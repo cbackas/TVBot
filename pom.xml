@@ -23,9 +23,16 @@
             <version>122aa70</version>
         </dependency>
         <dependency>
-            <groupId>com.uwetrottmann.thetvdb-java</groupId>
-            <artifactId>thetvdb-java</artifactId>
-            <version>1.2.0</version>
+            <groupId>com.uwetrottmann.trakt5</groupId>
+            <artifactId>trakt-java</artifactId>
+            <version>5.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <!-- use 2.5.0 for Java 7 projects -->
+            <version>3.5.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
