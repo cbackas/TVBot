@@ -55,6 +55,22 @@ public class DatabaseManager {
         return null;
     }
 
+    public List<Show> getShowsByChannel(String channelID) {
+        try {
+            PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM showdata WHERE channel_id = ?;");
+            statement.setString(1, channelID);
+            ResultSet rs = statement.executeQuery();
+            List<Show> shows = new ArrayList<>();
+            while (rs.next()) {
+                shows.add(new Show(rs.getString("show_id"), rs.getString("show_name"), channelID));
+            }
+            return shows;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<String> getShowIDs() {
         try {
             Statement statement = getConnection().createStatement();
@@ -84,6 +100,11 @@ public class DatabaseManager {
         return null;
     }
 
+    /**
+     * Gets airings that have not been announced
+     *
+     * @return
+     */
     public List<Airing> getNewAirings() {
         try {
             Statement statement = getConnection().createStatement();
@@ -99,10 +120,34 @@ public class DatabaseManager {
         return null;
     }
 
+    /**
+     * Gets airings that have been announced but not deleted
+     * @return
+     */
     public List<Airing> getOldAirings() {
         try {
             Statement statement = getConnection().createStatement();
             ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE NOT message_id = 'NONE' AND NOT message_id = 'DELETED' ORDER BY time ASC LIMIT 30;");
+            List<Airing> airings = new ArrayList<>();
+            while (rs.next()) {
+                airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id")));
+            }
+            return airings;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Gets airings that have been deleted but not wiped from the database
+     *
+     * @return
+     */
+    public List<Airing> getDeletedAirings() {
+        try {
+            Statement statement = getConnection().createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE message_id = 'DELETED';");
             List<Airing> airings = new ArrayList<>();
             while (rs.next()) {
                 airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id")));
@@ -149,6 +194,28 @@ public class DatabaseManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public int deleteShow(String showID) {
+        try {
+            PreparedStatement statement = getConnection().prepareStatement("DELETE FROM showdata WHERE show_id = ?;");
+            statement.setString(1, showID);
+            return statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int deleteAiring(String episodeID) {
+        try {
+            PreparedStatement statement = getConnection().prepareStatement("DELETE FROM airing WHERE episode_id = ?;");
+            statement.setString(1, episodeID);
+            return statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 }

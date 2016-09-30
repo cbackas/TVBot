@@ -15,19 +15,19 @@ public class Scheduler {
     /**
      * Check for airings every X seconds
      */
-    private static final int WAIT_INTERVAL = 300;
+    private static final int WAIT_INTERVAL = 300; //5 minutes
     /**
      * Send alert if show airs X seconds from now when checking
      */
-    private static final int ALERT_TIME_THRESHOLD = 660;
+    private static final int ALERT_TIME_THRESHOLD = 660; //11 minutes
     /**
      * Delete message from announcements if show aired X seconds ago
      */
-    private static final int DELETE_THRESHOLD = 7000;
+    private static final int DELETE_THRESHOLD = 7000; //~2 hours
     /**
-     * Update airing data every X seconds
+     * Update airing data every X seconds AND prune week old airings from the database
      */
-    private static final int UPDATE_AIRING_INTERVAL = 86400;
+    private static final int UPDATE_AIRING_INTERVAL = 86400; //24 hours
 
     private TVBot bot;
 
@@ -44,8 +44,7 @@ public class Scheduler {
         exec.scheduleAtFixedRate(() -> {
 
             //establish current time (will be 5 min interval)
-            int currentTime = Util.toInt(System.currentTimeMillis() / 1000);
-
+            int currentTime = Util.getCurrentTime();
 
             //get next 30 shows airing
             List<Airing> nextAirings = bot.getDatabaseManager().getNewAirings();
@@ -53,18 +52,23 @@ public class Scheduler {
             nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
                 try {
                     Show show = bot.getDatabaseManager().getShow(airing.getShowID());
-                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID);
-                    IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
-                    IChannel showChannel = bot.getClient().getChannelByID(show.getChannelID());
+                    if (show != null) {
+                        IChannel announceChannel = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID);
+                        IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
+                        IChannel showChannel = bot.getClient().getChannelByID(show.getChannelID());
 
-                    String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start. Go to " + showChannel.mention() + " for live episode discussion!";
+                        String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start. Go to " + showChannel.mention() + " for live episode discussion!";
 
-                    IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
-                    airing.setMessageID(announceMessage.getID());
-                    bot.getDatabaseManager().updateAiringMessage(airing);
-                    Util.sendBufferedMessage(globalChannel, message);
+                        IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
+                        airing.setMessageID(announceMessage.getID());
+                        bot.getDatabaseManager().updateAiringMessage(airing);
+                        Util.sendBufferedMessage(globalChannel, message);
 
-                    System.out.println("Sent announcement for " + airing.getEpisodeInfo());
+                        System.out.println("Sent announcement for " + airing.getEpisodeInfo());
+                    } else {
+                        System.out.println("Tried to announce airing for nonsaved show, deleting airing...");
+                        bot.getDatabaseManager().deleteAiring(airing.getEpisodeID());
+                    }
 
                 } catch (Exception e) {
                 }
@@ -89,7 +93,16 @@ public class Scheduler {
         }, timeToWait, WAIT_INTERVAL, TimeUnit.SECONDS);
 
         exec.scheduleAtFixedRate(() -> {
+
+            //delete week old airings whose announcements were deleted
+            List<Airing> deletedAirings = bot.getDatabaseManager().getDeletedAirings();
+            deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= 604800).forEach(airing -> {
+                bot.getDatabaseManager().deleteAiring(airing.getEpisodeID());
+            });
+
+            //update database with new airings for next 3 days
             bot.getTraktManager().updateAiringData();
+
         }, 0, UPDATE_AIRING_INTERVAL, TimeUnit.SECONDS);
     }
 

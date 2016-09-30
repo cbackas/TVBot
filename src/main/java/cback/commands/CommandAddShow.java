@@ -15,11 +15,11 @@ public class CommandAddShow implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        String author = message.getAuthor().getID();
-        if (author.equals("148279556619370496") || author.equals("73416411443113984") || author.equals("144412318447435776")) {
+        if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
             if (args.length >= 2) {
                 String imdbID = args[0];
                 String channelID = args[1];
+                if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getID();
                 String showName = bot.getTraktManager().getShowTitle(imdbID);
                 IChannel channel = client.getChannelByID(channelID);
                 if (channel == null) {
@@ -32,9 +32,11 @@ public class CommandAddShow implements Command {
                 }
                 bot.getDatabaseManager().insertShowData(imdbID, showName, channelID);
                 Util.sendMessage(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
-                Util.deleteMessage(message);
+                System.out.println("@" + message.getAuthor().getName() + " added show " + showName);
+                //Update airing data after new show added
+                bot.getTraktManager().updateAiringData();
             } else {
-                Util.sendMessage(message.getChannel(), "Usage: !addshow <imdbID> <channelID>");
+                Util.sendMessage(message.getChannel(), "Usage: !addshow <imdbID> <here|channelID>");
             }
         } else {
             Util.sendMessage(message.getChannel(), "You don't have permission to add shows.");
