@@ -1,6 +1,6 @@
 package cback.commands;
 
-import cback.TVbot;
+import cback.TVBot;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
@@ -17,10 +17,10 @@ public class CommandHelp implements Command {
     }
 
     @Override
-    public void execute(TVbot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         try {
             DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-            new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVbot's Commands:").appendCode("XL",
+            new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
                     "!help        //shows a list of commands\n" +
                             "!addshow [imdbid] [channelid]     //adds a new show to the calendar\n" +
                             "!removeshow [imdbid] [channelid]        //deletes a show from the calendar\n" +
@@ -28,7 +28,7 @@ public class CommandHelp implements Command {
             ).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
         } catch (Exception e) {
             try {
-                new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVbot's Commands:").appendCode("XL",
+                new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
                         "!help        //shows a list of commands\n"
                 ).send();
             } catch (Exception f) {
