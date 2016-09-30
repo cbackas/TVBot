@@ -86,4 +86,8 @@ public class Util {
         return 0;
     }
 
+    public static int getCurrentTime() {
+        return toInt(System.currentTimeMillis() / 1000);
+    }
+
 }

@@ -45,16 +45,20 @@ public class TraktManager {
                 for (CalendarShowEntry entry : shows) {
                     String id = entry.show.ids.imdb;
                     if (desiredShows.contains(id)) {
-                        int time = Util.toInt(entry.first_aired.getMillis() / 1000);
+                        int airTime = Util.toInt(entry.first_aired.getMillis() / 1000);
+                        int currentTime = Util.getCurrentTime();
                         String episodeID = String.valueOf(entry.episode.ids.trakt);
-                        String episodeInfo = "S" + entry.episode.season + "E" + entry.episode.number + " - " + entry.episode.title;
-                        bot.getDatabaseManager().insertAiring(episodeID, id, time, episodeInfo, "NONE");
-                        System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - " + time);
+                        //don't add if already aired or if airing already in database
+                        if ((bot.getDatabaseManager().getAiring(episodeID) == null) && (airTime > currentTime)) {
+                            String episodeInfo = "S" + entry.episode.season + "E" + entry.episode.number + " - " + entry.episode.title;
+                            bot.getDatabaseManager().insertAiring(episodeID, id, airTime, episodeInfo, "NONE");
+                            System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - " + airTime);
+                        }
                     }
                 }
             }
         } catch (IOException e) {
-            // could not connect to trakt
+            e.printStackTrace();
         }
     }
 

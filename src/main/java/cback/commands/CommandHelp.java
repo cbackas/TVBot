@@ -21,10 +21,10 @@ public class CommandHelp implements Command {
         try {
             DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
             new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
-                    "!help        //shows a list of commands\n" +
-                            "!addshow [imdbid] [channelid]     //adds a new show to the calendar\n" +
-                            "!removeshow [imdbid] [channelid]        //deletes a show from the calendar\n" +
-                            "!addlog [message]               //skips the current sound\n"
+                    "!help                              //shows a list of commands\n" +
+                            "!addshow [imdbid] [here|channelid] //adds a new show to the calendar\n" +
+                            "!removeshow [imdbid]               //deletes a show from the calendar\n" +
+                            "!addlog [message]                  //adds a message to the log\n"
             ).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
         } catch (Exception e) {
             try {

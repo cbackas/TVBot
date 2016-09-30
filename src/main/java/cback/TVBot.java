@@ -4,9 +4,11 @@ import cback.ServerFunctions.MemberLog;
 import cback.ServerFunctions.MutePermissions;
 import cback.commands.*;
 import cback.database.DatabaseManager;
+import cback.database.Show;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -26,6 +28,7 @@ public class TVBot {
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
     private Scheduler scheduler;
+    private List<String> botAdmins = new ArrayList<>();
 
     private List<Command> registeredCommands = new ArrayList<>();
 
@@ -53,6 +56,12 @@ public class TVBot {
         registerCommand(new CommandAddShow());
         registerCommand(new CommandRemoveShow());
         registerCommand(new CommandAddLog());
+
+        botAdmins.add("109109946565537792");
+        botAdmins.add("148279556619370496");
+        botAdmins.add("73416411443113984");
+        botAdmins.add("144412318447435776");
+        botAdmins.add("109109946565537792");
 
     }
 
@@ -104,6 +113,17 @@ public class TVBot {
         }
     }
 
+    @EventSubscriber
+    public void onDeleteChannelEvent(ChannelDeleteEvent event) {
+        List<Show> shows = getDatabaseManager().getShowsByChannel(event.getChannel().getID());
+        if (shows != null) {
+            shows.forEach(show -> {
+                if (getDatabaseManager().deleteShow(show.getShowID()) > 0) {
+                    System.out.println("Channel Deleted: Removed show " + show.getShowName() + " from database automatically.");
+                }
+            });
+        }
+    }
 
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
@@ -126,6 +146,10 @@ public class TVBot {
 
     public IDiscordClient getClient() {
         return client;
+    }
+
+    public List<String> getBotAdmins() {
+        return botAdmins;
     }
 
     public void registerCommand(Command command) {
