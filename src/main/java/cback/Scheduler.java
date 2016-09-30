@@ -57,7 +57,7 @@ public class Scheduler {
                     IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
                     IChannel showChannel = bot.getClient().getChannelByID(show.getChannelID());
 
-                    String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start. Go to " + showChannel.mention() + " to join the discussion!";
+                    String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start. Go to " + showChannel.mention() + " for live episode discussion!";
 
                     IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
                     airing.setMessageID(announceMessage.getID());
