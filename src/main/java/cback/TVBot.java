@@ -1,5 +1,7 @@
 package cback;
 
+import cback.ServerFunctions.MemberLog;
+import cback.ServerFunctions.MutePermissions;
 import cback.commands.*;
 import cback.database.DatabaseManager;
 import sx.blah.discord.api.ClientBuilder;
@@ -20,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TVBot {
-    private IDiscordClient client;
+    public IDiscordClient client;
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
     private Scheduler scheduler;
@@ -40,6 +42,8 @@ public class TVBot {
 
         connect();
         client.getDispatcher().registerListener(this);
+        client.getDispatcher().registerListener(new MutePermissions());
+        client.getDispatcher().registerListener(new MemberLog());
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
