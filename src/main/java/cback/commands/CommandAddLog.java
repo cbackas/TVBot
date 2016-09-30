@@ -23,7 +23,9 @@ public class CommandAddLog implements Command {
             try {
                 DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                 String text = message.getContent().split(" ", 2)[1];
-                Util.sendMessage(client.getChannelByID("217456105679224846"), "```" + text + "```");
+                Util.sendMessage(guild.getChannelByID("217456105679224846"), "```" + text + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                Util.deleteMessage(message);
+                Util.sendMessage(message.getChannel(), "Log added.");
             } catch (Exception e) {
                 Util.sendMessage(message.getChannel(), "You don't have permission to add logs.");
             }

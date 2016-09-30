@@ -14,6 +14,8 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.DiscordException;
 
@@ -24,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TVBot {
-    public IDiscordClient client;
+    private IDiscordClient client;
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
     private Scheduler scheduler;
@@ -33,8 +35,8 @@ public class TVBot {
     private List<Command> registeredCommands = new ArrayList<>();
 
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
-    public static final String ANNOUNCEMENT_CHANNEL_ID = "231177286760660993";
-    public static final String GENERAL_CHANNEL_ID = "231177330452725761";
+    public static final String ANNOUNCEMENT_CHANNEL_ID = "227852239769698304";
+    public static final String GENERAL_CHANNEL_ID = "192441520178200577";
 
 
     public static void main(String[] args) {
@@ -56,12 +58,12 @@ public class TVBot {
         registerCommand(new CommandAddShow());
         registerCommand(new CommandRemoveShow());
         registerCommand(new CommandAddLog());
+        registerCommand(new CommandMute());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
         botAdmins.add("73416411443113984");
         botAdmins.add("144412318447435776");
-        botAdmins.add("109109946565537792");
 
     }
 
@@ -104,6 +106,23 @@ public class TVBot {
             if (command.isPresent()) {
                 System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
+
+                List<IUser> mentionsU = message.getMentions();
+                List<IRole> mentionsG = message.getRoleMentions();
+                String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
+                if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
+                    Util.sendMessage(client.getChannelByID("231499461740724224"), finalText);
+                } else {
+                    for (IUser u : mentionsU) {
+                        String displayName = "\\@" + u.getDisplayName(message.getGuild());
+                        finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+                    }
+                    for (IRole g : mentionsG) {
+                        String displayName = "\\@" + g.getName();
+                        finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
+                    }
+                    Util.sendMessage(event.getClient().getChannelByID("231499461740724224"), finalText);
+                }
 
                 String args = matcher.group(2);
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
