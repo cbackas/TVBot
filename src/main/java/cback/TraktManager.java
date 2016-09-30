@@ -11,35 +11,45 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-public class TraktHandler {
+public class TraktManager {
 
     private TraktV2 trakt;
-    private TVbot bot;
+    private TVBot bot;
 
-    public TraktHandler(TVbot bot) {
+    public TraktManager(TVBot bot) {
         this.bot = bot;
-        trakt = new TraktV2("56c1b90ae2c41ee598ff2d2606ff2fefb6f59516c9f11aedd165020a06b2b6fd");
+
+        Optional<String> traktToken = Util.getToken("trakttoken.txt");
+        if (!traktToken.isPresent()) {
+            System.out.println("-------------------------------------");
+            System.out.println("Insert your Trakt token in trakttoken.txt");
+            System.out.println("Exiting......");
+            System.out.println("-------------------------------------");
+            System.exit(0);
+            return;
+        }
+        trakt = new TraktV2(traktToken.get());
+
     }
 
     public void updateAiringData() {
         try {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
-            Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 1).execute();
+            Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 3).execute();
             if (response.isSuccessful()) {
                 List<CalendarShowEntry> shows = response.body();
                 List<String> desiredShows = bot.getDatabaseManager().getShowIDs();
                 for (CalendarShowEntry entry : shows) {
                     String id = entry.show.ids.imdb;
                     if (desiredShows.contains(id)) {
-
-                        long time = entry.first_aired.getMillis() / 1000;
-                        String episodeID = entry.episode.ids.imdb;
-                        String episode = "S" + entry.episode.season + "E" + entry.episode.number;
-                        String episodeTitle = entry.episode.title;
-                        bot.getDatabaseManager().insertAiring(episodeID, id, time, episode, episodeTitle);
-                        System.out.println("Added Show Airing: " + entry.show.title + " - " + episode + " - " + time);
+                        int time = Util.toInt(entry.first_aired.getMillis() / 1000);
+                        String episodeID = String.valueOf(entry.episode.ids.trakt);
+                        String episodeInfo = "S" + entry.episode.season + "E" + entry.episode.number + " - " + entry.episode.title;
+                        bot.getDatabaseManager().insertAiring(episodeID, id, time, episodeInfo, "NONE");
+                        System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - " + time);
                     }
                 }
             }
@@ -51,7 +61,7 @@ public class TraktHandler {
     public String getShowTitle(String imdbID) {
         try {
             Response<List<SearchResult>> search = trakt.search().idLookup(IdType.IMDB, imdbID, 1, 1).execute();
-            if (search.isSuccessful() && search.body().isEmpty()) {
+            if (search.isSuccessful() && !search.body().isEmpty()) {
                 return search.body().get(0).show.title;
             }
         } catch (Exception e) {

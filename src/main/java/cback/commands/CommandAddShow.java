@@ -1,7 +1,7 @@
 package cback.commands;
 
-import cback.TVbot;
-import cback.TraktHandler;
+import cback.TVBot;
+import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -14,24 +14,24 @@ public class CommandAddShow implements Command {
     }
 
     @Override
-    public void execute(TVbot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (args.length >= 2) {
             String imdbID = args[0];
             String channelID = args[1];
-            String showName = bot.getTraktHandler().getShowTitle(imdbID);
+            String showName = bot.getTraktManager().getShowTitle(imdbID);
             IChannel channel = client.getChannelByID(channelID);
             if (channel == null) {
-                //CHANNEL NOT FOUND
+                Util.sendMessage(message.getChannel(), "No channel by this ID found.");
                 return;
             }
             if (showName == null) {
-                //SHOW NOT FOUND
+                Util.sendMessage(message.getChannel(), "No show by this IMDB ID found.");
                 return;
             }
             bot.getDatabaseManager().insertShowData(imdbID, showName, channelID);
-            //SUCCESS ADDED OMG WOW
+            Util.sendMessage(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
         } else {
-            //Usage
+            Util.sendMessage(message.getChannel(), "Usage: !addshow <imdbID> <channelID>");
         }
     }
 }
