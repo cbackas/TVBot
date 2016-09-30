@@ -1,9 +1,6 @@
 package cback;
 
-import cback.commands.Command;
-import cback.commands.CommandAddLog;
-import cback.commands.CommandAddShow;
-import cback.commands.CommandHelp;
+import cback.commands.*;
 import cback.database.DatabaseManager;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -50,6 +47,7 @@ public class TVBot {
 
         registerCommand(new CommandHelp());
         registerCommand(new CommandAddShow());
+        registerCommand(new CommandRemoveShow());
         registerCommand(new CommandAddLog());
 
     }
