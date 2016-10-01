@@ -49,6 +49,7 @@ public class TVBot {
         client.getDispatcher().registerListener(this);
         client.getDispatcher().registerListener(new MutePermissions());
         client.getDispatcher().registerListener(new MemberLog());
+        client.getDispatcher().registerListener(new KickAndBan());
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
