@@ -22,19 +22,24 @@ public class KickAndBan {
         if (text.toLowerCase().startsWith("!ban")) {
             try {
                 DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.BAN));
-                Pattern pattern = Pattern.compile("^!ban <@(.+)> (.+)");
+                Pattern pattern = Pattern.compile("^!ban <@(.+)> ?(.+)?");
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {
                     String userInput = matcher.group(1);
                     String reason = matcher.group(2);
+                    if (reason == null) {
+                        reason = "no reason provided";
+                    }
                     IUser user = guild.getUserByID(userInput);
                     if (!user.getID().equals(mod.getID())) {
                         try {
                             guild.banUser(user, 1);
-                            Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + "banned. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
-                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + "banned and logged");
+                            Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + " banned. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
+                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " banned and logged");
                             Util.deleteMessage(message);
                         } catch (Exception e) {
+                            e.printStackTrace();
+                            Util.sendMessage(message.getChannel(), "Internal error - check stack trace");
                         }
                     } else {
                         Util.sendMessage(message.getChannel(), "You probably shouldn't ban yourself");
@@ -43,24 +48,28 @@ public class KickAndBan {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!ban @user reason``");
                 }
             } catch (Exception e) {
-                Util.sendMessage(message.getChannel(), "You don't have permission to ban users");
             }
         } else if (text.toLowerCase().startsWith("!kick")) {
             try {
                 DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.KICK));
-                Pattern pattern = Pattern.compile("^!kick <@(.+)> (.+)");
+                Pattern pattern = Pattern.compile("^!kick <@(.+)> ?(.+)?");
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {
                     String userInput = matcher.group(1);
                     String reason = matcher.group(2);
+                    if (reason == null) {
+                        reason = "no reason provided";
+                    }
                     IUser user = guild.getUserByID(userInput);
                     if (!user.getID().equals(mod.getID())) {
                         try {
                             guild.kickUser(user);
-                            Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + "kicked. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
-                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + "kicked and logged");
+                            Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + " kicked. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
+                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " kicked and logged");
                             Util.deleteMessage(message);
                         } catch (Exception e) {
+                            e.printStackTrace();
+                            Util.sendMessage(message.getChannel(), "Internal error - check stack trace");
                         }
                     } else {
                         Util.sendMessage(message.getChannel(), "You probably shouldn't kick yourself");
@@ -69,7 +78,6 @@ public class KickAndBan {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!kick @user reason``");
                 }
             } catch (Exception e) {
-                Util.sendMessage(message.getChannel(), "You don't have permission to kick users");
             }
         }
     }

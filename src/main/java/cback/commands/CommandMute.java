@@ -30,15 +30,11 @@ public class CommandMute implements Command {
                     Util.sendMessage(message.getChannel(), "You probably shouldn't mute yourself");
                 } else {
                     try {
-                        try {
-                            DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                            userInput.addRole(guild.getRoleByID("231269949635559424"));
-                            Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
-                        } catch (Exception e) {
-                            Util.sendMessage(message.getChannel(), "You don't have permission to mute members");
-                        }
+                        DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                        userInput.addRole(guild.getRoleByID("231269949635559424"));
+                        Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
                     } catch (Exception e) {
-                        Util.sendMessage(message.getChannel(), "That user can't be muted");
+                        e.printStackTrace();
                     }
                 }
             }
