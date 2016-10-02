@@ -35,7 +35,6 @@ public class CommandMute implements Command {
                             userInput.addRole(guild.getRoleByID("231269949635559424"));
                             Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
                         } catch (Exception e) {
-                            e.printStackTrace();
                             Util.sendMessage(message.getChannel(), "You don't have permission to mute members");
                         }
                     } catch (Exception e) {

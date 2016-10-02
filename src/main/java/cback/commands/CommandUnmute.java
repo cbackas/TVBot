@@ -36,7 +36,6 @@ public class CommandUnmute implements Command {
                         userInput.removeRole(guild.getRoleByID("231269949635559424"));
                         Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
                     } catch (Exception e) {
-                        e.printStackTrace();
                         Util.sendMessage(message.getChannel(), "You don't have permission to mute members or that user can't be muted");
                     }
                 }
