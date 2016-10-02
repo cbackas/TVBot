@@ -26,33 +26,25 @@ public class CommandMute implements Command {
             if (matcher.find()) {
                 String u = matcher.group(1);
                 IUser userInput = guild.getUserByID(u);
-                List<IRole> roles = userInput.getRolesForGuild(guild);
-                try {
-                    DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                    if (message.getAuthor().getID().equals(u)) {
-                        Util.sendMessage(message.getChannel(), "You probably shouldn't mute yourself");
-                    } else if (roles.contains(guild.getRoleByID("231269949635559424"))) {
-                            try {
-                                userInput.removeRole(guild.getRoleByID("231269949635559424"));
-                                Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
-                            } catch (Exception e) {
-                                Util.sendMessage(message.getChannel(), "That user can't be muted");
-                            }
-                        } else {
-                            try {
-                                userInput.addRole(guild.getRoleByID("231269949635559424"));
-                                Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
-                            } catch (Exception e) {
-                                Util.sendMessage(message.getChannel(), "That user can't be muted");
-                            }
+                if (message.getAuthor().getID().equals(u)) {
+                    Util.sendMessage(message.getChannel(), "You probably shouldn't mute yourself");
+                } else {
+                    try {
+                        try {
+                            DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                            userInput.addRole(guild.getRoleByID("231269949635559424"));
+                            Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Util.sendMessage(message.getChannel(), "You don't have permission to mute members");
                         }
-                } catch(Exception e){
-                        e.printStackTrace();
-                        Util.sendMessage(message.getChannel(), "You don't have permission to mute members");
+                    } catch (Exception e) {
+                        Util.sendMessage(message.getChannel(), "That user can't be muted");
                     }
                 }
+            }
         } else {
-            Util.sendMessage(message.getChannel(), "Too many arguments");
+            Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!mute @user``");
         }
     }
 }

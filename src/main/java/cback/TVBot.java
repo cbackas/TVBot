@@ -1,7 +1,7 @@
 package cback;
 
-import cback.ServerFunctions.MemberLog;
-import cback.ServerFunctions.MutePermissions;
+import cback.serverfunctions.MemberLog;
+import cback.serverfunctions.MutePermissions;
 import cback.commands.*;
 import cback.database.DatabaseManager;
 import cback.database.Show;
@@ -60,6 +60,7 @@ public class TVBot {
         registerCommand(new CommandRemoveShow());
         registerCommand(new CommandAddLog());
         registerCommand(new CommandMute());
+        registerCommand(new CommandUnmute());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");

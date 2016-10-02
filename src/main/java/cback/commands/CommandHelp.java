@@ -25,13 +25,16 @@ public class CommandHelp implements Command {
                             "!addshow [imdbid] [here|channelid] //adds a new show to the calendar\n" +
                             "!removeshow [imdbid]               //deletes a show from the calendar\n" +
                             "!addlog [message]                  //adds a message to the log\n" +
-                            "!mute @user                        //toggles mute on user\n"
+                            "!mute @user                        //mutes user\n" +
+                            "!unmute @user                      //unmutes user" +
+                            "!kick @user [reason]               //kicks user and logs the action" +
+                            "!ban @user [reason]                //bans user and logs the action"
             ).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
         } catch (Exception e) {
             try {
                 new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
                         "!help        //shows a list of commands\n"
-                ).send();
+                ).appendQuote("This bot will get some cool commands down the road").send();
             } catch (Exception f) {
             }
         }

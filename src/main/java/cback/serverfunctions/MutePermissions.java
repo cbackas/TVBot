@@ -1,4 +1,4 @@
-package cback.ServerFunctions;
+package cback.serverfunctions;
 
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
