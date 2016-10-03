@@ -21,7 +21,7 @@ public class CommandMute implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (args.length == 1) {
             String user = args[0];
-            Pattern pattern = Pattern.compile("^<@(.+)>");
+            Pattern pattern = Pattern.compile("^<@!?(\\d{20})>");
             Matcher matcher = pattern.matcher(user);
             if (matcher.find()) {
                 String u = matcher.group(1);
