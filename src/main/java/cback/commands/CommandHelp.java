@@ -26,8 +26,8 @@ public class CommandHelp implements Command {
                             "!removeshow [imdbid]               //deletes a show from the calendar\n" +
                             "!addlog [message]                  //adds a message to the log\n" +
                             "!mute @user                        //mutes user\n" +
-                            "!unmute @user                      //unmutes user" +
-                            "!kick @user [reason]               //kicks user and logs the action" +
+                            "!unmute @user                      //unmutes user\n" +
+                            "!kick @user [reason]               //kicks user and logs the action\n" +
                             "!ban @user [reason]                //bans user and logs the action"
             ).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
         } catch (Exception e) {
