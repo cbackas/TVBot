@@ -28,12 +28,15 @@ public class CommandHelp implements Command {
                             "!mute @user                        //mutes user\n" +
                             "!unmute @user                      //unmutes user\n" +
                             "!kick @user [reason]               //kicks user and logs the action\n" +
-                            "!ban @user [reason]                //bans user and logs the action"
+                            "!ban @user [reason]                //bans user and logs the action\n" +
+                            "!rule [number]                     //posts the rule requested in chat"
             ).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
         } catch (Exception e) {
             try {
-                new MessageBuilder(client).withChannel(message.getChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
-                        "!help        //shows a list of commands\n"
+                new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
+                        "!help                          //shows a list of commands\n" +
+                                "!goodnight                     //does that good night thing everyone likes\n" +
+                                "!lenny                         //lenny"
                 ).appendQuote("This bot will get some cool commands down the road").send();
             } catch (Exception f) {
             }

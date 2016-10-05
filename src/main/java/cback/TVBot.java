@@ -12,10 +12,7 @@ import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.DiscordException;
 
@@ -61,6 +58,9 @@ public class TVBot {
         registerCommand(new CommandAddLog());
         registerCommand(new CommandMute());
         registerCommand(new CommandUnmute());
+        registerCommand(new CommandLenny());
+        registerCommand(new CommandGoodnight());
+        registerCommand(new CommandRule());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
@@ -140,7 +140,9 @@ public class TVBot {
         if (shows != null) {
             shows.forEach(show -> {
                 if (getDatabaseManager().deleteShow(show.getShowID()) > 0) {
-                    System.out.println("Channel Deleted: Removed show " + show.getShowName() + " from database automatically.");
+                    String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
+                    System.out.println(message);
+                    Util.sendMessage(client.getChannelByID("231499461740724224"), message);
                 }
             });
         }
