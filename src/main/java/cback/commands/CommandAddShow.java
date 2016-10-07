@@ -42,4 +42,9 @@ public class CommandAddShow implements Command {
             Util.sendMessage(message.getChannel(), "You don't have permission to add shows.");
         }
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

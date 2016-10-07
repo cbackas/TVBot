@@ -17,4 +17,9 @@ public class CommandShrug implements Command {
         Util.deleteMessage(message);
         Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n¯\\_(ツ)_/¯");
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

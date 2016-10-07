@@ -17,4 +17,9 @@ public class CommandLenny implements Command {
         Util.deleteMessage(message);
         Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n( ͡° ͜ʖ ͡°)");
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

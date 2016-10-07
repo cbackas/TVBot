@@ -17,4 +17,9 @@ public class CommandGoodnight implements Command {
         Util.deleteMessage(message);
         Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n\uD83D\uDE1A \uD83D\uDCA4 \uD83D\uDC4B \uD83C\uDF1B");
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

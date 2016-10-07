@@ -37,4 +37,9 @@ public class CommandRule implements Command {
             Util.sendMessage(message.getChannel(), "Too many arguments");
         }
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

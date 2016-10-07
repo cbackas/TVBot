@@ -15,4 +15,9 @@ public class movienight implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
 
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }
