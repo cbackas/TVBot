@@ -6,15 +6,15 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
-public class CommandLenny implements Command {
+public class CommandShrug implements Command {
     @Override
     public String getName() {
-        return "lenny";
+        return "shrug";
     }
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         Util.deleteMessage(message);
-        Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n( ͡° ͜ʖ ͡°)");
+        Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n¯\\_(ツ)_/¯");
     }
 }

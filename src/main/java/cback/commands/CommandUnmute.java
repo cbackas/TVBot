@@ -35,6 +35,7 @@ public class CommandUnmute implements Command {
                         DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                         userInput.removeRole(guild.getRoleByID("231269949635559424"));
                         Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
+                        Util.sendMessage(guild.getChannelByID("217456105679224846"), userInput.getDisplayName(guild) + " has been unmuted\n- " + message.getAuthor().getDisplayName(guild));
                     } catch (Exception e) {
                     }
                 }

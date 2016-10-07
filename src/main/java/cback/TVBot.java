@@ -59,6 +59,7 @@ public class TVBot {
         registerCommand(new CommandMute());
         registerCommand(new CommandUnmute());
         registerCommand(new CommandLenny());
+        registerCommand(new CommandShrug());
         registerCommand(new CommandGoodnight());
         registerCommand(new CommandRule());
 

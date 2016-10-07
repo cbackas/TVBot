@@ -14,6 +14,7 @@ public class CommandGoodnight implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        Util.sendMessage(message.getChannel(), "\uD83D\uDE1A \uD83D\uDCA4 \uD83D\uDC4B \uD83C\uDF1B");
+        Util.deleteMessage(message);
+        Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n\uD83D\uDE1A \uD83D\uDCA4 \uD83D\uDC4B \uD83C\uDF1B");
     }
 }
