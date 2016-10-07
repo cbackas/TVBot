@@ -50,6 +50,6 @@ public class CommandAddLog implements Command {
 
     @Override
     public boolean isLogged() {
-        return false;
+        return true;
     }
 }

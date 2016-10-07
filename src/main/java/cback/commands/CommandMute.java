@@ -48,6 +48,6 @@ public class CommandMute implements Command {
 
     @Override
     public boolean isLogged() {
-        return false;
+        return true;
     }
 }

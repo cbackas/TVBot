@@ -37,7 +37,8 @@ public class CommandHelp implements Command {
                 new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL",
                         "!help                          //shows a list of commands\n" +
                                 "!goodnight                     //does that good night thing everyone likes\n" +
-                                "!lenny                         //lenny"
+                                "!lenny                         //lenny\n" +
+                                "!shrug                         //shrugs"
                 ).appendQuote("This bot will get some cool commands down the road").send();
             } catch (Exception f) {
             }
