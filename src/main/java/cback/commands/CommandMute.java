@@ -4,10 +4,12 @@ import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,5 +44,10 @@ public class CommandMute implements Command {
         } else {
             Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!mute @user``");
         }
+    }
+
+    @Override
+    public boolean isLogged() {
+        return false;
     }
 }

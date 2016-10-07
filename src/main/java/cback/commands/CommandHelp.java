@@ -44,4 +44,9 @@ public class CommandHelp implements Command {
         }
         Util.deleteMessage(message);
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

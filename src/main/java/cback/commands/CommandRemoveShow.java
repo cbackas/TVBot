@@ -33,4 +33,9 @@ public class CommandRemoveShow implements Command {
             Util.sendMessage(message.getChannel(), "You don't have permission to remove shows.");
         }
     }
+
+    @Override
+    public boolean isLogged() {
+        return false;
+    }
 }

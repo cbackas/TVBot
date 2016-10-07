@@ -5,7 +5,6 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -47,5 +46,10 @@ public class CommandAddLog implements Command {
         } else {
             Util.sendMessage(message.getChannel(), "Usage: !addlog <text>");
         }
+    }
+
+    @Override
+    public boolean isLogged() {
+        return false;
     }
 }
