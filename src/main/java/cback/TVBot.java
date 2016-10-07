@@ -46,21 +46,23 @@ public class TVBot {
         client.getDispatcher().registerListener(this);
         client.getDispatcher().registerListener(new MutePermissions());
         client.getDispatcher().registerListener(new MemberLog());
-        client.getDispatcher().registerListener(new KickAndBan());
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
         scheduler = new Scheduler(this);
 
         registerCommand(new CommandHelp());
-        registerCommand(new CommandAddShow());
-        registerCommand(new CommandRemoveShow());
-        registerCommand(new CommandAddLog());
-        registerCommand(new CommandMute());
-        registerCommand(new CommandUnmute());
         registerCommand(new CommandLenny());
         registerCommand(new CommandShrug());
         registerCommand(new CommandGoodnight());
+        registerCommand(new CommandAddShow());
+        registerCommand(new CommandRemoveShow());
+        registerCommand(new CommandAddLog());
+        registerCommand(new CommandMovieNight());
+        registerCommand(new CommandMute());
+        registerCommand(new CommandUnmute());
+        registerCommand(new CommandBan());
+        registerCommand(new CommandKick());
         registerCommand(new CommandRule());
 
         botAdmins.add("109109946565537792");
