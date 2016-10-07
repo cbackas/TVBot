@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
@@ -41,5 +42,6 @@ public class CommandHelp implements Command {
             } catch (Exception f) {
             }
         }
+        Util.deleteMessage(message);
     }
 }

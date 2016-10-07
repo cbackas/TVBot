@@ -63,7 +63,7 @@ public class Util {
     }
 
     public static void writeJSON(String string) {
-        
+
     }
 
     public static void sendMessage(IChannel channel, String message) {

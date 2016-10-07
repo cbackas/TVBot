@@ -110,21 +110,25 @@ public class TVBot {
                 System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
 
-                List<IUser> mentionsU = message.getMentions();
-                List<IRole> mentionsG = message.getRoleMentions();
-                String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
-                if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
-                    Util.sendMessage(client.getChannelByID("231499461740724224"), finalText);
-                } else {
-                    for (IUser u : mentionsU) {
-                        String displayName = "\\@" + u.getDisplayName(message.getGuild());
-                        finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+                if (!isPrivate) {
+                    if (!command.equals("help") || !command.equals("lenny") || !command.equals("goodnight") || !command.equals("shrug")) {
+                        List<IUser> mentionsU = message.getMentions();
+                        List<IRole> mentionsG = message.getRoleMentions();
+                        String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
+                        if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
+                            Util.sendMessage(client.getChannelByID("231499461740724224"), finalText);
+                        } else {
+                            for (IUser u : mentionsU) {
+                                String displayName = "\\@" + u.getDisplayName(message.getGuild());
+                                finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+                            }
+                            for (IRole g : mentionsG) {
+                                String displayName = "\\@" + g.getName();
+                                finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
+                            }
+                            Util.sendMessage(event.getClient().getChannelByID("231499461740724224"), finalText);
+                        }
                     }
-                    for (IRole g : mentionsG) {
-                        String displayName = "\\@" + g.getName();
-                        finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
-                    }
-                    Util.sendMessage(event.getClient().getChannelByID("231499461740724224"), finalText);
                 }
 
                 String args = matcher.group(2);
