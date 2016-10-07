@@ -111,7 +111,8 @@ public class TVBot {
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
 
                 if (!isPrivate) {
-                    if (!command.equals("help") || !command.equals("lenny") || !command.equals("goodnight") || !command.equals("shrug")) {
+                    if (baseCommand.equals("help") || baseCommand.equals("lenny") || baseCommand.equals("goodnight") || baseCommand.equals("shrug")) {
+                    } else {
                         List<IUser> mentionsU = message.getMentions();
                         List<IRole> mentionsG = message.getRoleMentions();
                         String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
@@ -130,14 +131,16 @@ public class TVBot {
                         }
                     }
                 }
-
-                String args = matcher.group(2);
-                String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
-                command.get().execute(this, client, argsArr, guild, message, isPrivate);
             }
 
+            String args = matcher.group(2);
+            String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
+            command.get().execute(this, client, argsArr, guild, message, isPrivate);
         }
+
     }
+
+}
 
     @EventSubscriber
     public void onDeleteChannelEvent(ChannelDeleteEvent event) {
