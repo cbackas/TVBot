@@ -1,14 +1,19 @@
 package cback;
 
 import org.apache.commons.io.FileUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.Optional;
 
 
@@ -42,6 +47,23 @@ public class Util {
             e.printStackTrace();
             return Optional.empty();
         }
+    }
+
+    public static String readJSON(String string) {
+        JSONParser parser = new JSONParser();
+        String property = null;
+        try {
+            Object obj = parser.parse(new FileReader(botPath + "/TVproperties.json"));
+            JSONObject jsonObject = (JSONObject) obj;
+
+            property = (String) jsonObject.get(string);
+        } catch (Exception e) {
+        }
+        return property;
+    }
+
+    public static void writeJSON(String string) {
+
     }
 
     public static void sendMessage(IChannel channel, String message) {

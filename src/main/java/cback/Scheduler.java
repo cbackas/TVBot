@@ -63,6 +63,7 @@ public class Scheduler {
                         airing.setMessageID(announceMessage.getID());
                         bot.getDatabaseManager().updateAiringMessage(airing);
                         Util.sendBufferedMessage(globalChannel, message);
+                        Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
 
                         System.out.println("Sent announcement for " + airing.getEpisodeInfo());
                     } else {

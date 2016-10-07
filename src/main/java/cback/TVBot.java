@@ -1,5 +1,7 @@
 package cback;
 
+import cback.serverfunctions.MemberLog;
+import cback.serverfunctions.MutePermissions;
 import cback.commands.*;
 import cback.database.DatabaseManager;
 import cback.database.Show;
@@ -10,8 +12,7 @@ import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.DiscordException;
 
@@ -31,8 +32,8 @@ public class TVBot {
     private List<Command> registeredCommands = new ArrayList<>();
 
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
-    public static final String ANNOUNCEMENT_CHANNEL_ID = "231177286760660993";
-    public static final String GENERAL_CHANNEL_ID = "231177330452725761";
+    public static final String ANNOUNCEMENT_CHANNEL_ID = "227852239769698304";
+    public static final String GENERAL_CHANNEL_ID = "192441520178200577";
 
 
     public static void main(String[] args) {
@@ -43,6 +44,9 @@ public class TVBot {
 
         connect();
         client.getDispatcher().registerListener(this);
+        client.getDispatcher().registerListener(new MutePermissions());
+        client.getDispatcher().registerListener(new MemberLog());
+        client.getDispatcher().registerListener(new KickAndBan());
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
@@ -52,12 +56,17 @@ public class TVBot {
         registerCommand(new CommandAddShow());
         registerCommand(new CommandRemoveShow());
         registerCommand(new CommandAddLog());
+        registerCommand(new CommandMute());
+        registerCommand(new CommandUnmute());
+        registerCommand(new CommandLenny());
+        registerCommand(new CommandShrug());
+        registerCommand(new CommandGoodnight());
+        registerCommand(new CommandRule());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
         botAdmins.add("73416411443113984");
         botAdmins.add("144412318447435776");
-        botAdmins.add("109109946565537792");
 
     }
 
@@ -101,6 +110,27 @@ public class TVBot {
                 System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
 
+                if (!isPrivate) {
+                    if (!command.equals("help") || !command.equals("lenny") || !command.equals("goodnight") || !command.equals("shrug")) {
+                        List<IUser> mentionsU = message.getMentions();
+                        List<IRole> mentionsG = message.getRoleMentions();
+                        String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
+                        if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
+                            Util.sendMessage(client.getChannelByID("231499461740724224"), finalText);
+                        } else {
+                            for (IUser u : mentionsU) {
+                                String displayName = "\\@" + u.getDisplayName(message.getGuild());
+                                finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+                            }
+                            for (IRole g : mentionsG) {
+                                String displayName = "\\@" + g.getName();
+                                finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
+                            }
+                            Util.sendMessage(event.getClient().getChannelByID("231499461740724224"), finalText);
+                        }
+                    }
+                }
+
                 String args = matcher.group(2);
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
                 command.get().execute(this, client, argsArr, guild, message, isPrivate);
@@ -115,7 +145,9 @@ public class TVBot {
         if (shows != null) {
             shows.forEach(show -> {
                 if (getDatabaseManager().deleteShow(show.getShowID()) > 0) {
-                    System.out.println("Channel Deleted: Removed show " + show.getShowName() + " from database automatically.");
+                    String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
+                    System.out.println(message);
+                    Util.sendMessage(client.getChannelByID("231499461740724224"), message);
                 }
             });
         }
