@@ -13,7 +13,12 @@ public class CommandMovieNight implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+        String variation = args[0];
+        if(variation.equalsIgnoreCase("set")) {
 
+        } else if(variation.equalsIgnoreCase("start")) {
+
+        }
     }
 
     @Override

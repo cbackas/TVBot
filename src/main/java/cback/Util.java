@@ -1,7 +1,6 @@
 package cback;
 
 import org.apache.commons.io.FileUtils;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import sx.blah.discord.handle.obj.IChannel;
@@ -11,20 +10,27 @@ import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.Optional;
 
 
 public class Util {
 
     public static File botPath;
+    private static JSONObject config;
 
     static {
         try {
             botPath = new File(TVBot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
         } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        try {
+            org.json.simple.parser.JSONParser parser = new JSONParser();
+            config = (JSONObject) parser.parse(new FileReader(botPath + "/TVproperties.json"));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -49,21 +55,24 @@ public class Util {
         }
     }
 
-    public static String readJSON(String string) {
-        JSONParser parser = new JSONParser();
-        String property = null;
-        try {
-            Object obj = parser.parse(new FileReader(botPath + "/TVproperties.json"));
-            JSONObject jsonObject = (JSONObject) obj;
-
-            property = (String) jsonObject.get(string);
-        } catch (Exception e) {
-        }
-        return property;
+    public static String readJSON(String key) {
+        return (String) config.get(key);
     }
 
-    public static void writeJSON(String string) {
-
+    public static void writeJSON(String key, String setting) {
+        if (config.containsKey(key)) {
+            config.replace(key, setting);
+        } else {
+            config.putIfAbsent(key, setting);
+        }
+        try {
+            FileWriter file = new FileWriter(botPath + "/TVproperties.json");
+            file.write(config.toJSONString());
+            file.flush();
+            file.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void sendMessage(IChannel channel, String message) {
