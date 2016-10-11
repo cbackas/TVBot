@@ -21,10 +21,10 @@ public class TraktManager {
     public TraktManager(TVBot bot) {
         this.bot = bot;
 
-        Optional<String> traktToken = Util.getToken("trakttoken.txt");
+        Optional<String> traktToken = bot.getConfigManager().getTokenValue("traktToken");
         if (!traktToken.isPresent()) {
             System.out.println("-------------------------------------");
-            System.out.println("Insert your Trakt token in trakttoken.txt");
+            System.out.println("Insert your Trakt token in the config.");
             System.out.println("Exiting......");
             System.out.println("-------------------------------------");
             System.exit(0);

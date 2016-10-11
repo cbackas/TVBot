@@ -24,11 +24,13 @@ import java.util.regex.Pattern;
 
 public class TVBot {
     private IDiscordClient client;
+
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
+    private ConfigManager configManager;
     private Scheduler scheduler;
-    private List<String> botAdmins = new ArrayList<>();
 
+    private List<String> botAdmins = new ArrayList<>();
     private List<Command> registeredCommands = new ArrayList<>();
 
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
@@ -41,6 +43,9 @@ public class TVBot {
     }
 
     public TVBot() {
+
+        //instantiate config manager first as connect() relies on tokens
+        configManager = new ConfigManager(this);
 
         connect();
         client.getDispatcher().registerListener(this);
@@ -76,10 +81,10 @@ public class TVBot {
         //don't load external modules and don't attempt to create modules folder
         Configuration.LOAD_EXTERNAL_MODULES = false;
 
-        Optional<String> token = Util.getToken("bottoken.txt");
+        Optional<String> token = configManager.getTokenValue("botToken");
         if (!token.isPresent()) {
             System.out.println("-------------------------------------");
-            System.out.println("Insert your bot's token in bottoken.txt");
+            System.out.println("Insert your bot's token in the config.");
             System.out.println("Exiting......");
             System.out.println("-------------------------------------");
             System.exit(0);
@@ -171,6 +176,8 @@ public class TVBot {
     public TraktManager getTraktManager() {
         return traktManager;
     }
+
+    public ConfigManager getConfigManager() { return configManager; }
 
     public IDiscordClient getClient() {
         return client;
