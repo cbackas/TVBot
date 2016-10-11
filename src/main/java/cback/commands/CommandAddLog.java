@@ -26,18 +26,18 @@ public class CommandAddLog implements Command {
                 List<IRole> mentionsG = message.getRoleMentions();
                 String finalText = text;
                 for (IChannel c : mentionsC) {
-                    String displayName = "#" + c.getName();
+                    String displayName = c.getName();
                     finalText = text.replace(c.mention(), displayName).replace(c.mention(), displayName);
                 }
                 for (IUser u : mentionsU) {
-                    String displayName = "@" + u.getDisplayName(guild);
+                    String displayName = u.getDisplayName(guild);
                     finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
                 }
                 for (IRole g : mentionsG) {
-                    String displayName = "@" + g.getName();
+                    String displayName = g.getName();
                     finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
                 }
-                Util.sendMessage(guild.getChannelByID("217456105679224846"), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
                 Util.sendMessage(message.getChannel(), "Log added.");
                 Util.deleteMessage(message);
             } catch (Exception e) {

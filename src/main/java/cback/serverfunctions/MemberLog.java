@@ -1,5 +1,6 @@
 package cback.serverfunctions;
 
+import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.UserJoinEvent;
@@ -7,7 +8,7 @@ import sx.blah.discord.handle.impl.events.UserLeaveEvent;
 import sx.blah.discord.handle.obj.IGuild;
 
 public class MemberLog {
-    String logChannel = "217450005462646794";
+    String logChannel = TVBot.LOG_CHANNEL_ID;
 
     @EventSubscriber
     public void memberJoin(UserJoinEvent event) {

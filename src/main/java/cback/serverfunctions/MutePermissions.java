@@ -55,7 +55,10 @@ public class MutePermissions {
         if (text.equalsIgnoreCase("!getroles") && message.getAuthor().getID().equals("73416411443113984")) {
             List<IRole> serverRoles = event.getClient().getRoles();
             for (IRole roles : serverRoles) {
-                System.out.println(roles + " " + roles.getID());
+                System.out.println(roles.getName() + " " + roles.getID() + "\n");
+                if(roles.getName().equalsIgnoreCase("movienight")) {
+                    Util.sendMessage(message.getChannel(), "Found id for movienight: " + roles.getID());
+                }
             }
             Util.deleteMessage(message);
         }

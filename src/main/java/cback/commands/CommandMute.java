@@ -35,7 +35,7 @@ public class CommandMute implements Command {
                         DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                         userInput.addRole(guild.getRoleByID("231269949635559424"));
                         Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
-                        Util.sendMessage(guild.getChannelByID("217456105679224846"), userInput.getDisplayName(guild) + " has been muted\n- " + message.getAuthor().getDisplayName(guild));
+                        Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userInput.getDisplayName(guild) + " has been muted\n- " + message.getAuthor().getDisplayName(guild) + "```");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

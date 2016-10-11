@@ -32,7 +32,7 @@ public class ConfigManager {
 
     private void initConfig() {
         try {
-            configFile = new File(Util.botPath, "config.json");
+            configFile = new File(Util.botPath, "tvconfig.json");
             if (configFile.exists()) {
                 JSONParser parser = new JSONParser();
                 FileReader reader = new FileReader(configFile);

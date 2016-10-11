@@ -36,6 +36,8 @@ public class TVBot {
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
     public static final String ANNOUNCEMENT_CHANNEL_ID = "227852239769698304";
     public static final String GENERAL_CHANNEL_ID = "192441520178200577";
+    public static final String LOG_CHANNEL_ID = "217456105679224846";
+    public static final String BOTLOG_CHANNEL_ID = "231499461740724224";
 
 
     public static void main(String[] args) {
@@ -122,7 +124,7 @@ public class TVBot {
                     List<IRole> mentionsG = message.getRoleMentions();
                     String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
                     if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
-                        Util.sendMessage(client.getChannelByID("231499461740724224"), finalText);
+                        Util.sendMessage(client.getChannelByID(BOTLOG_CHANNEL_ID), finalText);
                     } else {
                         for (IUser u : mentionsU) {
                             String displayName = "\\@" + u.getDisplayName(message.getGuild());
@@ -132,7 +134,7 @@ public class TVBot {
                             String displayName = "\\@" + g.getName();
                             finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
                         }
-                        Util.sendMessage(event.getClient().getChannelByID("231499461740724224"), finalText);
+                        Util.sendMessage(event.getClient().getChannelByID(BOTLOG_CHANNEL_ID), finalText);
                     }
                 }
 
