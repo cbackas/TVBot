@@ -18,37 +18,39 @@ public class CommandBan implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        String text = message.getContent();
-        IUser mod = message.getAuthor();
-        IChannel logChannel = guild.getChannelByID("217456105679224846");
-        try {
-            DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.BAN));
-            Pattern pattern = Pattern.compile("^!ban <@(.+)> ?(.+)?");
-            Matcher matcher = pattern.matcher(text);
-            if (matcher.find()) {
-                String userInput = matcher.group(1);
-                String reason = matcher.group(2);
-                if (reason == null) {
-                    reason = "no reason provided";
-                }
-                IUser user = guild.getUserByID(userInput);
-                if (!user.getID().equals(mod.getID())) {
-                    try {
-                        guild.banUser(user, 1);
-                        Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + " banned. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
-                        Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " banned and logged");
-                        Util.deleteMessage(message);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Util.sendMessage(message.getChannel(), "Internal error - check stack trace");
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
+            String text = message.getContent();
+            IUser mod = message.getAuthor();
+            IChannel logChannel = guild.getChannelByID("217456105679224846");
+            try {
+                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.BAN));
+                Pattern pattern = Pattern.compile("^!ban <@(.+)> ?(.+)?");
+                Matcher matcher = pattern.matcher(text);
+                if (matcher.find()) {
+                    String userInput = matcher.group(1);
+                    String reason = matcher.group(2);
+                    if (reason == null) {
+                        reason = "no reason provided";
+                    }
+                    IUser user = guild.getUserByID(userInput);
+                    if (!user.getID().equals(mod.getID())) {
+                        try {
+                            guild.banUser(user, 1);
+                            Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + " banned. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
+                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " banned and logged");
+                            Util.deleteMessage(message);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Util.sendMessage(message.getChannel(), "Internal error - check stack trace");
+                        }
+                    } else {
+                        Util.sendMessage(message.getChannel(), "You probably shouldn't ban yourself");
                     }
                 } else {
-                    Util.sendMessage(message.getChannel(), "You probably shouldn't ban yourself");
+                    Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!ban @user reason``");
                 }
-            } else {
-                Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!ban @user reason``");
+            } catch (Exception e) {
             }
-        } catch (Exception e) {
         }
     }
 

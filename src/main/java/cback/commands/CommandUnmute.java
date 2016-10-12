@@ -21,27 +21,29 @@ public class CommandUnmute implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (args.length == 1) {
-            String user = args[0];
-            Pattern pattern = Pattern.compile("^<@!?(\\d+)>");
-            Matcher matcher = pattern.matcher(user);
-            if (matcher.find()) {
-                String u = matcher.group(1);
-                IUser userInput = guild.getUserByID(u);
-                if (message.getAuthor().getID().equals(u)) {
-                    Util.sendMessage(message.getChannel(), "Not sure how you typed this command... but you can't unmute yourself");
-                } else {
-                    try {
-                        DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                        userInput.removeRole(guild.getRoleByID("231269949635559424"));
-                        Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
-                        Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userInput.getDisplayName(guild) + " has been unmuted\n- " + message.getAuthor().getDisplayName(guild) + "```");
-                    } catch (Exception e) {
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
+            if (args.length == 1) {
+                String user = args[0];
+                Pattern pattern = Pattern.compile("^<@!?(\\d+)>");
+                Matcher matcher = pattern.matcher(user);
+                if (matcher.find()) {
+                    String u = matcher.group(1);
+                    IUser userInput = guild.getUserByID(u);
+                    if (message.getAuthor().getID().equals(u)) {
+                        Util.sendMessage(message.getChannel(), "Not sure how you typed this command... but you can't unmute yourself");
+                    } else {
+                        try {
+                            DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                            userInput.removeRole(guild.getRoleByID("231269949635559424"));
+                            Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
+                            Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userInput.getDisplayName(guild) + " has been unmuted\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                        } catch (Exception e) {
+                        }
                     }
                 }
+            } else {
+                Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!unmute @user``");
             }
-        } else {
-            Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!unmute @user``");
         }
     }
 

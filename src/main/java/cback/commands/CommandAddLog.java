@@ -17,34 +17,36 @@ public class CommandAddLog implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (args.length >= 1) {
-            try {
-                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                String text = message.getContent().split(" ", 2)[1];
-                List<IChannel> mentionsC = message.getChannelMentions();
-                List<IUser> mentionsU = message.getMentions();
-                List<IRole> mentionsG = message.getRoleMentions();
-                String finalText = text;
-                for (IChannel c : mentionsC) {
-                    String displayName = c.getName();
-                    finalText = text.replace(c.mention(), displayName).replace(c.mention(), displayName);
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
+            if (args.length >= 1) {
+                try {
+                    DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                    String text = message.getContent().split(" ", 2)[1];
+                    List<IChannel> mentionsC = message.getChannelMentions();
+                    List<IUser> mentionsU = message.getMentions();
+                    List<IRole> mentionsG = message.getRoleMentions();
+                    String finalText = text;
+                    for (IChannel c : mentionsC) {
+                        String displayName = c.getName();
+                        finalText = text.replace(c.mention(), displayName).replace(c.mention(), displayName);
+                    }
+                    for (IUser u : mentionsU) {
+                        String displayName = u.getDisplayName(guild);
+                        finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+                    }
+                    for (IRole g : mentionsG) {
+                        String displayName = g.getName();
+                        finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
+                    }
+                    Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                    Util.sendMessage(message.getChannel(), "Log added.");
+                    Util.deleteMessage(message);
+                } catch (Exception e) {
+                    Util.sendMessage(message.getChannel(), "You don't have permission to add logs.");
                 }
-                for (IUser u : mentionsU) {
-                    String displayName = u.getDisplayName(guild);
-                    finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
-                }
-                for (IRole g : mentionsG) {
-                    String displayName = g.getName();
-                    finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
-                }
-                Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
-                Util.sendMessage(message.getChannel(), "Log added.");
-                Util.deleteMessage(message);
-            } catch (Exception e) {
-                Util.sendMessage(message.getChannel(), "You don't have permission to add logs.");
+            } else {
+                Util.sendMessage(message.getChannel(), "Usage: !addlog <text>");
             }
-        } else {
-            Util.sendMessage(message.getChannel(), "Usage: !addlog <text>");
         }
     }
 

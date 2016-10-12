@@ -23,23 +23,23 @@ public class CommandHelp implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String userCommands =
                 "!help                                  //shows a list of commands\n" +
-                "!goodnight                             //does that good night thing everyone likes\n" +
-                "!lenny                                 //lenny\n" +
-                "!shrug                                 //shrugs";
+                        "!goodnight                             //does that good night thing everyone likes\n" +
+                        "!lenny                                 //lenny\n" +
+                        "!shrug                                 //shrugs";
 
         String modCommands =
-                "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
-                "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                 "!addlog [message]                      //adds a message to the log\n" +
-                "!mute @user                            //mutes user\n" +
-                "!unmute @user                          //unmutes user\n" +
-                "!kick @user [reason]                   //kicks user and logs the action\n" +
-                "!ban @user [reason]                    //bans user and logs the action\n" +
-                "!rule [number]                         //posts the rule requested in chat";
+                        "!mute @user                            //mutes user\n" +
+                        "!unmute @user                          //unmutes user\n" +
+                        "!kick @user [reason]                   //kicks user and logs the action\n" +
+                        "!ban @user [reason]                    //bans user and logs the action\n" +
+                        "!rule [number]                         //posts the rule requested in chat";
 
         String adminCommands =
-                "!amute @user                           //mutes user without log\n" +
-                "!aunmute @user                         //unmutes user without log";
+                "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
+                        "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!amute @user                           //mutes user without log\n" +
+                        "!aunmute @user                         //unmutes user without log";
 
         String movieCommands =
                 "!movienight set [pollID] [date]        //posts a link to a the google poll\n" +
@@ -63,15 +63,21 @@ public class CommandHelp implements Command {
                 } catch (Exception f) {
                 }
             }
-        } else { //All users mod and below
+        } else if (roles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             try {
                 DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                 new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendCode("XL", modCommands).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
             } catch (Exception e) {
                 try {
-                    new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendQuote("This bot will get some cool commands down the road").send();
+                    String staffUserCommands = userCommands + "\n!rule [number]                         //posts the rule requested in chat";
+                    new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", staffUserCommands).appendQuote("This bot will get some cool commands down the road").send();
                 } catch (Exception f) {
                 }
+            }
+        } else { //All users mod and below
+            try {
+                new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendQuote("This bot will get some cool commands down the road").send();
+            } catch (Exception f) {
             }
         }
         Util.deleteMessage(message);

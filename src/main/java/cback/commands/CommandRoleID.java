@@ -27,6 +27,7 @@ public class CommandRoleID implements Command {
                     } else {
                         if (roles.getName().equalsIgnoreCase(roleName)) {
                             Util.sendMessage(message.getChannel(), "Found id for **" + roleName + "**: " + roles.getID());
+
                         } else {
                             Util.sendMessage(message.getChannel(), "Role not found");
                         }

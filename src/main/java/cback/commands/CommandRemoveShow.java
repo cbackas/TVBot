@@ -29,8 +29,6 @@ public class CommandRemoveShow implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !removeshow <imdbID>");
             }
-        } else {
-            Util.sendMessage(message.getChannel(), "You don't have permission to remove shows.");
         }
     }
 

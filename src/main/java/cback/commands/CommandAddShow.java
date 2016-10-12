@@ -38,8 +38,6 @@ public class CommandAddShow implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !addshow <imdbID> <here|channelID>");
             }
-        } else {
-            Util.sendMessage(message.getChannel(), "You don't have permission to add shows.");
         }
     }
 
