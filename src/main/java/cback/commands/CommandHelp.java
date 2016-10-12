@@ -28,7 +28,7 @@ public class CommandHelp implements Command {
                         "!shrug                                 //shrugs";
 
         String modCommands =
-                "------------------------------------------------------------------\n" +
+                "\n------------------------------------------------------------------\n" +
                 "!addlog [message]                      //adds a message to the log\n" +
                         "!mute @user                            //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
@@ -36,14 +36,14 @@ public class CommandHelp implements Command {
                         "!ban @user [reason]                    //bans user and logs the action";
 
         String adminCommands =
-                "------------------------------------------------------------------\n" +
+                "\n------------------------------------------------------------------\n" +
                 "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!aunmute @user                         //unmutes user without log";
 
         String movieCommands =
-                "------------------------------------------------------------------\n" +
+                "\n------------------------------------------------------------------\n" +
                 "!movienight set [pollID] [date]        //posts a link to a the google poll\n" +
                         "!movienight announce [movie]           //deletes poll and announces movie\n" +
                         "!movienight start [rabbitID]           //announces movienight start and links to room";
@@ -52,7 +52,7 @@ public class CommandHelp implements Command {
         List<IRole> roles = message.getAuthor().getRolesForGuild(guild);
         String finalHelp = userCommands;
         if (roles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) { //Staff Check
-            finalHelp = userCommands + userCommands + "\n!rule [number]                         //posts the rule requested in chat";
+            finalHelp = userCommands + "\n!rule [number]                         //posts the rule requested in chat";
         } if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
             finalHelp = finalHelp + movieCommands;
         } if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
