@@ -8,7 +8,7 @@ import sx.blah.discord.handle.impl.events.UserLeaveEvent;
 import sx.blah.discord.handle.obj.IGuild;
 
 public class MemberLog {
-    String logChannel = TVBot.LOG_CHANNEL_ID;
+    String logChannel = "217450005462646794";
 
     @EventSubscriber
     public void memberJoin(UserJoinEvent event) {
