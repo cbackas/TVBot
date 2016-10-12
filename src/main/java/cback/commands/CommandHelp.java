@@ -28,59 +28,44 @@ public class CommandHelp implements Command {
                         "!shrug                                 //shrugs";
 
         String modCommands =
+                "------------------------------------------------------------------\n" +
                 "!addlog [message]                      //adds a message to the log\n" +
                         "!mute @user                            //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
                         "!kick @user [reason]                   //kicks user and logs the action\n" +
-                        "!ban @user [reason]                    //bans user and logs the action\n" +
-                        "!rule [number]                         //posts the rule requested in chat";
+                        "!ban @user [reason]                    //bans user and logs the action";
 
         String adminCommands =
+                "------------------------------------------------------------------\n" +
                 "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!aunmute @user                         //unmutes user without log";
 
         String movieCommands =
+                "------------------------------------------------------------------\n" +
                 "!movienight set [pollID] [date]        //posts a link to a the google poll\n" +
                         "!movienight announce [movie]           //deletes poll and announces movie\n" +
                         "!movienight start [rabbitID]           //announces movienight start and links to room";
 
+        guild = client.getGuildByID("192441520178200577");
         List<IRole> roles = message.getAuthor().getRolesForGuild(guild);
-        if (roles.contains(guild.getRoleByID("192441946210435072"))) { //Admin check
-            try {
-                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendCode("XL", modCommands).appendCode("XL", adminCommands).appendCode("XL", movieCommands).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
-            } catch (Exception e) {
-            }
-        } else if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight check
-            try {
-                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendCode("XL", modCommands).appendCode("XL", movieCommands).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
-            } catch (Exception e) {
-                try {
-                    new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendCode("XL", movieCommands).appendQuote("This bot will get some cool commands down the road").send();
-                } catch (Exception f) {
-                }
-            }
-        } else if (roles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
-            try {
-                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
-                new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendCode("XL", modCommands).appendQuote("Mod+ commands included - regular users can not see staff commands").send();
-            } catch (Exception e) {
-                try {
-                    String staffUserCommands = userCommands + "\n!rule [number]                         //posts the rule requested in chat";
-                    new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", staffUserCommands).appendQuote("This bot will get some cool commands down the road").send();
-                } catch (Exception f) {
-                }
-            }
-        } else { //All users mod and below
-            try {
-                new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", userCommands).appendQuote("This bot will get some cool commands down the road").send();
-            } catch (Exception f) {
-            }
+        String finalHelp = userCommands;
+        if (roles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) { //Staff Check
+            finalHelp = userCommands + userCommands + "\n!rule [number]                         //posts the rule requested in chat";
+        } if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
+            finalHelp = finalHelp + movieCommands;
+        } if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
+            finalHelp = finalHelp + modCommands;
+        } if (roles.contains(guild.getRoleByID("192441946210435072"))) { //Admin Check
+            finalHelp = finalHelp + adminCommands;
+        }
+        try {
+            new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", finalHelp).appendQuote("Staff commands excluded for regular users").send();
+        } catch (Exception e) {
         }
         Util.deleteMessage(message);
+
     }
 
     @Override
