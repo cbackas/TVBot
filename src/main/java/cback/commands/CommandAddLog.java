@@ -6,6 +6,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class CommandAddLog implements Command {
 
     @Override
     public List<String> getAliases() {
-        return null;
+        return Arrays.asList("log");
     }
 
     @Override

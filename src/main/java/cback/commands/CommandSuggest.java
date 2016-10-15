@@ -16,7 +16,7 @@ public class CommandSuggest implements Command {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("idea","suggestion"); //keep adding commas for more alias @zac also you can delete this comment
+        return Arrays.asList("idea","suggestion");
     }
 
     @Override
@@ -31,6 +31,6 @@ public class CommandSuggest implements Command {
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }
