@@ -20,6 +20,11 @@ public class CommandHelp implements Command {
     }
 
     @Override
+    public List<String> getAliases() {
+        return null;
+    }
+
+    @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String userCommands =
                 "!help                                  //shows a list of commands\n" +

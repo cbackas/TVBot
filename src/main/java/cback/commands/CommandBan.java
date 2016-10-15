@@ -7,6 +7,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,11 @@ public class CommandBan implements Command {
     @Override
     public String getName() {
         return "ban";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return null;
     }
 
     @Override

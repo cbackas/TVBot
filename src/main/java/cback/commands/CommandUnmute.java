@@ -10,6 +10,7 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +18,11 @@ public class CommandUnmute implements Command {
     @Override
     public String getName() {
         return "unmute";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return null;
     }
 
     @Override

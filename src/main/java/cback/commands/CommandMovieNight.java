@@ -9,6 +9,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,11 @@ public class CommandMovieNight implements Command {
     @Override
     public String getName() {
         return "movienight";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return null;
     }
 
     @Override

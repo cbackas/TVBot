@@ -7,10 +7,17 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
+import java.util.List;
+
 public class CommandAddShow implements Command {
     @Override
     public String getName() {
         return "addshow";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return null;
     }
 
     @Override

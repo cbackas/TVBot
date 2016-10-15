@@ -16,6 +16,11 @@ public class CommandAddLog implements Command {
     }
 
     @Override
+    public List<String> getAliases() {
+        return null;
+    }
+
+    @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             if (args.length >= 1) {

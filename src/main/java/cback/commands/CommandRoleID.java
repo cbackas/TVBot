@@ -16,6 +16,11 @@ public class CommandRoleID implements Command {
     }
 
     @Override
+    public List<String> getAliases() {
+        return null;
+    }
+
+    @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getID().equals("73416411443113984")) {
             if (args.length == 1) {

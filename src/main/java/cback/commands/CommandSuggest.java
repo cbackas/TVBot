@@ -1,18 +1,22 @@
 package cback.commands;
 
 import cback.TVBot;
-import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommandSuggest implements Command {
     @Override
     public String getName() {
         return "suggest";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return Arrays.asList("idea","suggestion"); //keep adding commas for more alias @zac also you can delete this comment
     }
 
     @Override

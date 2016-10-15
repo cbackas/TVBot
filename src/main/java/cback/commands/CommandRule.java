@@ -11,12 +11,18 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.util.EnumSet;
+import java.util.List;
 
 
 public class CommandRule implements Command {
     @Override
     public String getName() {
         return "rule";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return null;
     }
 
     @Override

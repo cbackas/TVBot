@@ -119,7 +119,9 @@ public class TVBot {
         Matcher matcher = COMMAND_PATTERN.matcher(text);
         if (matcher.matches()) {
             String baseCommand = matcher.group(1).toLowerCase();
-            Optional<Command> command = registeredCommands.stream().filter(com -> com.getName().equalsIgnoreCase(baseCommand)).findFirst();
+            Optional<Command> command = registeredCommands.stream()
+                    .filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && com.getAliases().contains(baseCommand)))
+                    .findFirst();
             if (command.isPresent()) {
                 System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
