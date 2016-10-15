@@ -15,6 +15,9 @@ public class MemberLog {
         IGuild server = event.getGuild();
         String user = event.getUser().mention();
         Util.sendMessage(event.getClient().getChannelByID(logChannel), user + " **joined** the server.");
+        if (event.getUser().isBot()) {
+            Util.sendMessage(server.getChannelByID(TVBot.BOTLOG_CHANNEL_ID), "A bot has joined the server - " + user);
+        }
     }
 
     @EventSubscriber

@@ -36,12 +36,13 @@ public class CommandKick implements Command {
                     if (!user.getID().equals(mod.getID())) {
                         try {
                             guild.kickUser(user);
-                            Util.sendMessage(logChannel, "```" + user.getDisplayName(guild) + " kicked. Reason: " + reason + "\n- " + mod.getDisplayName(guild) + "```");
-                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " kicked and logged");
+                            Util.sendMessage(logChannel, "```Kicked " + user.getDisplayName(guild) + " for " + reason + "\n- " + mod.getDisplayName(guild) + "```");
+                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been kicked. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info");
                             Util.deleteMessage(message);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Util.sendMessage(message.getChannel(), "Internal error - check stack trace");
+                            Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
+                            Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandKick - check stacktrace");
                         }
                     } else {
                         Util.sendMessage(message.getChannel(), "You probably shouldn't kick yourself");

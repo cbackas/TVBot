@@ -146,7 +146,9 @@ public class TVBot {
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
                 command.get().execute(this, client, argsArr, guild, message, isPrivate);
             }
-
+        }
+        if (message.getMentions().contains(client.getOurUser())) {
+            Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
         }
     }
 

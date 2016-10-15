@@ -30,10 +30,10 @@ public class CommandHelp implements Command {
         String modCommands =
                 "\n------------------------------------------------------------------\n" +
                 "!addlog [message]                      //adds a message to the log\n" +
-                        "!mute @user                            //mutes user\n" +
+                        "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
-                        "!kick @user [reason]                   //kicks user and logs the action\n" +
-                        "!ban @user [reason]                    //bans user and logs the action";
+                        "!kick @user [reason?]                  //kicks user and logs the action\n" +
+                        "!ban @user [reason?]                   //bans user and logs the action";
 
         String adminCommands =
                 "\n------------------------------------------------------------------\n" +
@@ -61,7 +61,7 @@ public class CommandHelp implements Command {
             finalHelp = finalHelp + adminCommands;
         }
         try {
-            new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("XL", finalHelp).appendQuote("Staff commands excluded for regular users").send();
+            new MessageBuilder(client).withChannel(message.getAuthor().getOrCreatePMChannel()).appendQuote("TVBot's Commands:").appendCode("xl", finalHelp).appendQuote("Staff commands excluded for regular users").send();
         } catch (Exception e) {
         }
         Util.deleteMessage(message);
