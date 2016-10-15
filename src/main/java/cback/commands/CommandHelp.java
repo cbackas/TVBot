@@ -25,7 +25,8 @@ public class CommandHelp implements Command {
                 "!help                                  //shows a list of commands\n" +
                         "!goodnight                             //does that good night thing everyone likes\n" +
                         "!lenny                                 //lenny\n" +
-                        "!shrug                                 //shrugs";
+                        "!shrug                                 //shrugs\n" +
+                        "!suggest [stuff]                       //pins your suggestion in #suggestion";
 
         String modCommands =
                 "\n------------------------------------------------------------------\n" +

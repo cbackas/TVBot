@@ -22,20 +22,17 @@ public class CommandMovieNight implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         ConfigManager configManager = bot.getConfigManager();
         String text = message.getContent();
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("226443478664609792"))) {
-            Pattern pattern = Pattern.compile("^!movienight (.+) ?.+?");
-            Matcher matcher = pattern.matcher(text);
-            if (matcher.find()) {
-                String option = matcher.group(1);
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("226443478664609792")) || message.getAuthor().getID().equals("73416411443113984")) {
+            Pattern patternOption = Pattern.compile("^!movienight (set|announce|start) (.+)");
+            Matcher matcherOption = patternOption.matcher(text);
+            if (matcherOption.find()) {
+                String option = matcherOption.group(1);
                 if (option.equalsIgnoreCase("set")) {
-                    Pattern patternSet = Pattern.compile("!movienight set (.+) (.+)");
+                    Pattern patternSet = Pattern.compile("^!movienight set (\\w+) (.+)");
                     Matcher matcherSet = patternSet.matcher(text);
-                    if (matcher.find()) {
+                    if (matcherSet.find()) {
                         String poll = "<https://goo.gl/forms/" + matcherSet.group(1) + ">";
                         String date = matcherSet.group(2);
-                        if (date == null) {
-                            date = "unspecified date";
-                        }
                         Util.deleteMessage(client.getMessageByID(configManager.getConfigValue("mnID")));
                         String announcement = "Polls for next weeks movie night is now open! " + poll + " Movie night will be on " + date + ".";
                         IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
@@ -50,9 +47,9 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 } else if (option.equalsIgnoreCase("announce")) {
-                    Pattern patternAnnounce = Pattern.compile("!movienight announce (.+)");
+                    Pattern patternAnnounce = Pattern.compile("^!movienight announce (.+)");
                     Matcher matcherAnnounce = patternAnnounce.matcher(text);
-                    if (matcher.find()) {
+                    if (matcherAnnounce.find()) {
                         String movie = matcherAnnounce.group(1);
                         String announcement = "The movie night poll is now closed! The movie that won is " + movie + ". Movie night will be on " + configManager.getConfigValue("date");
                         Util.deleteMessage(client.getMessageByID(configManager.getConfigValue("mnID")));
@@ -67,9 +64,9 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 } else if (option.equalsIgnoreCase("start")) {
-                    Pattern patternStart = Pattern.compile("!movienight start (.+)");
+                    Pattern patternStart = Pattern.compile("^!movienight start (.+)");
                     Matcher matcherStart = patternStart.matcher(text);
-                    if (matcher.find()) {
+                    if (matcherStart.find()) {
                         String rabbit = "<https://rabb.it/" + matcherStart.group(1) + ">";
                         String announcement = "We are about to start watching " + configManager.getConfigValue("movie") + "! Come check it out here " + rabbit;
                         Util.deleteMessage(client.getMessageByID(configManager.getConfigValue("mnID")));
@@ -83,6 +80,7 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 }
+                Util.deleteMessage(message);
             }
         }
     }

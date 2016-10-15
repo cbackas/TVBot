@@ -75,6 +75,7 @@ public class TVBot {
         registerCommand(new CommandBan());
         registerCommand(new CommandKick());
         registerCommand(new CommandRule());
+        registerCommand(new CommandSuggest());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
