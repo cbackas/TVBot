@@ -22,38 +22,33 @@ public class CommandSearch implements Command {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("lookup","show");
+        return Arrays.asList("lookup", "show");
     }
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String showName = Arrays.stream(args).collect(Collectors.joining(" "));
-        Show showLookup = bot.getTraktManager().showSearch(showName);
-        if (showLookup != null) {
-            Show showData = bot.getTraktManager().showIDSearch(showLookup.ids.imdb);
-            if (showData != null) {
-                String title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
-                String overview = showData.overview;
-                String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
-                 ? showData.airs.day + " at " + to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
-                String premier = new SimpleDateFormat("MMM dd, yyyy").format(showData.first_aired.toDate());
-                String runtime = Integer.toString(showData.runtime);
-                String country = showData.country + " - " + showData.language;
-                String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">";
-                Util.sendMessage(message.getChannel(),
-                        title + "\n" +
-                                overview + "\n" +
-                                homepage + "\n" +
-                                "```\n" +
-                                "AIRS: " + airs + "\n" +
-                                "RUNTIME: " + runtime + " min\n" +
-                                "PREMIERED: " + premier + "\n" +
-                                "COUNTRY: " + country.toUpperCase() + "\n" +
-                                "GENRES " + String.join(", ", showData.genres) + "\n" +
-                                "```\n");
-            } else {
-                Util.sendMessage(message.getChannel(), "Accidentally left the show on the roof of the car when I drove away - oops");
-            }
+        Show showData = bot.getTraktManager().showSummaryFromName(showName);
+        if (showData != null) {
+            String title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
+            String overview = showData.overview;
+            String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
+                    ? showData.airs.day + " at " + to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
+            String premier = new SimpleDateFormat("MMM dd, yyyy").format(showData.first_aired.toDate());
+            String runtime = Integer.toString(showData.runtime);
+            String country = showData.country + " - " + showData.language;
+            String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">";
+            Util.sendMessage(message.getChannel(),
+                    title + "\n" +
+                            overview + "\n" +
+                            homepage + "\n" +
+                            "```\n" +
+                            "AIRS: " + airs + "\n" +
+                            "RUNTIME: " + runtime + " min\n" +
+                            "PREMIERED: " + premier + "\n" +
+                            "COUNTRY: " + country.toUpperCase() + "\n" +
+                            "GENRES: " + String.join(", ", showData.genres) + "\n" +
+                            "```\n");
         } else {
             Util.sendMessage(message.getChannel(), "Error: Show not found");
         }

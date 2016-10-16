@@ -29,10 +29,16 @@ public class CommandHelp implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String userCommands =
                 "!help                                  //shows a list of commands\n" +
+                        "     aliases: !commands\n" +
+                        "!stats                                 //shows information about the server \n" +
+                        "     aliases: !info, !serverinfo, !server\n" +
                         "!goodnight                             //does that good night thing everyone likes\n" +
                         "!lenny                                 //lenny\n" +
                         "!shrug                                 //shrugs\n" +
-                        "!suggest [stuff]                       //pins your suggestion in #suggestion";
+                        "!suggest [stuff]                       //pins your suggestion in #suggestion\n" +
+                        "     aliases: !idea, !suggestion\n" +
+                        "!search [show name]                    //gives info about a show\n" +
+                        "     aliases: !lookup, !show";
 
         String modCommands =
                 "\n------------------------------------------------------------------\n" +

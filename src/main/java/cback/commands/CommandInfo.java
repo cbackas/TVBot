@@ -16,7 +16,7 @@ public class CommandInfo implements Command {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("serverinfo","server");
+        return Arrays.asList("serverinfo","server","stats");
     }
 
     @Override
