@@ -26,6 +26,7 @@ public class ConfigManager {
         defaultConfig.put("pollID", "POLLID");
         defaultConfig.put("date", "movienight date/time");
         defaultConfig.put("mnID", "movienight announce messageID");
+        defaultConfig.put("userCount", "0");
     }
 
     public ConfigManager(TVBot bot) {
