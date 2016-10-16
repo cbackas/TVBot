@@ -29,10 +29,10 @@ public class CommandMute implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
-            if (args.length == 1) {
-                String user = args[0];
-                Pattern pattern = Pattern.compile("^!ban <@(.+)> ?(.+)?");
-                Matcher matcher = pattern.matcher(user);
+            if (args.length >= 1) {
+                String text = message.getContent();
+                Pattern pattern = Pattern.compile("^!mute <@(.+)> ?(.+)?");
+                Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {
                     String u = matcher.group(1);
                     String reason = matcher.group(2);

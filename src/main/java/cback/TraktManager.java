@@ -4,9 +4,11 @@ import com.uwetrottmann.trakt5.TraktV2;
 import com.uwetrottmann.trakt5.entities.CalendarShowEntry;
 import com.uwetrottmann.trakt5.entities.SearchResult;
 import com.uwetrottmann.trakt5.entities.Show;
+import com.uwetrottmann.trakt5.enums.Extended;
 import com.uwetrottmann.trakt5.enums.IdType;
 import com.uwetrottmann.trakt5.enums.TraktEnum;
 import com.uwetrottmann.trakt5.enums.Type;
+import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
@@ -93,7 +95,22 @@ public class TraktManager {
         try {
             Response<List<SearchResult>> search = trakt.search().idLookup(IdType.IMDB, imdbID, 1, 1).execute();
             if (search.isSuccessful() && !search.body().isEmpty()) {
-                return search.body().get(0).show;
+                Response<Show> show = trakt.shows().summary(imdbID, Extended.FULL).execute();
+                if (show.isSuccessful()) {
+                    return show.body();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Show showSummary(String imdbID) {
+        try {
+            Response<Show> show = trakt.shows().summary(imdbID, Extended.FULL).execute();
+            if (show.isSuccessful()) {
+                return show.body();
             }
         } catch (Exception e) {
             e.printStackTrace();

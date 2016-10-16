@@ -8,6 +8,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CommandRoleID implements Command {
     @Override
@@ -26,16 +27,15 @@ public class CommandRoleID implements Command {
             if (args.length == 1) {
                 String roleName = args[0];
                 List<IRole> serverRoles = guild.getRoles();
-                for (IRole roles : serverRoles) {
-                    if (roleName.equalsIgnoreCase("listall")) {
-                        Util.sendBufferedMessage(message.getChannel(), roles.getName() + " " + roles.getID());
+                if (roleName.equalsIgnoreCase("listall")) {
+                    String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getID()).reduce("",(a, b) -> a + b + "\n");
+                    Util.sendBufferedMessage(message.getChannel(), roleList);
+                } else {
+                    Optional<IRole> foundRole = serverRoles.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
+                    if (foundRole.isPresent()) {
+                        Util.sendMessage(message.getChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getID());
                     } else {
-                        if (roles.getName().equalsIgnoreCase(roleName)) {
-                            Util.sendMessage(message.getChannel(), "Found id for **" + roleName + "**: " + roles.getID());
-
-                        } else {
-                            Util.sendMessage(message.getChannel(), "Role not found");
-                        }
+                        Util.sendMessage(message.getChannel(), "Role not found");
                     }
                 }
                 Util.deleteMessage(message);
