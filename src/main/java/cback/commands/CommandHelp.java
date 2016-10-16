@@ -10,6 +10,7 @@ import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.MessageBuilder;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class CommandHelp implements Command {
 
     @Override
     public List<String> getAliases() {
-        return null;
+        return Arrays.asList("commands","info");
     }
 
     @Override
