@@ -22,7 +22,7 @@ public class CommandHelp implements Command {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("commands","info");
+        return Arrays.asList("commands");
     }
 
     @Override

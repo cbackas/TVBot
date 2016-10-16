@@ -52,7 +52,7 @@ public class TVBot {
 
         connect();
         client.getDispatcher().registerListener(this);
-        client.getDispatcher().registerListener(new MutePermissions());
+        client.getDispatcher().registerListener(new MutePermissions(this));
         client.getDispatcher().registerListener(new MemberLog());
 
         databaseManager = new DatabaseManager(this);
@@ -76,6 +76,7 @@ public class TVBot {
         registerCommand(new CommandKick());
         registerCommand(new CommandRule());
         registerCommand(new CommandSuggest());
+        registerCommand(new CommandSearch());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");

@@ -5,6 +5,7 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.PermissionsUtils;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -29,7 +30,7 @@ public class CommandKick implements Command {
             IUser mod = message.getAuthor();
             IChannel logChannel = guild.getChannelByID("217456105679224846");
             try {
-                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.KICK));
+                PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.KICK));
                 Pattern pattern = Pattern.compile("^!kick <@(.+)> ?(.+)?");
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {

@@ -5,6 +5,7 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.PermissionsUtils;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -26,7 +27,7 @@ public class CommandAddLog implements Command {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             if (args.length >= 1) {
                 try {
-                    DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                    PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                     String text = message.getContent().split(" ", 2)[1];
                     List<IChannel> mentionsC = message.getChannelMentions();
                     List<IUser> mentionsU = message.getMentions();

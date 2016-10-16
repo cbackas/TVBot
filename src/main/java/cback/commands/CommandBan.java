@@ -5,6 +5,7 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.PermissionsUtils;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -29,7 +30,7 @@ public class CommandBan implements Command {
             IUser mod = message.getAuthor();
             IChannel logChannel = guild.getChannelByID("217456105679224846");
             try {
-                DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.BAN));
+                PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.BAN));
                 Pattern pattern = Pattern.compile("^!ban <@(.+)> ?(.+)?");
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {

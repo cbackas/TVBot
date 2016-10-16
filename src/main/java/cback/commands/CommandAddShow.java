@@ -2,6 +2,7 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
+import com.uwetrottmann.trakt5.entities.Show;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -27,7 +28,9 @@ public class CommandAddShow implements Command {
                 String imdbID = args[0];
                 String channelID = args[1];
                 if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getID();
-                String showName = bot.getTraktManager().getShowTitle(imdbID);
+                Show showData = bot.getTraktManager().showIDSearch(imdbID);
+                String showName = showData.title;
+                String showNetwork = showData.network;
                 IChannel channel = client.getChannelByID(channelID);
                 if (channel == null) {
                     Util.sendMessage(message.getChannel(), "No channel by this ID found.");
@@ -35,6 +38,10 @@ public class CommandAddShow implements Command {
                 }
                 if (showName == null) {
                     Util.sendMessage(message.getChannel(), "No show by this IMDB ID found.");
+                    return;
+                }
+                if (showNetwork.equalsIgnoreCase("netflix")) {
+                    Util.sendMessage(message.getChannel(), "Netflix show detected - import aborted");
                     return;
                 }
                 bot.getDatabaseManager().insertShowData(imdbID, showName, channelID);

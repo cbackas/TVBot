@@ -8,6 +8,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.util.PermissionsUtils;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -28,7 +29,7 @@ public class CommandAMute implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         try {
-            DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.ADMINISTRATOR));
+            PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.ADMINISTRATOR));
             if (args.length == 1) {
                 String user = args[0];
                 Pattern pattern = Pattern.compile("^<@!?(\\d+)>");
@@ -40,7 +41,7 @@ public class CommandAMute implements Command {
                         Util.sendPrivateMessage(message.getAuthor(), "You probably shouldn't mute yourself");
                     } else {
                         try {
-                            DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                            PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                             userInput.addRole(guild.getRoleByID("231269949635559424"));
                             Util.sendPrivateMessage(message.getAuthor(), userInput.getDisplayName(guild) + " has been muted");
                         } catch (Exception e) {
