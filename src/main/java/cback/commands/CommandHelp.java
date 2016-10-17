@@ -71,6 +71,7 @@ public class CommandHelp implements Command {
                 "\n------------------------------------------------------------------\n" +
                 "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!announce [announcement]               //sends a public announcement\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!aunmute @user                         //unmutes user without log\n" +
                         "!addlog [message]                      //adds a message to the log\n" +
