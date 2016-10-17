@@ -63,7 +63,7 @@ public class ChannelChange {
         String channelName = event.getChannel().getName();
         String[] showNameArray = channelName.split("-");
         String showName = Arrays.stream(showNameArray).collect(Collectors.joining(" "));
-        Show showData = trakt.showSearch(showName);
+        Show showData = trakt.showSummaryFromName(showName);
         String possibleID = showData.ids.imdb;
         if (possibleID != null) {
             String showNetwork = showData.network;
