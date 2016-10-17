@@ -28,7 +28,7 @@ public class CommandAddShow implements Command {
                 String imdbID = args[0];
                 String channelID = args[1];
                 if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getID();
-                Show showData = bot.getTraktManager().showIDSearch(imdbID);
+                Show showData = bot.getTraktManager().showSummary(imdbID);
                 String showName = showData.title;
                 String showNetwork = showData.network;
                 IChannel channel = client.getChannelByID(channelID);
