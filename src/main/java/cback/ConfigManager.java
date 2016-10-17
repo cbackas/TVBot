@@ -7,9 +7,8 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class ConfigManager {
 
@@ -18,7 +17,7 @@ public class ConfigManager {
     private File configFile;
     private JSONObject configJson;
 
-    private static Map<String, String> defaultConfig = new HashMap<>();
+    private static Map<String, Object> defaultConfig = new HashMap<>();
     static {
         //Insert all default config values here. They will be added on startup if they do not exist.
         defaultConfig.put("botToken", "TOKEN");
@@ -27,6 +26,7 @@ public class ConfigManager {
         defaultConfig.put("date", "movienight date/time");
         defaultConfig.put("mnID", "movienight announce messageID");
         defaultConfig.put("userCount", "0");
+        defaultConfig.put("muted", new ArrayList<String>());
     }
 
     public ConfigManager(TVBot bot) {
@@ -93,9 +93,16 @@ public class ConfigManager {
     }
 
     /**
+     * Gets array value from the config
+     */
+    public List<String> getConfigArray(String key) {
+        return (List<String>) configJson.get(key);
+    }
+
+    /**
      * Sets a config value and writes it to the file
      */
-    public void setConfigValue(String key, String value) {
+    public void setConfigValue(String key, Object value) {
         configJson.put(key, value);
         writeConfig();
     }

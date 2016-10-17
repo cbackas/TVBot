@@ -40,7 +40,9 @@ public class CommandKick implements Command {
                         reason = "no reason provided";
                     }
                     IUser user = guild.getUserByID(userInput);
-                    if (!user.getID().equals(mod.getID())) {
+                    if (user.getID().equals(mod.getID())) {
+                        Util.sendMessage(message.getChannel(), "You know you can just leave right?");
+                    } else {
                         try {
                             guild.kickUser(user);
                             Util.sendMessage(logChannel, "```Kicked " + user.getDisplayName(guild) + " for " + reason + "\n- " + mod.getDisplayName(guild) + "```");
@@ -51,8 +53,6 @@ public class CommandKick implements Command {
                             Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
                             Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandKick - check stacktrace");
                         }
-                    } else {
-                        Util.sendMessage(message.getChannel(), "You probably shouldn't kick yourself");
                     }
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!kick @user reason``");

@@ -1,6 +1,6 @@
 package cback;
 
-import cback.serverfunctions.MemberLog;
+import cback.serverfunctions.MemberChange;
 import cback.serverfunctions.MutePermissions;
 import cback.commands.*;
 import cback.database.DatabaseManager;
@@ -53,7 +53,7 @@ public class TVBot {
         connect();
         client.getDispatcher().registerListener(this);
         client.getDispatcher().registerListener(new MutePermissions(this));
-        client.getDispatcher().registerListener(new MemberLog());
+        client.getDispatcher().registerListener(new MemberChange(this));
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
@@ -173,6 +173,7 @@ public class TVBot {
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
+        //scheduler.updateUserCount();
     }
 
     @EventSubscriber

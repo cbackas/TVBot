@@ -40,7 +40,9 @@ public class CommandBan implements Command {
                         reason = "no reason provided";
                     }
                     IUser user = guild.getUserByID(userInput);
-                    if (!user.getID().equals(mod.getID())) {
+                    if (user.getID().equals(mod.getID())) {
+                        Util.sendMessage(message.getChannel(), "You're gonna have to try harder than that.");
+                    } else {
                         try {
                             guild.banUser(user, 1);
                             Util.sendMessage(logChannel, "```Banned " + user.getDisplayName(guild) + " for " + reason + "\n- " + mod.getDisplayName(guild) + "```");
@@ -51,8 +53,6 @@ public class CommandBan implements Command {
                             Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
                             Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandBan - check stacktrace");
                         }
-                    } else {
-                        Util.sendMessage(message.getChannel(), "You probably shouldn't ban yourself");
                     }
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!ban @user reason``");

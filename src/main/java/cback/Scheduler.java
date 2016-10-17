@@ -2,14 +2,13 @@ package cback;
 
 import cback.database.Airing;
 import cback.database.Show;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.*;
 
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Scheduler {
 
@@ -144,7 +143,8 @@ public class Scheduler {
     public void updateUserCount() {
         IGuild loungeGuild = bot.getClient().getGuildByID("192441520178200577");
         if (loungeGuild != null) {
-            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
+            List<IUser> users = loungeGuild.getUsers().stream().filter(u -> u.getPresence() != Presences.OFFLINE).collect(Collectors.toList());
+            bot.getConfigManager().setConfigValue("userCount", String.valueOf(users.size()));
         }
     }
 

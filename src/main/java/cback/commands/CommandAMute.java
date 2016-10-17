@@ -10,6 +10,8 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.PermissionsUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -44,6 +46,9 @@ public class CommandAMute implements Command {
                             PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                             userInput.addRole(guild.getRoleByID("231269949635559424"));
                             Util.sendPrivateMessage(message.getAuthor(), userInput.getDisplayName(guild) + " has been muted");
+                            List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
+                            mutedUsers.add(u);
+                            bot.getConfigManager().setConfigValue("muted", mutedUsers);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
