@@ -36,5 +36,8 @@ public class MemberChange {
     public void memberLeave(UserLeaveEvent event) {
         String user = event.getUser().mention();
         Util.sendMessage(event.getClient().getChannelByID(logChannel), user + " **left** the server.");
+        if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
+            Util.sendMessage(event.getGuild().getChannelByID("192444648545845248"), user + "is muted and left the server. Their mute will be applied again when/if they return.");
+        }
     }
 }
