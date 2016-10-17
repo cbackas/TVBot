@@ -65,6 +65,7 @@ public class CommandHelp implements Command {
                         "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!amute @user                           //mutes user without log\n" +
+                        "!announce [announcement]               //sends a public announcement\n" +
                         "!aunmute @user                         //unmutes user without log";
 
         String adminCommands =
