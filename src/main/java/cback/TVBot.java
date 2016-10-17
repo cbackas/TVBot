@@ -1,7 +1,7 @@
 package cback;
 
-import cback.serverfunctions.MemberChange;
-import cback.serverfunctions.MutePermissions;
+import cback.eventFunctions.ChannelChange;
+import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
 import cback.database.Show;
@@ -52,7 +52,7 @@ public class TVBot {
 
         connect();
         client.getDispatcher().registerListener(this);
-        client.getDispatcher().registerListener(new MutePermissions(this));
+        client.getDispatcher().registerListener(new ChannelChange(this));
         client.getDispatcher().registerListener(new MemberChange(this));
 
         databaseManager = new DatabaseManager(this);

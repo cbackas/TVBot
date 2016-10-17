@@ -40,6 +40,12 @@ public class CommandHelp implements Command {
                         "!search [show name]                    //gives info about a show\n" +
                         "     aliases: !lookup, !show";
 
+        String trialmodCommands =
+                "\n------------------------------------------------------------------\n" +
+                        "!addlog [message]                      //adds a message to the log\n" +
+                        "!mute @user [reason?]                  //mutes user\n" +
+                        "!unmute @user                          //unmutes user";
+
         String modCommands =
                 "\n------------------------------------------------------------------\n" +
                 "!addlog [message]                      //adds a message to the log\n" +
@@ -48,12 +54,30 @@ public class CommandHelp implements Command {
                         "!kick @user [reason?]                  //kicks user and logs the action\n" +
                         "!ban @user [reason?]                   //bans user and logs the action";
 
+        String devCommands =
+                "\n------------------------------------------------------------------\n" +
+                        "!roleid [rolename|listall]             //gives the roleid for role\n" +
+                        "!setmuteperm                           //gives muted role to all channels\n" +
+                        "!aunmute @user                         //unmutes user without log";
+
+        String zockCommands =
+                "\n------------------------------------------------------------------\n" +
+                        "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
+                        "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!amute @user                           //mutes user without log\n" +
+                        "!aunmute @user                         //unmutes user without log";
+
         String adminCommands =
                 "\n------------------------------------------------------------------\n" +
                 "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!amute @user                           //mutes user without log\n" +
-                        "!aunmute @user                         //unmutes user without log";
+                        "!aunmute @user                         //unmutes user without log\n" +
+                        "!addlog [message]                      //adds a message to the log\n" +
+                        "!mute @user [reason?]                  //mutes user\n" +
+                        "!unmute @user                          //unmutes user\n" +
+                        "!kick @user [reason?]                  //kicks user and logs the action\n" +
+                        "!ban @user [reason?]                   //bans user and logs the action";
 
         String movieCommands =
                 "\n------------------------------------------------------------------\n" +
@@ -68,9 +92,15 @@ public class CommandHelp implements Command {
             finalHelp = userCommands + "\n!rule [number]                         //posts the rule requested in chat";
         } if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
             finalHelp = finalHelp + movieCommands;
+        } if (roles.contains(guild.getRoleByID("228231762113855489"))) {
+            finalHelp = finalHelp + trialmodCommands;
         } if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
             finalHelp = finalHelp + modCommands;
-        } if (roles.contains(guild.getRoleByID("192441946210435072"))) { //Admin Check
+        } if (roles.contains(guild.getRoleByID("236988571330805760"))) { //Dev Check
+            finalHelp = finalHelp + devCommands;
+        } if (message.getAuthor().getID().equals("148279556619370496")) { //Zock Check
+            finalHelp = finalHelp + zockCommands;
+        } if (roles.contains(guild.getRoleByID("192441946210435072")) && !message.getAuthor().getID().equals("148279556619370496")) { //Admin Check
             finalHelp = finalHelp + adminCommands;
         }
         try {

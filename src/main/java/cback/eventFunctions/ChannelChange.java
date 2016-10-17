@@ -1,9 +1,8 @@
-package cback.serverfunctions;
+package cback.eventFunctions;
 
 import cback.TVBot;
 import cback.TraktManager;
 import cback.Util;
-import com.uwetrottmann.trakt5.TraktV2;
 import com.uwetrottmann.trakt5.entities.Show;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -20,15 +19,15 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MutePermissions {
+public class ChannelChange {
     private TVBot bot;
 
-    public MutePermissions(TVBot bot) {
+    public ChannelChange(TVBot bot) {
         this.bot = bot;
     }
 
     @EventSubscriber //Set all
-    public void mutePermTrigger(MessageReceivedEvent event) {
+    public void setMuteRoleMASS(MessageReceivedEvent event) {
         IMessage message = event.getMessage();
         String text = message.getContent();
         IDiscordClient client = event.getClient();
@@ -37,11 +36,11 @@ public class MutePermissions {
             IRole muted = client.getRoleByID("231269949635559424");
             for (IChannel channels : channelList) {
                 RequestBuffer.request(() -> {
-                try {
+                    try {
                         channels.overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
             }
             System.out.println("Set muted role");
@@ -50,7 +49,7 @@ public class MutePermissions {
     }
 
     @EventSubscriber //New Channel
-    public void mutePermNewChannel(ChannelCreateEvent event) {
+    public void newChannel(ChannelCreateEvent event) {
         //Set muted role
         IRole muted = event.getClient().getRoleByID("231269949635559424");
         try {

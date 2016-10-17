@@ -1,4 +1,4 @@
-package cback.serverfunctions;
+package cback.eventFunctions;
 
 import cback.TVBot;
 import cback.Util;
