@@ -65,6 +65,7 @@ public class TVBot {
         registerCommand(new CommandGoodnight());
         registerCommand(new CommandAddShow());
         registerCommand(new CommandRemoveShow());
+        registerCommand(new CommandAnnounce());
         registerCommand(new CommandAddLog());
         registerCommand(new CommandMovieNight());
         registerCommand(new CommandMute());
