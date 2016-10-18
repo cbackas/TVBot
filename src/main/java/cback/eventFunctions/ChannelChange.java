@@ -7,6 +7,7 @@ import com.uwetrottmann.trakt5.entities.Show;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -74,6 +75,20 @@ public class ChannelChange {
             } else {
                 Util.sendMessage(event.getChannel(), "Netflix show detected - data not stored");
             }
+        }
+    }
+
+    @EventSubscriber
+    public void onDeleteChannelEvent(ChannelDeleteEvent event) {
+        List<cback.database.Show> shows = bot.getDatabaseManager().getShowsByChannel(event.getChannel().getID());
+        if (shows != null) {
+            shows.forEach(show -> {
+                if (bot.getDatabaseManager().deleteShow(show.getShowID()) > 0) {
+                    String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
+                    System.out.println(message);
+                    Util.sendMessage(bot.getClient().getChannelByID("231499461740724224"), message);
+                }
+            });
         }
     }
 

@@ -8,7 +8,6 @@ import cback.database.Show;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -154,20 +153,6 @@ public class TVBot {
         }
         if (message.getMentions().contains(client.getOurUser())) {
             Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
-        }
-    }
-
-    @EventSubscriber
-    public void onDeleteChannelEvent(ChannelDeleteEvent event) {
-        List<Show> shows = getDatabaseManager().getShowsByChannel(event.getChannel().getID());
-        if (shows != null) {
-            shows.forEach(show -> {
-                if (getDatabaseManager().deleteShow(show.getShowID()) > 0) {
-                    String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
-                    System.out.println(message);
-                    Util.sendMessage(client.getChannelByID("231499461740724224"), message);
-                }
-            });
         }
     }
 

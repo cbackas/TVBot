@@ -51,17 +51,20 @@ public class CommandHelp implements Command {
                 "!addlog [message]                      //adds a message to the log\n" +
                         "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
-                        "!kick @user [reason?]                  //kicks user and logs the action\n" +
                         "!ban @user [reason?]                   //bans user and logs the action";
 
         String devCommands =
                 "\n------------------------------------------------------------------\n" +
+                        "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
+                        "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!showid [here|showname]                //returns possible imdb id for a show\n" +
                         "!roleid [rolename|listall]             //gives the roleid for role\n" +
                         "!setmuteperm                           //gives muted role to all channels\n" +
                         "!aunmute @user                         //unmutes user without log";
 
         String zockCommands =
                 "\n------------------------------------------------------------------\n" +
+                        "!kick @user [reason?]                  //kicks user and logs the action\n" +
                         "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!amute @user                           //mutes user without log\n" +
@@ -72,6 +75,7 @@ public class CommandHelp implements Command {
                 "\n------------------------------------------------------------------\n" +
                 "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!showid [here|showname]                //returns possible imdb id for a show\n" +
                         "!announce [announcement]               //sends a public announcement\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!aunmute @user                         //unmutes user without log\n" +
