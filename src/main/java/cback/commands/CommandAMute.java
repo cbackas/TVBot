@@ -49,6 +49,7 @@ public class CommandAMute implements Command {
                             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
                             mutedUsers.add(u);
                             bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            Util.deleteMessage(message);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

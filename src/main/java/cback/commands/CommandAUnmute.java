@@ -47,6 +47,7 @@ public class CommandAUnmute implements Command {
                             mutedUsers.remove(u);
                             bot.getConfigManager().setConfigValue("muted", mutedUsers);
                             Util.sendPrivateMessage(message.getAuthor(), userInput.getDisplayName(guild) + " has been unmuted");
+                            Util.deleteMessage(message);
                         } catch (Exception e) {
                         }
                     }

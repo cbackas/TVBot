@@ -82,8 +82,8 @@ public class CommandHelp implements Command {
                         "!addlog [message]                      //adds a message to the log\n" +
                         "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
-                        "!kick @user [reason?]                  //kicks user and logs the action\n" +
-                        "!ban @user [reason?]                   //bans user and logs the action";
+                        "!kick @user [reason]                  //kicks user and logs the action\n" +
+                        "!ban @user [reason]                   //bans user and logs the action";
 
         String movieCommands =
                 "\n------------------------------------------------------------------\n" +
