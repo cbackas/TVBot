@@ -129,6 +129,7 @@ public class TraktManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Util.sendPrivateMessage(bot.getClient().getUserByID("73416411443113984"), "Couldn't find " + showName);
         }
         return null;
     }

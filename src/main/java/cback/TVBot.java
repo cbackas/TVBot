@@ -77,6 +77,7 @@ public class TVBot {
         registerCommand(new CommandRule());
         registerCommand(new CommandSuggest());
         registerCommand(new CommandSearch());
+        registerCommand(new CommandShowID());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
@@ -159,7 +160,6 @@ public class TVBot {
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
-        //scheduler.updateUserCount();
     }
 
     @EventSubscriber

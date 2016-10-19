@@ -51,6 +51,7 @@ public class CommandSearch implements Command {
                             "```\n");
         } else {
             Util.sendMessage(message.getChannel(), "Error: Show not found");
+            Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Couldn't find " + showName);
         }
     }
 
