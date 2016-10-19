@@ -36,29 +36,30 @@ public class CommandKick implements Command {
                 if (matcher.find()) {
                     String userInput = matcher.group(1);
                     String reason = matcher.group(2);
-                    if (reason == null) {
-                        reason = "no reason provided";
-                    }
-                    IUser user = guild.getUserByID(userInput);
-                    if (user.getID().equals(mod.getID())) {
-                        Util.sendMessage(message.getChannel(), "You know you can just leave right?");
-                    } else {
-                        try {
-                            guild.kickUser(user);
-                            Util.sendMessage(logChannel, "```Kicked " + user.getDisplayName(guild) + " for " + reason + "\n- " + mod.getDisplayName(guild) + "```");
-                            Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been kicked. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info");
-                            Util.deleteMessage(message);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
-                            Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandKick - check stacktrace");
+                    if (reason != null) {
+                        IUser user = guild.getUserByID(userInput);
+                        if (user.getID().equals(mod.getID())) {
+                            Util.sendMessage(message.getChannel(), "You know you can just leave right?");
+                        } else {
+                            try {
+                                guild.kickUser(user);
+                                Util.sendMessage(logChannel, "```Kicked " + user.getDisplayName(guild) + " for " + reason + "\n- " + mod.getDisplayName(guild) + "```");
+                                Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been kicked. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
+                                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandKick - check stacktrace");
+                            }
                         }
+                    } else {
+                        Util.sendPrivateMessage(mod, "**Error Kicking**: Reason required");
                     }
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!kick @user reason``");
                 }
             } catch (Exception e) {
             }
+            Util.deleteMessage(message);
         }
     }
 
