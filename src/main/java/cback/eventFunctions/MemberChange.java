@@ -22,7 +22,7 @@ public class MemberChange {
         IUser user = event.getUser();
         Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " joined the server. " + user.mention());
         if (event.getUser().isBot()) {
-            Util.sendMessage(server.getChannelByID(TVBot.BOTLOG_CHANNEL_ID), "A bot has joined the server - " + user);
+            Util.sendMessage(server.getChannelByID(TVBot.BOTLOG_CHANNEL_ID), "A bot has joined the server - " + user.mention());
         }
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             try {
