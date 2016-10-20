@@ -17,7 +17,7 @@ public class DatabaseManager {
         initTables();
     }
 
-    public Connection getConnection() {
+    private Connection getConnection() {
         if (connection == null) {
             try {
                 Class.forName("org.sqlite.JDBC");
@@ -29,7 +29,7 @@ public class DatabaseManager {
         return connection;
     }
 
-    public void initTables() {
+    private void initTables() {
         try {
             // create a database connection
             Statement statement = getConnection().createStatement();
@@ -102,8 +102,6 @@ public class DatabaseManager {
 
     /**
      * Gets airings that have not been announced
-     *
-     * @return
      */
     public List<Airing> getNewAirings() {
         try {
@@ -122,7 +120,6 @@ public class DatabaseManager {
 
     /**
      * Gets airings that have been announced but not deleted
-     * @return
      */
     public List<Airing> getOldAirings() {
         try {
@@ -141,8 +138,6 @@ public class DatabaseManager {
 
     /**
      * Gets airings that have been deleted but not wiped from the database
-     *
-     * @return
      */
     public List<Airing> getDeletedAirings() {
         try {

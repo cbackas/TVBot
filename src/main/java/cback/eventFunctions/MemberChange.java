@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 public class MemberChange {
-    String logChannel = "217450005462646794";
+    private String logChannel = "217450005462646794";
     private TVBot bot;
 
     public MemberChange(TVBot bot) {

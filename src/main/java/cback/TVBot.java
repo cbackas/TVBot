@@ -4,7 +4,6 @@ import cback.eventFunctions.ChannelChange;
 import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
-import cback.database.Show;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -21,6 +20,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class TVBot {
     private IDiscordClient client;
 
@@ -188,7 +188,7 @@ public class TVBot {
         return botAdmins;
     }
 
-    public void registerCommand(Command command) {
+    private void registerCommand(Command command) {
         if (!registeredCommands.contains(command)) {
             registeredCommands.add(command);
             System.out.println("Registered command: " + command.getName());
