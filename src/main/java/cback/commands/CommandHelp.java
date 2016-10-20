@@ -28,7 +28,8 @@ public class CommandHelp implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String userCommands =
-                "!help                                  //shows a list of commands\n" +
+                "------------------------------------------------------------------\n" +
+                        "!help                                  //shows a list of commands\n" +
                         "     aliases: !commands\n" +
                         "!stats                                 //shows information about the server \n" +
                         "     aliases: !info, !serverinfo, !server\n" +
@@ -43,12 +44,14 @@ public class CommandHelp implements Command {
         String trialmodCommands =
                 "\n------------------------------------------------------------------\n" +
                         "!addlog [message]                      //adds a message to the log\n" +
+                        "     aliases: !log\n" +
                         "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user";
 
         String modCommands =
                 "\n------------------------------------------------------------------\n" +
-                "!addlog [message]                      //adds a message to the log\n" +
+                        "!addlog [message]                      //adds a message to the log\n" +
+                        "     aliases: !log\n" +
                         "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
                         "!ban @user [reason?]                   //bans user and logs the action";
@@ -57,6 +60,7 @@ public class CommandHelp implements Command {
                 "\n------------------------------------------------------------------\n" +
                         "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!addchannel [channel name]             //creates a new channel with the given name\n" +
                         "!showid [here|showname]                //returns possible imdb id for a show\n" +
                         "!roleid [rolename|listall]             //gives the roleid for role\n" +
                         "!setmuteperm                           //gives muted role to all channels\n" +
@@ -67,19 +71,24 @@ public class CommandHelp implements Command {
                         "!kick @user [reason?]                  //kicks user and logs the action\n" +
                         "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
+                        "!addchannel [channel name]             //creates a new channel with the given name\n" +
+                        "     aliases: !newchannel\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!announce [announcement]               //sends a public announcement\n" +
                         "!aunmute @user                         //unmutes user without log";
 
         String adminCommands =
                 "\n------------------------------------------------------------------\n" +
-                "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
+                        "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!showid [here|showname]                //returns possible imdb id for a show\n" +
                         "!announce [announcement]               //sends a public announcement\n" +
+                        "!addchannel [channel name]             //creates a new channel with the given name\n" +
+                        "     aliases: !newchannel\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!aunmute @user                         //unmutes user without log\n" +
                         "!addlog [message]                      //adds a message to the log\n" +
+                        "     aliases: !log\n" +
                         "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
                         "!kick @user [reason]                  //kicks user and logs the action\n" +
@@ -87,7 +96,7 @@ public class CommandHelp implements Command {
 
         String movieCommands =
                 "\n------------------------------------------------------------------\n" +
-                "!movienight set [pollID] [date]        //posts a link to a the google poll\n" +
+                        "!movienight set [pollID] [date]        //posts a link to a the google poll\n" +
                         "!movienight announce [movie]           //deletes poll and announces movie\n" +
                         "!movienight start [rabbitID]           //announces movienight start and links to room";
 
@@ -96,17 +105,23 @@ public class CommandHelp implements Command {
         String finalHelp = userCommands;
         if (roles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) { //Staff Check
             finalHelp = userCommands + "\n!rule [number]                         //posts the rule requested in chat";
-        } if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
+        }
+        if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
             finalHelp = finalHelp + movieCommands;
-        } if (roles.contains(guild.getRoleByID("228231762113855489"))) {
+        }
+        if (roles.contains(guild.getRoleByID("228231762113855489"))) {
             finalHelp = finalHelp + trialmodCommands;
-        } if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
+        }
+        if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
             finalHelp = finalHelp + modCommands;
-        } if (roles.contains(guild.getRoleByID("236988571330805760"))) { //Dev Check
+        }
+        if (roles.contains(guild.getRoleByID("236988571330805760"))) { //Dev Check
             finalHelp = finalHelp + devCommands;
-        } if (message.getAuthor().getID().equals("148279556619370496")) { //Zock Check
+        }
+        if (message.getAuthor().getID().equals("148279556619370496")) { //Zock Check
             finalHelp = finalHelp + zockCommands;
-        } if (roles.contains(guild.getRoleByID("192441946210435072")) && !message.getAuthor().getID().equals("148279556619370496")) { //Admin Check
+        }
+        if (roles.contains(guild.getRoleByID("192441946210435072")) && !message.getAuthor().getID().equals("148279556619370496")) { //Admin Check
             finalHelp = finalHelp + adminCommands;
         }
         try {

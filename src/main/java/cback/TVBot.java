@@ -78,6 +78,8 @@ public class TVBot {
         registerCommand(new CommandSuggest());
         registerCommand(new CommandSearch());
         registerCommand(new CommandShowID());
+        registerCommand(new CommandAddChannel());
+        registerCommand(new CommandTrigger());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
