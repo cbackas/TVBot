@@ -3,10 +3,14 @@ package cback;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.List;
 
 
 public class Util {
@@ -32,7 +36,9 @@ public class Util {
         RequestBuffer.RequestFuture<IMessage> sentMessage = RequestBuffer.request(() -> {
             try {
                 return channel.sendMessage(message);
-            } catch (Exception e) {
+            } catch (MissingPermissionsException e) {
+                e.printStackTrace();
+            } catch (DiscordException e) {
                 e.printStackTrace();
             }
             return null;
@@ -45,6 +51,41 @@ public class Util {
             message.delete();
         } catch (Exception ignored) {
         }
+    }
+
+    public static void deleteBufferedMessage(IMessage message) {
+        RequestBuffer.request(() -> {
+            try {
+                message.delete();
+            } catch (MissingPermissionsException e) {
+            } catch (DiscordException e) {
+            }
+        });
+    }
+
+    public static void bulkDelete(IChannel channel, List<IMessage> toDelete) {
+        RequestBuffer.request(() -> {
+            if (toDelete.size() > 0) {
+                if (toDelete.size() == 1) {
+                    try {
+                        toDelete.get(0).delete();
+                    } catch (MissingPermissionsException e) {
+                        e.printStackTrace();
+                    } catch (DiscordException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        channel.getMessages().bulkDelete(toDelete);
+                    } catch (DiscordException e) {
+                        e.printStackTrace();
+                    } catch (MissingPermissionsException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
     }
 
     public static void sendPrivateMessage(IUser user, String message) {

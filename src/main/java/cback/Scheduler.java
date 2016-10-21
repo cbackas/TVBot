@@ -115,13 +115,16 @@ public class Scheduler {
         //if episode aired over 2 hours ago, delete message from announcements channel
         oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
             try {
-                bot.getClient().getMessageByID(airing.getMessageID()).delete();
+
                 airing.setMessageID("DELETED");
                 bot.getDatabaseManager().updateAiringMessage(airing);
+                bot.getClient().getMessageByID(airing.getMessageID()).delete();
 
                 System.out.println("Deleted announcement message for " + airing.getEpisodeInfo());
+
             } catch (Exception e) {
-                System.out.println("Error deleting announcement for " + airing.getEpisodeInfo());
+                System.out.println("Error deleting announcement message for " + airing.getEpisodeInfo());
+                System.out.println(e.toString());
             }
         });
     }
@@ -143,8 +146,7 @@ public class Scheduler {
     public void updateUserCount() {
         IGuild loungeGuild = bot.getClient().getGuildByID("192441520178200577");
         if (loungeGuild != null) {
-            List<IUser> users = loungeGuild.getUsers().stream().filter(u -> u.getPresence() != Presences.OFFLINE).collect(Collectors.toList());
-            bot.getConfigManager().setConfigValue("userCount", String.valueOf(users.size()));
+            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
         }
     }
 

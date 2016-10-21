@@ -38,6 +38,9 @@ public class TVBot {
     public static final String LOG_CHANNEL_ID = "217456105679224846";
     public static final String BOTLOG_CHANNEL_ID = "231499461740724224";
     public static final String STAFF_ROLE_ID = "227213155917496330";
+    public static final String ADMIN_ROLE_ID = "192441946210435072";
+    public static final String MOD_ROLE_ID = "192442068981776384";
+
 
 
     public static void main(String[] args) {
@@ -81,6 +84,7 @@ public class TVBot {
         registerCommand(new CommandAddChannel());
         registerCommand(new CommandDeleteChannel());
         registerCommand(new CommandTrigger());
+        registerCommand(new CommandPurge());
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
