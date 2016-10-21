@@ -55,6 +55,7 @@ public class CommandPurge implements Command {
                         .collect(Collectors.toList());
 
                 Util.bulkDelete(message.getChannel(), toDelete);
+                Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userToDelete.getDisplayName(guild) + "'s messages have been pruned in " + message.getChannel().getName() + ".\n- " + message.getAuthor().getDisplayName(guild) + "```");
 
             } else { //this is a purge - delete all
                 if (userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
@@ -65,6 +66,7 @@ public class CommandPurge implements Command {
                             .collect(Collectors.toList());
 
                     Util.bulkDelete(message.getChannel(), toDelete);
+                    Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + numberArg + " messages have been purged in " + message.getChannel().getName() + ".\n- " + message.getAuthor().getDisplayName(guild) + "```");
 
                 } else {
                     Util.sendMessage(message.getChannel(), "No permission, please specify a user.");
