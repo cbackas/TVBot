@@ -6,7 +6,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +40,6 @@ public class CommandDeleteChannel implements Command {
 
     @Override
     public boolean isLogged() {
-        return false;
+        return true;
     }
 }
