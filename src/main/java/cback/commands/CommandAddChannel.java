@@ -23,7 +23,7 @@ public class CommandAddChannel implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("192441946210435072")) | message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("236988571330805760"))) {
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) | message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.DEV_ROLE_ID))) {
             String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
             try {
                 guild.createChannel(channelName);

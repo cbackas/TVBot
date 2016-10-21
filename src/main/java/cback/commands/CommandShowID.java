@@ -24,7 +24,7 @@ public class CommandShowID implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("236988571330805760")) || message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("192441946210435072"))) {
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.DEV_ROLE_ID))) {
             if (args.length >= 1) {
                 String showName = Arrays.stream(args).collect(Collectors.joining(" "));
                 if (showName.equalsIgnoreCase("here")) {

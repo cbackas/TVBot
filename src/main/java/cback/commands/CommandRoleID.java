@@ -23,7 +23,7 @@ public class CommandRoleID implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getID().equals("73416411443113984")) {
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.DEV_ROLE_ID))) {
             if (args.length == 1) {
                 String roleName = args[0];
                 List<IRole> serverRoles = guild.getRoles();

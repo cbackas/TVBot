@@ -27,8 +27,7 @@ public class CommandUnmute implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
-            //trial mod - mod - admin
-            if (userRoles.contains(guild.getRoleByID("228231762113855489")) || userRoles.contains(guild.getRoleByID("192442068981776384")) || userRoles.contains(guild.getRoleByID("192441946210435072"))) {
+            if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) {
                 if (args.length == 1) {
                     String user = args[0];
                     Pattern pattern = Pattern.compile("^<@!?(\\d+)>");

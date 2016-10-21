@@ -41,6 +41,9 @@ public class TVBot {
     public static final String STAFF_ROLE_ID = "227213155917496330";
     public static final String ADMIN_ROLE_ID = "192441946210435072";
     public static final String MOD_ROLE_ID = "192442068981776384";
+    public static final String DEV_ROLE_ID = "236988571330805760";
+    public static final String MOVIENIGHT_ROLE_ID = "226443478664609792";
+    public static final String TRIALMOD_ROLE_ID = "228231762113855489";
 
 
 

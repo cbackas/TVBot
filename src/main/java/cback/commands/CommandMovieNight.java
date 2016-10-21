@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +30,9 @@ public class CommandMovieNight implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         ConfigManager configManager = bot.getConfigManager();
         String text = message.getContent();
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID("226443478664609792")) || message.getAuthor().getID().equals("73416411443113984")) {
+        IUser author = message.getAuthor();
+        List<IRole> roles = author.getRolesForGuild(guild);
+        if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || roles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID)) || roles.contains(TVBot.DEV_ROLE_ID)) {
             Pattern patternOption = Pattern.compile("^!movienight (set|announce|start) (.+)");
             Matcher matcherOption = patternOption.matcher(text);
             if (matcherOption.find()) {

@@ -114,7 +114,7 @@ public class CommandHelp implements Command {
         if (roles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) { //Staff Check
             finalHelp = userCommands + "\n!rule [number]                         //posts the rule requested in chat";
         }
-        if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
+        if (roles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID))) { //Movienight Check
             finalHelp = finalHelp + movieCommands;
         }
         if (roles.contains(guild.getRoleByID("228231762113855489"))) { //Trialmod Check
@@ -123,7 +123,7 @@ public class CommandHelp implements Command {
         if (roles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) { //Mod Check
             finalHelp = finalHelp + modCommands;
         }
-        if (roles.contains(guild.getRoleByID("236988571330805760"))) { //Dev Check
+        if (roles.contains(guild.getRoleByID(TVBot.DEV_ROLE_ID))) { //Dev Check
             finalHelp = finalHelp + devCommands;
         }
         if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) { //Admin Check

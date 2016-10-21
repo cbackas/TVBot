@@ -25,8 +25,8 @@ public class CommandAddLog implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             if (args.length >= 1) {
-                try {
-                    PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
+                List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
+                if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) {
                     String text = message.getContent().split(" ", 2)[1];
                     List<IChannel> mentionsC = message.getChannelMentions();
                     List<IUser> mentionsU = message.getMentions();
@@ -47,7 +47,7 @@ public class CommandAddLog implements Command {
                     Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
                     Util.sendMessage(message.getChannel(), "Log added.");
                     Util.deleteMessage(message);
-                } catch (Exception e) {
+                } else {
                     Util.sendMessage(message.getChannel(), "You don't have permission to add logs.");
                 }
             } else {
