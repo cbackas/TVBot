@@ -120,13 +120,13 @@ public class CommandHelp implements Command {
         if (roles.contains(guild.getRoleByID("228231762113855489"))) { //Trialmod Check
             finalHelp = finalHelp + trialmodCommands;
         }
-        if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
+        if (roles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) { //Mod Check
             finalHelp = finalHelp + modCommands;
         }
         if (roles.contains(guild.getRoleByID("236988571330805760"))) { //Dev Check
             finalHelp = finalHelp + devCommands;
         }
-        if (roles.contains(guild.getRoleByID("192441946210435072"))) { //Admin Check
+        if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) { //Admin Check
             finalHelp = finalHelp + adminCommands;
         }
         try {

@@ -32,9 +32,8 @@ public class CommandDeleteChannel implements Command {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
-
+            Util.deleteMessage(message);
         }
     }
 
