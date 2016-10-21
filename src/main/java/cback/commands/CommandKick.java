@@ -43,7 +43,7 @@ public class CommandKick implements Command {
                         } else {
                             try {
                                 guild.kickUser(user);
-                                Util.sendMessage(logChannel, "```Kicked " + user.getDisplayName(guild) + " for " + reason + "\n- " + mod.getDisplayName(guild) + "```");
+                                Util.sendMessage(logChannel, "```Kicked " + user.getDisplayName(guild) + " for " + reason + ".\n- " + mod.getDisplayName(guild) + "```");
                                 Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been kicked. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info");
                             } catch (Exception e) {
                                 e.printStackTrace();

@@ -52,6 +52,8 @@ public class CommandHelp implements Command {
                 "\n------------------------------------------------------------------\n" +
                         "!addlog [message]                      //adds a message to the log\n" +
                         "     aliases: !log\n" +
+                        "!prune @user [#]                       //deletes a number of messages by a user\n" +
+                        "     aliases: !purge\n" +
                         "!mute @user [reason?]                  //mutes user\n" +
                         "!unmute @user                          //unmutes user\n" +
                         "!ban @user [reason?]                   //bans user and logs the action";
@@ -73,6 +75,9 @@ public class CommandHelp implements Command {
                         "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                         "!addchannel [channel name]             //creates a new channel with the given name\n" +
                         "     aliases: !newchannel\n" +
+                        "!prune @user [#]                       //deletes a number of messages by a user\n" +
+                        "     exclude user to purge all user's messages\n" +
+                        "     aliases: !purge\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!announce [announcement]               //sends a public announcement\n" +
                         "!aunmute @user                         //unmutes user without log";
@@ -85,6 +90,9 @@ public class CommandHelp implements Command {
                         "!announce [announcement]               //sends a public announcement\n" +
                         "!addchannel [channel name]             //creates a new channel with the given name\n" +
                         "     aliases: !newchannel\n" +
+                        "!prune @user [#]                       //deletes a number of messages by a user\n" +
+                        "     exclude user to purge all user's messages\n" +
+                        "     aliases: !purge\n" +
                         "!amute @user                           //mutes user without log\n" +
                         "!aunmute @user                         //unmutes user without log\n" +
                         "!addlog [message]                      //adds a message to the log\n" +
@@ -109,7 +117,7 @@ public class CommandHelp implements Command {
         if (roles.contains(guild.getRoleByID("226443478664609792"))) { //Movienight Check
             finalHelp = finalHelp + movieCommands;
         }
-        if (roles.contains(guild.getRoleByID("228231762113855489"))) {
+        if (roles.contains(guild.getRoleByID("228231762113855489"))) { //Trialmod Check
             finalHelp = finalHelp + trialmodCommands;
         }
         if (roles.contains(guild.getRoleByID("192442068981776384"))) { //Mod Check
@@ -118,10 +126,7 @@ public class CommandHelp implements Command {
         if (roles.contains(guild.getRoleByID("236988571330805760"))) { //Dev Check
             finalHelp = finalHelp + devCommands;
         }
-        if (message.getAuthor().getID().equals("148279556619370496")) { //Zock Check
-            finalHelp = finalHelp + zockCommands;
-        }
-        if (roles.contains(guild.getRoleByID("192441946210435072")) && !message.getAuthor().getID().equals("148279556619370496")) { //Admin Check
+        if (roles.contains(guild.getRoleByID("192441946210435072"))) { //Admin Check
             finalHelp = finalHelp + adminCommands;
         }
         try {
