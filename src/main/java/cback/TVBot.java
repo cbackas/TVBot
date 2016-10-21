@@ -4,6 +4,7 @@ import cback.eventFunctions.ChannelChange;
 import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
+import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -61,30 +62,7 @@ public class TVBot {
         traktManager = new TraktManager(this);
         scheduler = new Scheduler(this);
 
-        registerCommand(new CommandHelp());
-        registerCommand(new CommandLenny());
-        registerCommand(new CommandShrug());
-        registerCommand(new CommandGoodnight());
-        registerCommand(new CommandAddShow());
-        registerCommand(new CommandRemoveShow());
-        registerCommand(new CommandAnnounce());
-        registerCommand(new CommandAddLog());
-        registerCommand(new CommandMovieNight());
-        registerCommand(new CommandMute());
-        registerCommand(new CommandUnmute());
-        registerCommand(new CommandAMute());
-        registerCommand(new CommandAUnmute());
-        registerCommand(new CommandRoleID());
-        registerCommand(new CommandBan());
-        registerCommand(new CommandKick());
-        registerCommand(new CommandRule());
-        registerCommand(new CommandSuggest());
-        registerCommand(new CommandSearch());
-        registerCommand(new CommandShowID());
-        registerCommand(new CommandAddChannel());
-        registerCommand(new CommandDeleteChannel());
-        registerCommand(new CommandTrigger());
-        registerCommand(new CommandPurge());
+        registerAllCommands();
 
         botAdmins.add("109109946565537792");
         botAdmins.add("148279556619370496");
@@ -130,7 +108,7 @@ public class TVBot {
             String baseCommand = matcher.group(1).toLowerCase();
             Optional<Command> command = registeredCommands.stream()
                     .filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && com.getAliases().contains(baseCommand)))
-                    .findFirst();
+                    .findAny();
             if (command.isPresent()) {
                 System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
@@ -193,11 +171,25 @@ public class TVBot {
         return botAdmins;
     }
 
-    private void registerCommand(Command command) {
-        if (!registeredCommands.contains(command)) {
-            registeredCommands.add(command);
-            System.out.println("Registered command: " + command.getName());
-        }
+    private void registerAllCommands() {
+        new Reflections("cback").getSubTypesOf(Command.class).forEach(commandImpl -> {
+            try {
+                Command command = commandImpl.newInstance();
+                Optional<Command> existingCommand = registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();
+                if (!existingCommand.isPresent()) {
+                    registeredCommands.add(command);
+                    System.out.println("Registered command: " + command.getName());
+                } else {
+                    System.out.println("Attempted to register two commands with the same name: " + existingCommand.get().getName());
+                    System.out.println("Existing: " + existingCommand.get().getClass().getName());
+                    System.out.println("Attempted: " + commandImpl.getName());
+                }
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }
