@@ -36,10 +36,13 @@ public class DatabaseManager {
 
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS airing (episode_id TEXT PRIMARY KEY, show_id TEXT, time INT, episode_info TEXT, message_id TEXT);");
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS showdata (show_id TEXT PRIMARY KEY, show_name TEXT, channel_id TEXT);");
+            //statement.executeUpdate("CREATE TABLE IF NOT EXISTS xpdata (user_id TEXT PRIMARY KEY, message_count INT");
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
+
+
 
     public Show getShow(String showID) {
         try {
