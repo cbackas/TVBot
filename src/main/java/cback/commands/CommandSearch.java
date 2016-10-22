@@ -5,6 +5,7 @@ import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Status;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -38,6 +39,17 @@ public class CommandSearch implements Command {
             String runtime = Integer.toString(showData.runtime);
             String country = showData.country + " - " + showData.language;
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">";
+            List<IChannel> channels = guild.getChannels();
+            String channelName = showName.replaceAll(" ", "-");
+            if (channels.isEmpty()) {
+                System.out.println("channels is empty");
+            } else {
+                try {
+                    title += " " + guild.getChannelsByName(channelName).get(0).mention();
+                } catch (Exception ignored) {
+                    title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
+                }
+            }
             Util.sendMessage(message.getChannel(),
                     title + "\n" +
                             overview + "\n" +
