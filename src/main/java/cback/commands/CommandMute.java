@@ -30,7 +30,7 @@ public class CommandMute implements Command {
             if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) {
                 if (args.length >= 1) {
                     String text = message.getContent();
-                    Pattern pattern = Pattern.compile("^!mute <@(.+)> ?(.+)?");
+                    Pattern pattern = Pattern.compile("^!mute <@!?(\\d+)> ?(.+)?");
                     Matcher matcher = pattern.matcher(text);
                     if (matcher.find()) {
                         String u = matcher.group(1);

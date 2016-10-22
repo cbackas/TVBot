@@ -31,7 +31,7 @@ public class CommandBan implements Command {
             IChannel logChannel = guild.getChannelByID("217456105679224846");
             try {
                 PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.BAN));
-                Pattern pattern = Pattern.compile("^!ban <@(.+)> ?(.+)?");
+                Pattern pattern = Pattern.compile("^!ban <@!?(\\d+)> ?(.+)?");
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {
                     String userInput = matcher.group(1);

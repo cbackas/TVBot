@@ -31,7 +31,7 @@ public class CommandKick implements Command {
             IChannel logChannel = guild.getChannelByID("217456105679224846");
             try {
                 PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.KICK));
-                Pattern pattern = Pattern.compile("^!kick <@(.+)> ?(.+)?");
+                Pattern pattern = Pattern.compile("^!kick <@!?(\\d+)> ?(.+)?");
                 Matcher matcher = pattern.matcher(text);
                 if (matcher.find()) {
                     String userInput = matcher.group(1);
