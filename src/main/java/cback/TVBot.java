@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class TVBot {
+
+    private static TVBot instance;
     private IDiscordClient client;
 
     private DatabaseManager databaseManager;
@@ -52,6 +54,8 @@ public class TVBot {
     }
 
     public TVBot() {
+
+        instance = this;
 
         //instantiate config manager first as connect() relies on tokens
         configManager = new ConfigManager(this);
@@ -193,6 +197,10 @@ public class TVBot {
                 e.printStackTrace();
             }
         });
+    }
+
+    public static TVBot getInstance() {
+        return instance;
     }
 
 }
