@@ -39,7 +39,7 @@ public class CommandMovieNight implements Command {
             if (matcherOption.find()) {
                 String option = matcherOption.group(1);
                 if (option.equalsIgnoreCase("set")) {
-                    Pattern patternSet = Pattern.compile("^!set (\\w+) (.+)");
+                    Pattern patternSet = Pattern.compile("^set (\\w+) (.+)");
                     Matcher matcherSet = patternSet.matcher(text);
                     if (matcherSet.find()) {
                         String poll = "<https://goo.gl/forms/" + matcherSet.group(1) + ">";
@@ -58,7 +58,7 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 } else if (option.equalsIgnoreCase("announce")) {
-                    Pattern patternAnnounce = Pattern.compile("^!announce (.+)");
+                    Pattern patternAnnounce = Pattern.compile("^announce (.+)");
                     Matcher matcherAnnounce = patternAnnounce.matcher(text);
                     if (matcherAnnounce.find()) {
                         String movie = matcherAnnounce.group(1);
@@ -75,7 +75,7 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 } else if (option.equalsIgnoreCase("start")) {
-                    Pattern patternStart = Pattern.compile("^!start (.+)");
+                    Pattern patternStart = Pattern.compile("^start (.+)");
                     Matcher matcherStart = patternStart.matcher(text);
                     if (matcherStart.find()) {
                         String rabbit = "<https://rabb.it/" + matcherStart.group(1) + ">";
