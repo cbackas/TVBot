@@ -32,7 +32,7 @@ public class CommandMovieNight implements Command {
         ConfigManager configManager = bot.getConfigManager();
         IUser author = message.getAuthor();
         List<IRole> roles = author.getRolesForGuild(guild);
-        String text = Arrays.stream(args).collect(Collectors.joining("-"));
+        String text = Arrays.stream(args).collect(Collectors.joining(" "));
         if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || roles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID)) || roles.contains(TVBot.DEV_ROLE_ID)) {
             Pattern patternOption = Pattern.compile("^!(set|announce|start) (.+)");
             Matcher matcherOption = patternOption.matcher(text);
