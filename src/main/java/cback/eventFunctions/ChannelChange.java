@@ -9,10 +9,7 @@ import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.Arrays;
@@ -34,11 +31,12 @@ public class ChannelChange {
         IDiscordClient client = event.getClient();
         if (text.equalsIgnoreCase("!setmuteperm") && message.getAuthor().getID().equals("73416411443113984")) {
             List<IChannel> channelList = client.getGuildByID("192441520178200577").getChannels();
-            IRole muted = client.getRoleByID("231269949635559424");
+            IGuild guild = event.getClient().getGuildByID("192441520178200577");
+            IRole muted = guild.getRoleByID("239233306325942272");
             for (IChannel channels : channelList) {
                 RequestBuffer.request(() -> {
                     try {
-                        channels.overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
+                        channels.overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.EMBED_LINKS, Permissions.ATTACH_FILES));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -52,9 +50,12 @@ public class ChannelChange {
     @EventSubscriber //New Channel
     public void newChannel(ChannelCreateEvent event) {
         //Set muted role
-        IRole muted = event.getClient().getRoleByID("231269949635559424");
+        IGuild guild = event.getClient().getGuildByID("192441520178200577");
+        IRole muted = guild.getRoleByID("231269949635559424");
+        IRole embedMuted = guild.getRoleByID("239233306325942272");
         try {
             event.getChannel().overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class) ,EnumSet.of(Permissions.SEND_MESSAGES));
+            event.getChannel().overrideRolePermissions(embedMuted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.EMBED_LINKS, Permissions.ATTACH_FILES));
         } catch (Exception e) {
             e.printStackTrace();
         }

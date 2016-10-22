@@ -54,6 +54,8 @@ public class CommandHelp implements Command {
                     "     aliases: !purge\n" +
                     "!mute @user [reason?]                  //mutes user\n" +
                     "!unmute @user                          //unmutes user\n" +
+                    "!embedmute @user                       //removes users embed perms\n" +
+                    "!unembedmute @user                     //restores users embed perms\n" +
                     "!ban @user [reason?]                   //bans user and logs the action";
 
     static final String devCommands =
@@ -77,6 +79,9 @@ public class CommandHelp implements Command {
                     "!prune [#] @user                       //deletes a number of messages by a user\n" +
                     "     exclude user to purge all user's messages\n" +
                     "     aliases: !purge\n" +
+                    "!resetxp @user                         //resets a users message count\n" +
+                    "!embedmute @user                       //removes users embed perms\n" +
+                    "!unembedmute @user                     //restores users embed perms\n" +
                     "!amute @user                           //mutes user without log\n" +
                     "!aunmute @user                         //unmutes user without log\n" +
                     "!addlog [message]                      //adds a message to the log\n" +
