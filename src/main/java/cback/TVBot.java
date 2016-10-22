@@ -145,7 +145,7 @@ public class TVBot {
             }
         } else {
             //Increment message count if message was not a command
-
+            databaseManager.getXP().addXPUser(message.getAuthor().getID());
         }
 
         if (message.getMentions().contains(client.getOurUser())) {
