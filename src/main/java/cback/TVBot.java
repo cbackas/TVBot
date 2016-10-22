@@ -143,7 +143,11 @@ public class TVBot {
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
                 command.get().execute(this, client, argsArr, guild, message, isPrivate);
             }
+        } else {
+            //Increment message count if message was not a command
+
         }
+
         if (message.getMentions().contains(client.getOurUser())) {
             Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
         }
@@ -179,7 +183,7 @@ public class TVBot {
     }
 
     private void registerAllCommands() {
-        new Reflections("cback").getSubTypesOf(Command.class).forEach(commandImpl -> {
+        new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
             try {
                 Command command = commandImpl.newInstance();
                 Optional<Command> existingCommand = registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();

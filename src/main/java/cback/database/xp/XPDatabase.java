@@ -49,4 +49,29 @@ public class XPDatabase {
             e.printStackTrace();
         }
     }
+
+    public void addXP(String userID){
+        try {
+            if(getUserXP(userID) == null){
+                addXPUser(userID);
+            } else{
+                PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE xpdata SET message_count = message_count + 1 WHERE user_id = ?;");
+                statement.setString(1, userID);
+                statement.executeUpdate();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addXPUser(String userID){
+        try {
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("INSERT OR IGNORE INTO xpdata VALUES (?,?);");
+            statement.setString(1, userID);
+            statement.setInt(2, 1);
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
