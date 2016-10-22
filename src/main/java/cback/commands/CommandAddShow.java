@@ -44,7 +44,7 @@ public class CommandAddShow implements Command {
                     Util.sendMessage(message.getChannel(), "Netflix show detected - import aborted");
                     return;
                 }
-                bot.getDatabaseManager().insertShowData(imdbID, showName, channelID);
+                bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
                 Util.sendMessage(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
                 System.out.println("@" + message.getAuthor().getName() + " added show " + showName);
                 //Update airing data after new show added

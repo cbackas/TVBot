@@ -80,10 +80,10 @@ public class ChannelChange {
 
     @EventSubscriber
     public void onDeleteChannelEvent(ChannelDeleteEvent event) {
-        List<cback.database.Show> shows = bot.getDatabaseManager().getShowsByChannel(event.getChannel().getID());
+        List<cback.database.tv.Show> shows = bot.getDatabaseManager().getTV().getShowsByChannel(event.getChannel().getID());
         if (shows != null) {
             shows.forEach(show -> {
-                if (bot.getDatabaseManager().deleteShow(show.getShowID()) > 0) {
+                if (bot.getDatabaseManager().getTV().deleteShow(show.getShowID()) > 0) {
                     String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
                     System.out.println(message);
                     Util.sendMessage(bot.getClient().getChannelByID("231499461740724224"), message);

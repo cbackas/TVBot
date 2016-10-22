@@ -1,14 +1,15 @@
 package cback;
 
-import cback.database.Airing;
-import cback.database.Show;
-import sx.blah.discord.handle.obj.*;
+import cback.database.tv.Airing;
+import cback.database.tv.Show;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class Scheduler {
 
@@ -77,11 +78,11 @@ public class Scheduler {
      */
     public void processNewAirings(int currentTime) {
         //get next 30 shows airing
-        List<Airing> nextAirings = bot.getDatabaseManager().getNewAirings();
+        List<Airing> nextAirings = bot.getDatabaseManager().getTV().getNewAirings();
         //if it airs in next 11 minutes, send message and update in database
         nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
             try {
-                Show show = bot.getDatabaseManager().getShow(airing.getShowID());
+                Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
                 if (show != null) {
                     IChannel announceChannel = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID);
                     IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
@@ -91,14 +92,14 @@ public class Scheduler {
 
                     IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
                     airing.setMessageID(announceMessage.getID());
-                    bot.getDatabaseManager().updateAiringMessage(airing);
+                    bot.getDatabaseManager().getTV().updateAiringMessage(airing);
                     Util.sendBufferedMessage(globalChannel, message);
                     Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
 
                     System.out.println("Sent announcement for " + airing.getEpisodeInfo());
                 } else {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
-                    bot.getDatabaseManager().deleteAiring(airing.getEpisodeID());
+                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                 }
 
             } catch (Exception e) {
@@ -111,13 +112,13 @@ public class Scheduler {
      */
     public void processOldAirings(int currentTime) {
         //get last 30 shows alerted
-        List<Airing> oldAirings = bot.getDatabaseManager().getOldAirings();
+        List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
         //if episode aired over 2 hours ago, delete message from announcements channel
         oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
             try {
 
                 airing.setMessageID("DELETED");
-                bot.getDatabaseManager().updateAiringMessage(airing);
+                bot.getDatabaseManager().getTV().updateAiringMessage(airing);
                 bot.getClient().getMessageByID(airing.getMessageID()).delete();
 
                 System.out.println("Deleted announcement message for " + airing.getEpisodeInfo());
@@ -134,9 +135,9 @@ public class Scheduler {
      */
     public void pruneDeletedAirings() {
         //delete week old airings whose announcements were deleted
-        List<Airing> deletedAirings = bot.getDatabaseManager().getDeletedAirings();
+        List<Airing> deletedAirings = bot.getDatabaseManager().getTV().getDeletedAirings();
         deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= 604800).forEach(airing -> {
-            bot.getDatabaseManager().deleteAiring(airing.getEpisodeID());
+            bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
         });
     }
 

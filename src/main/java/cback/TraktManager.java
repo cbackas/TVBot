@@ -6,9 +6,7 @@ import com.uwetrottmann.trakt5.entities.SearchResult;
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Extended;
 import com.uwetrottmann.trakt5.enums.IdType;
-import com.uwetrottmann.trakt5.enums.TraktEnum;
 import com.uwetrottmann.trakt5.enums.Type;
-import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
@@ -46,7 +44,7 @@ public class TraktManager {
             Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 3).execute();
             if (response.isSuccessful()) {
                 List<CalendarShowEntry> shows = response.body();
-                List<String> desiredShows = bot.getDatabaseManager().getShowIDs();
+                List<String> desiredShows = bot.getDatabaseManager().getTV().getShowIDs();
                 for (CalendarShowEntry entry : shows) {
                     String id = entry.show.ids.imdb;
                     if (desiredShows.contains(id)) {
@@ -54,9 +52,9 @@ public class TraktManager {
                         int currentTime = Util.getCurrentTime();
                         String episodeID = String.valueOf(entry.episode.ids.trakt);
                         //don't add if already aired or if airing already in database
-                        if ((bot.getDatabaseManager().getAiring(episodeID) == null) && (airTime > currentTime)) {
+                        if ((bot.getDatabaseManager().getTV().getAiring(episodeID) == null) && (airTime > currentTime)) {
                             String episodeInfo = "S" + entry.episode.season + "E" + entry.episode.number + " - " + entry.episode.title;
-                            bot.getDatabaseManager().insertAiring(episodeID, id, airTime, episodeInfo, "NONE");
+                            bot.getDatabaseManager().getTV().insertAiring(episodeID, id, airTime, episodeInfo, "NONE");
                             System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - " + airTime);
                         }
                     }

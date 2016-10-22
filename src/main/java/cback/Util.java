@@ -18,7 +18,7 @@ public class Util {
 
     public static File botPath;
 
-    private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@(.+)>$");
+    private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@!?(\\d+)>$");
 
     static {
         try {
