@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CommandMovieNight implements Command {
     @Override
@@ -23,22 +24,22 @@ public class CommandMovieNight implements Command {
 
     @Override
     public List<String> getAliases() {
-        return null;
+        return Arrays.asList("mn");
     }
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         ConfigManager configManager = bot.getConfigManager();
-        String text = message.getContent();
         IUser author = message.getAuthor();
         List<IRole> roles = author.getRolesForGuild(guild);
+        String text = Arrays.stream(args).collect(Collectors.joining("-"));
         if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || roles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID)) || roles.contains(TVBot.DEV_ROLE_ID)) {
-            Pattern patternOption = Pattern.compile("^!movienight (set|announce|start) (.+)");
+            Pattern patternOption = Pattern.compile("^!(set|announce|start) (.+)");
             Matcher matcherOption = patternOption.matcher(text);
             if (matcherOption.find()) {
                 String option = matcherOption.group(1);
                 if (option.equalsIgnoreCase("set")) {
-                    Pattern patternSet = Pattern.compile("^!movienight set (\\w+) (.+)");
+                    Pattern patternSet = Pattern.compile("^!set (\\w+) (.+)");
                     Matcher matcherSet = patternSet.matcher(text);
                     if (matcherSet.find()) {
                         String poll = "<https://goo.gl/forms/" + matcherSet.group(1) + ">";
@@ -57,7 +58,7 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 } else if (option.equalsIgnoreCase("announce")) {
-                    Pattern patternAnnounce = Pattern.compile("^!movienight announce (.+)");
+                    Pattern patternAnnounce = Pattern.compile("^!announce (.+)");
                     Matcher matcherAnnounce = patternAnnounce.matcher(text);
                     if (matcherAnnounce.find()) {
                         String movie = matcherAnnounce.group(1);
@@ -74,7 +75,7 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 } else if (option.equalsIgnoreCase("start")) {
-                    Pattern patternStart = Pattern.compile("^!movienight start (.+)");
+                    Pattern patternStart = Pattern.compile("^!start (.+)");
                     Matcher matcherStart = patternStart.matcher(text);
                     if (matcherStart.find()) {
                         String rabbit = "<https://rabb.it/" + matcherStart.group(1) + ">";
