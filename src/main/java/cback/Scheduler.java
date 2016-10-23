@@ -117,15 +117,19 @@ public class Scheduler {
         oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
             try {
 
-                airing.setMessageID("DELETED");
-                bot.getDatabaseManager().getTV().updateAiringMessage(airing);
-                bot.getClient().getMessageByID(airing.getMessageID()).delete();
+                IMessage toDelete = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID).getMessageByID(airing.getMessageID());
+                if(toDelete == null)
+                    throw new NullPointerException("Message to delete was not found!");
+                Util.deleteBufferedMessage(toDelete);
 
                 System.out.println("Deleted announcement message for " + airing.getEpisodeInfo());
 
             } catch (Exception e) {
                 System.out.println("Error deleting announcement message for " + airing.getEpisodeInfo());
-                System.out.println(e.toString());
+                e.printStackTrace();
+            } finally {
+                airing.setMessageID("DELETED");
+                bot.getDatabaseManager().getTV().updateAiringMessage(airing);
             }
         });
     }
