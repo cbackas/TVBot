@@ -44,7 +44,7 @@ public class CommandBan implements Command {
                             try {
                                 guild.banUser(user, 1);
                                 Util.sendMessage(logChannel, "```Banned " + user.getDisplayName(guild) + " for " + reason + ".\n- " + mod.getDisplayName(guild) + "```");
-                                Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info");
+                                Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");

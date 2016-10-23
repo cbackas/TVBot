@@ -44,7 +44,7 @@ public class CommandMute implements Command {
                         } else {
                             try {
                                 userInput.addRole(guild.getRoleByID("231269949635559424"));
-                                Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted");
+                                Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
                                 List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
                                 mutedUsers.add(u);
                                 bot.getConfigManager().setConfigValue("muted", mutedUsers);
@@ -52,6 +52,8 @@ public class CommandMute implements Command {
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
+                                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandBan - check stacktrace");
                             }
                         }
                     }
