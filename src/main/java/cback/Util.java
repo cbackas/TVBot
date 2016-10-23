@@ -9,6 +9,8 @@ import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,6 +124,17 @@ public class Util {
             return TVBot.getInstance().getClient().getUserByID(matcher.group(1));
         }
         return null;
+    }
+
+    public static String to12Hour(String time) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
+            Date dateObj = sdf.parse(time);
+            return new SimpleDateFormat("K:mm").format(dateObj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return time;
     }
 
 }

@@ -45,7 +45,7 @@ public class CommandAddLog implements Command {
                         finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
                     }
                     Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
-                    Util.sendMessage(message.getChannel(), "Log added.");
+                    Util.sendMessage(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention());
                     Util.deleteMessage(message);
                 } else {
                     Util.sendMessage(message.getChannel(), "You don't have permission to add logs.");

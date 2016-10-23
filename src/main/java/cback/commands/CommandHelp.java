@@ -36,8 +36,8 @@ public class CommandHelp implements Command {
                     "!shrug                                 //shrugs\n" +
                     "!suggest [stuff]                       //pins your suggestion in #suggestion\n" +
                     "     aliases: !idea, !suggestion\n" +
-                    "!search [show name]                    //gives info about a show\n" +
-                    "     aliases: !lookup, !show";
+                    "!show [show name]                      //gives info about a show\n" +
+                    "!movie [movie name]                    //gives info about a movie";
 
     static final String trialmodCommands =
             "\n------------------------------------------------------------------\n" +
@@ -50,7 +50,7 @@ public class CommandHelp implements Command {
             "\n------------------------------------------------------------------\n" +
                     "!addlog [message]                      //adds a message to the log\n" +
                     "     aliases: !log\n" +
-                    "!prune [#] @user                         //deletes a number of messages by a user\n" +
+                    "!prune [#] @user                       //deletes a number of messages by a user\n" +
                     "     aliases: !purge\n" +
                     "!mute @user [reason?]                  //mutes user\n" +
                     "!unmute @user                          //unmutes user\n" +
@@ -77,7 +77,7 @@ public class CommandHelp implements Command {
                     "!addchannel [channel name]             //creates a new channel with the given name\n" +
                     "     aliases: !newchannel\n" +
                     "!prune [#] @user                       //deletes a number of messages by a user\n" +
-                    "     exclude user to purge all user's messages\n" +
+                    "     exclude user to purge all messages (admin only)\n" +
                     "     aliases: !purge\n" +
                     "!resetxp @user                         //resets a users message count\n" +
                     "!embedmute @user                       //removes users embed perms\n" +
@@ -88,8 +88,8 @@ public class CommandHelp implements Command {
                     "     aliases: !log\n" +
                     "!mute @user [reason?]                  //mutes user\n" +
                     "!unmute @user                          //unmutes user\n" +
-                    "!kick @user [reason]                  //kicks user and logs the action\n" +
-                    "!ban @user [reason]                   //bans user and logs the action";
+                    "!kick @user [reason]                   //kicks user and logs the action\n" +
+                    "!ban @user [reason]                    //bans user and logs the action";
 
     String movieCommands =
             "\n------------------------------------------------------------------\n" +

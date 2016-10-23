@@ -2,6 +2,7 @@ package cback;
 
 import com.uwetrottmann.trakt5.TraktV2;
 import com.uwetrottmann.trakt5.entities.CalendarShowEntry;
+import com.uwetrottmann.trakt5.entities.Movie;
 import com.uwetrottmann.trakt5.entities.SearchResult;
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Extended;
@@ -127,8 +128,25 @@ public class TraktManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Util.sendPrivateMessage(bot.getClient().getUserByID("73416411443113984"), "Couldn't find " + showName);
+            Util.sendPrivateMessage(bot.getClient().getUserByID("73416411443113984"), "Couldn't find show: " + showName);
         }
         return null;
     }
+
+    public Movie movieSummaryFromName(String movieName) {
+        try {
+            Response<List<SearchResult>> search = trakt.search().textQuery(movieName, Type.MOVIE, null, 1, 1).execute();
+            if (search.isSuccessful() && !search.body().isEmpty()) {
+                Response<Movie> movie = trakt.movies().summary(search.body().get(0).movie.ids.imdb, Extended.FULL).execute();
+                if (movie.isSuccessful()) {
+                    return movie.body();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Util.sendPrivateMessage(bot.getClient().getUserByID("73416411443113984"), "Couldn't find movie: " + movieName);
+        }
+        return null;
+    }
+
 }

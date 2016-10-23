@@ -15,15 +15,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommandSearch implements Command {
+public class CommandShow implements Command {
     @Override
     public String getName() {
-        return "search";
+        return "show";
     }
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("lookup", "show");
+        return null;
     }
 
     @Override
@@ -34,22 +34,19 @@ public class CommandSearch implements Command {
             String title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
             String overview = showData.overview;
             String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
-                    ? showData.airs.day + " at " + to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
+                    ? showData.airs.day + " at " + Util.to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
             String premier = new SimpleDateFormat("MMM dd, yyyy").format(showData.first_aired.toDate());
             String runtime = Integer.toString(showData.runtime);
             String country = showData.country + " - " + showData.language;
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">";
-            List<IChannel> channels = guild.getChannels();
+
             String channelName = showName.replaceAll(" ", "-");
-            if (channels.isEmpty()) {
-                System.out.println("channels is empty");
-            } else {
-                try {
-                    title += " " + guild.getChannelsByName(channelName).get(0).mention();
-                } catch (Exception ignored) {
-                    title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
-                }
+            try {
+                title += " " + guild.getChannelByID(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID());
+            } catch (Exception ignored) {
+                title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
             }
+
             Util.sendMessage(message.getChannel(),
                     title + "\n" +
                             overview + "\n" +
@@ -71,15 +68,5 @@ public class CommandSearch implements Command {
         return false;
     }
 
-    public static String to12Hour(String time) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
-            Date dateObj = sdf.parse(time);
-            return new SimpleDateFormat("K:mm").format(dateObj);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return time;
-    }
 }
 
