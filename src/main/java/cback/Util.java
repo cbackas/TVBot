@@ -10,6 +10,8 @@ import sx.blah.discord.util.RequestBuffer;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -135,6 +137,15 @@ public class Util {
             e.printStackTrace();
         }
         return time;
+    }
+
+    public static String formatDate(LocalDate dateObject) {
+        try {
+            return new SimpleDateFormat("MMM dd, yyyy").format(dateObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "error";
     }
 
 }

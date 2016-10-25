@@ -25,7 +25,7 @@ public class CommandInfo implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String serverName = guild.getName();
-        String creationDate = new SimpleDateFormat("MMM dd, yyyy").format(guild.getCreationDate());
+        String creationDate = Util.formatDate(guild.getCreationDate().toLocalDate());
         int userCount = guild.getUsers().size();
         int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int newCount = userCount - oldUserCount;
