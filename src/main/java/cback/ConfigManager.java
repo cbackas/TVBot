@@ -22,11 +22,11 @@ public class ConfigManager {
         //Insert all default config values here. They will be added on startup if they do not exist.
         defaultConfig.put("botToken", "TOKEN");
         defaultConfig.put("traktToken", "TOKEN");
-        defaultConfig.put("pollID", "POLLID");
         defaultConfig.put("date", "movienight date/time");
         defaultConfig.put("mnID", "movienight announce messageID");
         defaultConfig.put("userCount", "0");
         defaultConfig.put("muted", new ArrayList<String>());
+        defaultConfig.put("permanentchannels", new ArrayList<String>());
     }
 
     public ConfigManager(TVBot bot) {
