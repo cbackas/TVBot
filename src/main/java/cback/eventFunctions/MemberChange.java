@@ -23,7 +23,7 @@ public class MemberChange {
     public void memberJoin(UserJoinEvent event) {
         IGuild server = event.getGuild();
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " joined the server. " + user.mention());
+        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " joined the server. " + user.mention() + " ⬅️️");
 
         //Bot Check
         if (event.getUser().isBot()) {
@@ -68,7 +68,7 @@ public class MemberChange {
     @EventSubscriber
     public void memberLeave(UserLeaveEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " left the server. " + user.mention());
+        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " left the server. " + user.mention() + " \uD83D\uDC4B");
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             Util.sendMessage(event.getGuild().getChannelByID("192444648545845248"), user + " is muted and left the server. Their mute will be applied again when/if they return.");
         }
