@@ -40,7 +40,6 @@ public class CommandShow implements Command {
             String country = showData.country + " - " + showData.language;
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">";
 
-            String channelName = showName.replaceAll(" ", "-");
             try {
                 title += " " + guild.getChannelByID(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID());
             } catch (Exception ignored) {

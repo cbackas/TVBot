@@ -123,7 +123,7 @@ public class TVBot {
                 if (!isPrivate && command.get().isLogged()) {
                     List<IUser> mentionsU = message.getMentions();
                     List<IRole> mentionsG = message.getRoleMentions();
-                    String finalText = "@" + message.getAuthor().getName() + " issued \"" + text + "\" in " + message.getChannel().mention();
+                    String finalText = "@" + message.getAuthor().getDisplayName(guild) + " issued \"" + text + "\" in " + message.getChannel().mention();
                     if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
                         Util.sendMessage(client.getChannelByID(BOTLOG_CHANNEL_ID), finalText);
                     } else {
