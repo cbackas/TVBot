@@ -29,8 +29,7 @@ public class CommandPerson implements Command {
         Person personData = bot.getTraktManager().personSummaryFromName(personName);
         if (personData != null) {
             String name = "**" + personData.name + "**";
-            String overview = personData.biography;
-            String homepage = "<https://imdb.com/name/" + personData.ids.imdb + ">";
+            String homepage = "<http://www.imdb.com/name/" + personData.ids.imdb + ">";
             String birthPlace = personData.birthplace;
 
             String dates = new SimpleDateFormat("MMM dd, yyyy").format(personData.birthday.toDate());
@@ -39,17 +38,25 @@ public class CommandPerson implements Command {
                 dates += "\nDIED: " + deathDate;
             }
 
+            String overview = personData.biography;
+            String [] arr = overview.split("\\s+");
+            String nWords = "";
+
+            for(int i = 0; i < 100 ; i++){
+                nWords = nWords + " " + arr[i];
+            }
+
 
             Util.sendMessage(message.getChannel(),
                     name + "\n" +
-                            overview + "\n" +
+                            nWords + "...\n" +
                             homepage + "\n" +
                             "```\n" +
                             "BORN: " + birthPlace + "\n" +
                             "BIRTHPLACE: " + dates + "\n" +
                             "```\n");
         } else {
-            Util.sendMessage(message.getChannel(), "Error: Show not found");
+            Util.sendMessage(message.getChannel(), "Error: Person not found.");
         }
     }
 
