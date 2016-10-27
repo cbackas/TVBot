@@ -1,14 +1,12 @@
 package cback;
 
 import com.uwetrottmann.trakt5.TraktV2;
-import com.uwetrottmann.trakt5.entities.CalendarShowEntry;
-import com.uwetrottmann.trakt5.entities.Movie;
-import com.uwetrottmann.trakt5.entities.SearchResult;
-import com.uwetrottmann.trakt5.entities.Show;
+import com.uwetrottmann.trakt5.entities.*;
 import com.uwetrottmann.trakt5.enums.Extended;
 import com.uwetrottmann.trakt5.enums.IdType;
 import com.uwetrottmann.trakt5.enums.Type;
 import retrofit2.Response;
+import sun.font.CreatedFontTracker;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -145,6 +143,21 @@ public class TraktManager {
         } catch (Exception e) {
             e.printStackTrace();
             Util.sendPrivateMessage(bot.getClient().getUserByID("73416411443113984"), "Couldn't find movie: " + movieName);
+        }
+        return null;
+    }
+
+    public Person personSummaryFromName(String personName) {
+        try {
+            Response<List<SearchResult>> search = trakt.search().textQuery(personName, Type.PERSON, null, 1, 1).execute();
+            if (search.isSuccessful() && !search.body().isEmpty()) {
+                Response<Person> person = trakt.people().summary(search.body().get(0).person.ids.imdb, Extended.FULL).execute();
+                if (person.isSuccessful()) {
+                    return person.body();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
