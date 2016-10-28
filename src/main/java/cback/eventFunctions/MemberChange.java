@@ -4,12 +4,14 @@ import cback.TVBot;
 import cback.Util;
 import sun.awt.image.URLImageSource;
 import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.UserBanEvent;
 import sx.blah.discord.handle.impl.events.UserJoinEvent;
 import sx.blah.discord.handle.impl.events.UserLeaveEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.net.URL;
+import java.util.List;
 
 public class MemberChange {
     private String logChannel = "217450005462646794";
@@ -23,7 +25,7 @@ public class MemberChange {
     public void memberJoin(UserJoinEvent event) {
         IGuild server = event.getGuild();
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " **joined** the server. " + user.mention() + " ⬅️️");
+        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " **joined** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("greenarrow"));
 
         //Bot Check
         if (event.getUser().isBot()) {
@@ -68,9 +70,20 @@ public class MemberChange {
     @EventSubscriber
     public void memberLeave(UserLeaveEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " **left** the server. " + user.mention() + " \uD83D\uDC4B");
+        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " **left** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("redarrow"));
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             Util.sendMessage(event.getGuild().getChannelByID("192444648545845248"), user + " is muted and left the server. Their mute will be applied again when/if they return.");
+        }
+    }
+
+    @EventSubscriber
+    public void memberBanned(UserBanEvent event) {
+        IUser user = event.getUser();
+        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " was **banned**. " + user.mention() + " \uD83D\uDC4B");
+        if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
+            List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
+            mutedUsers.remove(user.getID());
+            bot.getConfigManager().setConfigValue("muted", mutedUsers);
         }
     }
 }
