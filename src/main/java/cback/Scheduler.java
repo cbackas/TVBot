@@ -69,6 +69,7 @@ public class Scheduler {
         exec.scheduleAtFixedRate(() -> {
 
             updateUserCount();
+            updateTechronian();
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
     }
@@ -153,6 +154,13 @@ public class Scheduler {
         if (loungeGuild != null) {
             bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
         }
+    }
+
+    /**
+     * Clear Techronian's meme count
+     */
+    public void updateTechronian() {
+        bot.getConfigManager().setConfigValue("Techronian", "nope");
     }
 
     /**

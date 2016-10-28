@@ -145,10 +145,33 @@ public class TVBot {
         } else {
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getID());
-        }
 
-        if (message.getMentions().contains(client.getOurUser())) {
-            Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
+            //Check for mentions
+            if (message.getMentions().contains(client.getOurUser())) {
+                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
+            }
+
+            //Check for discord invite link
+            String lowerCase = message.getContent().toLowerCase();
+            if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
+                Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
+                Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " might have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
+            }
+
+            //Check on Techronian
+            if (lowerCase.contains("ha eleven")) {
+                String hasHe = getConfigManager().getConfigValue("Techronian");
+                if (hasHe.equalsIgnoreCase("yep")) {
+                    try {
+                        guild.banUser(message.getAuthor());
+                        Util.sendMessage(message.getChannel(), "Techronian was banned for meming too badly");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (hasHe.equalsIgnoreCase("nope")) {
+                    Util.sendMessage(message.getChannel(), "That's your meme for the day, Techronian. Be careful bud.");
+                }
+            }
         }
     }
 
