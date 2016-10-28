@@ -160,16 +160,18 @@ public class TVBot {
 
             //Check on Techronian
             if (lowerCase.contains("ha eleven")) {
-                String hasHe = getConfigManager().getConfigValue("Techronian");
-                if (hasHe.equalsIgnoreCase("yep")) {
-                    try {
-                        guild.banUser(message.getAuthor());
-                        Util.sendMessage(message.getChannel(), "Techronian was banned for meming too badly");
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                if (message.getAuthor().getID().equals("235872366490681344")) {
+                    String hasHe = getConfigManager().getConfigValue("Techronian");
+                    if (hasHe.equalsIgnoreCase("yep")) {
+                        try {
+                            guild.banUser(message.getAuthor());
+                            Util.sendMessage(message.getChannel(), "Techronian was banned for meming too badly");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (hasHe.equalsIgnoreCase("nope")) {
+                        Util.sendMessage(message.getChannel(), "That's your meme for the day, Techronian. Be careful bud.");
                     }
-                } else if (hasHe.equalsIgnoreCase("nope")) {
-                    Util.sendMessage(message.getChannel(), "That's your meme for the day, Techronian. Be careful bud.");
                 }
             }
         }
