@@ -170,6 +170,7 @@ public class TVBot {
                             e.printStackTrace();
                         }
                     } else if (hasHe.equalsIgnoreCase("nope")) {
+                        getConfigManager().setConfigValue("Techronian","yep");
                         Util.sendMessage(message.getChannel(), "That's your meme for the day, Techronian. Be careful bud.");
                     }
                 }

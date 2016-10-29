@@ -64,6 +64,7 @@ public class XPDatabase {
         }
     }
 
+
     public void addXPUser(String userID){
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("INSERT OR IGNORE INTO xpdata VALUES (?,?);");
