@@ -27,7 +27,7 @@ public class XPDatabase {
         }
     }
 
-    public UserXP getUserXP(String userID){
+    public UserXP getUserXP(String userID) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("SELECT * FROM xpdata WHERE user_id = ?;");
             statement.setString(1, userID);
@@ -44,7 +44,7 @@ public class XPDatabase {
         return null;
     }
 
-    public List<UserXP> getTopUsers(int maxUsers){
+    public List<UserXP> getTopUsers(int maxUsers) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("SELECT * FROM xpdata ORDER BY message_count DESC LIMIT ?;");
             statement.setInt(1, maxUsers);
@@ -60,7 +60,7 @@ public class XPDatabase {
         return null;
     }
 
-    public void updateUserXP(UserXP userXP){
+    public void updateUserXP(UserXP userXP) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE xpdata SET message_count = ? WHERE user_id = ?;");
             statement.setInt(1, userXP.getMessageCount());
@@ -71,18 +71,32 @@ public class XPDatabase {
         }
     }
 
-    public void addXP(String userID){
+    public void addXP(String userID, int amount) {
         try {
             getUserXP(userID); //call getUserXP to ensure user exists
-            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE xpdata SET message_count = message_count + 1 WHERE user_id = ?;");
-            statement.setString(1, userID);
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE xpdata SET message_count = message_count + ? WHERE user_id = ?;");
+            statement.setInt(1, amount);
+            statement.setString(2, userID);
             statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void createXPUser(String userID){
+    public void removeXP(String userID, int amount) {
+        try {
+            UserXP user = getUserXP(userID); //call getUserXP to ensure user exists
+            if (user.getMessageCount() - amount < 0) amount = user.getMessageCount(); //set xp to 0 if goes to negative
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE xpdata SET message_count = message_count - ? WHERE user_id = ?;");
+            statement.setInt(1, amount);
+            statement.setString(2, userID);
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createXPUser(String userID) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("INSERT OR IGNORE INTO xpdata VALUES (?,?);");
             statement.setString(1, userID);

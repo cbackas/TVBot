@@ -144,7 +144,7 @@ public class TVBot {
             }
         } else {
             //Increment message count if message was not a command
-            databaseManager.getXP().addXP(message.getAuthor().getID());
+            databaseManager.getXP().addXP(message.getAuthor().getID(), 1);
 
             //Check for mentions
             if (message.getMentions().contains(client.getOurUser())) {
@@ -163,14 +163,10 @@ public class TVBot {
                 if (message.getAuthor().getID().equals("235872366490681344")) {
                     String hasHe = getConfigManager().getConfigValue("Techronian");
                     if (hasHe.equalsIgnoreCase("yep")) {
-                        try {
-                            guild.banUser(message.getAuthor());
-                            Util.sendMessage(message.getChannel(), "Techronian was banned for meming too badly");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        getDatabaseManager().getXP().removeXP(message.getAuthor().getID(), 50);
+                        Util.sendMessage(message.getChannel(), "Techronian memed too much. They lost 50xp");
                     } else if (hasHe.equalsIgnoreCase("nope")) {
-                        getConfigManager().setConfigValue("Techronian","yep");
+                        getConfigManager().setConfigValue("Techronian", "yep");
                         Util.sendMessage(message.getChannel(), "That's your meme for the day, Techronian. Be careful bud.");
                     }
                 }
@@ -197,7 +193,9 @@ public class TVBot {
         return traktManager;
     }
 
-    public ConfigManager getConfigManager() { return configManager; }
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
 
     public IDiscordClient getClient() {
         return client;
