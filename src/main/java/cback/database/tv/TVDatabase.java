@@ -17,7 +17,7 @@ public class TVDatabase {
         initTable();
     }
 
-    public void initTable() {
+    private void initTable() {
         try {
             Statement statement = dbManager.getConnection().createStatement();
 

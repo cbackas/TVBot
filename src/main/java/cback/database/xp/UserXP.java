@@ -11,7 +11,6 @@ public class UserXP {
 
     public UserXP(String userID, int messageCount) {
         this.userID = userID;
-        this.user = TVBot.getInstance().getClient().getUserByID(userID);
         this.messageCount = messageCount;
     }
 
@@ -20,6 +19,7 @@ public class UserXP {
     }
 
     public IUser getUser() {
+        if(user == null) user = TVBot.getInstance().getClient().getUserByID(userID);
         return user;
     }
 
