@@ -36,6 +36,7 @@ public class CommandMovieNight implements Command {
         if (arguments.equalsIgnoreCase("ping")) {
             IMessage announcement = guild.getMessageByID(configManager.getConfigValue("mnID"));
             Util.sendPrivateMessage(message.getAuthor(), announcement.getContent());
+            Util.deleteMessage(message);
         }
         if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || roles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID))) {
             Pattern patternOption = Pattern.compile("^(set|announce|start) (.+)");
