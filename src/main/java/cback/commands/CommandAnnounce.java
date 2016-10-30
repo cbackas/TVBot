@@ -25,10 +25,10 @@ public class CommandAnnounce implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
             if (args.length >= 1) {
-                String announcement = Arrays.stream(args).collect(Collectors.joining(" "));
                 Util.deleteMessage(message);
-                Util.sendMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
-                Util.sendMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
+
+                String announcement = Arrays.stream(args).collect(Collectors.joining(" "));
+                Util.sendAnnouncement(announcement);
             }
         }
     }

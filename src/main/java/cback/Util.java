@@ -1,6 +1,7 @@
 package cback;
 
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
@@ -99,6 +100,15 @@ public class Util {
         });
     }
 
+    public static void sendAnnouncement(String message) {
+        try {
+            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID), message);
+            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void sendPrivateMessage(IUser user, String message) {
         try {
             user.getClient().getOrCreatePMChannel(user).sendMessage(message);
@@ -128,6 +138,8 @@ public class Util {
         return null;
     }
 
+
+
     public static String to12Hour(String time) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
@@ -137,15 +149,6 @@ public class Util {
             e.printStackTrace();
         }
         return time;
-    }
-
-    public static String formatDate(LocalDate dateObject) {
-        try {
-            return new SimpleDateFormat("MMM dd, yyyy").format(dateObject);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "error";
     }
 
 }
