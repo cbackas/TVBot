@@ -8,6 +8,9 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,16 +28,18 @@ public class CommandInfo implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         String serverName = guild.getName();
-        String creationDate = Util.formatDate(guild.getCreationDate().toLocalDate());
         int userCount = guild.getUsers().size();
         int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int newCount = userCount - oldUserCount;
         int channelCount = guild.getChannels().size();
-        long botResponseTime = client.getResponseTime();
+
+        LocalDateTime creationDate = guild.getCreationDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+        String formattedDateTime = creationDate.format(formatter);
 
         String words =
                 "**" + serverName + "**" +
-                        "\n``Created " + creationDate + "``" +
+                        "\n``Created " + formattedDateTime + "``" +
                         "\n\n``Users:`` " + userCount +
                         "\n``New Users:`` " + newCount +
                         "\n``Channels:`` " + channelCount;

@@ -7,6 +7,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -18,13 +19,18 @@ public class CommandScoreboard implements Command {
 
     @Override
     public List<String> getAliases() {
-        return null;
+        return Arrays.asList("leaderboard", "topxp");
     }
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
 
-        List<UserXP> topUsers = bot.getDatabaseManager().getXP().getTopUsers(5);
+        int defaultCount = 5;
+        if (Integer.valueOf(args[0]) > 5 && Integer.valueOf(args[0]) <= 100) {
+            defaultCount = Integer.valueOf(args[0]);
+        }
+
+        List<UserXP> topUsers = bot.getDatabaseManager().getXP().getTopUsers(defaultCount);
         if (topUsers != null && topUsers.size() > 0) {
             StringBuilder scoreboard = new StringBuilder();
             scoreboard.append("**Most Active Lounge Users**\n");

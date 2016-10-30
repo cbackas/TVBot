@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.List;
 
 public class MemberChange {
-    private String logChannel = "217450005462646794";
+    private String memberLog = "217450005462646794";
     private TVBot bot;
 
     public MemberChange(TVBot bot) {
@@ -25,7 +25,7 @@ public class MemberChange {
     public void memberJoin(UserJoinEvent event) {
         IGuild server = event.getGuild();
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " **joined** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("greenarrow"));
+        Util.sendMessage(event.getClient().getChannelByID(memberLog), user.getName() + " **joined** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("greenarrow"));
 
         //Bot Check
         if (event.getUser().isBot()) {
@@ -70,7 +70,7 @@ public class MemberChange {
     @EventSubscriber
     public void memberLeave(UserLeaveEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " **left** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("redarrow"));
+        Util.sendMessage(event.getClient().getChannelByID(memberLog), user.getName() + " **left** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("redarrow"));
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             Util.sendMessage(event.getGuild().getChannelByID("192444648545845248"), user + " is muted and left the server. Their mute will be applied again when/if they return.");
         }
@@ -79,7 +79,7 @@ public class MemberChange {
     @EventSubscriber
     public void memberBanned(UserBanEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(logChannel), user.getName() + " was **banned**. " + user.mention() + " \uD83D\uDC4B");
+        Util.sendMessage(event.getClient().getChannelByID(memberLog), user.getName() + " was **banned**. " + user.mention() + " " + event.getGuild().getEmojiByName("hammer"));
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
             mutedUsers.remove(user.getID());

@@ -38,7 +38,9 @@ public class CommandHelp implements Command {
                     "!suggest [stuff]                       //pins your suggestion in #suggestion\n" +
                     "     aliases: !idea, !suggestion\n" +
                     "!show [show name]                      //gives info about a show\n" +
-                    "!movie [movie name]                    //gives info about a movie";
+                    "!movie [movie name]                    //gives info about a movie\n" +
+                    "!leaderboard                           //shows users with the top 5 xp\n" +
+                    "!movienight ping                       //sends movienight info in a pm";
 
     static final String staffCommands =
             "\n------------------------------staff------------------------------\n" +
@@ -52,7 +54,7 @@ public class CommandHelp implements Command {
                     "!unmute @user                          //unmutes user\n" +
                     "!embedmute @user                       //removes users embed perms\n" +
                     "!unembedmute @user                     //restores users embed perms\n" +
-                    "!ban @user [reason]                   //bans user and logs the action\n" +
+                    "!ban @user [reason]                    //bans user and logs the action\n" +
                     "\n------------------------------admin------------------------------\n" +
                     "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                     "!removeshow [imdbid]                   //deletes a show from the calendar\n" +

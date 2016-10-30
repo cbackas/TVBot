@@ -11,7 +11,6 @@ import sx.blah.discord.util.RequestBuffer;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommandAddPrivate implements Command {
     @Override
