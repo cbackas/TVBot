@@ -44,6 +44,22 @@ public class XPDatabase {
         return null;
     }
 
+    public int getUserRank(String userID) {
+        try {
+            PreparedStatement statement = dbManager.getConnection().prepareStatement(
+                    "SELECT COUNT(*) + 1 FROM (SELECT * FROM xpdata ORDER BY message_count DESC) WHERE message_count > (SELECT message_count FROM xpdata WHERE user_id = ?);"
+            );
+            statement.setString(1, userID);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public List<UserXP> getTopUsers(int maxUsers) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("SELECT * FROM xpdata ORDER BY message_count DESC LIMIT ?;");

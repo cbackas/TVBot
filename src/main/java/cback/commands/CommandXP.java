@@ -33,12 +33,12 @@ public class CommandXP implements Command {
         if (user != null) {
             UserXP xp = bot.getDatabaseManager().getXP().getUserXP(user.getID());
             if (xp != null) {
-                Util.sendMessage(message.getChannel(), "XP for " + user.getDisplayName(guild) + ": ``" + xp.getMessageCount() + "``");
+                Util.sendMessage(message.getChannel(), "**" + user.getDisplayName(guild) + "** ( Rank **#" + xp.getRank() + "** )\nXP: `" + xp.getMessageCount() + "`");
             } else {
                 Util.sendMessage(message.getChannel(), "No xp data found for " + user.getDisplayName(guild));
             }
         } else {
-            Util.sendMessage(message.getChannel(), "Invalid user \"" + args[0] + "\".");
+            Util.sendMessage(message.getChannel(), "Invalid user \"" + args[0] + "\". You must use an @mention");
         }
 
         Util.deleteMessage(message);
