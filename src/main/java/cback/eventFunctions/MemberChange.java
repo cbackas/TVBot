@@ -79,7 +79,7 @@ public class MemberChange {
     @EventSubscriber
     public void memberBanned(UserBanEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(memberLog), user.getName() + " was **banned**. " + user.mention() + " " + event.getGuild().getEmojiByName("hammer"));
+        Util.sendMessage(event.getClient().getChannelByID(memberLog), user.getName() + " was **banned**. " + user.mention() + " \uD83D\uDD28");
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
             mutedUsers.remove(user.getID());
