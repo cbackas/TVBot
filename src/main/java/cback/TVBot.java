@@ -4,6 +4,7 @@ import cback.eventFunctions.ChannelChange;
 import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
+import cback.eventFunctions.NicknameChange;
 import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -40,6 +41,9 @@ public class TVBot {
     public static final String GENERAL_CHANNEL_ID = "192441520178200577";
     public static final String LOG_CHANNEL_ID = "217456105679224846";
     public static final String BOTLOG_CHANNEL_ID = "231499461740724224";
+    public static final String MEMBERLOG_CHANNEL_ID = "217450005462646794";
+    public static final String DEV_CHANNEL_ID = "234045109908275201";
+
     public static final String STAFF_ROLE_ID = "227213155917496330";
     public static final String ADMIN_ROLE_ID = "192441946210435072";
     public static final String MOD_ROLE_ID = "192442068981776384";
@@ -63,6 +67,7 @@ public class TVBot {
         client.getDispatcher().registerListener(this);
         client.getDispatcher().registerListener(new ChannelChange(this));
         client.getDispatcher().registerListener(new MemberChange(this));
+        client.getDispatcher().registerListener(new NicknameChange());
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
