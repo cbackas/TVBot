@@ -26,9 +26,11 @@ public class CommandScoreboard implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
 
         int defaultCount = 5;
-        if (args.length == 1) {
-            if (Integer.parseInt(args[0]) > 5 && Integer.parseInt(args[0]) <= 30) {
+        if (args.length == 1 && Integer.parseInt(args[0]) > 5) {
+            if (Integer.parseInt(args[0]) <= 30) {
                 defaultCount = Integer.parseInt(args[0]);
+            } else {
+                defaultCount = 30;
             }
         }
 
