@@ -23,7 +23,7 @@ public class NicknameChange {
                 newName = event.getNewNickname().get();
             }
 
-            Util.sendMessage(guild.getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), event.getUser().mention() + "'s nickname changed from " + oldName + " to " + newName);
+            Util.sendMessage(guild.getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), event.getUser().mention() + "'s nickname changed from ``" + oldName + "`` to ``" + newName + "``");
         }
     }
 }
