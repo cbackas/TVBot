@@ -66,15 +66,17 @@ public class CommandSort implements Command {
 
             //apply new positions
             IntStream.range(0, allChannelsSorted.size()).forEach(position -> {
-                RequestBuffer.request(() -> {
-                    try {
-                        allChannelsSorted.get(position).changePosition(position);
-                    } catch (DiscordException e) {
-                        e.printStackTrace();
-                    } catch (MissingPermissionsException e) {
-                        e.printStackTrace();
-                    }
-                });
+                IChannel channel = allChannelsSorted.get(position);
+                if (!(channel.getPosition() == position)) //don't sort if position is already correct
+                    RequestBuffer.request(() -> {
+                        try {
+                            channel.changePosition(position);
+                        } catch (DiscordException e) {
+                            e.printStackTrace();
+                        } catch (MissingPermissionsException e) {
+                            e.printStackTrace();
+                        }
+                    });
             });
 
             Util.deleteMessage(message);
