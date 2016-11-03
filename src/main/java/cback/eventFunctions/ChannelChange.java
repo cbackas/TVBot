@@ -91,6 +91,12 @@ public class ChannelChange {
                 }
             });
         }
+
+        List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
+        if (permChannels.contains(event.getChannel().getID())) {
+            permChannels.remove(event.getChannel().getID());
+            bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
+        }
     }
 
 }

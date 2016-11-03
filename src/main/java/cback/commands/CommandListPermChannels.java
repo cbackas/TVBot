@@ -29,10 +29,10 @@ public class CommandListPermChannels implements Command {
             List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
             StringBuilder channelMentions = new StringBuilder();
             permChannels.forEach(id -> {
-
                 IChannel channel = guild.getChannelByID(id);
-
-                channelMentions.append("\n").append(channel.mention());
+                if (channel != null) {
+                    channelMentions.append("\n").append(channel.mention());
+                }
             });
 
             Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
