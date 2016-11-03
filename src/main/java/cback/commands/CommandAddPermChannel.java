@@ -30,18 +30,23 @@ public class CommandAddPermChannel implements Command {
 
             List<IChannel> channels = message.getChannelMentions();
             if (channels.size() >= 1) {
-                String channelMentions = "";
+                StringBuilder channelMentions = new StringBuilder();
 
                 for (IChannel c : channels) {
 
                     List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-                    permChannels.add(c.getID());
-                    bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
+                    if (!permChannels.contains(c.getID())) {
+                        permChannels.add(c.getID());
+                        bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
 
-                    channelMentions += " " + c.mention();
+                        channelMentions.append(" ").append(c.mention());
+                    } else {
+                        Util.sendMessage(message.getChannel(), c.mention() + " already exists.");
+                    }
+
                 }
 
-                Util.sendMessage(message.getChannel(), "Set " + channelMentions + " as permanent channel(s).");
+                Util.sendMessage(message.getChannel(), "Set " + channelMentions.toString() + " as permanent channel(s).");
             } else {
                 Util.sendMessage(message.getChannel(), "Channels not found.");
             }

@@ -27,15 +27,15 @@ public class CommandListPermChannels implements Command {
             Util.deleteMessage(message);
 
             List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-            String channelMentions = "";
-            for (String c : permChannels) {
+            StringBuilder channelMentions = new StringBuilder();
+            permChannels.forEach(id -> {
 
-                IChannel channel = guild.getChannelByID(c);
+                IChannel channel = guild.getChannelByID(id);
 
-                channelMentions += "\n" + channel.mention();
-            }
+                channelMentions.append("\n").append(channel.mention());
+            });
 
-            Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions);
+            Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
 
         }
     }

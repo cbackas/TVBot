@@ -28,7 +28,7 @@ public class CommandRemovePermChannel implements Command {
 
             List<IChannel> channels = message.getChannelMentions();
             if (channels.size() >= 1) {
-                String channelMentions = "";
+                StringBuilder channelMentions = new StringBuilder();
 
                 for (IChannel c : channels) {
 
@@ -36,14 +36,15 @@ public class CommandRemovePermChannel implements Command {
                     if (permChannels.contains(c.getID())) {
                         permChannels.remove(c.getID());
                         bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
+
+                        channelMentions.append(" ").append(c.mention());
                     } else {
                         Util.sendMessage(message.getChannel(), c.mention() + " was not a permanent channel.");
                     }
 
-                    channelMentions += " " + c.mention();
                 }
 
-                Util.sendMessage(message.getChannel(), "Removed " + channelMentions + " from permanent channel(s).");
+                Util.sendMessage(message.getChannel(), "Removed " + channelMentions.toString() + " from permanent channel(s).");
             } else {
                 Util.sendMessage(message.getChannel(), "Channels not found.");
             }
