@@ -65,7 +65,10 @@ public class CommandHelp implements Command {
                     "!resetxp @user                         //resets a users message count\n" +
                     "!amute @user                           //mutes user without log\n" +
                     "!aunmute @user                         //unmutes user without log\n" +
-                    "!kick @user [reason]                   //kicks user and logs the action";
+                    "!kick @user [reason]                   //kicks user and logs the action\n" +
+                    "!addpchannel [channel mentions]        //makes a channel not auto sort\n" +
+                    "!removepchannel [channel mentions]     //removes a channel from the unsort list\n" +
+                    "!listpchannels                         //lists all unsortable channels";
 
     static final String movieCommands =
             "\n------------------------------------------------------------------\n" +
