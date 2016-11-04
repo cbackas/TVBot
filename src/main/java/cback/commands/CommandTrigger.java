@@ -22,11 +22,8 @@ public class CommandTrigger implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getID().equals("73416411443113984")) {
-            List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-            permChannels.forEach(id -> {
-                IChannel channel = guild.getChannelByID(id);
-                System.out.println(id + " " + (channel == null ? "null" : channel.getName()));
-            });
+            System.out.println(client.getUserByID("164533183201804288").getName());
+
         }
     }
 

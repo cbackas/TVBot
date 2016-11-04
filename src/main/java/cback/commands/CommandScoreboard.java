@@ -41,19 +41,16 @@ public class CommandScoreboard implements Command {
 
             Iterator<UserXP> userXPIterator = topUsers.iterator();
             int index = 0;
-            while(userXPIterator.hasNext()){
+            while (userXPIterator.hasNext()) {
                 index++;
                 UserXP user = userXPIterator.next();
-                scoreboard.append("**").append(index).append(".** ");
-                String name = user.getUser().getName();
+                if (user.getUser() != null) {
+                    scoreboard.append("**").append(index).append(".** ");
 
-                if (user.getUser().getDisplayName(guild) != null) {
-                    name = user.getUser().getDisplayName(guild);
+                    scoreboard.append(user.getUser().getDisplayName(guild));
+                    scoreboard.append(" (").append(user.getMessageCount()).append(")");
+                    if (userXPIterator.hasNext()) scoreboard.append("\n");
                 }
-
-                scoreboard.append(name);
-                scoreboard.append(" (").append(user.getMessageCount()).append(")");
-                if(userXPIterator.hasNext()) scoreboard.append("\n");
             }
 
             Util.sendMessage(message.getChannel(), scoreboard.toString());
