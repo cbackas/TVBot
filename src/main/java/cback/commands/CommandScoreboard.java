@@ -45,7 +45,13 @@ public class CommandScoreboard implements Command {
                 index++;
                 UserXP user = userXPIterator.next();
                 scoreboard.append("**").append(index).append(".** ");
-                scoreboard.append(user.getUser().getDisplayName(guild));
+                String name = user.getUser().getName();
+
+                if (user.getUser().getDisplayName(guild) != null) {
+                    name = user.getUser().getDisplayName(guild);
+                }
+
+                scoreboard.append(name);
                 scoreboard.append(" (").append(user.getMessageCount()).append(")");
                 if(userXPIterator.hasNext()) scoreboard.append("\n");
             }

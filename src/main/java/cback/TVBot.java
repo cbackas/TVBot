@@ -164,7 +164,7 @@ public class TVBot {
             }
 
             //Check on Techronian
-            if (lowerCase.contains("ha eleven")) {
+            if (lowerCase.contains("ha eleven") || lowerCase.equals("eleven") || lowerCase.equals("11") || lowerCase.contains("ha 11") || lowerCase.contains("ha11")|| lowerCase.contains("spooky thirteen") || lowerCase.contains("ouch twelve") || lowerCase.contains("\uD83C\uDDED")) {
                 if (message.getAuthor().getID().equals("235872366490681344")) {
                     String hasHe = getConfigManager().getConfigValue("Techronian");
                     if (hasHe.equalsIgnoreCase("yep")) {
