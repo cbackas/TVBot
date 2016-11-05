@@ -1,18 +1,22 @@
 package cback;
 
+import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.responses.UserResponse;
 import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -130,15 +134,13 @@ public class Util {
         return toInt(System.currentTimeMillis() / 1000);
     }
 
-    public static IUser getUserFromMentionArg(String arg){
+    public static IUser getUserFromMentionArg(String arg) {
         Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
-        if(matcher.matches()){
+        if (matcher.matches()) {
             return TVBot.getInstance().getClient().getUserByID(matcher.group(1));
         }
         return null;
     }
-
-
 
     public static String to12Hour(String time) {
         try {
@@ -149,6 +151,23 @@ public class Util {
             e.printStackTrace();
         }
         return time;
+    }
+
+    public static String requestUsernameByID(String id) {
+        try {
+            IDiscordClient client = TVBot.getInstance().getClient();
+
+            String result = ((DiscordClientImpl) TVBot.getInstance().getClient()).REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id,
+                    new BasicNameValuePair("authorization", TVBot.getInstance().getClient().getToken()));
+
+            return DiscordUtils.getUserFromJSON(client, DiscordUtils.GSON.fromJson(result, UserResponse.class)).getName();
+
+        } catch (RateLimitException e) {
+            e.printStackTrace();
+        } catch (DiscordException e) {
+            e.printStackTrace();
+        }
+        return "NULL";
     }
 
 }

@@ -6,6 +6,7 @@ import cback.database.xp.UserXP;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -43,14 +44,22 @@ public class CommandScoreboard implements Command {
             int index = 0;
             while (userXPIterator.hasNext()) {
                 index++;
-                UserXP user = userXPIterator.next();
-                if (user.getUser() != null) {
-                    scoreboard.append("**").append(index).append(".** ");
+                UserXP userXP = userXPIterator.next();
+                IUser user = userXP.getUser();
 
-                    scoreboard.append(user.getUser().getDisplayName(guild));
-                    scoreboard.append(" (").append(user.getMessageCount()).append(")");
-                    if (userXPIterator.hasNext()) scoreboard.append("\n");
+                String name = "NULL";
+                if (user != null) {
+                    String displayName = user.getDisplayName(guild);
+                    name = displayName != null ? displayName : user.getName();
+                } else {
+                    name = Util.requestUsernameByID(userXP.getUserID());
                 }
+
+                scoreboard.append("**").append(index).append(".** ");
+                scoreboard.append(name);
+                scoreboard.append(" (").append(userXP.getMessageCount()).append(")");
+
+                if (userXPIterator.hasNext()) scoreboard.append("\n");
             }
 
             Util.sendMessage(message.getChannel(), scoreboard.toString());
