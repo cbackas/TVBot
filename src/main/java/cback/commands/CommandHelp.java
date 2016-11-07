@@ -28,7 +28,7 @@ public class CommandHelp implements Command {
 
     static final String userCommands =
             "-----------------------------commands-----------------------------\n" +
-                    "!help                                  //shows a list of commands\n" +
+                    "!help [staff|movienight|admin]         //shows a list of commands\n" +
                     "     aliases: !commands\n" +
                     "!stats                                 //shows information about the server \n" +
                     "     aliases: !info, !serverinfo, !server\n" +
@@ -54,7 +54,9 @@ public class CommandHelp implements Command {
                     "!unmute @user                          //unmutes user\n" +
                     "!embedmute @user                       //removes users embed perms\n" +
                     "!unembedmute @user                     //restores users embed perms\n" +
-                    "!ban @user [reason]                    //bans user and logs the action\n" +
+                    "!ban @user [reason]                    //bans user and logs the action";
+
+    static final String adminCommands =
                     "\n------------------------------admin------------------------------\n" +
                     "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                     "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
@@ -84,6 +86,9 @@ public class CommandHelp implements Command {
         String variation = Arrays.stream(args).collect(Collectors.joining(" "));
         if (variation.equalsIgnoreCase("staff") && userRoles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             finalHelp = staffCommands;
+        }
+        if (variation.equalsIgnoreCase("admin") && userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+            finalHelp = adminCommands;
         }
         if (variation.equalsIgnoreCase("movienight") || variation.equalsIgnoreCase("movie night") && userRoles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID))) {
             finalHelp = movieCommands;
