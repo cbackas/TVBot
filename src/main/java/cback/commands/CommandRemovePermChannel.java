@@ -52,8 +52,4 @@ public class CommandRemovePermChannel implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

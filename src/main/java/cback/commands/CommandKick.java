@@ -3,7 +3,6 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.PermissionsUtils;
 
@@ -65,8 +64,4 @@ public class CommandKick implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

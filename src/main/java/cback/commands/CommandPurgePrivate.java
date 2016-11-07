@@ -37,8 +37,4 @@ public class CommandPurgePrivate implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

@@ -5,11 +5,8 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +45,4 @@ public class CommandInfo implements Command {
         Util.sendMessage(message.getChannel(), words);
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

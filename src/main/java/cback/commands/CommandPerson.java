@@ -60,8 +60,4 @@ public class CommandPerson implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

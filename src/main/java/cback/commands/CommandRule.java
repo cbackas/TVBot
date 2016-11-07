@@ -4,13 +4,10 @@ import cback.Rules;
 import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.MessageBuilder;
 
-import java.util.EnumSet;
 import java.util.List;
 
 
@@ -53,8 +50,4 @@ public class CommandRule implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

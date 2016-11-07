@@ -40,8 +40,4 @@ public class CommandRemoveShow implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

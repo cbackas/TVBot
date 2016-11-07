@@ -3,15 +3,12 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,8 +98,4 @@ public class CommandHelp implements Command {
 
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

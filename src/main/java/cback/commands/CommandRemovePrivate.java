@@ -45,8 +45,4 @@ public class CommandRemovePrivate implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

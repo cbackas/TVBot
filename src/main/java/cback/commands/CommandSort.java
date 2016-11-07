@@ -84,11 +84,6 @@ public class CommandSort implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
-
     public static String getSortName(String channelName) {
         String newName = channelName.replaceAll("-", " ");
         Matcher matcher = Pattern.compile("^(the|a) ").matcher(newName);

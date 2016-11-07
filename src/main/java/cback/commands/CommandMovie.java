@@ -3,8 +3,6 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Movie;
-import com.uwetrottmann.trakt5.entities.Show;
-import com.uwetrottmann.trakt5.enums.Status;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -56,8 +54,4 @@ public class CommandMovie implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

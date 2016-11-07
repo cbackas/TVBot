@@ -14,6 +14,5 @@ public interface Command {
 
     void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate);
 
-    boolean isLogged();
 }
 

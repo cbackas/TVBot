@@ -4,10 +4,8 @@ import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.PermissionsUtils;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 
 public class CommandAddLog implements Command {
@@ -57,8 +55,4 @@ public class CommandAddLog implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

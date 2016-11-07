@@ -49,8 +49,4 @@ public class CommandResetXP implements Command{
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

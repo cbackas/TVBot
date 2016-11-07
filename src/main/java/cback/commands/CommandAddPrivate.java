@@ -46,8 +46,4 @@ public class CommandAddPrivate implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

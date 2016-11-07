@@ -24,8 +24,4 @@ public class CommandStaffXP implements Command {
         Util.botLog(message);
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

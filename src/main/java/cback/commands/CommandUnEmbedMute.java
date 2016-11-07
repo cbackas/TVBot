@@ -55,8 +55,4 @@ public class CommandUnEmbedMute implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

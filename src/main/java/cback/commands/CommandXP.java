@@ -44,8 +44,4 @@ public class CommandXP implements Command {
         Util.deleteMessage(message);
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

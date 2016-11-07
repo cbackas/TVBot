@@ -5,13 +5,11 @@ import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Status;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,11 +58,6 @@ public class CommandShow implements Command {
         } else {
             Util.sendMessage(message.getChannel(), "Error: Show not found");
         }
-    }
-
-    @Override
-    public boolean isLogged() {
-        return false;
     }
 
 }

@@ -46,8 +46,4 @@ public class CommandShowID implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

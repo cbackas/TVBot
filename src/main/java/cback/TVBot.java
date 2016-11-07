@@ -124,25 +124,6 @@ public class TVBot {
                 System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                         (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
 
-                if (!isPrivate && command.get().isLogged()) {
-                    List<IUser> mentionsU = message.getMentions();
-                    List<IRole> mentionsG = message.getRoleMentions();
-                    String finalText = "@" + message.getAuthor().getDisplayName(guild) + " issued \"" + text + "\" in " + message.getChannel().mention();
-                    if (mentionsU.isEmpty() && mentionsG.isEmpty()) {
-                        Util.sendMessage(client.getChannelByID(BOTLOG_CHANNEL_ID), finalText);
-                    } else {
-                        for (IUser u : mentionsU) {
-                            String displayName = "\\@" + u.getDisplayName(message.getGuild());
-                            finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
-                        }
-                        for (IRole g : mentionsG) {
-                            String displayName = "\\@" + g.getName();
-                            finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
-                        }
-                        Util.sendMessage(event.getClient().getChannelByID(BOTLOG_CHANNEL_ID), finalText);
-                    }
-                }
-
                 String args = matcher.group(2);
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
                 command.get().execute(this, client, argsArr, guild, message, isPrivate);

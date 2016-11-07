@@ -52,8 +52,4 @@ public class CommandRoleID implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return true;
-    }
 }

@@ -3,7 +3,6 @@ package cback.commands;
 import cback.ConfigManager;
 import cback.TVBot;
 import cback.Util;
-import org.apache.commons.lang3.StringUtils;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -116,8 +115,4 @@ public class CommandMovieNight implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

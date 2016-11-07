@@ -3,11 +3,8 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.PermissionsUtils;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,8 +62,4 @@ public class CommandMute implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

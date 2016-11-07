@@ -38,8 +38,4 @@ public class CommandDeleteChannel implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }

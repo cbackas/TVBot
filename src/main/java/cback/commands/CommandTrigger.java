@@ -2,7 +2,6 @@ package cback.commands;
 
 import cback.TVBot;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -27,8 +26,4 @@ public class CommandTrigger implements Command {
         }
     }
 
-    @Override
-    public boolean isLogged() {
-        return false;
-    }
 }
