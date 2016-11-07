@@ -31,7 +31,7 @@ public class CommandSort implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-
+        //TODO make this use a batch request to modify all positions at once amd not spam
         if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
 
             //permanent channels sorted by position to keep on top or bottom

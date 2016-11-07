@@ -1,5 +1,6 @@
 package cback;
 
+import com.google.gson.JsonSyntaxException;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -154,20 +155,23 @@ public class Util {
     }
 
     public static String requestUsernameByID(String id) {
-        try {
-            IDiscordClient client = TVBot.getInstance().getClient();
+        IDiscordClient client = TVBot.getInstance().getClient();
 
-            String result = ((DiscordClientImpl) TVBot.getInstance().getClient()).REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id,
-                    new BasicNameValuePair("authorization", TVBot.getInstance().getClient().getToken()));
+        RequestBuffer.RequestFuture<String> userNameResult = RequestBuffer.request(() -> {
+            try {
+                String result = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id,
+                        new BasicNameValuePair("authorization", TVBot.getInstance().getClient().getToken()));
+                return DiscordUtils.getUserFromJSON(client, DiscordUtils.GSON.fromJson(result, UserResponse.class)).getName();
+            } catch (JsonSyntaxException e) {
+                e.printStackTrace();
+            } catch (DiscordException e) {
+                e.printStackTrace();
+            }
 
-            return DiscordUtils.getUserFromJSON(client, DiscordUtils.GSON.fromJson(result, UserResponse.class)).getName();
+            return "NULL";
+        });
 
-        } catch (RateLimitException e) {
-            e.printStackTrace();
-        } catch (DiscordException e) {
-            e.printStackTrace();
-        }
-        return "NULL";
+        return userNameResult.get();
     }
 
 }
