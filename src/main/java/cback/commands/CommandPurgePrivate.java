@@ -32,12 +32,13 @@ public class CommandPurgePrivate implements Command {
             Util.bulkDelete(privateChannel, messages);
 
             Util.deleteMessage(message);
+            Util.botLog(message);
 
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

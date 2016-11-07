@@ -148,16 +148,22 @@ public class TVBot {
                 command.get().execute(this, client, argsArr, guild, message, isPrivate);
             }
         } else {
+            String lowerCase = message.getContent().toLowerCase();
+
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getID(), 1);
 
-            //Check for mentions
+            //Check for bot mentions
             if (message.getMentions().contains(client.getOurUser())) {
                 Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
             }
 
+            //cback mentions
+            if (lowerCase.contains("cback")) {
+                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Someone said your name in " + message.getChannel().getName());
+            }
+
             //Check for discord invite link
-            String lowerCase = message.getContent().toLowerCase();
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
                 Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
                 Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " might have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
@@ -176,6 +182,7 @@ public class TVBot {
                     }
                 }
             }
+
         }
     }
 

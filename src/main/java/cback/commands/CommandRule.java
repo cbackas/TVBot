@@ -29,24 +29,32 @@ public class CommandRule implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             if (args.length == 1) {
+
                 String ruleNumber = args[0];
                 Rules rule = Rules.getRule(ruleNumber);
+
                 if (rule != null) {
+
                     try {
                         new MessageBuilder(client).withChannel(message.getChannel()).appendContent("**" + rule.title + "**").appendQuote(rule.specifics).send();
                     } catch (Exception e) {
                     }
+
                 } else {
                     Util.sendMessage(message.getChannel(), "Rule not found");
                 }
+
             } else {
                 Util.sendMessage(message.getChannel(), "Too many arguments");
             }
+
+            Util.botLog(message);
+
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

@@ -80,12 +80,13 @@ public class CommandSort implements Command {
             });
 
             Util.deleteMessage(message);
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 
     public static String getSortName(String channelName) {

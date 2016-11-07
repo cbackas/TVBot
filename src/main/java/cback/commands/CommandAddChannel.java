@@ -33,11 +33,12 @@ public class CommandAddChannel implements Command {
                 Util.sendMessage(message.getChannel(), "Channel creation failed.");
             }
             Util.deleteMessage(message);
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

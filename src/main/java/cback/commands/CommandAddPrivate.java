@@ -42,12 +42,12 @@ public class CommandAddPrivate implements Command {
                 });
             }
 
-
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

@@ -37,11 +37,12 @@ public class CommandListPermChannels implements Command {
 
             Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
 
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

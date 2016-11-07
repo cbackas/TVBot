@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -20,11 +21,11 @@ public class CommandStaffXP implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-
+        Util.botLog(message);
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

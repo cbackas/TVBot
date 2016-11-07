@@ -30,11 +30,12 @@ public class CommandAnnounce implements Command {
                 String announcement = Arrays.stream(args).collect(Collectors.joining(" "));
                 Util.sendAnnouncement(announcement);
             }
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

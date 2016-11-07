@@ -51,11 +51,12 @@ public class CommandAddPermChannel implements Command {
                 Util.sendMessage(message.getChannel(), "Channels not found.");
             }
 
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

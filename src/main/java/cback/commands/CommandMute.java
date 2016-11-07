@@ -60,12 +60,13 @@ public class CommandMute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!mute @user``");
                 }
-        }
+                Util.botLog(message);
+            }
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

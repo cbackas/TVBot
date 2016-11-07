@@ -36,11 +36,12 @@ public class CommandRemoveShow implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !removeshow <imdbID>");
             }
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

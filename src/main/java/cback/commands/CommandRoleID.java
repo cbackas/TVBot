@@ -29,24 +29,31 @@ public class CommandRoleID implements Command {
             if (args.length == 1) {
                 String roleName = Arrays.stream(args).collect(Collectors.joining(" "));
                 List<IRole> serverRoles = guild.getRoles();
+
                 if (roleName.equalsIgnoreCase("listall")) {
                     String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getID()).reduce("",(a, b) -> a + b + "\n");
+
                     Util.sendBufferedMessage(message.getChannel(), roleList);
                 } else {
                     Optional<IRole> foundRole = serverRoles.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
+
                     if (foundRole.isPresent()) {
                         Util.sendMessage(message.getChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getID());
+
                     } else {
                         Util.sendMessage(message.getChannel(), "Role not found");
                     }
                 }
+
                 Util.deleteMessage(message);
+                Util.botLog(message);
+
             }
         }
     }
 
     @Override
     public boolean isLogged() {
-        return false;
+        return true;
     }
 }

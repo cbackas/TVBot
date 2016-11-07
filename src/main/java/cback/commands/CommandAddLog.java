@@ -53,11 +53,12 @@ public class CommandAddLog implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !addlog <text>");
             }
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

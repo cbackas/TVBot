@@ -40,11 +40,14 @@ public class CommandShowID implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !showid [here|showname]");
             }
+
+            Util.deleteMessage(message);
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

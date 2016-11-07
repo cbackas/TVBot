@@ -41,13 +41,12 @@ public class CommandRemovePrivate implements Command {
                     }
                 });
             }
-
-
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

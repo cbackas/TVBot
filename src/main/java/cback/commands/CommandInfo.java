@@ -43,6 +43,7 @@ public class CommandInfo implements Command {
                         "\n\n``Users:`` " + userCount +
                         "\n``New Users:`` " + newCount +
                         "\n``Channels:`` " + channelCount;
+
         Util.deleteMessage(message);
         Util.sendMessage(message.getChannel(), words);
     }

@@ -53,12 +53,14 @@ public class CommandUnmute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!unmute @user``");
                 }
+
+                Util.botLog(message);
             }
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

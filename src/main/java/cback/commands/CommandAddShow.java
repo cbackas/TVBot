@@ -52,11 +52,12 @@ public class CommandAddShow implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !addshow <imdbID> <here|channelID>");
             }
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

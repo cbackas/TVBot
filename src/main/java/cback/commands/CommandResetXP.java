@@ -45,11 +45,12 @@ public class CommandResetXP implements Command{
                 Util.sendMessage(message.getChannel(), "Usage: !resetxp @user");
             }
             Util.deleteMessage(message);
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

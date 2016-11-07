@@ -50,12 +50,13 @@ public class CommandUnEmbedMute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!unembedmute @user``");
                 }
+                Util.botLog(message);
             }
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

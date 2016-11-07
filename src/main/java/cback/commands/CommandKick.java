@@ -59,12 +59,14 @@ public class CommandKick implements Command {
                 }
             } catch (Exception e) {
             }
+
             Util.deleteMessage(message);
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

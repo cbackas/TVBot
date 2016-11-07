@@ -9,6 +9,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.responses.UserResponse;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -103,6 +104,27 @@ public class Util {
                 }
             }
         });
+    }
+
+    public static void botLog(IMessage message) {
+        try {
+            String text = "@" + message.getAuthor().getDisplayName(message.getGuild()) + " issued ``" + message.getContent() + "`` in " + message.getChannel().mention();
+
+            List<IUser> mentionsU = message.getMentions();
+            List<IRole> mentionsG = message.getRoleMentions();
+            for (IUser u : mentionsU) {
+                String displayName = "\\@" + u.getDisplayName(message.getGuild());
+                text = text.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+            }
+            for (IRole g : mentionsG) {
+                String displayName = "\\@" + g.getName();
+                text = text.replace(g.mention(), displayName).replace(g.mention(), displayName);
+            }
+
+            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.BOTLOG_CHANNEL_ID), text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void sendAnnouncement(String message) {

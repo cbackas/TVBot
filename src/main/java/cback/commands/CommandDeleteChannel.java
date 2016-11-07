@@ -34,11 +34,12 @@ public class CommandDeleteChannel implements Command {
                 }
             }
             Util.deleteMessage(message);
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }

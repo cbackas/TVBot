@@ -57,11 +57,12 @@ public class CommandAMute implements Command {
             } else {
                 Util.sendPrivateMessage(message.getAuthor(), "Invalid arguments. Usage: ``!mute @user``");
             }
+            Util.botLog(message);
         }
     }
 
     @Override
     public boolean isLogged() {
-        return true;
+        return false;
     }
 }
