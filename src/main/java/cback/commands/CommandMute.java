@@ -29,15 +29,22 @@ public class CommandMute implements Command {
 
                 if (args[0].equalsIgnoreCase("list")) {
 
-                    StringBuilder list = new StringBuilder();
+                    StringBuilder mutedList = new StringBuilder();
                     for (String userID : mutedUsers) {
 
-                        IUser user =guild.getUserByID(userID);
+                        IUser userO = guild.getUserByID(userID);
 
-                        list.append("\n").append(user.mention());
+                        String user = "NULL";
+                        if (userO != null) {
+                            user = userO.mention();
+                        } else {
+                            user = Util.requestUsernameByID(userID);
+                        }
+
+                        mutedList.append("\n").append(user);
                     }
 
-                    Util.sendMessage(message.getChannel(), "**Muted Users**:\n" + list.toString());
+                    Util.sendMessage(message.getChannel(), "**Muted Users**: (plain text for users not on server)\n" + mutedList.toString());
 
                 }
 
