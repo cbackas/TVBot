@@ -34,7 +34,7 @@ public class CommandMovie implements Command {
             String rating = movieData.certification;
             String runtime = Integer.toString(movieData.runtime);
             String country = movieData.language;
-            String homepage = "<https://trakt.tv/movies/" + movieData.ids.slug + ">";
+            String homepage = "<https://trakt.tv/movies/" + movieData.ids.slug + ">\n<http://www.imdb.com/title/" + movieData.ids.imdb + ">";
             if (movieData.tagline != null) {
                 title = movieData.tagline + "\n\n**" + movieData.title + " (" + Integer.toString(movieData.year) + ")**";
             }
@@ -51,6 +51,7 @@ public class CommandMovie implements Command {
                             "```\n");
         } else {
             Util.sendMessage(message.getChannel(), "Error: Movie not found");
+            Util.errorLog(message, "Couldn't find movie: " + movieName);
         }
     }
 

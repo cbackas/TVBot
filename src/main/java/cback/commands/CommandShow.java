@@ -36,7 +36,7 @@ public class CommandShow implements Command {
             String premier = new SimpleDateFormat("MMM dd, yyyy").format(showData.first_aired.toDate());
             String runtime = Integer.toString(showData.runtime);
             String country = showData.country + " - " + showData.language;
-            String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">";
+            String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";
 
             try {
                 title += " " + guild.getChannelByID(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID());
@@ -57,6 +57,7 @@ public class CommandShow implements Command {
                             "```\n");
         } else {
             Util.sendMessage(message.getChannel(), "Error: Show not found");
+            Util.errorLog(message, "Couldn't find show: " + showName);
         }
     }
 

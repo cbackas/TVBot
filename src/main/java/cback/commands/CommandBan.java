@@ -47,7 +47,7 @@ public class CommandBan implements Command {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 Util.sendMessage(message.getChannel(), "Internal error - cback has been notified");
-                                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Error running CommandBan - check stacktrace");
+                                Util.errorLog(message, "Error running CommandBan - check stacktrace");
                             }
                         }
                     } else {

@@ -49,6 +49,7 @@ public class CommandHelp implements Command {
                     "     aliases: !purge\n" +
                     "!mute @user [reason?]                  //mutes user\n" +
                     "!unmute @user                          //unmutes user\n" +
+                    "!mute list                             //lists all muted users\n" +
                     "!embedmute @user                       //removes users embed perms\n" +
                     "!unembedmute @user                     //restores users embed perms\n" +
                     "!ban @user [reason]                    //bans user and logs the action";
