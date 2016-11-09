@@ -138,7 +138,7 @@ public class Util {
 
     public static void errorLog(IMessage message, String text) {
         try {
-            Util.sendPrivateMessage(TVBot.getInstance().getClient().getUserByID("73416411443113984"), text + " in ``" + message.getChannel().getName() + "``");
+            Util.sendPrivateMessage(TVBot.getInstance().getClient().getUserByID("73416411443113984"), text + " in ``#" + message.getChannel().getName() + "``");
         } catch (Exception e) {
             e.printStackTrace();
         }
