@@ -30,17 +30,24 @@ public class CommandUnmute implements Command {
                     Pattern pattern = Pattern.compile("^<@!?(\\d+)>");
                     Matcher matcher = pattern.matcher(user);
                     if (matcher.find()) {
+
                         String u = matcher.group(1);
                         IUser userInput = guild.getUserByID(u);
+
                         if (message.getAuthor().getID().equals(u)) {
                             Util.sendMessage(message.getChannel(), "Not sure how you typed this command... but you can't unmute yourself");
                         } else {
                             try {
                                 userInput.removeRole(guild.getRoleByID("231269949635559424"));
+
                                 Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
+
                                 List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
-                                mutedUsers.remove(u);
-                                bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                                if (mutedUsers.contains(u)) {
+                                    mutedUsers.remove(u);
+                                    bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                                }
+
                                 Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userInput.getDisplayName(guild) + " has been unmuted.\n- " + message.getAuthor().getDisplayName(guild) + "```");
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
@@ -50,7 +57,6 @@ public class CommandUnmute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!unmute @user``");
                 }
-
                 Util.botLog(message);
             }
         }

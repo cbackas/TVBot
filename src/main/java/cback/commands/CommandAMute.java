@@ -39,12 +39,16 @@ public class CommandAMute implements Command {
                         Util.sendPrivateMessage(message.getAuthor(), "You probably shouldn't mute yourself");
                     } else {
                         try {
-                            PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                             userInput.addRole(guild.getRoleByID("231269949635559424"));
+
                             Util.sendPrivateMessage(message.getAuthor(), userInput.getDisplayName(guild) + " has been muted");
+
                             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
-                            mutedUsers.add(u);
-                            bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            if (!mutedUsers.contains(u)) {
+                                mutedUsers.add(u);
+                                bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            }
+
                             Util.deleteMessage(message);
                         } catch (Exception e) {
                             e.printStackTrace();

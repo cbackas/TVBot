@@ -39,11 +39,14 @@ public class CommandAUnmute implements Command {
                         Util.sendPrivateMessage(message.getAuthor(), "Not sure how you typed this command... but you can't unmute yourself");
                     } else {
                         try {
-                            PermissionsUtils.checkPermissions(message.getChannel().getModifiedPermissions(message.getAuthor()), EnumSet.of(Permissions.BAN));
                             userInput.removeRole(guild.getRoleByID("231269949635559424"));
+
                             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
-                            mutedUsers.remove(u);
-                            bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            if (mutedUsers.contains(u)) {
+                                mutedUsers.remove(u);
+                                bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            }
+
                             Util.sendPrivateMessage(message.getAuthor(), userInput.getDisplayName(guild) + " has been unmuted");
                             Util.deleteMessage(message);
                         } catch (Exception e) {

@@ -72,8 +72,10 @@ public class CommandMute implements Command {
                                 userInput.addRole(guild.getRoleByID("231269949635559424"));
                                 Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + " has been muted. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
 
-                                mutedUsers.add(u);
-                                bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                                if (!mutedUsers.contains(u)) {
+                                    mutedUsers.add(u);
+                                    bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                                }
 
                                 Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```Muted " + userInput.getDisplayName(guild) + " for " + reason + ".\n- " + message.getAuthor().getDisplayName(guild) + "```");
                                 Util.deleteMessage(message);
