@@ -114,11 +114,11 @@ public class Util {
             List<IRole> mentionsG = message.getRoleMentions();
             for (IUser u : mentionsU) {
                 String displayName = "\\@" + u.getDisplayName(message.getGuild());
-                text = text.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
+                text.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
             }
             for (IRole g : mentionsG) {
                 String displayName = "\\@" + g.getName();
-                text = text.replace(g.mention(), displayName).replace(g.mention(), displayName);
+                text.replace(g.mention(), displayName).replace(g.mention(), displayName);
             }
 
             Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.BOTLOG_CHANNEL_ID), text);
