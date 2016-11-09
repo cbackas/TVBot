@@ -25,6 +25,8 @@ public class ConfigManager {
         defaultConfig.put("date", "movienight date/time");
         defaultConfig.put("mnID", "movienight announce messageID");
         defaultConfig.put("userCount", "0");
+        defaultConfig.put("joined", "0");
+        defaultConfig.put("left", "0");
         defaultConfig.put("muted", new ArrayList<String>());
         defaultConfig.put("permanentchannels", new ArrayList<String>());
         defaultConfig.put("Techronian", "nope");

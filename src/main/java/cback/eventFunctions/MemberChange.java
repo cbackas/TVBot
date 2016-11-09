@@ -40,6 +40,10 @@ public class MemberChange {
             }
         }
 
+        //Join Counter
+        int joined = Integer.parseInt(bot.getConfigManager().getConfigValue("joined"));
+        bot.getConfigManager().setConfigValue("joined", String.valueOf(joined + 1));
+
         //PM on join
         try {
             Util.sendPrivateMessage(user, "Welcome to The Lounge! We primarily discuss television but we also discuss other things on occasion. We are an English server.\n" +
@@ -70,9 +74,16 @@ public class MemberChange {
     public void memberLeave(UserLeaveEvent event) {
         IUser user = event.getUser();
         Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), user.getName() + " **left** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("redarrow"));
+
+        //Mute Check
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             Util.sendMessage(event.getGuild().getChannelByID("192444648545845248"), user + " is muted and left the server. Their mute will be applied again when/if they return.");
         }
+
+        //Leave Counter
+        int left = Integer.parseInt(bot.getConfigManager().getConfigValue("left"));
+        bot.getConfigManager().setConfigValue("left", String.valueOf(left + 1));
+
     }
 
     @EventSubscriber

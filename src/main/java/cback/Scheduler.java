@@ -70,6 +70,7 @@ public class Scheduler {
 
             updateUserCount();
             updateTechronian();
+            resetUserChange();
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
     }
@@ -161,6 +162,14 @@ public class Scheduler {
      */
     public void updateTechronian() {
         bot.getConfigManager().setConfigValue("Techronian", "nope");
+    }
+
+    /**
+     * Reset daily user change
+     */
+    public void resetUserChange() {
+        bot.getConfigManager().setConfigValue("left", "0");
+        bot.getConfigManager().setConfigValue("joined", "0");
     }
 
     /**

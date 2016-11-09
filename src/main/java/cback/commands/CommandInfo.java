@@ -27,8 +27,11 @@ public class CommandInfo implements Command {
         String serverName = guild.getName();
         int userCount = guild.getUsers().size();
         int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
-        int newCount = userCount - oldUserCount;
         int channelCount = guild.getChannels().size();
+
+        int newCount = userCount - oldUserCount;
+        String leaveJoin = " (-" + bot.getConfigManager().getConfigValue("left") + " +" + bot.getConfigManager().getConfigValue("joined") + ")";
+        String userChange = newCount + leaveJoin;
 
         LocalDateTime creationDate = guild.getCreationDate();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
@@ -38,7 +41,7 @@ public class CommandInfo implements Command {
                 "**" + serverName + "**" +
                         "\n``Created " + formattedDateTime + "``" +
                         "\n\n``Users:`` " + userCount +
-                        "\n``New Users:`` " + newCount +
+                        "\n``New Users:`` " + userChange +
                         "\n``Channels:`` " + channelCount;
 
         Util.deleteMessage(message);
