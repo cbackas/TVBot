@@ -30,18 +30,22 @@ public class CommandMute implements Command {
                 if (args[0].equalsIgnoreCase("list")) {
 
                     StringBuilder mutedList = new StringBuilder();
-                    for (String userID : mutedUsers) {
+                    if (!mutedUsers.isEmpty()) {
+                        for (String userID : mutedUsers) {
 
-                        IUser userO = guild.getUserByID(userID);
+                            IUser userO = guild.getUserByID(userID);
 
-                        String user = "NULL";
-                        if (userO != null) {
-                            user = userO.mention();
-                        } else {
-                            user = Util.requestUsernameByID(userID);
+                            String user = "NULL";
+                            if (userO != null) {
+                                user = userO.mention();
+                            } else {
+                                user = Util.requestUsernameByID(userID);
+                            }
+
+                            mutedList.append("\n").append(user);
                         }
-
-                        mutedList.append("\n").append(user);
+                    } else {
+                        mutedList.append("\n").append("There are currently no muted users.");
                     }
 
                     Util.sendMessage(message.getChannel(), "**Muted Users**: (plain text for users not on server)\n" + mutedList.toString());
