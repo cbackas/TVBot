@@ -33,16 +33,15 @@ public class CommandInfo implements Command {
         String leaveJoin = " (-" + bot.getConfigManager().getConfigValue("left") + " +" + bot.getConfigManager().getConfigValue("joined") + ")";
         String userChange = newCount + leaveJoin;
 
-        LocalDateTime creationDate = guild.getCreationDate();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-        String formattedDateTime = creationDate.format(formatter);
+        int suggestionCount = Util.getSuggestions().size();
 
         String words =
                 "**" + serverName + "**" +
-                        "\n``Created " + formattedDateTime + "``" +
+                        "\n``" + "Created Jun 14, 2016" + "``" +
                         "\n\n``Users:`` " + userCount +
                         "\n``New Users:`` " + userChange +
-                        "\n``Channels:`` " + channelCount;
+                        "\n``Channels:`` " + channelCount +
+                        "\n``Suggestions:`` " + suggestionCount;
 
         Util.deleteMessage(message);
         Util.sendMessage(message.getChannel(), words);

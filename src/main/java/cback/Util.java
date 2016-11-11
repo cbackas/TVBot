@@ -19,6 +19,7 @@ import sx.blah.discord.util.RequestBuffer;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -202,6 +203,21 @@ public class Util {
         });
 
         return userNameResult.get();
+    }
+
+    public static List<IMessage> getSuggestions() {
+        try {
+            IChannel channel = TVBot.getInstance().getClient().getGuildByID("192441520178200577").getChannelByID("192444470942236672");
+
+            List<IMessage> messages = channel.getPinnedMessages();
+            List<IMessage> permM = Arrays.asList(channel.getMessageByID("228166713521340416"), channel.getMessageByID("236703936789217285"), channel.getMessageByID("246306837748514826"));
+            permM.forEach(messages::remove);
+
+            return messages;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
