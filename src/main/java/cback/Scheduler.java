@@ -69,7 +69,6 @@ public class Scheduler {
         exec.scheduleAtFixedRate(() -> {
 
             updateUserCount();
-            updateTechronian();
             resetUserChange();
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);

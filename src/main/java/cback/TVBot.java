@@ -150,19 +150,6 @@ public class TVBot {
                 Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " might have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
             }
 
-            //Check on Techronian
-            if (lowerCase.contains("ha eleven") || lowerCase.equals("eleven") || lowerCase.equals("11") || lowerCase.contains("ha 11") || lowerCase.contains("ha11")|| lowerCase.contains("spooky thirteen") || lowerCase.contains("ouch twelve") || lowerCase.contains("\uD83C\uDDED")) {
-                if (message.getAuthor().getID().equals("235872366490681344")) {
-                    String hasHe = getConfigManager().getConfigValue("Techronian");
-                    if (hasHe.equalsIgnoreCase("yep")) {
-                        getDatabaseManager().getXP().removeXP(message.getAuthor().getID(), 50);
-                        Util.sendMessage(message.getChannel(), "Techronian memed too much. They lost 50xp");
-                    } else if (hasHe.equalsIgnoreCase("nope")) {
-                        getConfigManager().setConfigValue("Techronian", "yep");
-                        Util.sendMessage(message.getChannel(), "That's your meme for the day, Techronian. Be careful bud.");
-                    }
-                }
-            }
 
         }
     }
