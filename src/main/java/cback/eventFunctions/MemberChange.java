@@ -24,7 +24,7 @@ public class MemberChange {
     public void memberJoin(UserJoinEvent event) {
         IGuild server = event.getGuild();
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), user.getName() + " **joined** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("greenarrow"));
+        Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDCE5  " + user.getName() + " **joined** the server. " + user.mention());
 
         //Bot Check
         if (event.getUser().isBot()) {
@@ -73,7 +73,7 @@ public class MemberChange {
     @EventSubscriber
     public void memberLeave(UserLeaveEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), user.getName() + " **left** the server. " + user.mention() + " " + event.getGuild().getEmojiByName("redarrow"));
+        Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDCE4  " + user.getName() + " **left** the server. " + user.mention());
 
         //Mute Check
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
@@ -89,7 +89,7 @@ public class MemberChange {
     @EventSubscriber
     public void memberBanned(UserBanEvent event) {
         IUser user = event.getUser();
-        Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), user.getName() + " was **banned**. " + user.mention() + " \uD83D\uDD28");
+        Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDD28  " + user.getName() + " was **banned**. " + user.mention());
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
             mutedUsers.remove(user.getID());
