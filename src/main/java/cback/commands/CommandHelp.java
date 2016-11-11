@@ -34,6 +34,8 @@ public class CommandHelp implements Command {
                     "!shrug                                 //shrugs\n" +
                     "!suggest [stuff]                       //pins your suggestion in #suggestion\n" +
                     "     aliases: !idea, !suggestion\n" +
+                    "!seesuggestions                        //sends you a list of the current suggestions\n" +
+                    "     aliases: !seesuggest, !seeideas\n" +
                     "!show [show name]                      //gives info about a show\n" +
                     "!movie [movie name]                    //gives info about a movie\n" +
                     "!leaderboard                           //shows users with the top 5 xp\n" +
