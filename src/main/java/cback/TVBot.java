@@ -136,18 +136,18 @@ public class TVBot {
 
             //Check for bot mentions
             if (message.getMentions().contains(client.getOurUser())) {
-                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in " + message.getChannel().getName());
+                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in ``#" + message.getChannel().getName() + "``" + " by **" + message.getAuthor().getDisplayName(client.getGuildByID("192441520178200577")) + "**");
             }
 
             //cback mentions
             if (lowerCase.contains("cback")) {
-                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Someone said your name in " + message.getChannel().getName());
+                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "**" + message.getAuthor().getDisplayName(client.getGuildByID("192441520178200577")) + "** said your name in ``#" + message.getChannel().getName() + "``");
             }
 
             //Check for discord invite link
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
                 Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
-                Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " might have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
+                Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
             }
 
 
