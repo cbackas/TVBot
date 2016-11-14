@@ -28,9 +28,6 @@ public class CommandAddPrivate implements Command {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
 
-            Util.botLog(message);
-            Util.deleteMessage(message);
-
             List<IUser> users = message.getMentions();
             for (IUser u : users) {
                 RequestBuffer.request(() -> {
@@ -43,6 +40,9 @@ public class CommandAddPrivate implements Command {
             }
 
             Util.sendMessage(guild.getChannelByID("240614159958540288"), "Added user(s) to private channel.");
+
+            Util.botLog(message);
+            Util.deleteMessage(message);
         }
     }
 

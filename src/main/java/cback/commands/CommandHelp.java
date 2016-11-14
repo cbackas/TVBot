@@ -55,7 +55,7 @@ public class CommandHelp implements Command {
                     "!mute list                             //lists all muted users\n" +
                     "!embedmute @user                       //removes users embed perms\n" +
                     "!unembedmute @user                     //restores users embed perms\n" +
-                    "!staffban [add|remove] @user           //removes or ads a user's ability to summon staff\n" +
+                    "!staffban [add|remove] @user           //removes or adds a user's ability to summon staff\n" +
                     "!ban @user [reason]                    //bans user and logs the action";
 
     static final String adminCommands =
