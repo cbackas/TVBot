@@ -27,6 +27,7 @@ public class CommandHelp implements Command {
             "-----------------------------commands-----------------------------\n" +
                     "!help [staff|movienight|admin]         //shows a list of commands\n" +
                     "     aliases: !commands\n" +
+                    "!staff                                 //summons moderators to your location\n" +
                     "!stats                                 //shows information about the server \n" +
                     "     aliases: !info, !serverinfo, !server\n" +
                     "!goodnight                             //does that good night thing everyone likes\n" +
@@ -54,6 +55,7 @@ public class CommandHelp implements Command {
                     "!mute list                             //lists all muted users\n" +
                     "!embedmute @user                       //removes users embed perms\n" +
                     "!unembedmute @user                     //restores users embed perms\n" +
+                    "!staffban [add|remove] @user           //removes or ads a user's ability to summon staff\n" +
                     "!ban @user [reason]                    //bans user and logs the action";
 
     static final String adminCommands =

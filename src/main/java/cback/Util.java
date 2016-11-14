@@ -7,10 +7,7 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.responses.UserResponse;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
@@ -19,6 +16,7 @@ import sx.blah.discord.util.RequestBuffer;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -203,6 +201,34 @@ public class Util {
         });
 
         return userNameResult.get();
+    }
+
+    public static List<IUser> getUsersByRole(String roleID) {
+        try {
+            IGuild guild = TVBot.getInstance().getClient().getGuildByID("192441520178200577");
+            IRole role = guild.getRoleByID(roleID);
+
+            if (role != null) {
+                List<IUser> allUsers = guild.getUsers();
+                List<IUser> ourUsers = new ArrayList<>();
+
+
+                for (IUser u : allUsers) {
+                    List<IRole> userRoles = u.getRolesForGuild(guild);
+
+                    if (userRoles.contains(role)) {
+                        ourUsers.add(u);
+                    }
+                }
+
+                return ourUsers;
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static List<IMessage> getSuggestions() {

@@ -29,6 +29,7 @@ public class ConfigManager {
         defaultConfig.put("left", "0");
         defaultConfig.put("muted", new ArrayList<String>());
         defaultConfig.put("permanentchannels", new ArrayList<String>());
+        defaultConfig.put("cantsummon", new ArrayList<String>());
     }
 
     public ConfigManager(TVBot bot) {
