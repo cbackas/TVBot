@@ -24,13 +24,15 @@ public class CommandAnnounce implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+
+            Util.botLog(message);
+
             if (args.length >= 1) {
                 Util.deleteMessage(message);
 
                 String announcement = Arrays.stream(args).collect(Collectors.joining(" "));
                 Util.sendAnnouncement(announcement);
             }
-            Util.botLog(message);
         }
     }
 

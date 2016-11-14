@@ -32,8 +32,9 @@ public class CommandAddChannel implements Command {
                 e.printStackTrace();
                 Util.sendMessage(message.getChannel(), "Channel creation failed.");
             }
-            Util.deleteMessage(message);
+
             Util.botLog(message);
+            Util.deleteMessage(message);
         }
     }
 

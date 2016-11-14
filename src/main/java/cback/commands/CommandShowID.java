@@ -41,8 +41,8 @@ public class CommandShowID implements Command {
                 Util.sendMessage(message.getChannel(), "Usage: !showid [here|showname]");
             }
 
-            Util.deleteMessage(message);
             Util.botLog(message);
+            Util.deleteMessage(message);
         }
     }
 

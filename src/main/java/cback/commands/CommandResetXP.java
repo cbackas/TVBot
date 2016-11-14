@@ -44,8 +44,9 @@ public class CommandResetXP implements Command{
             }else{
                 Util.sendMessage(message.getChannel(), "Usage: !resetxp @user");
             }
-            Util.deleteMessage(message);
+
             Util.botLog(message);
+            Util.deleteMessage(message);
         }
     }
 

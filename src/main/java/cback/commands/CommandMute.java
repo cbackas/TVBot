@@ -27,6 +27,8 @@ public class CommandMute implements Command {
             if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.REDDITMOD_ROLE_ID))) {
                 List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
 
+                Util.botLog(message);
+
                 if (args[0].equalsIgnoreCase("list")) {
 
                     StringBuilder mutedList = new StringBuilder();
@@ -94,7 +96,6 @@ public class CommandMute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!mute @user``");
                 }
-                Util.botLog(message);
             }
         }
     }

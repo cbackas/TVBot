@@ -24,6 +24,7 @@ public class CommandListPermChannels implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
 
+            Util.botLog(message);
             Util.deleteMessage(message);
 
             List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
@@ -37,7 +38,6 @@ public class CommandListPermChannels implements Command {
 
             Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
 
-            Util.botLog(message);
         }
     }
 

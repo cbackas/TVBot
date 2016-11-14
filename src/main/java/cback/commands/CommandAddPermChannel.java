@@ -24,6 +24,7 @@ public class CommandAddPermChannel implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
 
+            Util.botLog(message);
             Util.deleteMessage(message);
 
             List<IChannel> channels = message.getChannelMentions();
@@ -48,8 +49,6 @@ public class CommandAddPermChannel implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Channels not found.");
             }
-
-            Util.botLog(message);
         }
     }
 

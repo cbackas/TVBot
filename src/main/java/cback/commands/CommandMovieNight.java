@@ -109,8 +109,8 @@ public class CommandMovieNight implements Command {
                         }
                     }
                 }
-                Util.deleteMessage(message);
                 Util.botLog(message);
+                Util.deleteMessage(message);
             }
         }
     }

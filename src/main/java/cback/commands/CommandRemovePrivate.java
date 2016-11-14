@@ -28,8 +28,8 @@ public class CommandRemovePrivate implements Command {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
 
+            Util.botLog(message);
             Util.deleteMessage(message);
-            Util.sendMessage(guild.getChannelByID("240614159958540288"), "Removed user(s) from private channel.");
 
             List<IUser> users = message.getMentions();
             for (IUser u : users) {
@@ -41,7 +41,8 @@ public class CommandRemovePrivate implements Command {
                     }
                 });
             }
-            Util.botLog(message);
+
+            Util.sendMessage(guild.getChannelByID("240614159958540288"), "Removed user(s) from private channel.");
         }
     }
 

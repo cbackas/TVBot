@@ -33,8 +33,9 @@ public class CommandDeleteChannel implements Command {
                     e.printStackTrace();
                 }
             }
-            Util.deleteMessage(message);
+
             Util.botLog(message);
+            Util.deleteMessage(message);
         }
     }
 

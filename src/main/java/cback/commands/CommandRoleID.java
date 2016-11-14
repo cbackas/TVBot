@@ -45,9 +45,8 @@ public class CommandRoleID implements Command {
                     }
                 }
 
-                Util.deleteMessage(message);
                 Util.botLog(message);
-
+                Util.deleteMessage(message);
             }
         }
     }

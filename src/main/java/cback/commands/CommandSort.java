@@ -79,8 +79,8 @@ public class CommandSort implements Command {
                     });
             });
 
-            Util.deleteMessage(message);
             Util.botLog(message);
+            Util.deleteMessage(message);
         }
     }
 

@@ -31,8 +31,8 @@ public class CommandPurgePrivate implements Command {
             List<IMessage> messages = privateChannel.getMessages();
             Util.bulkDelete(privateChannel, messages);
 
-            Util.deleteMessage(message);
             Util.botLog(message);
+            Util.deleteMessage(message);
 
         }
     }

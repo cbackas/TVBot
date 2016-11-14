@@ -25,6 +25,9 @@ public class CommandUnmute implements Command {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.REDDITMOD_ROLE_ID))) {
+
+                Util.botLog(message);
+
                 if (args.length == 1) {
                     String user = args[0];
                     Pattern pattern = Pattern.compile("^<@!?(\\d+)>");
@@ -57,7 +60,6 @@ public class CommandUnmute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!unmute @user``");
                 }
-                Util.botLog(message);
             }
         }
     }

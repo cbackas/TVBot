@@ -28,6 +28,9 @@ public class CommandAUnmute implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+
+            Util.botLog(message);
+
             if (args.length == 1) {
                 String user = args[0];
                 Pattern pattern = Pattern.compile("^<@!?(\\d+)>");
@@ -56,7 +59,6 @@ public class CommandAUnmute implements Command {
             } else {
                 Util.sendPrivateMessage(message.getAuthor(), "Invalid arguments. Usage: ``!unmute @user``");
             }
-            Util.botLog(message);
         }
     }
 

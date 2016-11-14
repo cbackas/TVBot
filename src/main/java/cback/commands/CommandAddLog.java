@@ -22,6 +22,9 @@ public class CommandAddLog implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
+
+            Util.botLog(message);
+
             if (args.length >= 1) {
                 List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
                 if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) {
@@ -51,7 +54,6 @@ public class CommandAddLog implements Command {
             } else {
                 Util.sendMessage(message.getChannel(), "Usage: !addlog <text>");
             }
-            Util.botLog(message);
         }
     }
 

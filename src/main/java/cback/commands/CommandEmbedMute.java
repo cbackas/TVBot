@@ -28,6 +28,9 @@ public class CommandEmbedMute implements Command {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
             if (userRoles.contains(guild.getRoleByID(TVBot.TRIALMOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) {
+
+                Util.botLog(message);
+
                 if (args.length >= 1) {
                     String text = message.getContent();
                     Pattern pattern = Pattern.compile("^!embedmute <@!?(\\d+)> ?");
@@ -51,7 +54,6 @@ public class CommandEmbedMute implements Command {
                 } else {
                     Util.sendMessage(message.getChannel(), "Invalid arguments. Usage: ``!embedmute @user``");
                 }
-                Util.botLog(message);
             }
         }
     }
