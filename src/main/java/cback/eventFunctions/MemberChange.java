@@ -90,10 +90,16 @@ public class MemberChange {
     public void memberBanned(UserBanEvent event) {
         IUser user = event.getUser();
         Util.sendMessage(event.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDD28  " + user.getName() + " was **banned**. " + user.mention());
+
+        //Mute Check
         if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
             mutedUsers.remove(user.getID());
             bot.getConfigManager().setConfigValue("muted", mutedUsers);
         }
+
+        //Leave Counter
+        int left = Integer.parseInt(bot.getConfigManager().getConfigValue("left"));
+        bot.getConfigManager().setConfigValue("left", String.valueOf(left + 1));
     }
 }
