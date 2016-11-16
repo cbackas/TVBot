@@ -8,10 +8,10 @@ import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.List;
 
-public class CommandLenny implements Command {
+public class CommandArchive implements Command {
     @Override
     public String getName() {
-        return "lenny";
+        return "archive";
     }
 
     @Override
@@ -21,8 +21,7 @@ public class CommandLenny implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        Util.sendMessage(message.getChannel(), "``" + message.getAuthor().getDisplayName(guild) + "``\n( ͡° ͜ʖ ͡°)");
+        Util.sendMessage(message.getChannel(), "https://www.reddit.com/r/discordlounge");
         Util.deleteMessage(message);
     }
-
 }
