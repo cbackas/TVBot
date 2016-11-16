@@ -7,7 +7,9 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommandTrigger implements Command {
     @Override
@@ -23,14 +25,12 @@ public class CommandTrigger implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getID().equals("73416411443113984")) {
-            List<IUser> users = Util.getUsersByRole("226078206497783809");
+            String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
+            String channelNames[] = channelName.split("-\\|-");
 
-            StringBuilder fMessage = new StringBuilder();
-            for (IUser u : users) {
-                fMessage.append("\n").append(u.getDisplayName(guild));
+            for (String c : channelNames) {
+                System.out.println(c);
             }
-
-            Util.sendMessage(message.getChannel(), "Users in the role that I'm testing:\n" + fMessage.toString());
 
             Util.deleteMessage(message);
         }

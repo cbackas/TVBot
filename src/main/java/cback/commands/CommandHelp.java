@@ -64,7 +64,7 @@ public class CommandHelp implements Command {
                     "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                     "!showid [here|showname]                //returns possible imdb id for a show\n" +
                     "!announce [announcement]               //sends a public announcement\n" +
-                    "!addchannel [channel name]             //creates a new channel with the given name\n" +
+                    "!addchannel [name | name | name]       //creates a new channel with the given name\n" +
                     "     aliases: !newchannel\n" +
                     "!resetxp @user                         //resets a users message count\n" +
                     "!amute @user                           //mutes user without log\n" +
