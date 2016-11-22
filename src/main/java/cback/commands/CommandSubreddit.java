@@ -6,17 +6,18 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 
+import java.util.Arrays;
 import java.util.List;
 
-public class CommandArchive implements Command {
+public class CommandSubreddit implements Command {
     @Override
     public String getName() {
-        return "archive";
+        return "subreddit";
     }
 
     @Override
     public List<String> getAliases() {
-        return null;
+        return Arrays.asList("archive");
     }
 
     @Override

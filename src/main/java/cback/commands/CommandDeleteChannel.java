@@ -25,13 +25,29 @@ public class CommandDeleteChannel implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
             List<IChannel> mentionsC = message.getChannelMentions();
-            for (IChannel c : mentionsC) {
+            if (!mentionsC.isEmpty()) {
+                for (IChannel c : mentionsC) {
+                    try {
+
+                        Util.sendBufferedMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```Deleted " + c.getName() + " channel.\n- " + message.getAuthor().getDisplayName(guild) + "```");
+
+                        c.delete();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else if (args[0].equalsIgnoreCase("here")) {
                 try {
-                    c.delete();
-                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```Deleted " + c.getName() + " channel.\n- " + message.getAuthor().getDisplayName(guild) + "```");
+
+                    IChannel here = message.getChannel();
+
+                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```Deleted " + here.getName() + " channel.\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                    here.delete();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            } else {
+                Util.sendMessage(message.getChannel(), "**ERROR**: Couldn't find channel to delete.");
             }
 
             Util.botLog(message);
