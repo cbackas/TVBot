@@ -30,7 +30,7 @@ public class CommandManager {
 
     private void initConfig() {
         try {
-            commandFile = new File(Util.botPath, "tvconfig.json");
+            commandFile = new File(Util.botPath, "commands.json");
             if (commandFile.exists()) {
                 JSONParser parser = new JSONParser();
                 FileReader reader = new FileReader(commandFile);
@@ -80,17 +80,37 @@ public class CommandManager {
     }
 
     /**
-     * Gets a value from the config
+     * Gets a command response from the file
      */
     public String getCommandValue(String key) {
         return (String) commandJson.get(key);
     }
 
     /**
-     * Sets a config value and writes it to the file
+     * Sets a command value and writes it to the file
      */
     public void setConfigValue(String key, Object value) {
         commandJson.put(key, value);
         writeConfig();
+    }
+
+    /**
+     * Deletes a command from the file
+     */
+    public void removeConfigValue(String key) {
+        commandJson.remove(key);
+        writeConfig();
+    }
+
+    /**
+     * Returns a list of commands
+     */
+    public String getCommandList() {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Object key : commandJson.keySet()) {
+            stringBuilder.append("\n").append(((String) key));
+        }
+        return stringBuilder.toString();
     }
 }

@@ -30,9 +30,6 @@ public class CommandHelp implements Command {
                     "!staff                                 //summons moderators to your location\n" +
                     "!stats                                 //shows information about the server \n" +
                     "     aliases: !info, !serverinfo, !server\n" +
-                    "!goodnight                             //does that good night thing everyone likes\n" +
-                    "!lenny                                 //lenny\n" +
-                    "!shrug                                 //shrugs\n" +
                     "!suggest [stuff]                       //pins your suggestion in #suggestion\n" +
                     "     aliases: !idea, !suggestion\n" +
                     "!seesuggestions                        //sends you a list of the current suggestions\n" +
@@ -59,7 +56,7 @@ public class CommandHelp implements Command {
                     "!ban @user [reason]                    //bans user and logs the action";
 
     static final String adminCommands =
-                    "\n------------------------------admin------------------------------\n" +
+            "\n------------------------------admin------------------------------\n" +
                     "!addshow [imdbid] [here|channelid]     //adds a new show to the calendar\n" +
                     "!removeshow [imdbid]                   //deletes a show from the calendar\n" +
                     "!showid [here|showname]                //returns possible imdb id for a show\n" +
@@ -72,7 +69,10 @@ public class CommandHelp implements Command {
                     "!kick @user [reason]                   //kicks user and logs the action\n" +
                     "!addpchannel [channel mentions]        //makes a channel not auto sort\n" +
                     "!removepchannel [channel mentions]     //removes a channel from the unsort list\n" +
-                    "!listpchannels                         //lists all unsortable channels";
+                    "!listpchannels                         //lists all unsortable channels\n" +
+                    "!addcommand command response           //adds a custom command with a custom response\n" +
+                    "!removecommand command                 //removes a custom command\n" +
+                    "!listcommands                          //lists all custom commands";
 
     static final String movieCommands =
             "\n------------------------------------------------------------------\n" +

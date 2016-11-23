@@ -31,10 +31,11 @@ public class TVBot {
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
     private ConfigManager configManager;
+    private CommandManager commandManager;
     private Scheduler scheduler;
 
     private List<String> botAdmins = new ArrayList<>();
-    private List<Command> registeredCommands = new ArrayList<>();
+    public List<Command> registeredCommands = new ArrayList<>();
 
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
     public static final String ANNOUNCEMENT_CHANNEL_ID = "227852239769698304";
@@ -62,6 +63,7 @@ public class TVBot {
 
         //instantiate config manager first as connect() relies on tokens
         configManager = new ConfigManager(this);
+        commandManager = new CommandManager(this);
 
         connect();
         client.getDispatcher().registerListener(this);
@@ -127,6 +129,16 @@ public class TVBot {
                 String args = matcher.group(2);
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
                 command.get().execute(this, client, argsArr, guild, message, isPrivate);
+            } else if (commandManager.getCommandValue(baseCommand) != null) {
+
+                String response = commandManager.getCommandValue(baseCommand);
+
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("``" + message.getAuthor().getDisplayName(guild) + "``\n").append(response);
+
+                Util.sendMessage(message.getChannel(), stringBuilder.toString());
+
+                Util.deleteMessage(message);
             }
         } else {
             String lowerCase = message.getContent().toLowerCase();
@@ -176,6 +188,8 @@ public class TVBot {
     public ConfigManager getConfigManager() {
         return configManager;
     }
+
+    public CommandManager getCommandManager() { return commandManager; }
 
     public IDiscordClient getClient() {
         return client;
