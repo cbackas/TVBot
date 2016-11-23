@@ -11,7 +11,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.List;
 
-public class CommandResetXP implements Command{
+public class CommandXPReset implements Command{
 
     @Override
     public String getName() {
