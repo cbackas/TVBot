@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommandShow implements Command {
+public class CommandSearchShows implements Command {
     @Override
     public String getName() {
         return "show";

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CommandUnmute implements Command {
+public class CommandMuteRemove implements Command {
     @Override
     public String getName() {
         return "unmute";

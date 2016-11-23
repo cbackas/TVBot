@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommandSeeSuggestions implements Command{
+public class CommandSuggestList implements Command{
     @Override
     public String getName() {
         return "seesuggestions";

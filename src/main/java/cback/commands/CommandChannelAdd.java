@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommandAddChannel implements Command {
+public class CommandChannelAdd implements Command {
     @Override
     public String getName() {
         return "addchannel";

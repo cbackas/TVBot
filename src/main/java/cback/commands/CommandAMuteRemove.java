@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CommandAUnmute implements Command {
+public class CommandAMuteRemove implements Command {
     @Override
     public String getName() {
         return "aunmute";

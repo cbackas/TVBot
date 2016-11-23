@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CommandEmbedMute implements Command {
+public class CommandEmbedMuteAdd implements Command {
     @Override
     public String getName() {
         return "embedmute";

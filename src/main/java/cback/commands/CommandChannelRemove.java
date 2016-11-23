@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommandDeleteChannel implements Command {
+public class CommandChannelRemove implements Command {
     @Override
     public String getName() {
         return "deletechannel";

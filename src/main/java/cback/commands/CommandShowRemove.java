@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.List;
 
-public class CommandRemoveShow implements Command {
+public class CommandShowRemove implements Command {
     @Override
     public String getName() {
         return "removeshow";

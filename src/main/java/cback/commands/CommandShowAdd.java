@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.List;
 
-public class CommandAddShow implements Command {
+public class CommandShowAdd implements Command {
     @Override
     public String getName() {
         return "addshow";

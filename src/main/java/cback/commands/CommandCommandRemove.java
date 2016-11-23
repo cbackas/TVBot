@@ -8,7 +8,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.List;
 
-public class CommandRemoveCommand implements Command {
+public class CommandCommandRemove implements Command {
     @Override
     public String getName() {
         return "removecommand";
