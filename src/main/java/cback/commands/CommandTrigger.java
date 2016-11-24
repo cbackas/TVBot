@@ -2,14 +2,16 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
+import in.ashwanthkumar.slack.webhook.Slack;
+import in.ashwanthkumar.slack.webhook.SlackMessage;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandTrigger implements Command {
     @Override
@@ -25,11 +27,20 @@ public class CommandTrigger implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getID().equals("73416411443113984")) {
-            String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
-            String channelNames[] = channelName.split("-\\|-");
+            Pattern pattern = Pattern.compile("^!trigger <@!?(\\d+)> \"(.+)\"");
+            Matcher matcher = pattern.matcher(message.getContent());
+            if (matcher.find()) {
+                IUser user = guild.getUserByID(matcher.group(1));
+                String words = matcher.group(2);
 
-            for (String c : channelNames) {
-                System.out.println(c);
+                try {
+                    new Slack("https://ptb.discordapp.com/api/webhooks/251482202527760385/OkWClC55zDGDkfNaXgHquq0n5vXNNXDCi6P0bUDLqKdrD1Z4WnSueMO-zmvVG6LpCdHb/slack")
+                            .icon(user.getAvatarURL())
+                            .displayName(user.getDisplayName(guild))
+                            .push(new SlackMessage(words));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             Util.deleteMessage(message);

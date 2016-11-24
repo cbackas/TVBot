@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.github.austinv11</groupId>
             <artifactId>Discord4J</artifactId>
-            <version>ae0469e</version>
+            <version>854f666</version>
         </dependency>
         <dependency>
             <groupId>com.uwetrottmann.trakt5</groupId>
@@ -46,6 +46,11 @@
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
             <version>[4.0,)</version>
+        </dependency>
+        <dependency>
+            <groupId>in.ashwanthkumar</groupId>
+            <artifactId>slack-java-webhook</artifactId>
+            <version>0.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
