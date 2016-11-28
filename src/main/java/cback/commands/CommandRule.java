@@ -31,12 +31,7 @@ public class CommandRule implements Command {
                 Rules rule = Rules.getRule(ruleNumber);
 
                 if (rule != null) {
-
-                    try {
-                        new MessageBuilder(client).withChannel(message.getChannel()).appendContent("**" + rule.title + "**").appendQuote(rule.specifics).send();
-                    } catch (Exception e) {
-                    }
-
+                    Util.sendMessage(message.getChannel(), rule.fullRule);
                 } else {
                     Util.sendMessage(message.getChannel(), "Rule not found");
                 }

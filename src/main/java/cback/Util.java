@@ -10,7 +10,6 @@ import sx.blah.discord.api.internal.json.responses.UserResponse;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
@@ -246,4 +245,14 @@ public class Util {
         return null;
     }
 
+    public static String getRule(String ruleID) {
+        try {
+            String rule = TVBot.getInstance().getClient().getChannelByID("251916332747063296").getMessageByID(ruleID).getContent();
+
+            return rule;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
