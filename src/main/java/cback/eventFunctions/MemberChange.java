@@ -21,11 +21,8 @@ public class MemberChange {
         this.bot = bot;
     }
 
-    private IGuild loungeGuild = bot.getClient().getGuildByID("192441520178200577");
-
     @EventSubscriber
     public void memberJoin(UserJoinEvent event) {
-        if (event.getGuild().equals(loungeGuild)) {
             IUser user = event.getUser();
 
             //Memberlog message
@@ -73,12 +70,10 @@ public class MemberChange {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
     }
 
     @EventSubscriber
     public void memberLeave(UserLeaveEvent event) {
-        if (event.getGuild().equals(loungeGuild)) {
             IUser user = event.getUser();
 
             //Memberlog message
@@ -93,12 +88,10 @@ public class MemberChange {
             int left = Integer.parseInt(bot.getConfigManager().getConfigValue("left"));
             bot.getConfigManager().setConfigValue("left", String.valueOf(left + 1));
 
-        }
     }
 
     @EventSubscriber
     public void memberBanned(UserBanEvent event) {
-        if (event.getGuild().equals(loungeGuild)) {
             IUser user = event.getUser();
 
             //Memberlog message
@@ -122,6 +115,5 @@ public class MemberChange {
                 bot.getDatabaseManager().getXP().updateUserXP(xp);
                 Util.sendMessage(bot.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "Reset xp for " + user.getDisplayName(event.getGuild()));
             }
-        }
     }
 }
