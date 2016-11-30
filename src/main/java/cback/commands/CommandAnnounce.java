@@ -27,12 +27,10 @@ public class CommandAnnounce implements Command {
 
             Util.botLog(message);
 
-            if (args.length >= 1) {
-                Util.deleteMessage(message);
+            String announcement = message.getContent().split(" ", 2)[1];
+            Util.sendAnnouncement(announcement);
 
-                String announcement = Arrays.stream(args).collect(Collectors.joining(" "));
-                Util.sendAnnouncement(announcement);
-            }
+            Util.deleteMessage(message);
         }
     }
 
