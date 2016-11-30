@@ -29,11 +29,10 @@ public class CommandSuggestList implements Command{
             StringBuilder response = new StringBuilder();
             if (!messages.isEmpty()) {
                 for (IMessage m : messages) {
-                    String text = m.getContent();
-                    String suggestion[] = text.split(" ", 2);
+                    String suggestion = m.getContent().split(" ", 2)[1];
 
                     if(suggestion != null) {
-                        response.append("\n").append(suggestion[1]);
+                        response.append("\n").append(suggestion);
                     }
                 }
             } else {
