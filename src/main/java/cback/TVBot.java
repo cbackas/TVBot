@@ -158,8 +158,10 @@ public class TVBot {
 
             //Check for discord invite link
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
-                Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
-                Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
+                if (!Util.getUsersByRole(TVBot.ADMIN_ROLE_ID).contains(message.getAuthor()) || !lowerCase.contains("discord.gg/lounge")) {
+                    Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
+                    Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
+                }
             }
 
 
@@ -189,7 +191,9 @@ public class TVBot {
         return configManager;
     }
 
-    public CommandManager getCommandManager() { return commandManager; }
+    public CommandManager getCommandManager() {
+        return commandManager;
+    }
 
     public IDiscordClient getClient() {
         return client;
