@@ -62,9 +62,8 @@ public class ChannelChange {
 
         //Check for tv show
         TraktManager trakt = bot.getTraktManager();
-        String channelName = event.getChannel().getName();
-        String[] showNameArray = channelName.split("-");
-        String showName = Arrays.stream(showNameArray).collect(Collectors.joining(" "));
+        String[] showNameArray = event.getChannel().getName().split("-");
+        String showName = "\"" + Arrays.stream(showNameArray).collect(Collectors.joining(" ")) + "\"";
         Show showData = trakt.showSummaryFromName(showName);
         String possibleID = showData.ids.imdb;
         if (possibleID != null) {
