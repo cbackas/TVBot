@@ -158,7 +158,9 @@ public class TVBot {
 
             //Check for discord invite link
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
-                if (!Util.getUsersByRole(TVBot.ADMIN_ROLE_ID).contains(message.getAuthor()) || !lowerCase.contains("discord.gg/lounge")) {
+                IGuild loungeGuild = client.getGuildByID("192441520178200577");
+                if (message.getAuthor().getRolesForGuild(loungeGuild).contains(loungeGuild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || lowerCase.contains("discord.gg/lounge")) {
+                } else {
                     Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
                     Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
                 }
