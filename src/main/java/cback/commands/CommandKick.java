@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
@@ -24,7 +25,7 @@ public class CommandKick implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.STAFF.id))) {
             String text = message.getContent();
             IUser mod = message.getAuthor();
             IChannel logChannel = guild.getChannelByID("217456105679224846");

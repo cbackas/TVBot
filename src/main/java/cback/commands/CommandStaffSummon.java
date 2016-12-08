@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -25,7 +26,7 @@ public class CommandStaffSummon implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (!bot.getConfigManager().getConfigArray("cantsummon").contains(message.getAuthor().getID())) {
             IChannel modLounge = client.getChannelByID("192444648545845248");
-            List<IUser> mods = Util.getUsersByRole(TVBot.MOD_ROLE_ID);
+            List<IUser> mods = Util.getUsersByRole(TVRoles.MOD.id);
 
             StringBuilder modMentions = new StringBuilder();
             for (IUser u : mods) {

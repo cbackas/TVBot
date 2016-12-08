@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import org.apache.commons.lang3.StringUtils;
 import sx.blah.discord.api.IDiscordClient;
@@ -28,7 +29,7 @@ public class CommandPurge implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-        if (userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.MOD_ROLE_ID)) || userRoles.contains(guild.getRoleByID(TVBot.REDDITMOD_ROLE_ID))) {
+        if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || userRoles.contains(guild.getRoleByID(TVRoles.MOD.id)) || userRoles.contains(guild.getRoleByID(TVRoles.REDDITMOD.id))) {
 
             if (args.length >= 1) {
 
@@ -58,7 +59,7 @@ public class CommandPurge implements Command {
                     }
                 } else {
                     userToDelete = null;
-                    if (!userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+                    if (!userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
                         //Must be admin to purge all without entering user
                         Util.deleteMessage(message);
                         Util.sendMessage(message.getChannel(), "You must specify a user.");

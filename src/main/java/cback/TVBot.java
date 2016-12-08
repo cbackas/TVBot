@@ -45,13 +45,6 @@ public class TVBot {
     public static final String MEMBERLOG_CHANNEL_ID = "217450005462646794";
     public static final String DEV_CHANNEL_ID = "234045109908275201";
 
-    public static final String STAFF_ROLE_ID = "227213155917496330";
-    public static final String ADMIN_ROLE_ID = "192441946210435072";
-    public static final String MOD_ROLE_ID = "192442068981776384";
-    public static final String MOVIENIGHT_ROLE_ID = "226443478664609792";
-    public static final String TRIALMOD_ROLE_ID = "228231762113855489";
-    public static final String REDDITMOD_ROLE_ID = "221973215948308480";
-
 
     public static void main(String[] args) {
         new TVBot();
@@ -159,7 +152,7 @@ public class TVBot {
             //Check for discord invite link
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
                 IGuild loungeGuild = client.getGuildByID("192441520178200577");
-                if (message.getAuthor().getRolesForGuild(loungeGuild).contains(loungeGuild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || lowerCase.contains("discord.gg/lounge")) {
+                if (message.getAuthor().getRolesForGuild(loungeGuild).contains(loungeGuild.getRoleByID(TVRoles.ADMIN.id)) || lowerCase.contains("discord.gg/lounge")) {
                 } else {
                     Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
                     Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");

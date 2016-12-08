@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import cback.database.xp.UserXP;
 import sx.blah.discord.api.IDiscordClient;
@@ -25,7 +26,7 @@ public class CommandXPAdd implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-        if (userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+        if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
             if (args.length >= 1) {
                 IUser mentioned = Util.getUserFromMentionArg(args[0]);
                 if (mentioned != null) {

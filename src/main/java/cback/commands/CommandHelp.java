@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
@@ -86,13 +87,13 @@ public class CommandHelp implements Command {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         String finalHelp = userCommands;
         String variation = Arrays.stream(args).collect(Collectors.joining(" "));
-        if (variation.equalsIgnoreCase("staff") && userRoles.contains(guild.getRoleByID(TVBot.STAFF_ROLE_ID))) {
+        if (variation.equalsIgnoreCase("staff") && userRoles.contains(guild.getRoleByID(TVRoles.STAFF.id))) {
             finalHelp = staffCommands;
         }
-        if (variation.equalsIgnoreCase("admin") && userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+        if (variation.equalsIgnoreCase("admin") && userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
             finalHelp = adminCommands;
         }
-        if (variation.equalsIgnoreCase("movienight") || variation.equalsIgnoreCase("movie night") && userRoles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID))) {
+        if (variation.equalsIgnoreCase("movienight") || variation.equalsIgnoreCase("movie night") && userRoles.contains(guild.getRoleByID(TVRoles.MOVIENIGHT.id))) {
             finalHelp = movieCommands;
         }
         try {

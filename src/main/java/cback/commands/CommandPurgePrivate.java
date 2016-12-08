@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
@@ -23,7 +24,7 @@ public class CommandPurgePrivate implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-        if (userRoles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID))) {
+        if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
 
             IChannel privateChannel = guild.getChannelByID("240614159958540288");
             List<IMessage> messages = privateChannel.getMessages();

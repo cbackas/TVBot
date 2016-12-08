@@ -2,6 +2,7 @@ package cback.commands;
 
 import cback.ConfigManager;
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
@@ -39,7 +40,7 @@ public class CommandMovieNight implements Command {
             Util.deleteMessage(message);
         }
 
-        if (roles.contains(guild.getRoleByID(TVBot.ADMIN_ROLE_ID)) || roles.contains(guild.getRoleByID(TVBot.MOVIENIGHT_ROLE_ID))) {
+        if (roles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || roles.contains(guild.getRoleByID(TVRoles.MOVIENIGHT.id))) {
             Pattern patternOption = Pattern.compile("^(set|announce|start) (.+)");
             Matcher matcherOption = patternOption.matcher(arguments);
             if (matcherOption.find()) {

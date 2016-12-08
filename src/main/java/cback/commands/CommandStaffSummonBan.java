@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
@@ -22,7 +23,7 @@ public class CommandStaffSummonBan implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVBot.MOD_ROLE_ID))) {
+        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.MOD.id))) {
             if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("remove")) {
                     IUser user = Util.getUserFromMentionArg(args[1]);
