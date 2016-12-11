@@ -29,23 +29,7 @@ public class CommandLog implements Command {
             if (args.length >= 1) {
                 List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
                 if (userRoles.contains(guild.getRoleByID(TVRoles.TRIALMOD.id)) || userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || userRoles.contains(guild.getRoleByID(TVRoles.MOD.id))) {
-                    String text = message.getContent().split(" ", 2)[1];
-                    List<IChannel> mentionsC = message.getChannelMentions();
-                    List<IUser> mentionsU = message.getMentions();
-                    List<IRole> mentionsG = message.getRoleMentions();
-                    String finalText = text;
-                    for (IChannel c : mentionsC) {
-                        String displayName = c.getName();
-                        finalText = text.replace(c.mention(), displayName).replace(c.mention(), displayName);
-                    }
-                    for (IUser u : mentionsU) {
-                        String displayName = u.getDisplayName(guild);
-                        finalText = finalText.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
-                    }
-                    for (IRole g : mentionsG) {
-                        String displayName = g.getName();
-                        finalText = finalText.replace(g.mention(), displayName).replace(g.mention(), displayName);
-                    }
+                    String finalText = message.getFormattedContent().split(" ", 2)[1];
                     Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
                     Util.sendMessage(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention());
                     Util.deleteMessage(message);
