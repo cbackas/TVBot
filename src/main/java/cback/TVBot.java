@@ -5,6 +5,8 @@ import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
 import cback.eventFunctions.NicknameChange;
+import in.ashwanthkumar.slack.webhook.Slack;
+import in.ashwanthkumar.slack.webhook.SlackMessage;
 import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -157,6 +159,13 @@ public class TVBot {
                     Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
                     Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
                 }
+            }
+
+            //Global #general messages
+            if (message.getChannel().getID().equals("192441520178200577")) {
+                Util.sendGlobalChat("https://ptb.discordapp.com/api/webhooks/257588104263761921/WKnG8NWmgOD96Sy1nWPTD28Gvkc6o9BasEhT9vSkfW7UJixiJVm83E5nR6X8MJiBjDxl/slack", message);
+            } else if (message.getChannel().getID().equals("256248900124540929")) {
+                Util.sendGlobalChat("https://ptb.discordapp.com/api/webhooks/257588227517448192/ZwFhqeK8CrsMVKB9qwsBiSSPHKjzn96f5E5NCMizYzFD4MAr7Q2kqJ48wdNGHRwaUQYU/slack", message);
             }
 
 

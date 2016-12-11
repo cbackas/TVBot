@@ -1,6 +1,8 @@
 package cback;
 
 import com.google.gson.JsonSyntaxException;
+import in.ashwanthkumar.slack.webhook.Slack;
+import in.ashwanthkumar.slack.webhook.SlackMessage;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -145,6 +147,17 @@ public class Util {
     public static void sendPrivateMessage(IUser user, String message) {
         try {
             user.getClient().getOrCreatePMChannel(user).sendMessage(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendGlobalChat(String URL, IMessage message) {
+        try {
+            new Slack(URL)
+                    .icon(message.getAuthor().getAvatarURL())
+                    .displayName(message.getAuthor().getDisplayName(message.getGuild()))
+                    .push(new SlackMessage(message.getContent()));
         } catch (Exception e) {
             e.printStackTrace();
         }
