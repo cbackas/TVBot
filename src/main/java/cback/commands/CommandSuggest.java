@@ -23,7 +23,7 @@ public class CommandSuggest implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getChannel().getID().equals("192444470942236672") || message.getChannel().getID().equals("214763749867913216")) {
             try {
-                client.getMessageByID(message.getID()).pin();
+                message.getChannel().pin(client.getMessageByID(message.getID()));
             } catch (Exception e) {
             }
         }

@@ -5,10 +5,11 @@ import in.ashwanthkumar.slack.webhook.Slack;
 import in.ashwanthkumar.slack.webhook.SlackMessage;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.responses.UserResponse;
+import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -51,9 +52,7 @@ public class Util {
         RequestBuffer.RequestFuture<IMessage> sentMessage = RequestBuffer.request(() -> {
             try {
                 return channel.sendMessage(message);
-            } catch (MissingPermissionsException e) {
-                e.printStackTrace();
-            } catch (DiscordException e) {
+            } catch (MissingPermissionsException | DiscordException e) {
                 e.printStackTrace();
             }
             return null;
@@ -73,9 +72,7 @@ public class Util {
         RequestBuffer.request(() -> {
             try {
                 message.delete();
-            } catch (MissingPermissionsException e) {
-                e.printStackTrace();
-            } catch (DiscordException e) {
+            } catch (MissingPermissionsException | DiscordException e) {
                 e.printStackTrace();
             }
         });
@@ -87,17 +84,13 @@ public class Util {
                 if (toDelete.size() == 1) {
                     try {
                         toDelete.get(0).delete();
-                    } catch (MissingPermissionsException e) {
-                        e.printStackTrace();
-                    } catch (DiscordException e) {
+                    } catch (MissingPermissionsException | DiscordException e) {
                         e.printStackTrace();
                     }
                 } else {
                     try {
                         channel.getMessages().bulkDelete(toDelete);
-                    } catch (DiscordException e) {
-                        e.printStackTrace();
-                    } catch (MissingPermissionsException e) {
+                    } catch (DiscordException | MissingPermissionsException e) {
                         e.printStackTrace();
                     }
 
@@ -153,14 +146,19 @@ public class Util {
     }
 
     public static void sendGlobalChat(String URL, IMessage message) {
-        try {
-            new Slack(URL)
-                    .icon(message.getAuthor().getAvatarURL())
-                    .displayName(message.getAuthor().getDisplayName(message.getGuild()))
-                    .push(new SlackMessage(message.getContent()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        String content = message.getFormattedContent();
+        String finalContent = "";
+        if (message.mentionsEveryone() || message.mentionsHere()) {
+            String everyoneMessage = "tried to send a message with a lame everyone mention but cback wasn't feeling that so this is the message that is sending instead";
         }
+            try {
+                new Slack(URL)
+                        .icon(message.getAuthor().getAvatarURL())
+                        .displayName(message.getAuthor().getDisplayName(message.getGuild()))
+                        .push(new SlackMessage(finalContent));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     public static int toInt(long value) {
@@ -202,7 +200,7 @@ public class Util {
             try {
                 String result = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id,
                         new BasicNameValuePair("authorization", TVBot.getInstance().getClient().getToken()));
-                return DiscordUtils.getUserFromJSON(client, DiscordUtils.GSON.fromJson(result, UserResponse.class)).getName();
+                return DiscordUtils.GSON.fromJson(result, UserObject.class).username;
             } catch (JsonSyntaxException e) {
                 e.printStackTrace();
             } catch (DiscordException e) {

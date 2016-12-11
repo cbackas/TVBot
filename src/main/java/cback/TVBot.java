@@ -5,8 +5,6 @@ import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
 import cback.eventFunctions.NicknameChange;
-import in.ashwanthkumar.slack.webhook.Slack;
-import in.ashwanthkumar.slack.webhook.SlackMessage;
 import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
