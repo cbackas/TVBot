@@ -26,24 +26,27 @@ public class CommandRemovePrivate implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-        if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
+            if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
 
-            List<IUser> users = message.getMentions();
-            for (IUser u : users) {
-                RequestBuffer.request(() -> {
-                    try {
-                        u.removeRole(guild.getRoleByID("241767985302208513"));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+                List<IUser> users = message.getMentions();
+                for (IUser u : users) {
+                    RequestBuffer.request(() -> {
+                        try {
+                            u.removeRole(guild.getRoleByID("241767985302208513"));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                Util.sendMessage(guild.getChannelByID("240614159958540288"), "Removed user(s) from private channel.");
+
+                Util.botLog(message);
+                Util.deleteMessage(message);
             }
-
-            Util.sendMessage(guild.getChannelByID("240614159958540288"), "Removed user(s) from private channel.");
-
-            Util.botLog(message);
-            Util.deleteMessage(message);
         }
     }
 

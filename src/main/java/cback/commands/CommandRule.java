@@ -25,7 +25,7 @@ public class CommandRule implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.STAFF.id))) {
+        if (Util.permissionCheck(message, "Staff")) {
             if (args.length == 1) {
 
                 String ruleNumber = args[0];

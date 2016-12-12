@@ -25,25 +25,28 @@ public class CommandShowID implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
-            if (args.length >= 1) {
-                String showName = Arrays.stream(args).collect(Collectors.joining(" "));
-                if (showName.equalsIgnoreCase("here")) {
-                    String[] showNameArray = message.getChannel().getName().split("-");
-                    showName = Arrays.stream(showNameArray).collect(Collectors.joining(" "));
-                }
-                Show showData = bot.getTraktManager().showSearch(showName);
-                if (showData != null) {
-                    Util.sendMessage(message.getChannel(), "Found ID for " + showData.title + ": ``" + showData.ids.imdb + "``");
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
+                if (args.length >= 1) {
+                    String showName = Arrays.stream(args).collect(Collectors.joining(" "));
+                    if (showName.equalsIgnoreCase("here")) {
+                        String[] showNameArray = message.getChannel().getName().split("-");
+                        showName = Arrays.stream(showNameArray).collect(Collectors.joining(" "));
+                    }
+                    Show showData = bot.getTraktManager().showSearch(showName);
+                    if (showData != null) {
+                        Util.sendMessage(message.getChannel(), "Found ID for " + showData.title + ": ``" + showData.ids.imdb + "``");
+                    } else {
+                        Util.sendMessage(message.getChannel(), "Show ID not found");
+                    }
                 } else {
-                    Util.sendMessage(message.getChannel(), "Show ID not found");
+                    Util.sendMessage(message.getChannel(), "Usage: !showid [here|showname]");
                 }
-            } else {
-                Util.sendMessage(message.getChannel(), "Usage: !showid [here|showname]");
-            }
 
-            Util.botLog(message);
-            Util.deleteMessage(message);
+                Util.botLog(message);
+                Util.deleteMessage(message);
+            }
         }
     }
 

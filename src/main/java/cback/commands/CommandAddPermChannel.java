@@ -22,32 +22,35 @@ public class CommandAddPermChannel implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
 
-            Util.botLog(message);
-            Util.deleteMessage(message);
+                Util.botLog(message);
+                Util.deleteMessage(message);
 
-            List<IChannel> channels = message.getChannelMentions();
-            if (channels.size() >= 1) {
-                StringBuilder channelMentions = new StringBuilder();
+                List<IChannel> channels = message.getChannelMentions();
+                if (channels.size() >= 1) {
+                    StringBuilder channelMentions = new StringBuilder();
 
-                for (IChannel c : channels) {
+                    for (IChannel c : channels) {
 
-                    List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-                    if (!permChannels.contains(c.getID())) {
-                        permChannels.add(c.getID());
-                        bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
+                        List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
+                        if (!permChannels.contains(c.getID())) {
+                            permChannels.add(c.getID());
+                            bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
 
-                        channelMentions.append(" ").append(c.mention());
-                    } else {
-                        Util.sendMessage(message.getChannel(), c.mention() + " already exists.");
+                            channelMentions.append(" ").append(c.mention());
+                        } else {
+                            Util.sendMessage(message.getChannel(), c.mention() + " already exists.");
+                        }
+
                     }
 
+                    Util.sendMessage(message.getChannel(), "Set " + channelMentions.toString() + " as permanent channel(s).");
+                } else {
+                    Util.sendMessage(message.getChannel(), "Channels not found.");
                 }
-
-                Util.sendMessage(message.getChannel(), "Set " + channelMentions.toString() + " as permanent channel(s).");
-            } else {
-                Util.sendMessage(message.getChannel(), "Channels not found.");
             }
         }
     }

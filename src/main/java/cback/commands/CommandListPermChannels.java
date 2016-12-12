@@ -22,22 +22,25 @@ public class CommandListPermChannels implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
 
-            Util.botLog(message);
-            Util.deleteMessage(message);
+                Util.botLog(message);
+                Util.deleteMessage(message);
 
-            List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-            StringBuilder channelMentions = new StringBuilder();
-            permChannels.forEach(id -> {
-                IChannel channel = guild.getChannelByID(id);
-                if (channel != null) {
-                    channelMentions.append("\n").append(channel.mention());
-                }
-            });
+                List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
+                StringBuilder channelMentions = new StringBuilder();
+                permChannels.forEach(id -> {
+                    IChannel channel = guild.getChannelByID(id);
+                    if (channel != null) {
+                        channelMentions.append("\n").append(channel.mention());
+                    }
+                });
 
-            Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
+                Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
 
+            }
         }
     }
 

@@ -23,27 +23,30 @@ public class CommandSuggestList implements Command{
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        try {
-            List<IMessage> messages = Util.getSuggestions();
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            try {
+                List<IMessage> messages = Util.getSuggestions();
 
-            StringBuilder response = new StringBuilder();
-            if (!messages.isEmpty()) {
-                for (IMessage m : messages) {
-                    String suggestion = m.getContent().split(" ", 2)[1];
+                StringBuilder response = new StringBuilder();
+                if (!messages.isEmpty()) {
+                    for (IMessage m : messages) {
+                        String suggestion = m.getContent().split(" ", 2)[1];
 
-                    if(suggestion != null) {
-                        response.append("\n").append(suggestion);
+                        if (suggestion != null) {
+                            response.append("\n").append(suggestion);
+                        }
                     }
+                } else {
+                    response.append("\n").append("There aren't currently any suggestions.");
                 }
-            } else {
-                response.append("\n").append("There aren't currently any suggestions.");
+
+                Util.sendPrivateMessage(message.getAuthor(), "**Current Suggestions**:\n" + response.toString());
+                Util.deleteMessage(message);
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            Util.sendPrivateMessage(message.getAuthor(), "**Current Suggestions**:\n" + response.toString());
-            Util.deleteMessage(message);
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

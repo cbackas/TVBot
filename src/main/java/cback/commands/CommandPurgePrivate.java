@@ -23,6 +23,8 @@ public class CommandPurgePrivate implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
 
@@ -44,6 +46,7 @@ public class CommandPurgePrivate implements Command {
             Util.botLog(message);
             Util.deleteMessage(message);
 
+        }
         }
     }
 

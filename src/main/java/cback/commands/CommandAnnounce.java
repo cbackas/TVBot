@@ -24,7 +24,7 @@ public class CommandAnnounce implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
+        if (Util.permissionCheck(message, "Admins")) {
 
             Util.botLog(message);
 

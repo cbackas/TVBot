@@ -22,21 +22,24 @@ public class CommandShowRemove implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
-            if (args.length >= 1) {
-                String showID = args[0];
-                Show show = bot.getDatabaseManager().getTV().getShow(showID);
-                int entriesDeleted = bot.getDatabaseManager().getTV().deleteShow(showID);
-                if (show != null && entriesDeleted > 0) {
-                    Util.sendMessage(message.getChannel(), "Removed show: " + show.getShowName() + ".");
-                    System.out.println("@" + message.getAuthor().getName() + " removed show " + show.getShowName());
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
+                if (args.length >= 1) {
+                    String showID = args[0];
+                    Show show = bot.getDatabaseManager().getTV().getShow(showID);
+                    int entriesDeleted = bot.getDatabaseManager().getTV().deleteShow(showID);
+                    if (show != null && entriesDeleted > 0) {
+                        Util.sendMessage(message.getChannel(), "Removed show: " + show.getShowName() + ".");
+                        System.out.println("@" + message.getAuthor().getName() + " removed show " + show.getShowName());
+                    } else {
+                        Util.sendMessage(message.getChannel(), "No saved show found by this IMDB ID.");
+                    }
                 } else {
-                    Util.sendMessage(message.getChannel(), "No saved show found by this IMDB ID.");
+                    Util.sendMessage(message.getChannel(), "Usage: !removeshow <imdbID>");
                 }
-            } else {
-                Util.sendMessage(message.getChannel(), "Usage: !removeshow <imdbID>");
+                Util.botLog(message);
             }
-            Util.botLog(message);
         }
     }
 

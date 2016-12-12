@@ -23,6 +23,8 @@ public class CommandStaffSummonBan implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.MOD.id))) {
             if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("remove")) {
@@ -63,6 +65,7 @@ public class CommandStaffSummonBan implements Command {
                 }
 
             }
+        }
         }
     }
 }

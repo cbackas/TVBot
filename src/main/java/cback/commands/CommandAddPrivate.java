@@ -26,24 +26,26 @@ public class CommandAddPrivate implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-        if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
+        //Lounge Command Only
+        if (guild.getID().equals("192441520178200577")) {
+            if (Util.permissionCheck(message, "Admins")) {
 
-            List<IUser> users = message.getMentions();
-            for (IUser u : users) {
-                RequestBuffer.request(() -> {
-                try {
-                    u.addRole(guild.getRoleByID("241767985302208513"));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                List<IUser> users = message.getMentions();
+                for (IUser u : users) {
+                    RequestBuffer.request(() -> {
+                        try {
+                            u.addRole(guild.getRoleByID("241767985302208513"));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
-                });
+
+                Util.sendMessage(guild.getChannelByID("240614159958540288"), "Added user(s) to private channel.");
+
+                Util.botLog(message);
+                Util.deleteMessage(message);
             }
-
-            Util.sendMessage(guild.getChannelByID("240614159958540288"), "Added user(s) to private channel.");
-
-            Util.botLog(message);
-            Util.deleteMessage(message);
         }
     }
 
