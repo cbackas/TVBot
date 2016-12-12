@@ -5,7 +5,6 @@ import in.ashwanthkumar.slack.webhook.Slack;
 import in.ashwanthkumar.slack.webhook.SlackMessage;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -147,15 +146,11 @@ public class Util {
 
     public static void sendGlobalChat(String URL, IMessage message) {
         String content = message.getFormattedContent();
-        String finalContent = "";
-        if (message.mentionsEveryone() || message.mentionsHere()) {
-            String everyoneMessage = "tried to send a message with a lame everyone mention but cback wasn't feeling that so this is the message that is sending instead";
-        }
             try {
                 new Slack(URL)
                         .icon(message.getAuthor().getAvatarURL())
                         .displayName(message.getAuthor().getDisplayName(message.getGuild()))
-                        .push(new SlackMessage(finalContent));
+                        .push(new SlackMessage(content));
             } catch (Exception e) {
                 e.printStackTrace();
             }
