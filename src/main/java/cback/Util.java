@@ -136,6 +136,15 @@ public class Util {
         }
     }
 
+    public static Boolean permissionCheck(IMessage message, String role) {
+        try {
+            return message.getGuild().getRolesForUser(message.getAuthor()).contains(message.getGuild().getRolesByName(role).get(0));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void sendPrivateMessage(IUser user, String message) {
         try {
             user.getClient().getOrCreatePMChannel(user).sendMessage(message);
@@ -146,14 +155,14 @@ public class Util {
 
     public static void sendGlobalChat(String URL, IMessage message) {
         String content = message.getFormattedContent();
-            try {
-                new Slack(URL)
-                        .icon(message.getAuthor().getAvatarURL())
-                        .displayName(message.getAuthor().getDisplayName(message.getGuild()))
-                        .push(new SlackMessage(content));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            new Slack(URL)
+                    .icon(message.getAuthor().getAvatarURL())
+                    .displayName(message.getAuthor().getDisplayName(message.getGuild()))
+                    .push(new SlackMessage(content));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static int toInt(long value) {
