@@ -22,8 +22,6 @@ public class CommandAddPermChannel implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        //Lounge Command Only
-        if (guild.getID().equals("192441520178200577")) {
             if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
 
                 Util.botLog(message);
@@ -52,7 +50,6 @@ public class CommandAddPermChannel implements Command {
                     Util.sendMessage(message.getChannel(), "Channels not found.");
                 }
             }
-        }
     }
 
 }

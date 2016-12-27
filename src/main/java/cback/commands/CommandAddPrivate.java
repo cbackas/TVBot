@@ -26,8 +26,6 @@ public class CommandAddPrivate implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        //Lounge Command Only
-        if (guild.getID().equals("192441520178200577")) {
             if (Util.permissionCheck(message, "Admins")) {
 
                 List<IUser> users = message.getMentions();
@@ -46,7 +44,6 @@ public class CommandAddPrivate implements Command {
                 Util.botLog(message);
                 Util.deleteMessage(message);
             }
-        }
     }
 
 }

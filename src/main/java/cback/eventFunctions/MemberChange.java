@@ -27,14 +27,6 @@ public class MemberChange {
 
             IUser user = event.getUser();
 
-            //Memberlog message
-            Util.sendMessage(bot.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDCE5  " + user.getName() + " **joined** " + event.getGuild().getName() + user.mention());
-
-            //Bot Check
-            if (event.getUser().isBot()) {
-                Util.sendMessage(bot.getClient().getChannelByID(TVBot.BOTLOG_CHANNEL_ID), "**A bot has joined " + event.getGuild().getName() + "- **" + user.mention());
-            }
-
             if (event.getGuild().getID().equals("192441520178200577")) {
                 //Mute Check
                 if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
@@ -83,9 +75,6 @@ public class MemberChange {
         if (event.getGuild().getID().equals("192441520178200577") || event.getGuild().getID().equals("256248900124540929")) {
             IUser user = event.getUser();
 
-            //Memberlog message
-            Util.sendMessage(bot.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDCE4  " + user.getName() + " **left** " + event.getGuild().getName() + user.mention());
-
             if (event.getGuild().getID().equals("192441520178200577")) {
                 //Mute Check
                 if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getID())) {
@@ -104,9 +93,6 @@ public class MemberChange {
     public void memberBanned(UserBanEvent event) {
         if (event.getGuild().getID().equals("192441520178200577") || event.getGuild().getID().equals("256248900124540929")) {
             IUser user = event.getUser();
-
-            //Memberlog message
-            Util.sendMessage(bot.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "\uD83D\uDD28  " + user.getName() + " was **banned**. " + user.mention());
 
             //Reset xp
             UserXP xp = bot.getDatabaseManager().getXP().getUserXP(user.getID());

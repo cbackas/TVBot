@@ -9,7 +9,6 @@ import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
@@ -136,49 +135,21 @@ public class TVBot {
         } else {
             String lowerCase = message.getContent().toLowerCase();
 
-            //Increment message count if message was not a command
-            databaseManager.getXP().addXP(message.getAuthor().getID(), 1);
-
-            //Check for bot mentions
-            if (message.getMentions().contains(client.getOurUser())) {
-                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "Bot was mentioned in ``#" + message.getChannel().getName() + "``" + " by **" + message.getAuthor().getDisplayName(client.getGuildByID("192441520178200577")) + "**");
-            }
-
-            //cback mentions
-            if (lowerCase.contains("cback")) {
-                Util.sendPrivateMessage(client.getUserByID("73416411443113984"), "**" + message.getAuthor().getDisplayName(client.getGuildByID("192441520178200577")) + "** said your name in ``#" + message.getChannel().getName() + "``");
-            }
-
             //Check for discord invite link
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
                 IGuild loungeGuild = client.getGuildByID("192441520178200577");
-                if (message.getAuthor().getRolesForGuild(loungeGuild).contains(loungeGuild.getRoleByID(TVRoles.ADMIN.id)) || lowerCase.contains("discord.gg/lounge")) {
+                if (Util.permissionCheck(message, "Admins") || lowerCase.contains("discord.gg/lounge") || lowerCase.contains("QeuTNRb") || lowerCase.contains("Empn64q")) {
                 } else {
                     Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
-                    Util.sendMessage(client.getChannelByID("192444648545845248"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
+                    Util.sendMessage(client.getChannelByID("226433456060497920"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
                 }
             }
-
-            //Global #general messages
-            if (message.getChannel().getID().equals("192441520178200577")) {
-                Util.sendGlobalChat("https://ptb.discordapp.com/api/webhooks/257588104263761921/WKnG8NWmgOD96Sy1nWPTD28Gvkc6o9BasEhT9vSkfW7UJixiJVm83E5nR6X8MJiBjDxl/slack", message);
-            } else if (message.getChannel().getID().equals("256248900124540929")) {
-                Util.sendGlobalChat("https://ptb.discordapp.com/api/webhooks/257588227517448192/ZwFhqeK8CrsMVKB9qwsBiSSPHKjzn96f5E5NCMizYzFD4MAr7Q2kqJ48wdNGHRwaUQYU/slack", message);
-            }
-
-
         }
     }
 
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
-    }
-
-    @EventSubscriber
-    public void onDisconnectEvent(DiscordDisconnectedEvent event) {
-        System.out.println("BOT DISCONNECTED");
-        System.out.println("Reason: " + event.getReason());
     }
 
     public DatabaseManager getDatabaseManager() {
