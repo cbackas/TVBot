@@ -99,7 +99,6 @@ public class MemberChange {
             if (xp != null) {
                 xp.setMessageCount(0);
                 bot.getDatabaseManager().getXP().updateUserXP(xp);
-                Util.sendMessage(bot.getClient().getChannelByID(TVBot.MEMBERLOG_CHANNEL_ID), "Reset xp for " + user.getDisplayName(event.getGuild()));
             }
 
             //Mute Check

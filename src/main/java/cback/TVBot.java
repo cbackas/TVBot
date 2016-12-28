@@ -41,8 +41,6 @@ public class TVBot {
     public static final String GENERAL_CHANNEL_ID = "192441520178200577";
     public static final String LOG_CHANNEL_ID = "217456105679224846";
     public static final String BOTLOG_CHANNEL_ID = "231499461740724224";
-    public static final String MEMBERLOG_CHANNEL_ID = "217450005462646794";
-    public static final String DEV_CHANNEL_ID = "234045109908275201";
 
 
     public static void main(String[] args) {
