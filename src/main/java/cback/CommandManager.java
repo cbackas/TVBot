@@ -20,7 +20,6 @@ public class CommandManager {
 
     static {
         //Insert all default config values here. They will be added on startup if they do not exist.
-        defaultCommands.put("command", "response");
     }
 
     public CommandManager(TVBot bot) {
