@@ -2,9 +2,11 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,13 +21,12 @@ public class CommandInfo implements Command {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("serverinfo", "server", "stats");
+        return Arrays.asList("serverinfo", "server", "stats","about");
     }
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        String serverName = guild.getName();
-        int userCount = guild.getUsers().size();
+        int userCount = guild.getTotalMemberCount();
         int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int channelCount = guild.getChannels().size();
 
@@ -35,16 +36,32 @@ public class CommandInfo implements Command {
 
         int suggestionCount = Util.getSuggestions().size();
 
-        String words =
-                "**" + serverName + "**" +
-                        "\n``" + "Created Jun 14, 2016" + "``" +
-                        "\n\n``Users:`` " + userCount +
-                        "\n``New Users:`` " + userChange +
-                        "\n``Channels:`` " + channelCount +
-                        "\n``Suggestions:`` " + suggestionCount;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
 
+        EmbedBuilder embed = Util.getEmbed(message.getAuthor()).withThumbnail(Util.getAvatar(client.getOurUser()));
+        embed.withTitle(guild.getName());
+        embed.appendField("Created: ", guild.getCreationDate().format(formatter), true);
+
+        embed.appendField("\u200B", "\u200B", false);
+
+        embed.appendField("Users: ", Integer.toString(userCount), true);
+        embed.appendField("New Users: ", userChange, true);
+        embed.appendField("Text Channels: ", String.valueOf(client.getChannels(false).size()), true);
+        embed.appendField("Suggestions: ", Integer.toString(suggestionCount), true);
+
+        embed.appendField("\u200B", "\u200B", false);
+
+        embed.appendField("Bot Uptime: ", TVBot.getInstance().getUptime(), true);
+        embed.appendField("Our Servers: ", "[`The Lounge`](http://discord.me/lounge)\n[`The Cinema`](https://discord.gg/QeuTNRb)\n[`The Arcade`](discord.gg/Empn64q)", true);
+        embed.appendField("Donate to our hosting fees: ", "[`cash.me`](https://cash.me/$zgibson)", true);
+
+        embed.appendField("\u200B", "\u200B", false);
+
+        embed.appendField("Made By: ", "cback#3986", true);
+        embed.appendField("Source: ", "[`GitHub`](https://github.com/cbackas/TVBot)", true);
+
+        Util.sendEmbed(message.getChannel(), embed.withColor(023563).build());
         Util.deleteMessage(message);
-        Util.sendMessage(message.getChannel(), words);
     }
 
 }

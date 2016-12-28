@@ -2,10 +2,16 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
+import sun.misc.MessageUtils;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.List;
 
 public class CommandTrigger implements Command {
@@ -22,9 +28,6 @@ public class CommandTrigger implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getID().equals("73416411443113984")) {
-            String fullRule = TVBot.getInstance().getClient().getChannelByID("251916332747063296").getMessageByID("251922232069193728").getContent();
-            System.out.println(fullRule);
-
 
             Util.deleteMessage(message);
         }

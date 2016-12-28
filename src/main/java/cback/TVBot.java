@@ -42,6 +42,7 @@ public class TVBot {
     public static final String LOG_CHANNEL_ID = "217456105679224846";
     public static final String BOTLOG_WEBHOOK_URL = "https://ptb.discordapp.com/api/webhooks/263740625755701259/4md6yxY7cUxq5mS5LcfMtU1azF0RYurFdo-sl-YBbnkp-rhHTQais6xjE_ABXAsGdQG-/slack";
 
+    private long startTime;
 
     public static void main(String[] args) {
         new TVBot();
@@ -133,6 +134,9 @@ public class TVBot {
         } else {
             String lowerCase = message.getContent().toLowerCase();
 
+            //Increment message count if message was not a command
+            databaseManager.getXP().addXP(message.getAuthor().getID(), 1);
+
             //Check for discord invite link
             if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
                 IGuild loungeGuild = client.getGuildByID("192441520178200577");
@@ -148,6 +152,8 @@ public class TVBot {
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
+
+        startTime = System.currentTimeMillis();
     }
 
     public DatabaseManager getDatabaseManager() {
@@ -193,6 +199,14 @@ public class TVBot {
                 e.printStackTrace();
             }
         });
+    }
+
+    public String getUptime() {
+        long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+        long seconds = totalSeconds % 60;
+        long minutes = (totalSeconds / 60) % 60;
+        long hours = (totalSeconds / 3600);
+        return (hours < 10 ? "0" + hours : hours) + "h " + (minutes < 10 ? "0" + minutes : minutes) + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
     }
 
     public static TVBot getInstance() {
