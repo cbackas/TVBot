@@ -99,21 +99,11 @@ public class Util {
     }
 
     public static void botLog(IMessage message) {
+        IDiscordClient client = TVBot.getInstance().getClient();
         try {
-            String text = "@" + message.getAuthor().getDisplayName(message.getGuild()) + " issued ``" + message.getContent() + "`` in " + message.getChannel().mention();
+            String text = "@" + message.getAuthor().getDisplayName(message.getGuild()) + " issued ``" + message.getFormattedContent() + "`` in " + message.getGuild().getName() + "/" + message.getChannel().mention();
 
-            List<IUser> mentionsU = message.getMentions();
-            List<IRole> mentionsG = message.getRoleMentions();
-            for (IUser u : mentionsU) {
-                String displayName = "\\@" + u.getDisplayName(message.getGuild());
-                text.replace(u.mention(false), displayName).replace(u.mention(true), displayName);
-            }
-            for (IRole g : mentionsG) {
-                String displayName = "\\@" + g.getName();
-                text.replace(g.mention(), displayName).replace(g.mention(), displayName);
-            }
-
-            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.BOTLOG_CHANNEL_ID), text);
+            Util.sendWebhook(TVBot.BOTLOG_WEBHOOK_URL, client.getApplicationIconURL(), client.getApplicationName(), text);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,13 +143,12 @@ public class Util {
         }
     }
 
-    public static void sendGlobalChat(String URL, IMessage message) {
-        String content = message.getFormattedContent();
+    public static void sendWebhook(String URL, String iconURL, String displayName, String message) {
         try {
             new Slack(URL)
-                    .icon(message.getAuthor().getAvatarURL())
-                    .displayName(message.getAuthor().getDisplayName(message.getGuild()))
-                    .push(new SlackMessage(content));
+                    .icon(iconURL)
+                    .displayName(displayName)
+                    .push(new SlackMessage(message));
         } catch (Exception e) {
             e.printStackTrace();
         }
