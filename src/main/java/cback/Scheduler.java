@@ -157,13 +157,6 @@ public class Scheduler {
     }
 
     /**
-     * Clear Techronian's meme count
-     */
-    public void updateTechronian() {
-        bot.getConfigManager().setConfigValue("Techronian", "nope");
-    }
-
-    /**
      * Reset daily user change
      */
     public void resetUserChange() {
