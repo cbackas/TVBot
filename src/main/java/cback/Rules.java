@@ -1,13 +1,13 @@
 package cback;
 
 public enum Rules {
-    one("1", Util.getRule("251922065047683073")),
-    two("2", Util.getRule("251922120446181387")),
-    three("3", Util.getRule("251922158786314240")),
-    four("4", Util.getRule("251922192147808256")),
-    five("5", Util.getRule("251922232069193728")),
-    six("6", Util.getRule("251922268408512515")),
-    other("other", Util.getRule("251922307335979018"));
+    one("1", Util.getRule("263187086595719171")),
+    two("2", Util.getRule("263187123769704458")),
+    three("3", Util.getRule("263187157361885194")),
+    four("4", Util.getRule("263187200550764545")),
+    five("5", Util.getRule("263187237397594113")),
+    six("6", Util.getRule("263187288152866817")),
+    other("other", Util.getRule("263187326061117442"));
 
     public String number;
     public String fullRule;
