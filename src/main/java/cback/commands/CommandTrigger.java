@@ -12,7 +12,9 @@ import sx.blah.discord.util.EmbedBuilder;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommandTrigger implements Command {
     @Override
@@ -28,6 +30,10 @@ public class CommandTrigger implements Command {
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         if (message.getAuthor().getID().equals("73416411443113984")) {
+
+            String text = Arrays.stream(args).collect(Collectors.joining(" "));
+
+            Util.sendLog(message, text);
 
             Util.deleteMessage(message);
         }

@@ -45,7 +45,7 @@ public class CommandEmbedMuteRemove implements Command {
                             try {
                                 userInput.removeRole(guild.getRoleByID("239233306325942272"));
                                 Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + "'s embed/attach-files permission has been restored.");
-                                Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userInput.getDisplayName(guild) + "'s embed/attach-files permission has been restored.\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                                Util.sendLog(message,  userInput.getDisplayName(guild) + "'s embed/attach-files permission has been restored.");
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                             }

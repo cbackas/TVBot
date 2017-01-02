@@ -30,7 +30,7 @@ public class CommandLog implements Command {
                 List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
                 if (userRoles.contains(guild.getRoleByID(TVRoles.TRIALMOD.id)) || userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || userRoles.contains(guild.getRoleByID(TVRoles.MOD.id))) {
                     String finalText = message.getFormattedContent().split(" ", 2)[1];
-                    Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + finalText + "\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                    Util.sendLog(message, finalText);
                     Util.sendMessage(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention());
                     Util.deleteMessage(message);
                 } else {

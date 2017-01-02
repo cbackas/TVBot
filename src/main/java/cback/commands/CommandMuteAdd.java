@@ -84,7 +84,7 @@ public class CommandMuteAdd implements Command {
                                     bot.getConfigManager().setConfigValue("muted", mutedUsers);
                                 }
 
-                                Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```Muted " + userInput.getDisplayName(guild) + " for " + reason + ".\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                                Util.sendLog(message, "Muted " + userInput.getDisplayName(guild) + " for " + reason + ".");
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                                 e.printStackTrace();

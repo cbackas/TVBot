@@ -41,7 +41,7 @@ public class CommandChannelAdd implements Command {
                     try {
                         guild.createChannel(c);
 
-                        Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```Added " + c + " channel.\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                        Util.sendLog(message, "Added " + c + " channel.");
                     } catch (DiscordException | MissingPermissionsException e) {
                         e.printStackTrace();
 

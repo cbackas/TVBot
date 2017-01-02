@@ -52,7 +52,7 @@ public class CommandMuteRemove implements Command {
                                     bot.getConfigManager().setConfigValue("muted", mutedUsers);
                                 }
 
-                                Util.sendMessage(guild.getChannelByID(TVBot.LOG_CHANNEL_ID), "```" + userInput.getDisplayName(guild) + " has been unmuted.\n- " + message.getAuthor().getDisplayName(guild) + "```");
+                                Util.sendLog(message, userInput.getDisplayName(guild) + " has been unmuted.");
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                             }

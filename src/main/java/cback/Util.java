@@ -165,6 +165,29 @@ public class Util {
         }
     }
 
+    public static IMessage sendLog(IMessage message, String text) {
+        RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
+            try {
+                IUser user = message.getAuthor();
+
+                new EmbedBuilder();
+                EmbedBuilder embed = new EmbedBuilder();
+
+                embed.withFooterIcon(getAvatar(user));
+                embed.withFooterText("Action by @" + getTag(user));
+
+                embed.withDescription(text);
+                embed.withTimestamp(System.currentTimeMillis());
+
+                IDiscordClient client = TVBot.getInstance().getClient();
+                return new MessageBuilder(client).withEmbed(embed.withColor(023563).build())
+                        .withChannel(message.getChannel()).withContent("\u200B").send();
+            } catch (Exception e) {
+            }
+            return null;
+        });
+        return future.get();
+    }
 
     //EMBEDBUILDER STUFF
     private static String[] defaults = {

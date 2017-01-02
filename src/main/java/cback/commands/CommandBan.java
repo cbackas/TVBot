@@ -43,7 +43,7 @@ public class CommandBan implements Command {
                         } else {
                             try {
                                 guild.banUser(user, 1);
-                                Util.sendMessage(logChannel, "```Banned " + user.getDisplayName(guild) + " for " + reason + ".\n- " + mod.getDisplayName(guild) + "```");
+                                Util.sendLog(message, "Banned " + user.getDisplayName(guild) + " for " + reason + ".");
                                 Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
                             } catch (Exception e) {
                                 e.printStackTrace();
