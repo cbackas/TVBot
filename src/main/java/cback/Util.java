@@ -181,7 +181,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(023563).build())
-                        .withChannel(message.getChannel()).withContent("\u200B").send();
+                        .withChannel(client.getChannelByID("217456105679224846")).withContent("\u200B").send();
             } catch (Exception e) {
             }
             return null;
