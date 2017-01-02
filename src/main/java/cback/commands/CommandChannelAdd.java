@@ -11,6 +11,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,9 +26,12 @@ public class CommandChannelAdd implements Command {
         return Arrays.asList("newchannel", "createchannel");
     }
 
+    public static List<String> permitted = Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id, TVRoles.HEADMOD.id);
+
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
+        List<String> userRoles = message.getAuthor().getRolesForGuild(guild).stream().map(role ->role.getID()).collect(Collectors.toList());
+        if (!Collections.disjoint(userRoles, permitted)) {
 
             String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
             String channelNames[] = channelName.split("-\\|-");
