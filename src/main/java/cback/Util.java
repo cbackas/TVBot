@@ -299,7 +299,7 @@ public class Util {
 
     public static String getRule(String ruleID) {
         try {
-            String rule = TVBot.getInstance().getClient().getChannelByID("251916332747063296").getMessageByID(ruleID).getContent();
+            String rule = TVBot.getInstance().getClient().getChannelByID("263184364811059200").getMessageByID(ruleID).getContent();
 
             return rule;
         } catch (Exception e) {
