@@ -150,9 +150,9 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        IGuild loungeGuild = bot.getClient().getGuildByID("192441520178200577");
+        IGuild loungeGuild = bot.getClient().getGuildByID("256248900124540929");
         if (loungeGuild != null) {
-            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
+            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getTotalMemberCount()));
         }
     }
 
