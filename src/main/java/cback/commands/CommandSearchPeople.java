@@ -6,6 +6,7 @@ import com.uwetrottmann.trakt5.entities.Person;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -46,15 +47,18 @@ public class CommandSearchPeople implements Command {
                 nWords = nWords + " " + arr[i];
             }
 
+            EmbedBuilder embed = Util.getEmbed(message.getAuthor());
 
-            Util.sendMessage(message.getChannel(),
-                    name + "\n" +
-                            nWords + "...\n" +
-                            homepage + "\n" +
-                            "```\n" +
-                            "BORN: " + birthPlace + "\n" +
-                            "BIRTHPLACE: " + dates + "\n" +
-                            "```\n");
+            embed.withTitle(name);
+            embed.withDescription(nWords);
+            embed.appendField("References:", homepage, true);
+
+            embed.appendField("\u200B", "\u200B", false);
+
+            embed.appendField("BORN:", dates, true);
+            embed.appendField("BIRTHPLACE:", birthPlace, true);
+
+            Util.sendEmbed(message.getChannel(), embed.build());
         } else {
             Util.sendMessage(message.getChannel(), "Error: Person not found.");
         }

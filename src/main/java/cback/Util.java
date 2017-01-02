@@ -178,7 +178,7 @@ public class Util {
     public static EmbedBuilder getEmbed() {
         return new EmbedBuilder()
                 .withAuthorIcon(getAvatar(TVBot.getInstance().getClient().getOurUser()))
-                .withAuthorUrl("https://github.com/ArsenArsen/FlareBot")
+                .withAuthorUrl("https://github.com/cbackas/")
                 .withAuthorName(getTag(TVBot.getInstance().getClient().getOurUser()));
     }
 

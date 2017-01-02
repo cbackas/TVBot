@@ -6,6 +6,7 @@ import com.uwetrottmann.trakt5.entities.Movie;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -35,20 +36,26 @@ public class CommandSearchMovies implements Command {
             String runtime = Integer.toString(movieData.runtime);
             String country = movieData.language;
             String homepage = "<https://trakt.tv/movies/" + movieData.ids.slug + ">\n<http://www.imdb.com/title/" + movieData.ids.imdb + ">";
+
+            EmbedBuilder embed = Util.getEmbed(message.getAuthor());
+
             if (movieData.tagline != null) {
-                title = movieData.tagline + "\n\n**" + movieData.title + " (" + Integer.toString(movieData.year) + ")**";
+                embed.withTitle(movieData.tagline);
             }
-            Util.sendMessage(message.getChannel(),
-                    title + "\n" +
-                            overview + "\n" +
-                            homepage + "\n" +
-                            "```\n" +
-                            "PREMIERED: " + premier + "\n" +
-                            "RUNTIME: " + runtime + " min\n" +
-                            "RATED: " + rating + "\n" +
-                            "Language: " + country.toUpperCase() + "\n" +
-                            "GENRES: " + String.join(", ", movieData.genres) + "\n" +
-                            "```\n");
+
+            embed.withTitle(title);
+            embed.withDescription(overview);
+            embed.appendField("References:", homepage, true);
+
+            embed.appendField("\u200B", "\u200B", false);
+
+            embed.appendField("PREMIERED:", premier, true);
+            embed.appendField("RUNTIME:", runtime, true);
+            embed.appendField("RATED:", rating, true);
+            embed.appendField("LANGUAGE:", country.toUpperCase(), true);
+            embed.appendField("GENRES:", String.join(", ", movieData.genres), true);
+
+            Util.sendEmbed(message.getChannel(), embed.build());
         } else {
             Util.sendMessage(message.getChannel(), "Error: Movie not found");
             Util.errorLog(message, "Couldn't find movie: " + movieName);
