@@ -7,7 +7,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
 import java.awt.*;
-import java.awt.image.ColorModel;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +26,7 @@ public class CommandMuteAdd implements Command {
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
         List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
         if (userRoles.contains(guild.getRoleByID(TVRoles.STAFF.id))) {
-            if (userRoles.contains(guild.getRoleByID(TVRoles.TRIALMOD.id)) || userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || userRoles.contains(guild.getRoleByID(TVRoles.MOD.id)) || userRoles.contains(guild.getRoleByID(TVRoles.REDDITMOD.id))) {
+            if (userRoles.contains(guild.getRoleByID(TVRoles.HELPER.id)) || userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || userRoles.contains(guild.getRoleByID(TVRoles.MOD.id)) || userRoles.contains(guild.getRoleByID(TVRoles.REDDITMOD.id))) {
                 List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
 
                 Util.botLog(message);
