@@ -26,7 +26,7 @@ public class CommandInfo implements Command {
 
     @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        int userCount = guild.getTotalMemberCount();
+        int userCount = guild.getUsers().size();
         int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int channelCount = guild.getChannels().size();
 
