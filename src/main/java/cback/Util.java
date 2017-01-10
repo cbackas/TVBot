@@ -180,7 +180,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(023563).build())
-                        .withChannel(client.getChannelByID("217456105679224846")).withContent("\u200B").send();
+                        .withChannel(client.getChannelByID("217456105679224846")).send();
             } catch (Exception e) {
             }
             return null;
@@ -204,7 +204,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
-                        .withChannel(client.getChannelByID("217456105679224846")).withContent("\u200B").send();
+                        .withChannel(client.getChannelByID("217456105679224846")).send();
             } catch (Exception e) {
             }
             return null;
