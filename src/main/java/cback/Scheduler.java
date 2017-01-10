@@ -152,7 +152,7 @@ public class Scheduler {
     public void updateUserCount() {
         IGuild loungeGuild = bot.getClient().getGuildByID("192441520178200577");
         if (loungeGuild != null) {
-            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getTotalMemberCount()));
+            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
         }
     }
 
