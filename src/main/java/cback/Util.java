@@ -13,12 +13,11 @@ import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
+import java.awt.*;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +49,7 @@ public class Util {
         RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
             try {
                 return new MessageBuilder(TVBot.getInstance().getClient()).withEmbed(embedObject)
-                        .withChannel(channel).withContent("\u200B").send();
+                        .withChannel(channel).send();
             } catch (Exception e) {
             }
             return null;
@@ -189,6 +188,30 @@ public class Util {
         return future.get();
     }
 
+    public static IMessage sendLog(IMessage message, String text, Color color) {
+        RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
+            try {
+                IUser user = message.getAuthor();
+
+                new EmbedBuilder();
+                EmbedBuilder embed = new EmbedBuilder();
+
+                embed.withFooterIcon(getAvatar(user));
+                embed.withFooterText("Action by @" + getTag(user));
+
+                embed.withDescription(text);
+                embed.withTimestamp(System.currentTimeMillis());
+
+                IDiscordClient client = TVBot.getInstance().getClient();
+                return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
+                        .withChannel(client.getChannelByID("217456105679224846")).withContent("\u200B").send();
+            } catch (Exception e) {
+            }
+            return null;
+        });
+        return future.get();
+    }
+
     //EMBEDBUILDER STUFF
     private static String[] defaults = {
             "6debd47ed13483642cf09e832ed0bc1b",
@@ -223,6 +246,7 @@ public class Util {
         discrim %= defaults.length;
         return "https://discordapp.com/assets/" + defaults[discrim] + ".png";
     }
+
     //END EMBED BUILDER STUFF
 
     public static int toInt(long value) {

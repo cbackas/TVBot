@@ -9,6 +9,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.awt.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,7 +46,7 @@ public class CommandEmbedMuteAdd implements Command {
                             try {
                                 userInput.addRole(guild.getRoleByID("239233306325942272"));
                                 Util.sendMessage(message.getChannel(), userInput.getDisplayName(guild) + "'s embed/attach-files permission has been suspended.");
-                                Util.sendLog(message, userInput.getDisplayName(guild) + "'s embed/attach-files permission has been suspended.");
+                                Util.sendLog(message, userInput.getDisplayName(guild) + "'s embed/attach-files permission has been suspended.", Color.black);
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                                 e.printStackTrace();

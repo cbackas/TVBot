@@ -6,6 +6,8 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
+import java.awt.*;
+import java.awt.image.ColorModel;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,7 +86,7 @@ public class CommandMuteAdd implements Command {
                                     bot.getConfigManager().setConfigValue("muted", mutedUsers);
                                 }
 
-                                Util.sendLog(message, "Muted " + userInput.getDisplayName(guild) + " for " + reason + ".");
+                                Util.sendLog(message, "Muted " + userInput.getDisplayName(guild) + "\n**Reason:** " + reason, Color.gray);
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                                 e.printStackTrace();

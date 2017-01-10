@@ -7,6 +7,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 
+import java.awt.*;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -28,7 +29,6 @@ public class CommandKick implements Command {
         if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.STAFF.id))) {
             String text = message.getContent();
             IUser mod = message.getAuthor();
-            IChannel logChannel = guild.getChannelByID("217456105679224846");
             try {
                 DiscordUtils.checkPermissions(message.getChannel().getModifiedPermissions(mod), EnumSet.of(Permissions.KICK));
                 Pattern pattern = Pattern.compile("^!kick <@!?(\\d+)> ?(.+)?");
@@ -43,7 +43,7 @@ public class CommandKick implements Command {
                         } else {
                             try {
                                 guild.kickUser(user);
-                                Util.sendLog(message, "Kicked " + user.getDisplayName(guild) + " for " + reason + ".");
+                                Util.sendLog(message, "Kicked " + user.getDisplayName(guild) + "\n**Reason:** " + reason, Color.red);
                                 Util.sendMessage(message.getChannel(), user.getDisplayName(guild) + " has been kicked. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info");
                             } catch (Exception e) {
                                 e.printStackTrace();

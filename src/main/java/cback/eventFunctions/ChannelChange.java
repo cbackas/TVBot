@@ -54,10 +54,12 @@ public class ChannelChange {
     public void newChannel(ChannelCreateEvent event) {
         //Lounge Command Only
         if (event.getChannel().getGuild().getID().equals("192441520178200577")) {
+
             //Set muted role
             IGuild guild = event.getClient().getGuildByID("192441520178200577");
             IRole muted = guild.getRoleByID("231269949635559424");
             IRole embedMuted = guild.getRoleByID("239233306325942272");
+
             try {
                 event.getChannel().overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
                 event.getChannel().overrideRolePermissions(embedMuted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.EMBED_LINKS, Permissions.ATTACH_FILES));
@@ -86,8 +88,6 @@ public class ChannelChange {
 
     @EventSubscriber
     public void onDeleteChannelEvent(ChannelDeleteEvent event) {
-        //Lounge Command Only
-        if (event.getChannel().getGuild().getID().equals("192441520178200577")) {
             List<cback.database.tv.Show> shows = bot.getDatabaseManager().getTV().getShowsByChannel(event.getChannel().getID());
             if (shows != null) {
                 shows.forEach(show -> {
@@ -104,7 +104,6 @@ public class ChannelChange {
                 permChannels.remove(event.getChannel().getID());
                 bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
             }
-        }
     }
 
 }

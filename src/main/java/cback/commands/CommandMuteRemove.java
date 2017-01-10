@@ -6,6 +6,7 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
+import java.awt.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +53,7 @@ public class CommandMuteRemove implements Command {
                                     bot.getConfigManager().setConfigValue("muted", mutedUsers);
                                 }
 
-                                Util.sendLog(message, userInput.getDisplayName(guild) + " has been unmuted.");
+                                Util.sendLog(message, userInput.getDisplayName(guild) + " has been unmuted.", Color.gray);
                                 Util.deleteMessage(message);
                             } catch (Exception e) {
                             }
