@@ -3,15 +3,12 @@ package cback.eventFunctions;
 import cback.TVBot;
 import cback.Util;
 import cback.database.xp.UserXP;
-import sun.awt.image.URLImageSource;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.UserBanEvent;
-import sx.blah.discord.handle.impl.events.UserJoinEvent;
-import sx.blah.discord.handle.impl.events.UserLeaveEvent;
-import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.impl.events.guild.member.UserBanEvent;
+import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
+import sx.blah.discord.handle.impl.events.guild.member.UserLeaveEvent;
 import sx.blah.discord.handle.obj.IUser;
 
-import java.net.URL;
 import java.util.List;
 
 public class MemberChange {
