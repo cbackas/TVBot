@@ -174,8 +174,9 @@ public class Util {
 
                 embed.withFooterIcon(getAvatar(user));
                 embed.withFooterText("Action by @" + getTag(user));
-
                 embed.withDescription(text);
+                embed.appendField("\u200B", "\u200B", false);
+
                 embed.withTimestamp(System.currentTimeMillis());
 
                 IDiscordClient client = TVBot.getInstance().getClient();
@@ -198,8 +199,9 @@ public class Util {
 
                 embed.withFooterIcon(getAvatar(user));
                 embed.withFooterText("Action by @" + getTag(user));
-
                 embed.withDescription(text);
+                embed.appendField("\u200B", "\u200B", false);
+
                 embed.withTimestamp(System.currentTimeMillis());
 
                 IDiscordClient client = TVBot.getInstance().getClient();
