@@ -2,18 +2,10 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
-import sun.misc.MessageUtils;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.impl.obj.Webhook;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IWebhook;
-import sx.blah.discord.util.EmbedBuilder;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
