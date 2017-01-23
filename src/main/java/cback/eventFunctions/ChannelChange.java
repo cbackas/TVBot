@@ -6,9 +6,9 @@ import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.ChannelCreateEvent;
-import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.RequestBuffer;
 

@@ -1,9 +1,7 @@
 package cback.eventFunctions;
 
-import cback.TVBot;
-import cback.Util;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.NickNameChangeEvent;
+import sx.blah.discord.handle.impl.events.guild.member.NickNameChangeEvent;
 import sx.blah.discord.handle.obj.IGuild;
 
 public class NicknameChange {
