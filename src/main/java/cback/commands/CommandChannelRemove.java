@@ -24,6 +24,21 @@ public class CommandChannelRemove implements Command {
         return Arrays.asList("removechannel");
     }
 
+    @Override
+    public String getSyntax() {
+        return null;
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
+    public List<String> getPermissions() {
+        return null;
+    }
+
     public static List<String> permitted = Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id, TVRoles.HEADMOD.id);
 
     @Override

@@ -12,6 +12,12 @@ public interface Command {
 
     List<String> getAliases();
 
+    String getSyntax();
+
+    String getDescription();
+
+    List<String> getPermissions();
+
     void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate);
 
 }

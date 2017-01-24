@@ -24,6 +24,21 @@ public class CommandScoreboard implements Command {
     }
 
     @Override
+    public String getSyntax() {
+        return null;
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
+    public List<String> getPermissions() {
+        return null;
+    }
+
+    @Override
     public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
 
         int defaultCount = 5;

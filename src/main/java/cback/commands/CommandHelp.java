@@ -24,6 +24,21 @@ public class CommandHelp implements Command {
         return Arrays.asList("commands");
     }
 
+    @Override
+    public String getSyntax() {
+        return null;
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
+    public List<String> getPermissions() {
+        return null;
+    }
+
     static final String userCommands =
             "-----------------------------commands-----------------------------\n" +
                     "!help [staff|movienight|admin]         //shows a list of commands\n" +
