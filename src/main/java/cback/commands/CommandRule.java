@@ -7,6 +7,7 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.util.List;
@@ -47,7 +48,13 @@ public class CommandRule implements Command {
                 Rules rule = Rules.getRule(ruleNumber);
 
                 if (rule != null) {
-                    Util.sendMessage(message.getChannel(), rule.fullRule);
+                    EmbedBuilder ruleEmbed = new EmbedBuilder();
+
+                    ruleEmbed
+                            .withAuthorName(rule.title)
+                            .withDescription(rule.fullRule);
+
+                    Util.sendEmbed(message.getChannel(), ruleEmbed.withColor(023563).build());
                 } else {
                     Util.sendMessage(message.getChannel(), "Rule not found");
                 }
