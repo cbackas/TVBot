@@ -38,7 +38,8 @@ public class TVBot {
     public List<Command> registeredCommands = new ArrayList<>();
 
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
-    public static final String ANNOUNCEMENT_CHANNEL_ID = "263184398894104577";
+    public static final String ANNOUNCEMENT_CHANNEL_ID = "345774506373021716";
+    public static final String NEW_EPISODE_CHANNEL_ID = "263184398894104577";
     public static final String GENERAL_CHANNEL_ID = "192441520178200577";
     public static final String LOG_CHANNEL_ID = "217456105679224846";
     public static final String BOTLOG_WEBHOOK_URL = "https://ptb.discordapp.com/api/webhooks/263740625755701259/4md6yxY7cUxq5mS5LcfMtU1azF0RYurFdo-sl-YBbnkp-rhHTQais6xjE_ABXAsGdQG-/slack";

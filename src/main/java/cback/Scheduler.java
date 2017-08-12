@@ -85,7 +85,7 @@ public class Scheduler {
             try {
                 Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
                 if (show != null) {
-                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID);
+                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEW_EPISODE_CHANNEL_ID);
                     IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
                     IChannel showChannel = bot.getClient().getChannelByID(show.getChannelID());
 
