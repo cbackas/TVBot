@@ -40,30 +40,6 @@ public class MemberChange {
 
 
             }
-            String welcomeMessage = "Welcome to " + event.getGuild().getName() + "! We primarily discuss television but we also discuss other things on occasion. We are an English server.\n" +
-                    "\n" +
-                    "``Rules``\n" +
-                    "**Rule 1:** Stay Civil\n" +
-                    "\n" +
-                    "**Rule 2:** No Spam\n" +
-                    "\n" +
-                    "**Rule 3:** No Self-Promotion\n" +
-                    "\n" +
-                    "**Rule 4:** Keep spoilers in their respective channels.\n" +
-                    "\n" +
-                    "**Rule 5:** No NSFW of any kind.\n" +
-                    "\n" +
-                    "**Rule 6:** Do not abuse or add bots.\n" +
-                    "\n" +
-                    "**Other:** Our rules are subject to change, more in depth rules are on the server, #announcements.\n" +
-                    "\n" +
-                    "``Important info``\n" +
-                    "We are constantly adding new channels and deleting inactive ones, If you don't see your favorite show head over to #suggestions and simply do !suggest 'your show'. It will probably be added soon!";
-            try {
-                Util.sendPrivateMessage(user, welcomeMessage);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 
