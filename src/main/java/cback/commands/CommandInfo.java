@@ -68,7 +68,7 @@ public class CommandInfo implements Command {
 
         embed.appendField("Bot Uptime: ", TVBot.getInstance().getUptime(), true);
         embed.appendField("Our Servers: ", "[`The Lounge`](http://discord.me/lounge)\n[`The Cinema`](https://discord.gg/QeuTNRb)\n[`The Arcade`](discord.gg/Empn64q)", true);
-        embed.appendField("Donate to our hosting fees: ", "[`cash.me`](https://cash.me/$zgibson)", true);
+        embed.appendField("Feed bot developers: ", "[`paypal.me`](paypal.me/cbackas)", true);
 
         embed.appendField("\u200B", "\u200B", false);
 
