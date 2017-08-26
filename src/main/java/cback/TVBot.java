@@ -158,16 +158,6 @@ public class TVBot {
         startTime = System.currentTimeMillis();
     }
 
-    @EventSubscriber
-    public void onDisconnectEvent(DisconnectedEvent event) {
-        Util.sendWebhook(
-                "https://ptb.discordapp.com/api/webhooks/276878075944370177/lyhmQffmqwILMc7vawjk3g2tG-1XCV_oqSShvWq4ugjIQQ0X69ffp_cGaruoZ265w72S/slack",
-                client.getApplicationIconURL(),
-                client.getApplicationName(),
-                client.getUserByID("73416411443113984").mention() + " TVBot has gone offline."
-        );
-    }
-
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
