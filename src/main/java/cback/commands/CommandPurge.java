@@ -58,7 +58,7 @@ public class CommandPurge implements Command {
                     maxDeletions = Integer.parseInt(numberArg);
                     if (maxDeletions <= 0) {
                         Util.deleteMessage(message);
-                        Util.sendMessage(message.getChannel(), "Invalid number \"" + numberArg + "\".");
+                        Util.simpleEmbed(message.getChannel(), "Invalid number \"" + numberArg + "\".");
                         return;
                     }
                 } catch (NumberFormatException e) {
