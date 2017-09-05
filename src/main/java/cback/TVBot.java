@@ -41,7 +41,7 @@ public class TVBot {
     private List<String> botAdmins = new ArrayList<>();
 
     public static List<Command> registeredCommands = new ArrayList<>();
-    static private String prefix = "?";
+    static private String prefix = "!";
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
     public static final Long ANNOUNCEMENT_CHANNEL_ID = 345774506373021716l;
