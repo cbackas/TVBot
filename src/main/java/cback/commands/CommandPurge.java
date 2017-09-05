@@ -9,6 +9,8 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.MessageComparator;
+import sx.blah.discord.util.MessageHistory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -80,9 +82,13 @@ public class CommandPurge implements Command {
                 }
             }
 
+            //sort messages by date
+            MessageHistory messageHistory = message.getChannel().getMessageHistory();
+            messageHistory.sort(MessageComparator.REVERSED);
+
             if (userToDelete != null) { //this is a prune
 
-                List<IMessage> toDelete = message.getChannel().getMessages().stream()
+                List<IMessage> toDelete = messageHistory.stream()
                         .filter(msg -> msg.getAuthor().equals(userToDelete) && !msg.equals(message))
                         .limit(maxDeletions)
                         .collect(Collectors.toList());
@@ -92,7 +98,7 @@ public class CommandPurge implements Command {
 
             } else { //this is a purge
 
-                List<IMessage> toDelete = message.getChannel().getMessages().stream()
+                List<IMessage> toDelete = messageHistory.stream()
                         .filter(msg -> !msg.equals(message))
                         .limit(maxDeletions)
                         .collect(Collectors.toList());

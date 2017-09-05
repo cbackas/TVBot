@@ -4,7 +4,7 @@ import cback.eventFunctions.ChannelChange;
 import cback.eventFunctions.MemberChange;
 import cback.commands.*;
 import cback.database.DatabaseManager;
-import cback.eventFunctions.NicknameChange;
+import cback.eventFunctions.MessageChange;
 import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -73,7 +73,7 @@ public class TVBot {
         client.getDispatcher().registerListener(this);
         client.getDispatcher().registerListener(new ChannelChange(this));
         client.getDispatcher().registerListener(new MemberChange(this));
-        client.getDispatcher().registerListener(new NicknameChange());
+        client.getDispatcher().registerListener(new MessageChange(this));
 
         databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);

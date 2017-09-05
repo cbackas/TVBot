@@ -52,7 +52,7 @@ public class CommandSort implements Command {
         Util.simpleEmbed(message.getChannel(), "Sorting time! Here we go.");
         //permanent channels sorted by position to keep on top or bottom
         List<IChannel> permChannels = bot.getConfigManager().getConfigArray("permanentchannels").stream()
-                .map(id -> guild.getChannelByID(id))
+                .map(id -> guild.getChannelByID(Long.parseLong(id)))
                 .sorted((chan1, chan2) -> Integer.compare(chan1.getPosition(), chan2.getPosition()))
                 .collect(Collectors.toList());
         List<IChannel> permChannelsTop = new ArrayList<>();

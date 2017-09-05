@@ -47,7 +47,7 @@ public class CommandRoleID implements Command {
             List<IRole> serverRoles = guild.getRoles();
 
             if (roleName.equalsIgnoreCase("listall")) {
-                String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getID()).reduce("", (a, b) -> a + b + "\n");
+                String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getStringID()).reduce("", (a, b) -> a + b + "\n");
 
                 Util.sendBufferedMessage(message.getChannel(), roleList);
             } else {

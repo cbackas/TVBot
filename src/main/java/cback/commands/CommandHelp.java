@@ -41,35 +41,31 @@ public class CommandHelp implements Command {
 
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length >= 1) {
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.withTitle("Commands:");
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.withTitle("Commands:");
 
-            List<Long> roles = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
-            for (Command c : TVBot.registeredCommands) {
+        List<Long> roles = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
+        for (Command c : TVBot.registeredCommands) {
 
-                if (c.getDescription() != null) {
+            if (c.getDescription() != null) {
 
-                    String aliases = "";
-                    if (c.getAliases() != null) {
-                        aliases = "\n*Aliases:* " + c.getAliases().toString();
-                    }
+                String aliases = "";
+                if (c.getAliases() != null) {
+                    aliases = "\n*Aliases:* " + c.getAliases().toString();
+                }
 
-                    if (c.getPermissions() == null || !Collections.disjoint(roles, c.getPermissions())) {
-                        embed.appendField(bot.getPrefix()+c.getSyntax(), c.getDescription() + aliases, false);
-                    }
+                if (c.getPermissions() == null || !Collections.disjoint(roles, c.getPermissions())) {
+                    embed.appendField(bot.getPrefix() + c.getSyntax(), c.getDescription() + aliases, false);
                 }
             }
+        }
 
-            embed.withFooterText("Staff commands excluded for regular users");
+        embed.withFooterText("You can only see commands you can use.");
 
-            try {
-                Util.sendEmbed(message.getAuthor().getOrCreatePMChannel(), embed.withColor(Util.getBotColor()).build());
-            } catch (Exception e) {
-                Util.reportHome(message, e);
-            }
-        } else {
-            Util.syntaxError(this, message);
+        try {
+            Util.sendEmbed(message.getAuthor().getOrCreatePMChannel(), embed.withColor(Util.getBotColor()).build());
+        } catch (Exception e) {
+            Util.reportHome(message, e);
         }
     }
 

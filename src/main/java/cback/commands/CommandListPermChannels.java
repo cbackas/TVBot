@@ -44,7 +44,7 @@ public class CommandListPermChannels implements Command {
         StringBuilder channelMentions = new StringBuilder();
 
         permChannels.forEach(id -> {
-            IChannel channel = guild.getChannelByID(id);
+            IChannel channel = guild.getChannelByID(Long.parseLong(id));
             if (channel != null) {
                 channelMentions.append("\n").append(channel.mention());
             }

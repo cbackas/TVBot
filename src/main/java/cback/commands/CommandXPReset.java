@@ -44,7 +44,7 @@ public class CommandXPReset implements Command{
             if(args.length >= 1) {
                 IUser mentioned = Util.getUserFromMentionArg(args[0]);
                 if(mentioned != null) {
-                    UserXP xp = bot.getDatabaseManager().getXP().getUserXP(mentioned.getID());
+                    UserXP xp = bot.getDatabaseManager().getXP().getUserXP(mentioned.getStringID());
                     if(xp != null){
                         xp.setMessageCount(0);
                         bot.getDatabaseManager().getXP().updateUserXP(xp);

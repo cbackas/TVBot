@@ -26,15 +26,14 @@ public class ChannelChange {
 
     @EventSubscriber //Set all
     public void setMuteRoleMASS(MessageReceivedEvent event) {
-        //Lounge Command Only
-        if (event.getMessage().getGuild().getID().equals("192441520178200577")) {
+        if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID())) {
             IMessage message = event.getMessage();
             String text = message.getContent();
             IDiscordClient client = event.getClient();
-            if (text.equalsIgnoreCase("!setmuteperm") && message.getAuthor().getID().equals("73416411443113984")) {
-                List<IChannel> channelList = client.getGuildByID("192441520178200577").getChannels();
-                IGuild guild = event.getClient().getGuildByID("192441520178200577");
-                IRole muted = guild.getRoleByID("239233306325942272");
+            if (text.equalsIgnoreCase("!setmuteperm") && message.getAuthor().getStringID().equals("73416411443113984")) {
+                List<IChannel> channelList = client.getGuildByID(192441520178200577l).getChannels();
+                IGuild guild = event.getClient().getGuildByID(192441520178200577l);
+                IRole muted = guild.getRoleByID(239233306325942272l);
                 for (IChannel channels : channelList) {
                     RequestBuffer.request(() -> {
                         try {
@@ -52,13 +51,11 @@ public class ChannelChange {
 
     @EventSubscriber //New Channel
     public void newChannel(ChannelCreateEvent event) {
-        //Lounge Command Only
-        if (event.getChannel().getGuild().getID().equals("192441520178200577")) {
-
+        if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID())) {
             //Set muted role
-            IGuild guild = event.getClient().getGuildByID("192441520178200577");
-            IRole muted = guild.getRoleByID("231269949635559424");
-            IRole embedMuted = guild.getRoleByID("239233306325942272");
+            IGuild guild = event.getClient().getGuildByID(192441520178200577l);
+            IRole muted = guild.getRoleByID(231269949635559424l);
+            IRole embedMuted = guild.getRoleByID(239233306325942272l);
 
             try {
                 event.getChannel().overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
@@ -77,10 +74,10 @@ public class ChannelChange {
                 String showNetwork = showData.network;
                 if (!showNetwork.equalsIgnoreCase("netflix")) {
                     String nameFromIMDB = trakt.getShowTitle(possibleID);
-                    Util.sendMessage(event.getChannel(), "Found possible show: **" + nameFromIMDB + "**. The showID is ``" + possibleID + "``." +
-                            "\n\nBot Admins use: ``!addshow " + possibleID + " here`` to add the show");
+                    Util.simpleEmbed(event.getChannel(), "Found possible show: **" + nameFromIMDB + "**. The showID is: " + possibleID + "." +
+                            "\n\nAdmins use: !addshow " + possibleID + " here to add the show");
                 } else {
-                    Util.sendMessage(event.getChannel(), "Netflix show detected - data not stored");
+                    Util.simpleEmbed(event.getChannel(), "Netflix show detected - data not stored");
                 }
             }
         }
@@ -88,22 +85,24 @@ public class ChannelChange {
 
     @EventSubscriber
     public void onDeleteChannelEvent(ChannelDeleteEvent event) {
-            List<cback.database.tv.Show> shows = bot.getDatabaseManager().getTV().getShowsByChannel(event.getChannel().getID());
+        if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID())) {
+            List<cback.database.tv.Show> shows = bot.getDatabaseManager().getTV().getShowsByChannel(event.getChannel().getStringID());
             if (shows != null) {
                 shows.forEach(show -> {
                     if (bot.getDatabaseManager().getTV().deleteShow(show.getShowID()) > 0) {
-                        String message = "**Channel Deleted: Removed show** ``" + show.getShowName() + "`` **from database automatically.**";
+                        String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
                         System.out.println(message);
-                        Util.sendMessage(bot.getClient().getChannelByID("231499461740724224"), message);
+                        Util.simpleEmbed(bot.getClient().getChannelByID(231499461740724224l), message);
                     }
                 });
             }
 
             List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-            if (permChannels.contains(event.getChannel().getID())) {
-                permChannels.remove(event.getChannel().getID());
+            if (permChannels.contains(event.getChannel().getStringID())) {
+                permChannels.remove(event.getChannel().getStringID());
                 bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
             }
+        }
     }
 
 }
