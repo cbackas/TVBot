@@ -56,7 +56,7 @@ public class CommandSearchShows implements Command {
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";
 
             try {
-                title += " " + guild.getChannelByID(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID());
+                title += " " + guild.getChannelByID(Long.parseLong(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID()));
             } catch (Exception ignored) {
                 title = "**" + showData.title + " (" + Integer.toString(showData.year) + ")**";
             }
