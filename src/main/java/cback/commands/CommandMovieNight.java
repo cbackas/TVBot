@@ -7,7 +7,6 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
@@ -66,10 +65,10 @@ public class CommandMovieNight implements Command {
                     String date = matcherSet.group(2);
                     String announcement = "The poll for the next movie night is now open! " + poll + " Movie night will be on " + date + ".";
 
-                    Util.deleteMessage(client.getMessageByID(configManager.getConfigValue("mnID")));
+                    Util.deleteMessage(client.getMessageByID(Long.parseLong(configManager.getConfigValue("mnID"))));
 
                     IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
-                    String messageID = thingy.getID();
+                    String messageID = thingy.getStringID();
 
                     Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
                     try {
@@ -88,10 +87,10 @@ public class CommandMovieNight implements Command {
                     String movie = matcherAnnounce.group(1);
                     String announcement = "The movie night poll is now closed! The movie that won is " + movie + ". Movie night will be on " + configManager.getConfigValue("date");
 
-                    Util.deleteMessage(client.getMessageByID(configManager.getConfigValue("mnID")));
+                    Util.deleteMessage(client.getMessageByID(Long.parseLong(configManager.getConfigValue("mnID"))));
 
                     IMessage message2Delete = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
-                    String messageID = message2Delete.getID();
+                    String messageID = message2Delete.getStringID();
 
                     Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
                     try {
@@ -109,10 +108,10 @@ public class CommandMovieNight implements Command {
                     String rabbit = "<https://rabb.it/" + matcherStart.group(1) + ">";
                     String announcement = "We are about to start watching " + configManager.getConfigValue("movie") + "! Come check it out here " + rabbit;
 
-                    Util.deleteMessage(client.getMessageByID(configManager.getConfigValue("mnID")));
+                    Util.deleteMessage(client.getMessageByID(Long.parseLong(configManager.getConfigValue("mnID"))));
 
                     IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
-                    String messageID = thingy.getID();
+                    String messageID = thingy.getStringID();
 
                     Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
                     try {

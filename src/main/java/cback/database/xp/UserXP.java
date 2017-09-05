@@ -20,7 +20,7 @@ public class UserXP {
     }
 
     public IUser getUser() {
-        if(user == null) user = TVBot.getInstance().getClient().getUserByID(userID);
+        if(user == null) user = TVBot.getInstance().getClient().getUserByID(Long.parseLong(userID));
         return user;
     }
 

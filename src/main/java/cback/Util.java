@@ -32,7 +32,7 @@ public class Util {
         try {
             channel.sendMessage(message);
         } catch (Exception e) {
-            e.printStackTrace();
+            reportHome(e);
         }
     }
 
@@ -249,6 +249,9 @@ public class Util {
         });
     }
 
+    /**
+     * Bulk deletes a list of messages
+     */
     public static void bulkDelete(IChannel channel, List<IMessage> toDelete) {
         RequestBuffer.request(() -> {
             if (toDelete.size() > 0) {
@@ -256,13 +259,13 @@ public class Util {
                     try {
                         toDelete.get(0).delete();
                     } catch (MissingPermissionsException | DiscordException e) {
-                        e.printStackTrace();
+                        reportHome(e);
                     }
                 } else {
                     try {
-                        channel.getMessages().bulkDelete(toDelete);
+                        channel.bulkDelete(toDelete);
                     } catch (DiscordException | MissingPermissionsException e) {
-                        e.printStackTrace();
+                        reportHome(e);
                     }
 
                 }
@@ -270,18 +273,13 @@ public class Util {
         });
     }
 
+    /**
+     * Sends an announcement (message in general and announcements)
+     */
     public static void sendAnnouncement(String message) {
         try {
             Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID), message);
             Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void errorLog(IMessage message, String text) {
-        try {
-            Util.sendPrivateMessage(TVBot.getInstance().getClient().getUserByID("73416411443113984"), text + " in  " + message.getChannel().mention());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -348,7 +346,7 @@ public class Util {
     public static IUser getUserFromMentionArg(String arg) {
         Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
         if (matcher.matches()) {
-            return TVBot.getInstance().getClient().getUserByID(matcher.group(1));
+            return TVBot.getInstance().getClient().getUserByID(Long.parseLong(matcher.group(1)));
         }
         return null;
     }
@@ -366,7 +364,7 @@ public class Util {
 
     public static String getRule(Long ruleID) {
         try {
-            String rule = TVBot.getInstance().getClient().getChannelByID("263184364811059200").getMessageByID(ruleID).getContent();
+            String rule = TVBot.getInstance().getClient().getChannelByID(263184364811059200l).getMessageByID(ruleID).getContent();
 
             return rule;
         } catch (Exception e) {

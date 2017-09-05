@@ -50,7 +50,7 @@ public class Scheduler {
             //announce new airings
             processNewAirings(currentTime);
             //delete messages for old airings
-            processOldAirings(currentTime);
+            //processOldAirings(currentTime);
 
         }, airingCheckWaitTime, CHECK_AIRING_INTERVAL, TimeUnit.SECONDS);
 
@@ -87,12 +87,12 @@ public class Scheduler {
                 if (show != null) {
                     IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEW_EPISODE_CHANNEL_ID);
                     IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
-                    IChannel showChannel = bot.getClient().getChannelByID(show.getChannelID());
+                    IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
 
                     String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start. Go to " + showChannel.mention() + " for live episode discussion!";
 
                     IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
-                    airing.setMessageID(announceMessage.getID());
+                    airing.setMessageID(announceMessage.getStringID());
                     bot.getDatabaseManager().getTV().updateAiringMessage(airing);
                     Util.sendBufferedMessage(globalChannel, message);
                     Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
@@ -111,7 +111,7 @@ public class Scheduler {
     /**
      * Delete messages for episodes that have finished airing and set database values accordingly
      */
-    public void processOldAirings(int currentTime) {
+    /*public void processOldAirings(int currentTime) {
         //get last 30 shows alerted
         List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
         //if episode aired over 2 hours ago, delete message from announcements channel
@@ -133,7 +133,7 @@ public class Scheduler {
                 bot.getDatabaseManager().getTV().updateAiringMessage(airing);
             }
         });
-    }
+    }*/
 
     /***
      * Delete airing entries from the database if episode aired over a week ago
@@ -150,7 +150,7 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        IGuild loungeGuild = bot.getClient().getGuildByID("192441520178200577");
+        IGuild loungeGuild = bot.getClient().getGuildByID(192441520178200577l);
         if (loungeGuild != null) {
             bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
         }
