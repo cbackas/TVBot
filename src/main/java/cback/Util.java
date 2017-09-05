@@ -154,7 +154,6 @@ public class Util {
         RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
             try {
                 IUser user = message.getAuthor();
-                IChannel serverLogChannel = client.getChannelByID(Long.parseLong(cm.getConfigValue("SERVERLOG_ID")));
 
                 new EmbedBuilder();
                 EmbedBuilder embed = new EmbedBuilder();
@@ -168,7 +167,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(Color.GRAY).build())
-                        .withChannel(serverLogChannel).send();
+                        .withChannel(getServerLogChannel()).send();
             } catch (Exception e) {
                 reportHome(e);
             }
@@ -181,7 +180,6 @@ public class Util {
         RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
             try {
                 IUser user = message.getAuthor();
-                IChannel serverLogChannel = client.getChannelByID(Long.parseLong(cm.getConfigValue("SERVERLOG_ID")));
 
                 new EmbedBuilder();
                 EmbedBuilder embed = new EmbedBuilder();
@@ -195,7 +193,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
-                        .withChannel(serverLogChannel).send();
+                        .withChannel(getServerLogChannel()).send();
             } catch (Exception e) {
                 reportHome(e);
             }
@@ -283,6 +281,25 @@ public class Util {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns IChannels
+     */
+    public static IChannel getServerLogChannel() {
+        IChannel channel = client.getChannelByID(Long.parseLong(cm.getConfigValue("SERVERLOG_ID")));
+        if (channel != null) {
+            return channel;
+        }
+        return null;
+    }
+
+    public static IChannel getMessageLogsChannel() {
+        IChannel channel = client.getChannelByID(Long.parseLong(cm.getConfigValue("MESSAGELOGS_ID")));
+        if (channel != null) {
+            return channel;
+        }
+        return null;
     }
 
     public static void sendPrivateMessage(IUser user, String message) {

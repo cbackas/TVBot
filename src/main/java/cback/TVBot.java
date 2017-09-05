@@ -42,6 +42,7 @@ public class TVBot {
 
     public static List<Command> registeredCommands = new ArrayList<>();
     static private String prefix = "!";
+    public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
     public static final Long ANNOUNCEMENT_CHANNEL_ID = 345774506373021716l;
@@ -62,6 +63,11 @@ public class TVBot {
         //instantiate config manager first as connect() relies on tokens
         configManager = new ConfigManager(this);
         commandManager = new CommandManager(this);
+        prefixes.add(TVBot.getPrefix());
+        prefixes.add("t!");
+        prefixes.add("!g");
+        prefixes.add("--");
+        prefixes.add(".");
 
         connect();
         client.getDispatcher().registerListener(this);
@@ -207,6 +213,8 @@ public class TVBot {
     public static String getPrefix() {
         return prefix;
     }
+
+    public static IGuild getHomeGuild() { return client.getGuildByID(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));}
 
     public List<String> getBotAdmins() {
         return botAdmins;
