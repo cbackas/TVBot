@@ -73,7 +73,7 @@ public class CommandInfo implements Command {
         embed.appendField("Made By: ", "cback#3986", true);
         embed.appendField("Source: ", "[`GitHub`](https://github.com/cbackas/TVBot)", true);
 
-        Util.sendEmbed(message.getChannel(), embed.withColor(023563).build());
+        Util.sendEmbed(message.getChannel(), embed.withColor(Util.getBotColor()).build());
         Util.deleteMessage(message);
     }
 }
