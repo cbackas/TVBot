@@ -1,15 +1,12 @@
 package cback.commands;
 
 import cback.TVBot;
-import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.MessageBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
