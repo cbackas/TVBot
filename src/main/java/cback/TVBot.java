@@ -11,38 +11,43 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static cback.Util.getAvatar;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class TVBot {
 
     private static TVBot instance;
-    private IDiscordClient client;
+    private static IDiscordClient client;
 
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
-    private ConfigManager configManager;
+    private static ConfigManager configManager;
     private CommandManager commandManager;
     private Scheduler scheduler;
 
     private List<String> botAdmins = new ArrayList<>();
-    public List<Command> registeredCommands = new ArrayList<>();
 
+    public static List<Command> registeredCommands = new ArrayList<>();
+    static private String prefix = "?";
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
-    public static final String ANNOUNCEMENT_CHANNEL_ID = "345774506373021716";
-    public static final String NEW_EPISODE_CHANNEL_ID = "263184398894104577";
-    public static final String GENERAL_CHANNEL_ID = "192441520178200577";
-    public static final String LOG_CHANNEL_ID = "217456105679224846";
-    public static final String BOTLOG_WEBHOOK_URL = "https://ptb.discordapp.com/api/webhooks/263740625755701259/4md6yxY7cUxq5mS5LcfMtU1azF0RYurFdo-sl-YBbnkp-rhHTQais6xjE_ABXAsGdQG-/slack";
+
+    public static final Long ANNOUNCEMENT_CHANNEL_ID = 345774506373021716l;
+    public static final Long NEW_EPISODE_CHANNEL_ID = 263184398894104577l;
+    public static final Long GENERAL_CHANNEL_ID = 192441520178200577l;
+    public static final Long LOG_CHANNEL_ID = 217456105679224846l;
 
     private long startTime;
 
@@ -101,6 +106,9 @@ public class TVBot {
         }
     }
 
+    /*
+     * Message Central Choo Choo
+     */
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         if (event.getMessage().getAuthor().isBot()) return; //ignore bot messages
@@ -121,7 +129,25 @@ public class TVBot {
 
                 String args = matcher.group(2);
                 String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
-                command.get().execute(this, client, argsArr, guild, message, isPrivate);
+
+                List<Long> roleIDs = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
+
+                IUser author = message.getAuthor();
+                String content = message.getContent();
+
+                Command cCommand = command.get();
+
+                /*
+                 * If user has permission to run the command: Command executes and botlogs
+                 */
+                message.getChannel().setTypingStatus(true);
+                if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
+                    cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
+                    Util.botLog(message);
+                } else {
+                    Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
+                }
+                message.getChannel().setTypingStatus(false);
             } else if (commandManager.getCommandValue(baseCommand) != null) {
 
                 String response = commandManager.getCommandValue(baseCommand);
@@ -133,21 +159,21 @@ public class TVBot {
 
                 Util.deleteMessage(message);
             }
+            /**
+             * Forwards the random stuff people PM to the bot - to me
+             */
+        } else if (message.getChannel().isPrivate()) {
+            EmbedBuilder bld = new EmbedBuilder()
+                    .withColor(Util.getBotColor())
+                    .withTimestamp(System.currentTimeMillis())
+                    .withAuthorName(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator())
+                    .withAuthorIcon(getAvatar(message.getAuthor()))
+                    .withDesc(message.getContent());
+
+            Util.sendEmbed(client.getChannelByID(346104720903110656l), bld.build());
         } else {
-            String lowerCase = message.getContent().toLowerCase();
-
             //Increment message count if message was not a command
-            databaseManager.getXP().addXP(message.getAuthor().getID(), 1);
-
-            //Check for discord invite link
-            if (lowerCase.contains("discord.gg") || lowerCase.contains("discordapp.com/invite/")) {
-                IGuild loungeGuild = client.getGuildByID("192441520178200577");
-                if (Util.permissionCheck(message, "Admins") || lowerCase.contains("discord.gg/lounge") || lowerCase.contains("QeuTNRb") || lowerCase.contains("Empn64q")) {
-                } else {
-                    Util.sendPrivateMessage(message.getAuthor(), "Rule 3, Advertising your server is not allowed!");
-                    Util.sendMessage(client.getChannelByID("226433456060497920"), message.getAuthor().mention() + " __might__ have advertised their server in " + message.getChannel().mention() + ". Could a human please investigate?");
-                }
-            }
+            databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);
         }
     }
 
@@ -166,7 +192,7 @@ public class TVBot {
         return traktManager;
     }
 
-    public ConfigManager getConfigManager() {
+    public static ConfigManager getConfigManager() {
         return configManager;
     }
 
@@ -174,8 +200,12 @@ public class TVBot {
         return commandManager;
     }
 
-    public IDiscordClient getClient() {
+    public static IDiscordClient getClient() {
         return client;
+    }
+
+    public static String getPrefix() {
+        return prefix;
     }
 
     public List<String> getBotAdmins() {

@@ -8,11 +8,10 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommandShowAdd implements Command {
     @Override
@@ -27,60 +26,50 @@ public class CommandShowAdd implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "addshow [imdbID] [here|channelID]";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Associates a channel and a show in the spooky bot database :o";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
     }
 
-    public static List<String> permitted = Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id, TVRoles.HEADMOD.id);
-
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        //Lounge Command Only
-        if (guild.getID().equals("192441520178200577")) {
-
-            List<String> userRoles = message.getAuthor().getRolesForGuild(guild).stream().map(role ->role.getID()).collect(Collectors.toList());
-            if (!Collections.disjoint(userRoles, permitted)) {
-                if (args.length >= 2) {
-                    String imdbID = args[0];
-                    String channelID = args[1];
-                    if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getID();
-                    Show showData = bot.getTraktManager().showSummary(imdbID);
-                    String showName = showData.title;
-                    String showNetwork = showData.network;
-                    IChannel channel = client.getChannelByID(channelID);
-                    if (channel == null) {
-                        Util.sendMessage(message.getChannel(), "No channel by this ID found.");
-                        return;
-                    }
-                    if (showName == null) {
-                        Util.sendMessage(message.getChannel(), "No show by this IMDB ID found.");
-                        return;
-                    }
-                    if (showNetwork.equalsIgnoreCase("netflix")) {
-                        Util.sendMessage(message.getChannel(), "Netflix show detected - import aborted");
-                        return;
-                    }
-                    bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
-                    Util.sendMessage(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
-                    System.out.println("@" + message.getAuthor().getName() + " added show " + showName);
-                    //Update airing data after new show added
-                    bot.getTraktManager().updateAiringData();
-                } else {
-                    Util.sendMessage(message.getChannel(), "Usage: !addshow <imdbID> <here|channelID>");
-                }
-                Util.botLog(message);
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        if (args.length >= 2) {
+            String imdbID = args[0];
+            String channelID = args[1];
+            if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getStringID();
+            Show showData = bot.getTraktManager().showSummary(imdbID);
+            String showName = showData.title;
+            String showNetwork = showData.network;
+            IChannel channel = client.getChannelByID(Long.parseLong(channelID));
+            if (channel == null) {
+                Util.simpleEmbed(message.getChannel(), "No channel by this ID found.");
+                return;
             }
+            if (showName == null) {
+                Util.simpleEmbed(message.getChannel(), "No show by this IMDB ID found.");
+                return;
+            }
+            if (showNetwork.equalsIgnoreCase("netflix")) {
+                Util.simpleEmbed(message.getChannel(), "Netflix show detected - import aborted");
+                return;
+            }
+            bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
+            Util.simpleEmbed(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
+            System.out.println("@" + message.getAuthor().getName() + " added show " + showName);
+            Util.simpleEmbed(client.getChannelByID(Long.parseLong(TVBot.getConfigManager().getConfigValue("COMMANDLOG_ID"))), showName + " assigned to " + channel.getName());
+            //Update airing data after new show added
+            bot.getTraktManager().updateAiringData();
+        } else {
+            Util.syntaxError(this, message);
         }
-
     }
 
 }

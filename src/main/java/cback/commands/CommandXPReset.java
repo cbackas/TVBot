@@ -7,9 +7,9 @@ import cback.database.xp.UserXP;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CommandXPReset implements Command{
@@ -26,44 +26,39 @@ public class CommandXPReset implements Command{
 
     @Override
     public String getSyntax() {
-        return null;
+        return "resetxp @user";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Sets a user's xp to 0. Sucks to be them.";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-        if (userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
-            if(args.length >= 1){
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+            if(args.length >= 1) {
                 IUser mentioned = Util.getUserFromMentionArg(args[0]);
-                if(mentioned != null){
+                if(mentioned != null) {
                     UserXP xp = bot.getDatabaseManager().getXP().getUserXP(mentioned.getID());
                     if(xp != null){
                         xp.setMessageCount(0);
                         bot.getDatabaseManager().getXP().updateUserXP(xp);
-                        Util.sendMessage(message.getChannel(), "Reset xp for " + mentioned.getDisplayName(guild));
+                        Util.simpleEmbed(message.getChannel(), "Reset xp for " + mentioned.getDisplayName(guild));
                     }else{
-                        Util.sendMessage(message.getChannel(), "No xp data found for " + mentioned.getDisplayName(guild));
+                        Util.simpleEmbed(message.getChannel(), "No xp data found for " + mentioned.getDisplayName(guild));
                     }
                 }else{
-                    Util.sendMessage(message.getChannel(), "Invalid user \"" + args[0] + "\".");
+                    Util.simpleEmbed(message.getChannel(), "Invalid user \"" + args[0] + "\".");
                 }
             }else{
-                Util.sendMessage(message.getChannel(), "Usage: !resetxp @user");
+                Util.syntaxError(this, message);
             }
-
-            Util.botLog(message);
             Util.deleteMessage(message);
         }
-    }
 
 }

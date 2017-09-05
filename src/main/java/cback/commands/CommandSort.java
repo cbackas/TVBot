@@ -1,16 +1,19 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,75 +34,69 @@ public class CommandSort implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "sort";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Alphabetically sorts the channels";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        //Lounge Command Only
-        if (guild.getID().equals("192441520178200577")) {
-            //TODO make this use a batch request to modify all positions at once amd not spam
-            if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        Util.simpleEmbed(message.getChannel(), "Sorting time! Here we go.");
+        //permanent channels sorted by position to keep on top or bottom
+        List<IChannel> permChannels = bot.getConfigManager().getConfigArray("permanentchannels").stream()
+                .map(id -> guild.getChannelByID(id))
+                .sorted((chan1, chan2) -> Integer.compare(chan1.getPosition(), chan2.getPosition()))
+                .collect(Collectors.toList());
+        List<IChannel> permChannelsTop = new ArrayList<>();
+        List<IChannel> permChannelsBottom = new ArrayList<>();
+        //add top and bottom channels to their respective lists
+        IntStream.range(0, permChannels.size())
+                .forEach(index -> {
+                    IChannel channel = permChannels.get(index);
+                    if (channel.getPosition() == index)
+                        permChannelsTop.add(channel);
+                    else
+                        permChannelsBottom.add(channel);
 
-                //permanent channels sorted by position to keep on top or bottom
-                List<IChannel> permChannels = bot.getConfigManager().getConfigArray("permanentchannels").stream()
-                        .map(id -> guild.getChannelByID(id))
-                        .sorted((chan1, chan2) -> Integer.compare(chan1.getPosition(), chan2.getPosition()))
-                        .collect(Collectors.toList());
-                List<IChannel> permChannelsTop = new ArrayList<>();
-                List<IChannel> permChannelsBottom = new ArrayList<>();
-                //add top and bottom channels to their respective lists
-                IntStream.range(0, permChannels.size())
-                        .forEach(index -> {
-                            IChannel channel = permChannels.get(index);
-                            if (channel.getPosition() == index)
-                                permChannelsTop.add(channel);
-                            else
-                                permChannelsBottom.add(channel);
-
-                        });
-
-                //sort non permanent channels
-                List<IChannel> showsChannelsSorted = guild.getChannels().stream()
-                        .filter(chan -> !permChannels.contains(chan))
-                        .sorted((chan1, chan2) -> getSortName(chan1.getName()).compareTo(getSortName(chan2.getName())))
-                        .collect(Collectors.toList());
-
-                //add newly sorted channels in order
-                List<IChannel> allChannelsSorted = new ArrayList<>();
-                allChannelsSorted.addAll(permChannelsTop);
-                allChannelsSorted.addAll(showsChannelsSorted);
-                allChannelsSorted.addAll(permChannelsBottom);
-
-                //apply new positions
-                IntStream.range(0, allChannelsSorted.size()).forEach(position -> {
-                    IChannel channel = allChannelsSorted.get(position);
-                    if (!(channel.getPosition() == position)) //don't sort if position is already correct
-                        RequestBuffer.request(() -> {
-                            try {
-                                channel.changePosition(position);
-                            } catch (DiscordException e) {
-                                e.printStackTrace();
-                            } catch (MissingPermissionsException e) {
-                                e.printStackTrace();
-                            }
-                        });
                 });
 
-                Util.botLog(message);
-                Util.deleteMessage(message);
-            }
-        }
+        //sort non permanent channels
+        List<IChannel> showsChannelsSorted = guild.getChannels().stream()
+                .filter(chan -> !permChannels.contains(chan))
+                .sorted((chan1, chan2) -> getSortName(chan1.getName()).compareTo(getSortName(chan2.getName())))
+                .collect(Collectors.toList());
+
+        //add newly sorted channels in order
+        List<IChannel> allChannelsSorted = new ArrayList<>();
+        allChannelsSorted.addAll(permChannelsTop);
+        allChannelsSorted.addAll(showsChannelsSorted);
+        allChannelsSorted.addAll(permChannelsBottom);
+
+        //apply new positions
+        IntStream.range(0, allChannelsSorted.size()).forEach(position -> {
+            IChannel channel = allChannelsSorted.get(position);
+            if (!(channel.getPosition() == position)) //don't sort if position is already correct
+                RequestBuffer.request(() -> {
+                    try {
+                        channel.changePosition(position);
+                    } catch (DiscordException e) {
+                        Util.reportHome(message, e);
+                    } catch (MissingPermissionsException e) {
+                        Util.reportHome(message, e);
+                    }
+                });
+        });
+
+        Util.simpleEmbed(message.getChannel(), "Sorting complete!");
+        Util.deleteMessage(message);
     }
 
     public static String getSortName(String channelName) {

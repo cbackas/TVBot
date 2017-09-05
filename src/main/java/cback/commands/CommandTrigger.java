@@ -1,10 +1,12 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,14 +34,14 @@ public class CommandTrigger implements Command {
     }
 
     @Override
-    public List<String> getPermissions() {
+    public List<Long> getPermissions() {
         return null;
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getID().equals("73416411443113984")) {
-            String text = Arrays.stream(args).collect(Collectors.joining(" "));
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        if (author.getStringID().equals("73416411443113984")) {
+
 
             Util.deleteMessage(message);
         }

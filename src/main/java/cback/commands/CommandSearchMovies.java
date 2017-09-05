@@ -6,6 +6,7 @@ import com.uwetrottmann.trakt5.entities.Movie;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.text.SimpleDateFormat;
@@ -26,21 +27,21 @@ public class CommandSearchMovies implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "movie [movie name]";
     }
 
     @Override
     public String getDescription() {
+        return "Searches trakt.tv for the provided movie. Sometimes it works, sometimes it doesn't.";
+    }
+
+    @Override
+    public List<Long> getPermissions() {
         return null;
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         String movieName = Arrays.stream(args).collect(Collectors.joining(" "));
         Movie movieData = bot.getTraktManager().movieSummaryFromName(movieName);
         if (movieData != null) {
@@ -72,8 +73,8 @@ public class CommandSearchMovies implements Command {
 
             Util.sendEmbed(message.getChannel(), embed.build());
         } else {
-            Util.sendMessage(message.getChannel(), "Error: Movie not found");
-            Util.errorLog(message, "Couldn't find movie: " + movieName);
+            Util.simpleEmbed(message.getChannel(), "Error: Movie not found");
+            Util.simpleEmbed(client.getChannelByID(Long.parseLong(TVBot.getConfigManager().getConfigValue("ERORRLOG_ID"))), "Couldn't find movie " + movieName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }
 

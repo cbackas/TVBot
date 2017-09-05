@@ -7,6 +7,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class CommandManager {
@@ -29,7 +30,7 @@ public class CommandManager {
 
     private void initConfig() {
         try {
-            commandFile = new File(Util.botPath, "commands.json");
+            commandFile = new File(botPath, "commands.json");
             if (commandFile.exists()) {
                 JSONParser parser = new JSONParser();
                 FileReader reader = new FileReader(commandFile);
@@ -111,5 +112,18 @@ public class CommandManager {
             stringBuilder.append("\n").append(((String) key));
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * Bot path stuff
+     */
+    public static File botPath;
+
+    static {
+        try {
+            botPath = new File(TVBot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 }

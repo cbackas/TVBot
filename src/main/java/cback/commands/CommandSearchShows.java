@@ -7,6 +7,7 @@ import com.uwetrottmann.trakt5.enums.Status;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.text.SimpleDateFormat;
@@ -27,21 +28,21 @@ public class CommandSearchShows implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "show [show name]";
     }
 
     @Override
     public String getDescription() {
+        return "Searches trakt.tv for the provided show. Sometimes it works, sometimes it doesn't.";
+    }
+
+    @Override
+    public List<Long> getPermissions() {
         return null;
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         String showName = Arrays.stream(args).collect(Collectors.joining(" "));
         Show showData = bot.getTraktManager().showSummaryFromName(showName);
         if (showData != null) {
@@ -76,8 +77,8 @@ public class CommandSearchShows implements Command {
 
             Util.sendEmbed(message.getChannel(), embed.build());
         } else {
-            Util.sendMessage(message.getChannel(), "Error: Show not found");
-            Util.errorLog(message, "Couldn't find show: " + showName);
+            Util.simpleEmbed(message.getChannel(), "Error: Show not found");
+            Util.simpleEmbed(client.getChannelByID(Long.parseLong(TVBot.getConfigManager().getConfigValue("ERORRLOG_ID"))), "Couldn't find show " + showName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }
 

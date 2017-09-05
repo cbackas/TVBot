@@ -4,6 +4,7 @@ import cback.TVBot;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.List;
 
@@ -16,9 +17,9 @@ public interface Command {
 
     String getDescription();
 
-    List<String> getPermissions();
+    List<Long> getPermissions();
 
-    void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate);
+    void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot);
 
 }
 

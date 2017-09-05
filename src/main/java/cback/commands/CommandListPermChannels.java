@@ -1,12 +1,15 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CommandListPermChannels implements Command {
@@ -22,41 +25,35 @@ public class CommandListPermChannels implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "listpchannels";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Shows a list of all the channels currently tagged as permanent (not to be sorted)";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        //Lounge Command Only
-        if (guild.getID().equals("192441520178200577")) {
-            if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
+        StringBuilder channelMentions = new StringBuilder();
 
-                Util.botLog(message);
-                Util.deleteMessage(message);
-
-                List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-                StringBuilder channelMentions = new StringBuilder();
-                permChannels.forEach(id -> {
-                    IChannel channel = guild.getChannelByID(id);
-                    if (channel != null) {
-                        channelMentions.append("\n").append(channel.mention());
-                    }
-                });
-
-                Util.sendMessage(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
-
+        permChannels.forEach(id -> {
+            IChannel channel = guild.getChannelByID(id);
+            if (channel != null) {
+                channelMentions.append("\n").append(channel.mention());
             }
-        }
+        });
+
+        Util.simpleEmbed(message.getChannel(), "**Unmovable Channels:**\n" + channelMentions.toString());
+
+        Util.deleteMessage(message);
     }
+
 
 }

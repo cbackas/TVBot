@@ -1,12 +1,15 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CommandAddPermChannel implements Command {
@@ -31,40 +34,36 @@ public class CommandAddPermChannel implements Command {
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-            if (bot.getBotAdmins().contains(message.getAuthor().getID())) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        List<IChannel> channels = message.getChannelMentions();
+        if (channels.size() >= 1) {
+            StringBuilder channelMentions = new StringBuilder();
 
-                Util.botLog(message);
-                Util.deleteMessage(message);
+            for (IChannel c : channels) {
 
-                List<IChannel> channels = message.getChannelMentions();
-                if (channels.size() >= 1) {
-                    StringBuilder channelMentions = new StringBuilder();
+                List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
+                if (!permChannels.contains(c.getStringID())) {
+                    permChannels.add(c.getStringID());
+                    bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
 
-                    for (IChannel c : channels) {
-
-                        List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
-                        if (!permChannels.contains(c.getID())) {
-                            permChannels.add(c.getID());
-                            bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
-
-                            channelMentions.append(" ").append(c.mention());
-                        } else {
-                            Util.sendMessage(message.getChannel(), c.mention() + " already exists.");
-                        }
-
-                    }
-
-                    Util.sendMessage(message.getChannel(), "Set " + channelMentions.toString() + " as permanent channel(s).");
+                    channelMentions.append(" ").append(c.mention());
                 } else {
-                    Util.sendMessage(message.getChannel(), "Channels not found.");
+                    Util.simpleEmbed(message.getChannel(), c.mention() + " already exists.");
                 }
+
             }
+
+            Util.simpleEmbed(message.getChannel(), "Set " + channelMentions.toString() + " as permanent channel(s).");
+        } else {
+            Util.simpleEmbed(message.getChannel(), "Channels not found.");
+        }
+
+        Util.deleteMessage(message);
     }
 
 }

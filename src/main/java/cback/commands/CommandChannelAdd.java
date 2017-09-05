@@ -6,6 +6,7 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
@@ -28,46 +29,39 @@ public class CommandChannelAdd implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "addchannel [channelname]";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Creates channels with the provided names. Tip: use \"|\" between multiple names to create multiple channels";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
     }
 
-    public static List<String> permitted = Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id, TVRoles.HEADMOD.id);
-
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        List<String> userRoles = message.getAuthor().getRolesForGuild(guild).stream().map(role ->role.getID()).collect(Collectors.toList());
-        if (!Collections.disjoint(userRoles, permitted)) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
+        String channelNames[] = channelName.split("-\\|-");
 
-            String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
-            String channelNames[] = channelName.split("-\\|-");
+        for (String c : channelNames) {
+            RequestBuffer.request(() -> {
+                try {
+                    guild.createChannel(c);
 
-            for (String c : channelNames) {
-                RequestBuffer.request(() -> {
-                    try {
-                        guild.createChannel(c);
+                    Util.sendLog(message, "Added " + c + " channel.");
+                } catch (DiscordException | MissingPermissionsException e) {
+                    Util.reportHome(message, e);
 
-                        Util.sendLog(message, "Added " + c + " channel.");
-                    } catch (DiscordException | MissingPermissionsException e) {
-                        e.printStackTrace();
-
-                        Util.sendMessage(message.getChannel(), "**" + c + "** channel creation failed.");
-                    }
-                });
-            }
-
-            Util.botLog(message);
-            Util.deleteMessage(message);
+                    Util.simpleEmbed(message.getChannel(), c + " channel creation failed.");
+                }
+            });
         }
+
+        Util.deleteMessage(message);
     }
 
 }

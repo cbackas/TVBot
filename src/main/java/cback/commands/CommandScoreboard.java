@@ -20,27 +20,26 @@ public class CommandScoreboard implements Command {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("leaderboard", "topxp");
+        return Arrays.asList("leaderboard", "topxp", "top");
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "scoreboard [#]";
     }
 
     @Override
     public String getDescription() {
+        return "Shows a list of people with the most xp!";
+    }
+
+    @Override
+    public List<Long> getPermissions() {
         return null;
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         int defaultCount = 5;
         if (args.length == 1 && Integer.parseInt(args[0]) > 5) {
             if (Integer.parseInt(args[0]) <= 30) {
@@ -62,25 +61,19 @@ public class CommandScoreboard implements Command {
                 UserXP userXP = userXPIterator.next();
                 IUser user = userXP.getUser();
 
-                String name = "NULL";
                 if (user != null) {
-                    String displayName = user.getDisplayName(guild);
-                    name = displayName != null ? displayName : user.getName();
-                } else {
-                    name = Util.requestUsernameByID(userXP.getUserID());
+                    scoreboard.append("**").append(index).append(".** ");
+                    scoreboard.append(user.getName());
+                    scoreboard.append(" (").append(userXP.getMessageCount()).append(")");
                 }
-
-                scoreboard.append("**").append(index).append(".** ");
-                scoreboard.append(name);
-                scoreboard.append(" (").append(userXP.getMessageCount()).append(")");
 
                 if (userXPIterator.hasNext()) scoreboard.append("\n");
             }
 
-            Util.sendMessage(message.getChannel(), scoreboard.toString());
+            Util.simpleEmbed(message.getChannel(), scoreboard.toString());
 
         } else {
-            Util.sendMessage(message.getChannel(), "No scoreboard data found.");
+            Util.simpleEmbed(message.getChannel(), "No scoreboard data found.");
         }
 
         Util.deleteMessage(message);

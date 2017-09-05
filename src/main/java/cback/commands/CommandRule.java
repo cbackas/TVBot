@@ -7,9 +7,11 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MessageBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -35,36 +37,29 @@ public class CommandRule implements Command {
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.STAFF.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (Util.permissionCheck(message, "Staff")) {
-            if (args.length == 1) {
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        if (args.length == 1) {
+            String ruleNumber = args[0];
+            Rules rule = Rules.getRule(ruleNumber);
 
-                String ruleNumber = args[0];
-                Rules rule = Rules.getRule(ruleNumber);
+            if (rule != null) {
+                EmbedBuilder ruleEmbed = new EmbedBuilder();
 
-                if (rule != null) {
-                    EmbedBuilder ruleEmbed = new EmbedBuilder();
+                ruleEmbed
+                        .withAuthorName(rule.title)
+                        .withDescription(rule.fullRule);
 
-                    ruleEmbed
-                            .withAuthorName(rule.title)
-                            .withDescription(rule.fullRule);
-
-                    Util.sendEmbed(message.getChannel(), ruleEmbed.withColor(023563).build());
-                } else {
-                    Util.sendMessage(message.getChannel(), "Rule not found");
-                }
-
+                Util.sendEmbed(message.getChannel(), ruleEmbed.withColor(Util.getBotColor()).build());
             } else {
-                Util.sendMessage(message.getChannel(), "Too many arguments");
+                Util.simpleEmbed(message.getChannel(), "Rule not found");
             }
-
-            Util.botLog(message);
-
+        } else {
+            Util.syntaxError(this, message);
         }
     }
 

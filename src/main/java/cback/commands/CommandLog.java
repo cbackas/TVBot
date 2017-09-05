@@ -22,38 +22,28 @@ public class CommandLog implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "addlog [message]";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Submits a serverlog with some info attached";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.STAFF.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (message.getAuthor().getRolesForGuild(guild).contains(guild.getRoleByID(TVRoles.STAFF.id))) {
-
-            Util.botLog(message);
-
-            if (args.length >= 1) {
-                List<IRole> userRoles = message.getAuthor().getRolesForGuild(guild);
-                if (userRoles.contains(guild.getRoleByID(TVRoles.HELPER.id)) || userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id)) || userRoles.contains(guild.getRoleByID(TVRoles.MOD.id))) {
-                    String finalText = message.getFormattedContent().split(" ", 2)[1];
-                    Util.sendLog(message, finalText);
-                    Util.sendMessage(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention());
-                    Util.deleteMessage(message);
-                } else {
-                    Util.sendMessage(message.getChannel(), "You don't have permission to add logs.");
-                }
-            } else {
-                Util.sendMessage(message.getChannel(), "Usage: !addlog <text>");
-            }
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        if (args.length >= 1) {
+            String finalText = message.getFormattedContent().split(" ", 2)[1];
+            Util.sendLog(message, finalText);
+            Util.simpleEmbed(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention());
+            Util.deleteMessage(message);
+        } else {
+            Util.syntaxError(this, message);
         }
     }
 

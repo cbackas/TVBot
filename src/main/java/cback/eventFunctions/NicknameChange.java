@@ -1,15 +1,15 @@
 package cback.eventFunctions;
 
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.member.NickNameChangeEvent;
+import sx.blah.discord.handle.impl.events.guild.member.NicknameChangedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 
 public class NicknameChange {
 
     @EventSubscriber
-    public void nicknameChangeEvent(NickNameChangeEvent event) {
+    public void nicknameChangeEvent(NicknameChangedEvent event) {
         IGuild guild = event.getGuild();
-        if (guild.getID().equals("192441520178200577") || guild.getID().equals("256248900124540929")) {
+        if (guild.getStringID().equals("192441520178200577") || guild.getStringID().equals("256248900124540929")) {
 
             String oldName = event.getUser().getName();
             if (event.getOldNickname().isPresent()) {
@@ -22,14 +22,14 @@ public class NicknameChange {
             }
 
             //Sync nickname changes between servers
-            if (guild.getID().equals("192441520178200577")) {
+            if (guild.getStringID().equals("192441520178200577")) {
                 try {
-                    event.getClient().getGuildByID("256248900124540929").setUserNickname(event.getUser(), newName);
+                    event.getClient().getGuildByID(256248900124540929l).setUserNickname(event.getUser(), newName);
                 } catch (Exception ignored) {
                 }
-            } else if (guild.getID().equals("256248900124540929")) {
+            } else if (guild.getStringID().equals("256248900124540929")) {
                 try {
-                    event.getClient().getGuildByID("192441520178200577").setUserNickname(event.getUser(), newName);
+                    event.getClient().getGuildByID(192441520178200577l).setUserNickname(event.getUser(), newName);
                 } catch (Exception ignored) {
                 }
             }

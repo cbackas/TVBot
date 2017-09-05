@@ -7,7 +7,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.lang.reflect.Array;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class ConfigManager {
@@ -29,7 +29,6 @@ public class ConfigManager {
         defaultConfig.put("left", "0");
         defaultConfig.put("muted", new ArrayList<String>());
         defaultConfig.put("permanentchannels", new ArrayList<String>());
-        defaultConfig.put("cantsummon", new ArrayList<String>());
     }
 
     public ConfigManager(TVBot bot) {
@@ -39,7 +38,7 @@ public class ConfigManager {
 
     private void initConfig() {
         try {
-            configFile = new File(Util.botPath, "tvconfig.json");
+            configFile = new File(botPath, "tvconfig.json");
             if (configFile.exists()) {
                 JSONParser parser = new JSONParser();
                 FileReader reader = new FileReader(configFile);
@@ -119,6 +118,19 @@ public class ConfigManager {
             return Optional.of(token);
         } else {
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Bot path stuff
+     */
+    public static File botPath;
+
+    static {
+        try {
+            botPath = new File(TVBot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
     }
 }

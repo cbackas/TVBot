@@ -6,10 +6,10 @@ import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommandAnnounce implements Command {
     @Override
@@ -24,30 +24,28 @@ public class CommandAnnounce implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "announce [message]";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Sends a message in the announcement channel and the general channel";
     }
 
     @Override
-    public List<String> getPermissions() {
-        return null;
+    public List<Long> getPermissions() {
+        return Arrays.asList(TVRoles.ADMIN.id);
     }
 
     @Override
-    public void execute(TVBot bot, IDiscordClient client, String[] args, IGuild guild, IMessage message, boolean isPrivate) {
-        if (Util.permissionCheck(message, "Admins")) {
-
-            Util.botLog(message);
-
+    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+        if (args.length >= 1) {
             String announcement = message.getContent().split(" ", 2)[1];
             Util.sendAnnouncement(announcement);
-
-            Util.deleteMessage(message);
+        } else {
+            Util.syntaxError(this, message);
         }
+        Util.deleteMessage(message);
     }
 
 }
