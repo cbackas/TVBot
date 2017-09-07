@@ -30,8 +30,6 @@ public class MessageChange {
 
             Boolean tripped = true;
             for (String p : bot.prefixes) {
-                System.out.println(message == null);
-                System.out.println(message.getContent() == null);
                 if (message.getContent().startsWith(p)) {
                     tripped = false;
                 }
