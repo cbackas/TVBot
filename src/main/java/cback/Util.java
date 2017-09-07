@@ -61,7 +61,7 @@ public class Util {
         }
 
         String stackString = stack.toString();
-        if (stackString.length() > 1800) {
+        if (stackString.length() > 1024) {
             stackString = stackString.substring(0, 1800);
         }
 
@@ -88,7 +88,7 @@ public class Util {
         }
 
         String stackString = stack.toString();
-        if (stackString.length() > 1800) {
+        if (stackString.length() > 1024) {
             stackString = stackString.substring(0, 1800);
         }
 
