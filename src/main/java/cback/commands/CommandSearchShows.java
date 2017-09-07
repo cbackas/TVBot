@@ -50,7 +50,7 @@ public class CommandSearchShows implements Command {
             String overview = showData.overview;
             String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
                     ? showData.airs.day + " at " + Util.to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
-            String premier = new SimpleDateFormat("MMM dd, yyyy").format(showData.first_aired.toDate());
+            String premier = new SimpleDateFormat("MMM dd, yyyy").format(showData.first_aired.toLocalDate());
             String runtime = Integer.toString(showData.runtime);
             String country = showData.country + " - " + showData.language;
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";

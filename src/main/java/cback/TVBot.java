@@ -16,6 +16,7 @@ import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static cback.Util.getAvatar;
+import static cback.Util.reportHome;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class TVBot {
@@ -146,14 +148,15 @@ public class TVBot {
                 /*
                  * If user has permission to run the command: Command executes and botlogs
                  */
-                message.getChannel().setTypingStatus(true);
+                //message.getChannel().setTypingStatus(true);
                 if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
                     cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
                     Util.botLog(message);
+                    //message.getChannel().setTypingStatus(false);
                 } else {
                     Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
+                    //message.getChannel().setTypingStatus(false);
                 }
-                message.getChannel().setTypingStatus(false);
             } else if (commandManager.getCommandValue(baseCommand) != null) {
 
                 String response = commandManager.getCommandValue(baseCommand);
@@ -178,6 +181,16 @@ public class TVBot {
 
             Util.sendEmbed(client.getChannelByID(346104720903110656l), bld.build());
         } else {
+            if (message.getMentions().size() > 10) {
+                try {
+                    guild.banUser(message.getAuthor(), 1);
+                    Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
+                } catch (Exception e) {
+                    reportHome(e);
+                }
+            } else if (message.getMentions().size() > 5) {
+                Util.deleteMessage(message);
+            }
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);
         }
@@ -186,6 +199,7 @@ public class TVBot {
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
+        client = event.getClient();
 
         startTime = System.currentTimeMillis();
     }

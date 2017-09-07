@@ -3,6 +3,7 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Movie;
+import org.threeten.bp.temporal.Temporal;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -47,7 +48,7 @@ public class CommandSearchMovies implements Command {
         if (movieData != null) {
             String title = "**" + movieData.title + " (" + Integer.toString(movieData.year) + ")**";
             String overview = movieData.overview;
-            String premier = new SimpleDateFormat("MMM dd, yyyy").format(movieData.released.toDate());
+            String premier = new SimpleDateFormat("MMM dd, yyyy").format(movieData.released);
             String rating = movieData.certification;
             String runtime = Integer.toString(movieData.runtime);
             String country = movieData.language;
