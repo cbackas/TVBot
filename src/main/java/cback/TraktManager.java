@@ -47,8 +47,8 @@ public class TraktManager {
                 for (CalendarShowEntry entry : shows) {
                     String id = entry.show.ids.imdb;
                     if (desiredShows.contains(id)) {
-                        //int airTime = Util.toInt(entry.first_aired. / 1000);
-                        int airTime = Math.toIntExact(TimeUnit.NANOSECONDS.toMillis(entry.first_aired.getNano()));
+                        //int airTime = Util.toInt(entry.first_aired.toMillis() / 1000);
+                        int airTime = Math.toIntExact(entry.first_aired.toInstant().toEpochMilli() / 1000);
                         int currentTime = Util.getCurrentTime();
                         String episodeID = String.valueOf(entry.episode.ids.trakt);
                         //don't add if already aired or if airing already in database
