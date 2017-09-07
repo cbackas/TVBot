@@ -4,14 +4,12 @@ import cback.TVBot;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Movie;
 import org.threeten.bp.format.DateTimeFormatter;
-import org.threeten.bp.temporal.Temporal;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,17 +61,14 @@ public class CommandSearchMovies implements Command {
 
             embed.withTitle(title);
             embed.withDescription(overview);
-            embed.appendField("References:", homepage, true);
-
-            embed.appendField("\u200B", "\u200B", false);
-
+            embed.appendField("References:", homepage, false);
             embed.appendField("PREMIERED:", premier, true);
             embed.appendField("RUNTIME:", runtime, true);
             embed.appendField("RATED:", rating, true);
             embed.appendField("LANGUAGE:", country.toUpperCase(), true);
             embed.appendField("GENRES:", String.join(", ", movieData.genres), true);
 
-            Util.sendEmbed(message.getChannel(), embed.build());
+            Util.sendEmbed(message.getChannel(), embed.withColor(Util.getBotColor()).build());
         } else {
             Util.simpleEmbed(message.getChannel(), "Error: Movie not found");
             Util.simpleEmbed(client.getChannelByID(Long.parseLong(TVBot.getConfigManager().getConfigValue("ERORRLOG_ID"))), "Couldn't find movie " + movieName + " in " + guild.getName() + "/" + message.getChannel().getName());
