@@ -50,7 +50,7 @@ public class CommandMuteAdd implements Command {
 
                     IUser userO = guild.getUserByID(Long.parseLong(userID));
 
-                    String user = "NULL";
+                    String user = "<@" + userID + ">";
                     if (userO != null) {
                         user = userO.mention();
                     }
