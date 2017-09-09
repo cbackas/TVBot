@@ -230,10 +230,6 @@ public class TVBot {
 
     public static IGuild getHomeGuild() { return client.getGuildByID(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));}
 
-    public List<String> getBotAdmins() {
-        return botAdmins;
-    }
-
     private void registerAllCommands() {
         new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
             try {

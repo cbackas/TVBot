@@ -50,22 +50,22 @@ public class CommandBan implements Command {
             if (matcher.find()) {
                 String userInput = matcher.group(1);
                 String reason = matcher.group(2);
-                if (reason != null) {
-                    IUser user = guild.getUserByID(Long.parseLong(userInput));
-                    if (user.getStringID().equals(author.getStringID())) {
-                        Util.sendMessage(message.getChannel(), "You're gonna have to try harder than that.");
-                    } else {
-                        try {
-                            guild.banUser(user, 1);
-                            Util.sendLog(message, "Banned " + user.getDisplayName(guild) + "\n**Reason:** " + reason, Color.red);
-                            Util.simpleEmbed(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
-                        } catch (Exception e) {
-                            Util.reportHome(message, e);
+                IUser user = guild.getUserByID(Long.parseLong(userInput));
+                if (reason != null && user != null) {
+                        if (user.getStringID().equals(author.getStringID())) {
+                            Util.sendMessage(message.getChannel(), "You're gonna have to try harder than that.");
+                        } else {
+                            try {
+                                guild.banUser(user, 1);
+                                Util.sendLog(message, "Banned " + user.getDisplayName(guild) + "\n**Reason:** " + reason, Color.red);
+                                Util.simpleEmbed(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
+                            } catch (Exception e) {
+                                Util.reportHome(message, e);
+                            }
                         }
+                    } else {
+                        Util.sendPrivateMessage(author, "**Error Banning**: Reason required");
                     }
-                } else {
-                    Util.sendPrivateMessage(author, "**Error Banning**: Reason required");
-                }
             } else {
                 Util.syntaxError(this, message);
             }

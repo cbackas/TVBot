@@ -47,23 +47,25 @@ public class CommandMuteRemove implements Command {
             if (matcher.find()) {
                 String u = matcher.group(1);
                 IUser userInput = guild.getUserByID(Long.parseLong(u));
-                if (message.getAuthor().getStringID().equals(u)) {
-                    Util.sendMessage(message.getChannel(), "Not sure how you typed this command... but you can't unmute yourself");
-                } else {
-                    try {
-                        userInput.removeRole(guild.getRoleByID(231269949635559424l));
+                if (userInput != null) {
+                    if (message.getAuthor().getStringID().equals(u)) {
+                        Util.sendMessage(message.getChannel(), "Not sure how you typed this command... but you can't unmute yourself");
+                    } else {
+                        try {
+                            userInput.removeRole(guild.getRoleByID(231269949635559424l));
 
-                        Util.simpleEmbed(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
+                            Util.simpleEmbed(message.getChannel(), userInput.getDisplayName(guild) + " has been unmuted");
 
-                        List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
-                        if (mutedUsers.contains(u)) {
-                            mutedUsers.remove(u);
-                            bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
+                            if (mutedUsers.contains(u)) {
+                                mutedUsers.remove(u);
+                                bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            }
+
+                            Util.sendLog(message, userInput.getDisplayName(guild) + " has been unmuted.", Color.gray);
+                        } catch (Exception e) {
+                            Util.reportHome(message, e);
                         }
-
-                        Util.sendLog(message, userInput.getDisplayName(guild) + " has been unmuted.", Color.gray);
-                    } catch (Exception e) {
-                        Util.reportHome(message, e);
                     }
                 }
             }

@@ -71,26 +71,28 @@ public class CommandMuteAdd implements Command {
                 String u = matcher.group(1);
                 String reason = matcher.group(2);
 
-                if (reason == null) {
-                    reason = "an unspecified reason";
-                }
-
                 IUser userInput = guild.getUserByID(Long.parseLong(u));
-                if (message.getAuthor().getStringID().equals(u)) {
-                    Util.simpleEmbed(message.getChannel(), "You probably shouldn't mute yourself");
-                } else {
-                    try {
-                        userInput.addRole(guild.getRoleByID(231269949635559424l));
-                        Util.simpleEmbed(message.getChannel(), userInput.getDisplayName(guild) + " has been muted. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
+                if (userInput != null) {
+                    if (reason == null) {
+                        reason = "an unspecified reason";
+                    }
 
-                        if (!mutedUsers.contains(u)) {
-                            mutedUsers.add(u);
-                            bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                    if (message.getAuthor().getStringID().equals(u)) {
+                        Util.simpleEmbed(message.getChannel(), "You probably shouldn't mute yourself");
+                    } else {
+                        try {
+                            userInput.addRole(guild.getRoleByID(231269949635559424l));
+                            Util.simpleEmbed(message.getChannel(), userInput.getDisplayName(guild) + " has been muted. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
+
+                            if (!mutedUsers.contains(u)) {
+                                mutedUsers.add(u);
+                                bot.getConfigManager().setConfigValue("muted", mutedUsers);
+                            }
+
+                            Util.sendLog(message, "Muted " + userInput.getDisplayName(guild) + "\n**Reason:** " + reason, Color.gray);
+                        } catch (Exception e) {
+                            Util.reportHome(message, e);
                         }
-
-                        Util.sendLog(message, "Muted " + userInput.getDisplayName(guild) + "\n**Reason:** " + reason, Color.gray);
-                    } catch (Exception e) {
-                        Util.reportHome(message, e);
                     }
                 }
             }
