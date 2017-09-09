@@ -68,6 +68,9 @@ public class Scheduler {
         int midnightWaitTime = roundUp(currentTimeEST, DAILY_INTERVAL) - currentTimeEST; //seconds until midnight
         exec.scheduleAtFixedRate(() -> {
 
+            /**
+             * todo : message at midnight in the new episodes channel saying date and how many shows are airing that day
+             */
             updateUserCount();
             resetUserChange();
 
