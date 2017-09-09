@@ -40,7 +40,7 @@ public class CommandAnnounce implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         if (args.length >= 1) {
-            String announcement = message.getContent().split(" ", 2)[1];
+            String announcement = content.split(" ", 2)[1];
             Util.sendAnnouncement(announcement);
         } else {
             Util.syntaxError(this, message);
