@@ -4,7 +4,6 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.PermissionUtils;
 
@@ -28,12 +27,12 @@ public class CommandBan implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "ban @user [reason]";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Bans a user from the server and logs the reason";
     }
 
     @Override
@@ -45,7 +44,7 @@ public class CommandBan implements Command {
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         try {
             PermissionUtils.hasPermissions(message.getChannel(), message.getAuthor(), EnumSet.of(Permissions.BAN));
-            Pattern pattern = Pattern.compile("^\\?ban <@!?(\\d+)> ?(.+)?");
+            Pattern pattern = Pattern.compile("^\\!ban <@!?(\\d+)> ?(.+)?");
             Matcher matcher = pattern.matcher(content);
             if (matcher.find()) {
                 String userInput = matcher.group(1);
