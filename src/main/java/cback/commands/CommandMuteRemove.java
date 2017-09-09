@@ -64,6 +64,7 @@ public class CommandMuteRemove implements Command {
 
                             Util.sendLog(message, userInput.getDisplayName(guild) + " has been unmuted.", Color.gray);
                         } catch (Exception e) {
+                            Util.simpleEmbed(message.getChannel(), "Error running " + this.getName() + " - error recorded");
                             Util.reportHome(message, e);
                         }
                     }
