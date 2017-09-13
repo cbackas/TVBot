@@ -276,8 +276,8 @@ public class Util {
      */
     public static void sendAnnouncement(String message) {
         try {
-            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID), message);
-            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), message);
+            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CH_ID), message);
+            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), message);
         } catch (Exception e) {
             e.printStackTrace();
         }

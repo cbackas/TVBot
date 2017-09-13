@@ -82,7 +82,7 @@ public class CommandMuteAdd implements Command {
                     } else {
                         try {
                             userInput.addRole(guild.getRoleByID(231269949635559424l));
-                            Util.simpleEmbed(message.getChannel(), userInput.getDisplayName(guild) + " has been muted. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
+                            Util.simpleEmbed(message.getChannel(), userInput.getDisplayName(guild) + " has been muted. Check " + guild.getChannelByID(TVBot.SERVERLOG_CH_ID).mention() + " for more info.");
 
                             if (!mutedUsers.contains(u)) {
                                 mutedUsers.add(u);

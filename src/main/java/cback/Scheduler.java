@@ -88,8 +88,8 @@ public class Scheduler {
             try {
                 Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
                 if (show != null) {
-                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEW_EPISODE_CHANNEL_ID);
-                    IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CHANNEL_ID);
+                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
+                    IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
                     IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
 
                     String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + bot.getTraktManager().showSummary(show.getShowID()).network + ". Go to " + showChannel.mention() + " for live episode discussion!";
@@ -121,7 +121,7 @@ public class Scheduler {
         oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
             try {
 
-                IMessage toDelete = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID).getMessageByID(airing.getMessageID());
+                IMessage toDelete = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID).getMessageByID(airing.getMessageID());
                 if(toDelete == null)
                     throw new NullPointerException("Message to delete was not found!");
                 Util.deleteBufferedMessage(toDelete);

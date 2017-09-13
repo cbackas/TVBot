@@ -67,10 +67,10 @@ public class CommandMovieNight implements Command {
 
                     Util.deleteMessage(client.getMessageByID(Long.parseLong(configManager.getConfigValue("mnID"))));
 
-                    IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
+                    IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), announcement);
                     String messageID = thingy.getStringID();
 
-                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
+                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CH_ID), announcement);
                     try {
                         configManager.setConfigValue("poll", poll);
                         configManager.setConfigValue("date", date);
@@ -89,10 +89,10 @@ public class CommandMovieNight implements Command {
 
                     Util.deleteMessage(client.getMessageByID(Long.parseLong(configManager.getConfigValue("mnID"))));
 
-                    IMessage message2Delete = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
+                    IMessage message2Delete = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), announcement);
                     String messageID = message2Delete.getStringID();
 
-                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
+                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CH_ID), announcement);
                     try {
                         configManager.setConfigValue("movie", movie);
                         configManager.setConfigValue("mnID", messageID);
@@ -110,10 +110,10 @@ public class CommandMovieNight implements Command {
 
                     Util.deleteMessage(client.getMessageByID(Long.parseLong(configManager.getConfigValue("mnID"))));
 
-                    IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CHANNEL_ID), announcement);
+                    IMessage thingy = Util.sendBufferedMessage(guild.getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), announcement);
                     String messageID = thingy.getStringID();
 
-                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CHANNEL_ID), announcement);
+                    Util.sendBufferedMessage(guild.getChannelByID(TVBot.GENERAL_CH_ID), announcement);
                     try {
                         configManager.setConfigValue("mnID", messageID);
                     } catch (Exception e) {

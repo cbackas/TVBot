@@ -40,7 +40,7 @@ public class CommandLog implements Command {
         if (args.length >= 1) {
             String finalText = message.getFormattedContent().split(" ", 2)[1];
             Util.sendLog(message, finalText);
-            Util.simpleEmbed(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention());
+            Util.simpleEmbed(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.SERVERLOG_CH_ID).mention());
             Util.deleteMessage(message);
         } else {
             Util.syntaxError(this, message);
