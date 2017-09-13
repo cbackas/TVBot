@@ -42,7 +42,7 @@ public class Util {
     public static void reportHome(IMessage message, Exception e) {
         e.printStackTrace();
 
-        IChannel errorChannel = client.getChannelByID(Long.parseLong(cm.getConfigValue("ERORRLOG_ID")));
+        IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);
 
         EmbedBuilder bld = new EmbedBuilder()
                 .withColor(BOT_COLOR)
@@ -74,7 +74,7 @@ public class Util {
     public static void reportHome(Exception e) {
         e.printStackTrace();
 
-        IChannel errorChannel = client.getChannelByID(Long.parseLong(cm.getConfigValue("ERORRLOG_ID")));
+        IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);
 
         EmbedBuilder bld = new EmbedBuilder()
                 .withColor(BOT_COLOR)
@@ -103,14 +103,15 @@ public class Util {
      */
     public static void botLog(IMessage message) {
         try {
-            IChannel botLogChannel = client.getChannelByID(Long.parseLong(cm.getConfigValue("COMMANDLOG_ID")));
+            IChannel botLogChannel = client.getChannelByID(TVBot.BOTLOG_CH_ID);
 
             EmbedBuilder bld = new EmbedBuilder()
                     .withColor(BOT_COLOR)
                     .withAuthorName(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator())
                     .withAuthorIcon(getAvatar(message.getAuthor()))
                     .withDesc(message.getFormattedContent())
-                    .withFooterText(message.getGuild().getName() + "/#" + message.getChannel().getName());
+                    .withFooterText(message.getGuild().getName() + "/#" + message.getChannel().getName())
+                    .withTimestamp(System.currentTimeMillis());
 
             sendEmbed(botLogChannel, bld.build());
         } catch (Exception e) {
@@ -167,7 +168,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(Color.GRAY).build())
-                        .withChannel(getServerLogChannel()).send();
+                        .withChannel(TVBot.SERVERLOG_CH_ID).send();
             } catch (Exception e) {
                 reportHome(e);
             }
@@ -193,7 +194,7 @@ public class Util {
 
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
-                        .withChannel(getServerLogChannel()).send();
+                        .withChannel(TVBot.SERVERLOG_CH_ID).send();
             } catch (Exception e) {
                 reportHome(e);
             }
@@ -281,25 +282,6 @@ public class Util {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Returns IChannels
-     */
-    public static IChannel getServerLogChannel() {
-        IChannel channel = client.getChannelByID(Long.parseLong(cm.getConfigValue("SERVERLOG_ID")));
-        if (channel != null) {
-            return channel;
-        }
-        return null;
-    }
-
-    public static IChannel getMessageLogsChannel() {
-        IChannel channel = client.getChannelByID(Long.parseLong(cm.getConfigValue("MESSAGELOGS_ID")));
-        if (channel != null) {
-            return channel;
-        }
-        return null;
     }
 
     public static void sendPrivateMessage(IUser user, String message) {

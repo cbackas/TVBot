@@ -64,7 +64,7 @@ public class CommandShowAdd implements Command {
             bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
             Util.simpleEmbed(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
             System.out.println("@" + message.getAuthor().getName() + " added show " + showName);
-            Util.simpleEmbed(client.getChannelByID(Long.parseLong(TVBot.getConfigManager().getConfigValue("COMMANDLOG_ID"))), showName + " assigned to " + channel.getName());
+            Util.simpleEmbed(client.getChannelByID(TVBot.BOTLOG_CH_ID), showName + " assigned to " + channel.getName());
             //Update airing data after new show added
             bot.getTraktManager().updateAiringData();
         } else {

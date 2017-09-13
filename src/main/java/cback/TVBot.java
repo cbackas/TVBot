@@ -55,6 +55,10 @@ public class TVBot {
     public static final long SERVERLOG_CH_ID = 217456105679224846l;
     public static final long DEV_CH_ID = 269638376376893440l;
 
+    public static final long ERRORLOG_CH_ID = 346104666796589056l;
+    public static final long BOTLOG_CH_ID = 346483682376286208l;
+    public static final long BOTPM_CH_ID = 346104720903110656l;
+
     private long startTime;
 
     public static void main(String[] args) {
@@ -142,13 +146,13 @@ public class TVBot {
 
                 Command cCommand = command.get();
 
-                /*
+                /**
                  * If user has permission to run the command: Command executes and botlogs
                  */
                 //message.getChannel().setTypingStatus(true);
                 if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
-                    cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
                     Util.botLog(message);
+                    cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
                     //message.getChannel().setTypingStatus(false);
                 } else {
                     Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
@@ -176,7 +180,7 @@ public class TVBot {
                     .withAuthorIcon(getAvatar(message.getAuthor()))
                     .withDesc(message.getContent());
 
-            Util.sendEmbed(client.getChannelByID(346104720903110656l), bld.build());
+            Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), bld.build());
         } else {
             censorMessages(message);
 

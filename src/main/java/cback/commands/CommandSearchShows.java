@@ -75,7 +75,7 @@ public class CommandSearchShows implements Command {
             Util.sendEmbed(message.getChannel(), embed.withColor(Util.getBotColor()).build());
         } else {
             Util.simpleEmbed(message.getChannel(), "Error: Show not found");
-            Util.simpleEmbed(client.getChannelByID(Long.parseLong(TVBot.getConfigManager().getConfigValue("ERORRLOG_ID"))), "Couldn't find show " + showName + " in " + guild.getName() + "/" + message.getChannel().getName());
+            Util.simpleEmbed(client.getChannelByID(TVBot.ERRORLOG_CH_ID), "Couldn't find show " + showName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }
 

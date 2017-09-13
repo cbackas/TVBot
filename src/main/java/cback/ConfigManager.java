@@ -32,10 +32,6 @@ public class ConfigManager {
         defaultConfig.put("bannedWords", new ArrayList<String>());
         defaultConfig.put("bot_color", "023563");
         defaultConfig.put("HOMESERVER_ID", "192441520178200577");
-        defaultConfig.put("COMMANDLOG_ID", "ID"); // Hub channel
-        defaultConfig.put("ERORRLOG_ID", "ID"); // Hub channel
-        defaultConfig.put("SERVERLOG_ID", "ID"); // Home channel
-        defaultConfig.put("MESSAGELOGS_ID", "ID"); // Home channel
     }
 
     public ConfigManager(TVBot bot) {
