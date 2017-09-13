@@ -22,29 +22,33 @@ public class MessageChange {
     @EventSubscriber
     public void messageDeleted(MessageDeleteEvent event) {
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID()) && event.getMessage() != null) {
-            ConfigManager cm = bot.getConfigManager();
-            IChannel MESSAGE_LOGS = event.getClient().getChannelByID(Long.parseLong(cm.getConfigValue("MESSAGELOGS_ID")));
-            IMessage message = event.getMessage();
-            IUser author = event.getAuthor();
-            IChannel channel = event.getChannel();
+            if (!event.getAuthor().isBot() && !TVBot.messageCache.contains(event.getMessageID())) {
+                if (event.getChannel().getLongID() != TVBot.DEV_CH_ID) {
+                    TVBot.messageCache.remove(event.getMessageID());
+                    IChannel MESSAGE_LOGS = event.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
+                    IMessage message = event.getMessage();
+                    IUser author = event.getAuthor();
+                    IChannel channel = event.getChannel();
 
-            Boolean tripped = true;
-            for (String p : bot.prefixes) {
-                if (message.getContent().startsWith(p)) {
-                    tripped = false;
+                    Boolean tripped = true;
+                    for (String p : bot.prefixes) {
+                        if (message.getContent().startsWith(p)) {
+                            tripped = false;
+                        }
+                    }
+
+                    if (tripped) {
+                        EmbedBuilder bld = new EmbedBuilder().withColor(java.awt.Color.decode("#ED4337"));
+                        bld
+                                .withAuthorName(author.getName() + "#" + author.getDiscriminator())
+                                .withAuthorIcon(Util.getAvatar(author))
+                                .withDesc("**Message sent by **" + author.mention() + "** deleted in **" + channel.mention() + "\n" + message.getContent())
+                                .withFooterText("User ID: " + author.getStringID())
+                                .withTimestamp(System.currentTimeMillis());
+
+                        Util.sendEmbed(MESSAGE_LOGS, bld.build());
+                    }
                 }
-            }
-
-            if (tripped) {
-                EmbedBuilder bld = new EmbedBuilder().withColor(java.awt.Color.decode("#ED4337"));
-                bld
-                        .withAuthorName(author.getName() + "#" + author.getDiscriminator())
-                        .withAuthorIcon(Util.getAvatar(author))
-                        .withDesc("**Message sent by **" + author.mention() + "** deleted in **" + channel.mention() + "\n" + message.getContent())
-                        .withFooterText("User ID: " + author.getStringID())
-                        .withTimestamp(System.currentTimeMillis());
-
-                Util.sendEmbed(MESSAGE_LOGS, bld.build());
             }
         }
     }

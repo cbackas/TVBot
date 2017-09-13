@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static cback.Util.BOT_COLOR;
 import static cback.Util.getAvatar;
 import static cback.Util.reportHome;
 
@@ -40,17 +41,19 @@ public class TVBot {
     private CommandManager commandManager;
     private Scheduler scheduler;
 
-    private List<String> botAdmins = new ArrayList<>();
+    public static ArrayList<Long> messageCache = new ArrayList<>();
 
     public static List<Command> registeredCommands = new ArrayList<>();
     static private String prefix = "!";
     public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
-    public static final Long ANNOUNCEMENT_CHANNEL_ID = 345774506373021716l;
-    public static final Long NEW_EPISODE_CHANNEL_ID = 263184398894104577l;
-    public static final Long GENERAL_CHANNEL_ID = 192441520178200577l;
-    public static final Long LOG_CHANNEL_ID = 217456105679224846l;
+    public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
+    public static final long NEWEPISODE_CH_ID = 263184398894104577l;
+    public static final long GENERAL_CH_ID = 192441520178200577l;
+    public static final long MESSAGELOG_CH_ID = 305073652280590339l;
+    public static final long SERVERLOG_CH_ID = 217456105679224846l;
+    public static final long DEV_CH_ID = 269638376376893440l;
 
     private long startTime;
 
@@ -82,12 +85,6 @@ public class TVBot {
         scheduler = new Scheduler(this);
 
         registerAllCommands();
-
-        botAdmins.add("109109946565537792");
-        botAdmins.add("148279556619370496");
-        botAdmins.add("73416411443113984");
-        botAdmins.add("144412318447435776");
-
     }
 
     private void connect() {
@@ -181,9 +178,14 @@ public class TVBot {
 
             Util.sendEmbed(client.getChannelByID(346104720903110656l), bld.build());
         } else {
+            censorMessages(message);
+
+            /**
+             * Deletes messages/bans users for using too many @ mentions
+             */
             if (message.getMentions().size() > 10) {
                 try {
-                    guild.banUser(message.getAuthor(), 1);
+                    guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 1);
                     Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                 } catch (Exception e) {
                     reportHome(e);
@@ -191,6 +193,7 @@ public class TVBot {
             } else if (message.getMentions().size() > 5) {
                 Util.deleteMessage(message);
             }
+
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);
         }
@@ -202,6 +205,10 @@ public class TVBot {
         client = event.getClient();
 
         startTime = System.currentTimeMillis();
+    }
+
+    public static TVBot getInstance() {
+        return instance;
     }
 
     public DatabaseManager getDatabaseManager() {
@@ -259,8 +266,38 @@ public class TVBot {
         return (hours < 10 ? "0" + hours : hours) + "h " + (minutes < 10 ? "0" + minutes : minutes) + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
     }
 
-    public static TVBot getInstance() {
-        return instance;
+    /**
+     * Checks for dirty words :o
+     */
+    public void censorMessages(IMessage message) {
+        List<String> bannedWords = TVBot.getInstance().getConfigManager().getConfigArray("bannedWords");
+        String content = message.getFormattedContent().toLowerCase();
+        Boolean tripped = false;
+        for (String word : bannedWords) {
+            if (content.matches(".*\\b" + word + "\\b.*") || content.matches(".*\\b" + word + "s\\b.*")) {
+                tripped = true;
+                break;
+            }
+        }
+        if (tripped) {
+            message.getChannel().setTypingStatus(true);
+            IUser author = message.getAuthor();
+
+            EmbedBuilder bld = new EmbedBuilder();
+            bld
+                    .withAuthorIcon(author.getAvatarURL())
+                    .withAuthorName(Util.getTag(author))
+                    .withDesc(message.getFormattedContent())
+                    .withTimestamp(System.currentTimeMillis())
+                    .withFooterText("Auto-deleted from #" + message.getChannel().getName());
+
+            Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(BOT_COLOR).build());
+            Util.sendPrivateMessage(author, "Your message has been automatically removed for a banned word or something");
+
+            messageCache.add(message.getLongID());
+            message.delete();
+            message.getChannel().setTypingStatus(false);
+        }
     }
 
 }
