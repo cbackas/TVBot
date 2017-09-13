@@ -9,7 +9,6 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.MessageBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,12 +27,12 @@ public class CommandRule implements Command {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "rule #";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Returns the rule requested";
     }
 
     @Override
