@@ -55,9 +55,9 @@ public class CommandBan implements Command {
                             Util.sendMessage(message.getChannel(), "You're gonna have to try harder than that.");
                         } else {
                             try {
-                                guild.banUser(user, 1);
+                                guild.banUser(user, reason + " Appeal at https://www.reddit.com/r/LoungeBan/", 1);
                                 Util.sendLog(message, "Banned " + user.getDisplayName(guild) + "\n**Reason:** " + reason, Color.red);
-                                Util.simpleEmbed(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.LOG_CHANNEL_ID).mention() + " for more info.");
+                                Util.simpleEmbed(message.getChannel(), user.getDisplayName(guild) + " has been banned. Check " + guild.getChannelByID(TVBot.SERVERLOG_CH_ID).mention() + " for more info.");
                             } catch (Exception e) {
                                 Util.simpleEmbed(message.getChannel(), "Error running " + this.getName() + " - error recorded");
                                 Util.reportHome(message, e);
