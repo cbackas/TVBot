@@ -19,8 +19,6 @@ public class MessageChange {
         this.bot = bot;
     }
 
-    private final IChannel MESSAGE_LOGS = bot.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
-
     @EventSubscriber
     public void messageDeleted(MessageDeleteEvent event) {
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID()) && event.getMessage() != null) {
@@ -47,6 +45,7 @@ public class MessageChange {
                                 .withFooterText("User ID: " + author.getStringID())
                                 .withTimestamp(System.currentTimeMillis());
 
+                        IChannel MESSAGE_LOGS = event.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
                         Util.sendEmbed(MESSAGE_LOGS, bld.build());
                     }
                 }
@@ -74,6 +73,7 @@ public class MessageChange {
                         .withFooterText("ID: " + message.getStringID())
                         .withTimestamp(System.currentTimeMillis());
 
+                IChannel MESSAGE_LOGS = event.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
                 Util.sendEmbed(MESSAGE_LOGS, bld.build());
             }
         }
@@ -104,6 +104,7 @@ public class MessageChange {
                     .withFooterText("ID: " + user.getStringID())
                     .withTimestamp(System.currentTimeMillis());
 
+            IChannel MESSAGE_LOGS = event.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
             Util.sendEmbed(MESSAGE_LOGS, bld.build());
         }
     }
