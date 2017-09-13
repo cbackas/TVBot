@@ -77,6 +77,7 @@ public class TVBot {
         prefixes.add("!g");
         prefixes.add("--");
         prefixes.add(".");
+        prefixes.add("?");
 
         connect();
         client.getDispatcher().registerListener(this);
