@@ -73,7 +73,6 @@ public class TraktManager {
                 return search.body().get(0).show.title;
             }
         } catch (Exception e) {
-            Util.reportHome(e);
         }
         return null;
     }
@@ -85,7 +84,6 @@ public class TraktManager {
                 return show.body();
             }
         } catch (Exception e) {
-            Util.reportHome(e);
         }
         return null;
     }
@@ -101,7 +99,6 @@ public class TraktManager {
                 }
             }
         } catch (Exception e) {
-            Util.reportHome(e);
         }
         return null;
     }
@@ -116,7 +113,6 @@ public class TraktManager {
                 }
             }
         } catch (Exception e) {
-            Util.reportHome(e);
         }
         return null;
     }
