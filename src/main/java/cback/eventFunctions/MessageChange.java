@@ -1,6 +1,5 @@
 package cback.eventFunctions;
 
-import cback.ConfigManager;
 import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.events.EventSubscriber;
