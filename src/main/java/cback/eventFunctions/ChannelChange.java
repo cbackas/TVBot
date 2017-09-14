@@ -55,13 +55,11 @@ public class ChannelChange {
             //Set muted role
             IGuild guild = event.getClient().getGuildByID(192441520178200577l);
             IRole muted = guild.getRoleByID(231269949635559424l);
-            IRole embedMuted = guild.getRoleByID(239233306325942272l);
 
             try {
                 event.getChannel().overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
-                event.getChannel().overrideRolePermissions(embedMuted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.EMBED_LINKS, Permissions.ATTACH_FILES));
             } catch (Exception e) {
-                e.printStackTrace();
+                Util.reportHome(e);
             }
 
             //Check for tv show

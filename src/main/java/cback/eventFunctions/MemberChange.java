@@ -21,22 +21,18 @@ public class MemberChange {
     @EventSubscriber
     public void memberJoin(UserJoinEvent event) {
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID())) {
-            if (event.getGuild().getStringID().equals("192441520178200577")) {
-                //Mute Check
-                if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getStringID())) {
-                    try {
-                        event.getUser().addRole(event.getGuild().getRoleByID(231269949635559424l));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            //Mute Check
+            if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getStringID())) {
+                try {
+                    event.getUser().addRole(event.getGuild().getRoleByID(231269949635559424l));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                //Join Counter
-                int joined = Integer.parseInt(bot.getConfigManager().getConfigValue("joined"));
-                bot.getConfigManager().setConfigValue("joined", String.valueOf(joined + 1));
-
-
             }
+
+            //Join Counter
+            int joined = Integer.parseInt(bot.getConfigManager().getConfigValue("joined"));
+            bot.getConfigManager().setConfigValue("joined", String.valueOf(joined + 1));
         }
     }
 
@@ -45,17 +41,14 @@ public class MemberChange {
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID())) {
             IUser user = event.getUser();
 
-            if (event.getGuild().getStringID().equals("192441520178200577")) {
-                //Mute Check
-                if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getStringID())) {
-                    Util.sendMessage(event.getGuild().getChannelByID(192444648545845248l), user + " is muted and left the server. Their mute will be applied again when/if they return.");
-                }
-
-                //Leave Counter
-                int left = Integer.parseInt(bot.getConfigManager().getConfigValue("left"));
-                bot.getConfigManager().setConfigValue("left", String.valueOf(left + 1));
-
+            //Mute Check
+            if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getStringID())) {
+                Util.sendMessage(event.getGuild().getChannelByID(192444648545845248l), user + " is muted and left the server. Their mute will be applied again when/if they return.");
             }
+
+            //Leave Counter
+            int left = Integer.parseInt(bot.getConfigManager().getConfigValue("left"));
+            bot.getConfigManager().setConfigValue("left", String.valueOf(left + 1));
         }
     }
 
@@ -78,11 +71,9 @@ public class MemberChange {
                 bot.getConfigManager().setConfigValue("muted", mutedUsers);
             }
 
-            if (event.getGuild().getStringID().equals("192441520178200577")) {
                 //Leave Counter
                 int left = Integer.parseInt(bot.getConfigManager().getConfigValue("left"));
                 bot.getConfigManager().setConfigValue("left", String.valueOf(left + 1));
-            }
         }
     }
 }

@@ -1,10 +1,8 @@
 package cback;
 
-import cback.eventFunctions.ChannelChange;
-import cback.eventFunctions.MemberChange;
+import cback.eventFunctions.*;
 import cback.commands.*;
 import cback.database.DatabaseManager;
-import cback.eventFunctions.MessageChange;
 import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -25,11 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static cback.Util.BOT_COLOR;
-import static cback.Util.getAvatar;
-import static cback.Util.reportHome;
-
-@SuppressWarnings("FieldCanBeLocal")
 public class TVBot {
 
     private static TVBot instance;
@@ -178,7 +171,7 @@ public class TVBot {
                     .withColor(Util.getBotColor())
                     .withTimestamp(System.currentTimeMillis())
                     .withAuthorName(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator())
-                    .withAuthorIcon(getAvatar(message.getAuthor()))
+                    .withAuthorIcon(message.getAuthor().getAvatarURL())
                     .withDesc(message.getContent());
 
             Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), bld.build());
@@ -193,7 +186,7 @@ public class TVBot {
                     guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 1);
                     Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                 } catch (Exception e) {
-                    reportHome(e);
+                    Util.reportHome(e);
                 }
             } else if (message.getMentions().size() > 5) {
                 Util.deleteMessage(message);
@@ -296,7 +289,7 @@ public class TVBot {
                     .withTimestamp(System.currentTimeMillis())
                     .withFooterText("Auto-deleted from #" + message.getChannel().getName());
 
-            Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(BOT_COLOR).build());
+            Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(Util.getBotColor()).build());
             Util.sendPrivateMessage(author, "Your message has been automatically removed for a banned word or something");
 
             messageCache.add(message.getLongID());
