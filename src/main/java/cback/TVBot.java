@@ -127,30 +127,32 @@ public class TVBot {
                     .filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && com.getAliases().contains(baseCommand)))
                     .findAny();
             if (command.isPresent()) {
-                System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
-                        (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
-
-                String args = matcher.group(2);
-                String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
-
-                List<Long> roleIDs = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
-
-                IUser author = message.getAuthor();
-                String content = message.getContent();
-
                 Command cCommand = command.get();
 
-                /**
-                 * If user has permission to run the command: Command executes and botlogs
-                 */
-                //message.getChannel().setTypingStatus(true);
-                if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
-                    Util.botLog(message);
-                    cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
-                    //message.getChannel().setTypingStatus(false);
-                } else {
-                    Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
-                    //message.getChannel().setTypingStatus(false);
+                if (cCommand.getDescription() != null) {
+                    System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
+                            (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
+
+                    String args = matcher.group(2);
+                    String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
+
+                    List<Long> roleIDs = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
+
+                    IUser author = message.getAuthor();
+                    String content = message.getContent();
+
+                    /**
+                     * If user has permission to run the command: Command executes and botlogs
+                     */
+                    //message.getChannel().setTypingStatus(true);
+                    if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
+                        Util.botLog(message);
+                        cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
+                        //message.getChannel().setTypingStatus(false);
+                    } else {
+                        Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
+                        //message.getChannel().setTypingStatus(false);
+                    }
                 }
             } else if (commandManager.getCommandValue(baseCommand) != null) {
 
@@ -181,6 +183,7 @@ public class TVBot {
             /**
              * Deletes messages/bans users for using too many @ mentions
              */
+            if (!message.mentionsEveryone()) {
             if (message.getMentions().size() > 10) {
                 try {
                     guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 1);
@@ -190,6 +193,7 @@ public class TVBot {
                 }
             } else if (message.getMentions().size() > 5) {
                 Util.deleteMessage(message);
+            }
             }
 
             //Increment message count if message was not a command
@@ -201,6 +205,9 @@ public class TVBot {
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
         client = event.getClient();
+
+        //Set status
+        client.changePlayingText("Type " + prefix + "help");
 
         startTime = System.currentTimeMillis();
     }
