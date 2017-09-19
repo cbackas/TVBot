@@ -41,6 +41,8 @@ public class TVBot {
     public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
+    public static final long CBACK_USR_ID = 73416411443113984l;
+
     public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
     public static final long NEWEPISODE_CH_ID = 263184398894104577l;
     public static final long GENERAL_CH_ID = 192441520178200577l;
@@ -129,7 +131,7 @@ public class TVBot {
             if (command.isPresent()) {
                 Command cCommand = command.get();
 
-                if (cCommand.getDescription() != null) {
+                if (cCommand.getDescription() != null || message.getAuthor().getLongID() == CBACK_USR_ID) {
                     System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
                             (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
 
