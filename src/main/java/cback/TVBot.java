@@ -185,17 +185,15 @@ public class TVBot {
             /**
              * Deletes messages/bans users for using too many @ mentions
              */
-            if (!message.mentionsEveryone()) {
-            if (message.getMentions().size() > 10) {
+            if (message.getMentions().size() > 10 && !message.mentionsEveryone() && !message.mentionsHere()) {
                 try {
                     guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 1);
                     Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                 } catch (Exception e) {
                     Util.reportHome(e);
                 }
-            } else if (message.getMentions().size() > 5) {
+            } else if (message.getMentions().size() > 5 && !message.mentionsEveryone() && !message.mentionsHere()) {
                 Util.deleteMessage(message);
-            }
             }
 
             //Increment message count if message was not a command
@@ -242,7 +240,9 @@ public class TVBot {
         return prefix;
     }
 
-    public static IGuild getHomeGuild() { return client.getGuildByID(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));}
+    public static IGuild getHomeGuild() {
+        return client.getGuildByID(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
+    }
 
     private void registerAllCommands() {
         new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
