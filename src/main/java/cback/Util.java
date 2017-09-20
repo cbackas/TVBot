@@ -169,7 +169,7 @@ public class Util {
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(Color.GRAY).build())
                         .withChannel(TVBot.SERVERLOG_CH_ID).send();
-            } catch (Exception e) {
+            } catch (MissingPermissionsException | DiscordException e) {
                 reportHome(e);
             }
             return null;
@@ -195,7 +195,7 @@ public class Util {
                 IDiscordClient client = TVBot.getInstance().getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
                         .withChannel(TVBot.SERVERLOG_CH_ID).send();
-            } catch (Exception e) {
+            } catch (MissingPermissionsException | DiscordException e) {
                 reportHome(e);
             }
             return null;
@@ -219,7 +219,8 @@ public class Util {
             try {
                 return new MessageBuilder(TVBot.getInstance().getClient()).withEmbed(embedObject)
                         .withChannel(channel).send();
-            } catch (Exception e) {
+            } catch (MissingPermissionsException | DiscordException e) {
+                reportHome(e);
             }
             return null;
         });
@@ -276,12 +277,8 @@ public class Util {
      * Sends an announcement (message in general and announcements)
      */
     public static void sendAnnouncement(String message) {
-        try {
-            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CH_ID), message);
-            Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CH_ID), message);
+        Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), message);
     }
 
     public static void sendPrivateMessage(IUser user, String message) {
