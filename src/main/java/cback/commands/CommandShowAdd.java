@@ -47,7 +47,6 @@ public class CommandShowAdd implements Command {
             if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getStringID();
             Show showData = bot.getTraktManager().showSummary(imdbID);
             String showName = showData.title;
-            String showNetwork = showData.network;
             IChannel channel = client.getChannelByID(Long.parseLong(channelID));
             if (channel == null) {
                 Util.simpleEmbed(message.getChannel(), "No channel by this ID found.");
@@ -55,10 +54,6 @@ public class CommandShowAdd implements Command {
             }
             if (showName == null) {
                 Util.simpleEmbed(message.getChannel(), "No show by this IMDB ID found.");
-                return;
-            }
-            if (showNetwork.equalsIgnoreCase("netflix")) {
-                Util.simpleEmbed(message.getChannel(), "Netflix show detected - import aborted");
                 return;
             }
             bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
