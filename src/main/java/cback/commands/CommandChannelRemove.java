@@ -8,6 +8,9 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,25 +46,26 @@ public class CommandChannelRemove implements Command {
         List<IChannel> mentionsC = message.getChannelMentions();
         if (!mentionsC.isEmpty()) {
             for (IChannel c : mentionsC) {
-                try {
-
-                    Util.sendLog(message, "Deleted " + c.getName() + " channel.");
-
-                    c.delete();
-                } catch (Exception e) {
-                    Util.reportHome(message, e);
-                }
+                RequestBuffer.request(() -> {
+                    try {
+                        c.delete();
+                        Util.sendLog(message, "Deleted " + c.getName() + " channel.");
+                    } catch (DiscordException | MissingPermissionsException e) {
+                        Util.reportHome(message, e);
+                    }
+                });
             }
         } else if (args[0].equalsIgnoreCase("here")) {
-            try {
+            IChannel here = message.getChannel();
 
-                IChannel here = message.getChannel();
-
-                Util.sendLog(message, "Deleted " + here.getName() + " channel.");
-                here.delete();
-            } catch (Exception e) {
-                Util.reportHome(message, e);
-            }
+            RequestBuffer.request(() -> {
+                try {
+                    here.delete();
+                    Util.sendLog(message, "Deleted " + here.getName() + " channel.");
+                } catch (DiscordException | MissingPermissionsException e) {
+                    Util.reportHome(message, e);
+                }
+            });
         } else {
             Util.simpleEmbed(message.getChannel(), "Error! Couldn't find channel to delete.");
         }
