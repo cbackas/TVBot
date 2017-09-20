@@ -1,16 +1,14 @@
 package cback.commands;
 
+import cback.Scheduler;
 import cback.TVBot;
-import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommandTrigger implements Command {
     @Override
