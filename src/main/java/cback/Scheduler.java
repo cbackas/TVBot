@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Scheduler {
 
@@ -96,27 +98,31 @@ public class Scheduler {
                 if (show != null) {
                     TraktManager tm = bot.getTraktManager();
                     String network = tm.showSummary(show.getShowID()).network;
+
+                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
+                    IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
+                    IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
+
+                    String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.mention() + " for live episode discussion!";
+
                     if (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon")) {
                         if (bulkShowIDs.contains(show.getShowID())) {
                             return;
                         } else {
+                            Pattern pattern = Pattern.compile("^S([0-9]+)E[0-9]+");
+                            Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
+                            message = "**" + show.getShowName() + " season " + matcher.group(1) + " is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";;
                             bulkShowIDs.add(show.getShowID());
-
-                            IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
-                            IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
-                            IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
-
-                            String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + tm.showSummary(show.getShowID()).network + ". Go to " + showChannel.mention() + " for live episode discussion!";
-
-                            IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
-                            airing.setMessageID(announceMessage.getStringID());
-                            bot.getDatabaseManager().getTV().updateAiringMessage(airing);
-                            Util.sendBufferedMessage(globalChannel, message);
-                            Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
-
-                            System.out.println("Sent announcement for " + airing.getEpisodeInfo());
                         }
                     }
+
+                    IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
+                    airing.setMessageID(announceMessage.getStringID());
+                    bot.getDatabaseManager().getTV().updateAiringMessage(airing);
+                    Util.sendBufferedMessage(globalChannel, message);
+                    Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
+
+                    System.out.println("Sent announcement for " + airing.getEpisodeInfo());
                 } else {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
