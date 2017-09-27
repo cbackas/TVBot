@@ -4,13 +4,17 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
+import com.uwetrottmann.trakt5.enums.Status;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.EmbedBuilder;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class CommandShowAdd implements Command {
@@ -49,11 +53,11 @@ public class CommandShowAdd implements Command {
             String showName = showData.title;
             IChannel channel = client.getChannelByID(Long.parseLong(channelID));
             if (channel == null) {
-                Util.simpleEmbed(message.getChannel(), "No channel by this ID found.");
+                Util.simpleEmbed(message.getChannel(), "Error: No channel by this ID found.");
                 return;
             }
             if (showName == null) {
-                Util.simpleEmbed(message.getChannel(), "No show by this IMDB ID found.");
+                Util.simpleEmbed(message.getChannel(), "Error: Couldn't find a show associated with this IMDB ID");
                 return;
             }
             bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
@@ -62,6 +66,36 @@ public class CommandShowAdd implements Command {
             Util.simpleEmbed(client.getChannelByID(TVBot.BOTLOG_CH_ID), showName + " assigned to " + channel.getName());
             //Update airing data after new show added
             bot.getTraktManager().updateAiringData();
+
+            //Builds a show embed thing
+            String title = showData.title + " (" + Integer.toString(showData.year) + ") ";
+            String overview = showData.overview;
+            String airs = (showData.status == com.uwetrottmann.trakt5.enums.Status.RETURNING || showData.status == Status.IN_PRODUCTION)
+                    ? showData.airs.day + " at " + Util.to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
+            String premier = new SimpleDateFormat("MMM dd, yyyy").format(new Date(showData.first_aired.toInstant().toEpochMilli()));
+            String runtime = Integer.toString(showData.runtime);
+            String country = showData.country + " - " + showData.language;
+            String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";
+
+            try {
+                overview = guild.getChannelByID(Long.parseLong(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID())).mention() + "\n" + overview;
+            } catch (Exception ignored) {
+            }
+
+            EmbedBuilder embed = new EmbedBuilder();
+
+            embed
+                    .withTitle(title)
+                    .withDescription(overview)
+                    .appendField("References:", homepage, false)
+                    .appendField("AIRS:", airs, true)
+                    .appendField("RUNTIME:", runtime, true)
+                    .appendField("PREMIERED:", premier, true)
+                    .appendField("COUNTRY:", country.toUpperCase(), true)
+                    .appendField("GENRES:", String.join(", ", showData.genres), true)
+                    .withColor(Util.getBotColor());
+
+            Util.sendEmbed(message.getChannel(), embed.build());
         } else {
             Util.syntaxError(this, message);
         }
