@@ -76,36 +76,6 @@ public class ChannelChange {
                 String nameFromIMDB = trakt.getShowTitle(possibleID);
                 Util.simpleEmbed(event.getChannel(), "Found possible show: **" + nameFromIMDB + "**. The showID is: " + possibleID + "." +
                         "\n\nAdmins use: !addshow " + possibleID + " here to add the show");
-
-                //Builds a show embed thing
-                String title = showData.title + " (" + Integer.toString(showData.year) + ") ";
-                String overview = showData.overview;
-                String airs = (showData.status == com.uwetrottmann.trakt5.enums.Status.RETURNING || showData.status == Status.IN_PRODUCTION)
-                        ? showData.airs.day + " at " + Util.to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
-                String premier = new SimpleDateFormat("MMM dd, yyyy").format(new Date(showData.first_aired.toInstant().toEpochMilli()));
-                String runtime = Integer.toString(showData.runtime);
-                String country = showData.country + " - " + showData.language;
-                String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";
-
-                try {
-                    overview = guild.getChannelByID(Long.parseLong(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID())).mention() + "\n" + overview;
-                } catch (Exception ignored) {
-                }
-
-                EmbedBuilder embed = new EmbedBuilder();
-
-                embed.withTitle(title);
-                embed.withDescription(overview);
-                embed.appendField("References:", homepage, false);
-                embed.appendField("AIRS:", airs, true);
-                embed.appendField("RUNTIME:", runtime, true);
-                embed.appendField("PREMIERED:", premier, true);
-                embed.appendField("COUNTRY:", country.toUpperCase(), true);
-                embed.appendField("GENRES:", String.join(", ", showData.genres), true);
-                embed.withColor(Util.getBotColor());
-
-                Util.sendEmbed(event.getChannel(), embed.build());
-
             }
         }
     }
