@@ -111,7 +111,8 @@ public class Scheduler {
                         } else {
                             Pattern pattern = Pattern.compile("^S([0-9]+)E[0-9]+");
                             Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
-                            message = "**" + show.getShowName() + " season " + matcher.group(1) + " is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";;
+                            String season = matcher.group(1);
+                            message = "**" + show.getShowName() + " season " + season + " is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";;
                             bulkShowIDs.add(show.getShowID());
                         }
                     }
@@ -220,8 +221,10 @@ public class Scheduler {
                 .withTitle(dayOfWeek + ", " + month + " " + day)
                 .withColor(Util.BOT_COLOR);
 
-        if (count > 0) {
+        if (count > 1) {
             embed.withDesc("There are " + count + " episodes airing today! Stick around to see what they are.");
+        } else if (count == 1) {
+            embed.withDesc("There is " + count + " episode airing today! Stick around to see what it is.");
         } else {
             embed.withDesc("There aren't any new episodes airing today. Maybe tomorrow will be interesting.");
         }
