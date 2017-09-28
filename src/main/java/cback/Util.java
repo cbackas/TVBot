@@ -232,7 +232,7 @@ public class Util {
             try {
                 return channel.sendMessage(message);
             } catch (MissingPermissionsException | DiscordException e) {
-                e.printStackTrace();
+                reportHome(e);
             }
             return null;
         });
