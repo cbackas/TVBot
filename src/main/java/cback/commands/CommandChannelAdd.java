@@ -48,17 +48,8 @@ public class CommandChannelAdd implements Command {
         String channelNames[] = channelName.split("-\\|-");
 
         for (String c : channelNames) {
-            RequestBuffer.request(() -> {
-                try {
-                    guild.createChannel(c);
-
-                    Util.sendLog(message, "Added " + c + " channel.");
-                } catch (DiscordException | MissingPermissionsException e) {
-                    Util.reportHome(message, e);
-
-                    Util.simpleEmbed(message.getChannel(), c + " channel creation failed.");
-                }
-            });
+            RequestBuffer.request(() -> guild.createChannel(c));
+            Util.sendLog(message, "Added " + c + " channel.");
         }
 
         Util.deleteMessage(message);
