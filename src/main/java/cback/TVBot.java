@@ -46,6 +46,7 @@ public class TVBot {
     public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
     public static final long NEWEPISODE_CH_ID = 263184398894104577l;
     public static final long GENERAL_CH_ID = 192441520178200577l;
+    public static final long SUGGEST_CH_ID = 256491839870337024l;
     public static final long MESSAGELOG_CH_ID = 305073652280590339l;
     public static final long SERVERLOG_CH_ID = 217456105679224846l;
     public static final long DEV_CH_ID = 269638376376893440l;

@@ -37,7 +37,7 @@ public class CommandSuggest implements Command {
 
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<Long> suggestable = Arrays.asList(256491839870337024l, 192444470942236672l, 256491839870337024l);
+        List<Long> suggestable = Arrays.asList(TVBot.SUGGEST_CH_ID);
         if (suggestable.contains(message.getChannel().getLongID())) {
             try {
                 message.getChannel().pin(message);
