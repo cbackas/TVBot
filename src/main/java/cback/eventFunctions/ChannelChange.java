@@ -11,7 +11,9 @@ import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.text.SimpleDateFormat;
@@ -42,7 +44,7 @@ public class ChannelChange {
                     RequestBuffer.request(() -> {
                         try {
                             channels.overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.EMBED_LINKS, Permissions.ATTACH_FILES));
-                        } catch (Exception e) {
+                        } catch (MissingPermissionsException | DiscordException e) {
                             e.printStackTrace();
                         }
                     });
@@ -60,11 +62,13 @@ public class ChannelChange {
             IGuild guild = event.getClient().getGuildByID(192441520178200577l);
             IRole muted = guild.getRoleByID(231269949635559424l);
 
-            try {
-                event.getChannel().overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
-            } catch (Exception e) {
-                Util.reportHome(e);
-            }
+            RequestBuffer.request(() -> {
+                try {
+                    event.getChannel().overrideRolePermissions(muted, EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.SEND_MESSAGES));
+                } catch (MissingPermissionsException | DiscordException e) {
+                    Util.reportHome(e);
+                }
+            });
 
             //Check for tv show
             TraktManager trakt = bot.getTraktManager();
