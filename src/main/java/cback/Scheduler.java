@@ -123,6 +123,8 @@ public class Scheduler {
                     Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
 
                     System.out.println("Sent announcement for " + airing.getEpisodeInfo());
+                    //Delete airing once it's done
+                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                 } else {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
