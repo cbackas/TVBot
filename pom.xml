@@ -27,6 +27,12 @@
             <artifactId>trakt-java</artifactId>
             <version>5.7.1</version>
         </dependency>
+        <!--manual gson version -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.6.2</version>
+        </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
@@ -47,11 +53,6 @@
             <artifactId>twitter4j-core</artifactId>
             <version>[4.0,)</version>
         </dependency>
-<!--        <dependency>
-            <groupId>in.ashwanthkumar</groupId>
-            <artifactId>slack-java-webhook</artifactId>
-            <version>0.0.7</version>
-        </dependency>-->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
