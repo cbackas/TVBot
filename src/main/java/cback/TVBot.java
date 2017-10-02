@@ -186,16 +186,17 @@ public class TVBot {
             /**
              * Deletes messages/bans users for using too many @ mentions
              */
-            /*if (message.getMentions().size() > 10 && !message.mentionsEveryone() && !message.mentionsHere()) {
+            if (Util.mentionsCount(message.getContent()) > 10) {
                 try {
-                    guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 1);
+                    guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 0);
+                    Util.simpleEmbed(message.getChannel(), message.getAuthor().getDisplayName(guild) + " was just banned for mentioning more than 10 users.");
                     Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                 } catch (Exception e) {
                     Util.reportHome(e);
                 }
-            } else if (message.getMentions().size() > 5 && !message.mentionsEveryone() && !message.mentionsHere()) {
+            } else if (Util.mentionsCount(message.getContent()) > 5) {
                 Util.deleteMessage(message);
-            }*/
+            }
 
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);

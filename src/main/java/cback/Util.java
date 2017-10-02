@@ -374,4 +374,23 @@ public class Util {
         }
         return null;
     }
+
+    /**
+     * returns a count of mentions
+     */
+    public static int mentionsCount(String content) {
+        String[] args = content.split(" ");
+        if (args.length > 0) {
+            int count = 0;
+            for (String arg : args) {
+                Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
+                if (matcher.matches()) {
+                    count++;
+                }
+            }
+            return count;
+        } else {
+            return 0;
+        }
+    }
 }
