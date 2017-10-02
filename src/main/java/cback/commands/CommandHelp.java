@@ -26,7 +26,7 @@ public class CommandHelp implements Command {
 
     @Override
     public String getSyntax() {
-        return "help";
+        return "help <command>";
     }
 
     @Override
@@ -41,32 +41,44 @@ public class CommandHelp implements Command {
 
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.withTitle("Commands:");
-
-        List<Long> roles = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
-        for (Command c : TVBot.registeredCommands) {
-
-            if (c.getDescription() != null) {
-
-                String aliases = "";
-                if (c.getAliases() != null) {
-                    aliases = "\n*Aliases:* " + c.getAliases().toString();
-                }
-
-                if (c.getPermissions() == null || !Collections.disjoint(roles, c.getPermissions())) {
-                    embed.appendField(bot.getPrefix() + c.getSyntax(), c.getDescription() + aliases, false);
+        if (args.length == 1) {
+            for (Command c : TVBot.registeredCommands) {
+                if (c.getName().equalsIgnoreCase(args[0])) {
+                    Util.syntaxError(c, message);
+                    break;
                 }
             }
-        }
+        } else {
+            EmbedBuilder embed = Util.getEmbed();
+            embed.withTitle("Commands:");
 
-        embed.withFooterText("You can only see commands you can use.");
+            List<Long> roles = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
+            for (Command c : TVBot.registeredCommands) {
 
-        try {
+                if (c.getDescription() != null) {
+
+                    String aliases = "";
+                    if (c.getAliases() != null) {
+                        aliases = "\n*Aliases:* " + c.getAliases().toString();
+                    }
+
+                    if (c.getPermissions() == null) {
+                        embed.appendField(c.getSyntax(), c.getDescription() + aliases, false);
+                    } else if (!Collections.disjoint(roles, c.getPermissions())) {
+                        embed.appendField(TVBot.getPrefix() + c.getSyntax(), c.getDescription() + aliases, false);
+                    }
+
+                }
+
+            }
+
+            embed.withFooterText("You only see commands you have permission to use");
+
             Util.sendEmbed(message.getAuthor().getOrCreatePMChannel(), embed.withColor(Util.getBotColor()).build());
-        } catch (Exception e) {
-            Util.reportHome(message, e);
         }
+
+        Util.deleteMessage(message);
+
     }
 
 }
