@@ -71,9 +71,9 @@ public class CommandSearchMovies implements Command {
             embed.appendField("LANGUAGE:", country.toUpperCase(), true);
             embed.appendField("GENRES:", String.join(", ", movieData.genres), true);
 
-            initialMessage.edit(embed.withColor(Util.getBotColor()).build());
+            initialMessage.edit("Found it!", embed.withColor(Util.getBotColor()).build());
         } else {
-            initialMessage.edit(new EmbedBuilder().withDesc("Error: Movie not found").withColor(Util.getBotColor()).build());
+            initialMessage.edit("Oops...", new EmbedBuilder().withDesc("Error: Movie not found").withColor(Util.getBotColor()).build());
             Util.simpleEmbed(client.getChannelByID(TVBot.ERRORLOG_CH_ID), "Couldn't find movie " + movieName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }

@@ -75,9 +75,9 @@ public class CommandSearchShows implements Command {
             embed.appendField("COUNTRY:", country.toUpperCase(), true);
             embed.appendField("GENRES:", String.join(", ", showData.genres), true);
 
-            initialMessage.edit(embed.withColor(Util.getBotColor()).build());
+            initialMessage.edit("Found it!", embed.withColor(Util.getBotColor()).build());
         } else {
-            initialMessage.edit(new EmbedBuilder().withDesc("Error: Show not found").withColor(Util.getBotColor()).build());
+            initialMessage.edit("Oops...", new EmbedBuilder().withDesc("Error: Show not found").withColor(Util.getBotColor()).build());
             Util.simpleEmbed(client.getChannelByID(TVBot.ERRORLOG_CH_ID), "Couldn't find show " + showName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }
