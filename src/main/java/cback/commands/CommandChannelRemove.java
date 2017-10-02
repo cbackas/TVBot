@@ -61,7 +61,6 @@ public class CommandChannelRemove implements Command {
             RequestBuffer.request(() -> {
                 try {
                     here.delete();
-                    Util.sendLog(message, "Deleted " + here.getName() + " channel.");
                 } catch (DiscordException | MissingPermissionsException e) {
                     Util.reportHome(message, e);
                 }
