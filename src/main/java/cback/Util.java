@@ -347,6 +347,9 @@ public class Util {
         return null;
     }
 
+    /**
+     * Changes the time to a 12 hour format
+     */
     public static String to12Hour(String time) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
@@ -358,6 +361,9 @@ public class Util {
         return time;
     }
 
+    /**
+     * returns the string content of a rule, given the message ID of where it's found
+     */
     public static String getRule(Long ruleID) {
         try {
             String rule = TVBot.getInstance().getClient().getChannelByID(263184364811059200l).getMessageByID(ruleID).getContent();
