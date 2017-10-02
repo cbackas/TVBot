@@ -43,6 +43,9 @@ public class CommandSearchMovies implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         String movieName = Arrays.stream(args).collect(Collectors.joining(" "));
+
+        IMessage initialMessage = Util.simpleEmbed(message.getChannel(), "Searching <https://trakt.tv/> for " + movieName + " ...");
+
         Movie movieData = bot.getTraktManager().movieSummaryFromName(movieName);
         if (movieData != null) {
             String title = "**" + movieData.title + " (" + Integer.toString(movieData.year) + ")**";
@@ -68,9 +71,9 @@ public class CommandSearchMovies implements Command {
             embed.appendField("LANGUAGE:", country.toUpperCase(), true);
             embed.appendField("GENRES:", String.join(", ", movieData.genres), true);
 
-            Util.sendEmbed(message.getChannel(), embed.withColor(Util.getBotColor()).build());
+            initialMessage.edit(embed.withColor(Util.getBotColor()).build());
         } else {
-            Util.simpleEmbed(message.getChannel(), "Error: Movie not found");
+            initialMessage.edit(new EmbedBuilder().withDesc("Error: Movie not found").withColor(Util.getBotColor()).build());
             Util.simpleEmbed(client.getChannelByID(TVBot.ERRORLOG_CH_ID), "Couldn't find movie " + movieName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }

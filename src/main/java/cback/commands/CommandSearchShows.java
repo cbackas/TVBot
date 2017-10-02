@@ -45,6 +45,9 @@ public class CommandSearchShows implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         String showName = Arrays.stream(args).collect(Collectors.joining(" "));
+
+        IMessage initialMessage = Util.simpleEmbed(message.getChannel(), "Searching <https://trakt.tv/> for " + showName + " ...");
+
         Show showData = bot.getTraktManager().showSummaryFromName(showName);
         if (showData != null) {
             String title = showData.title + " (" + Integer.toString(showData.year) + ") ";
@@ -72,9 +75,9 @@ public class CommandSearchShows implements Command {
             embed.appendField("COUNTRY:", country.toUpperCase(), true);
             embed.appendField("GENRES:", String.join(", ", showData.genres), true);
 
-            Util.sendEmbed(message.getChannel(), embed.withColor(Util.getBotColor()).build());
+            initialMessage.edit(embed.withColor(Util.getBotColor()).build());
         } else {
-            Util.simpleEmbed(message.getChannel(), "Error: Show not found");
+            initialMessage.edit(new EmbedBuilder().withDesc("Error: Show not found").withColor(Util.getBotColor()).build());
             Util.simpleEmbed(client.getChannelByID(TVBot.ERRORLOG_CH_ID), "Couldn't find show " + showName + " in " + guild.getName() + "/" + message.getChannel().getName());
         }
     }

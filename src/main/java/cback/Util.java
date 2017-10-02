@@ -206,12 +206,12 @@ public class Util {
     /**
      * Send simple fast embeds
      */
-    public static void simpleEmbed(IChannel channel, String message) {
-        sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(BOT_COLOR).build());
+    public static IMessage simpleEmbed(IChannel channel, String message) {
+        return sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(BOT_COLOR).build());
     }
 
-    public static void simpleEmbed(IChannel channel, String message, Color color) {
-        sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(color).build());
+    public static IMessage simpleEmbed(IChannel channel, String message, Color color) {
+        return sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(color).build());
     }
 
     public static IMessage sendEmbed(IChannel channel, EmbedObject embedObject) {
