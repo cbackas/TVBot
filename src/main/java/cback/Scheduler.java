@@ -168,7 +168,7 @@ public class Scheduler {
     public void pruneDeletedAirings() {
         //delete week old airings whose announcements were deleted
         List<Airing> deletedAirings = bot.getDatabaseManager().getTV().getDeletedAirings();
-        deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= 604800).forEach(airing -> {
+        deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= 86400).forEach(airing -> {
             bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
         });
     }
