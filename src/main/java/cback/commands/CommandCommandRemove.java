@@ -19,7 +19,7 @@ public class CommandCommandRemove implements Command {
 
     @Override
     public List<String> getAliases() {
-        return null;
+        return Arrays.asList("rcom");
     }
 
     @Override
@@ -29,7 +29,7 @@ public class CommandCommandRemove implements Command {
 
     @Override
     public String getDescription() {
-        return null;
+        return "Deletes a custom command from the official custom command database!";
     }
 
     @Override
