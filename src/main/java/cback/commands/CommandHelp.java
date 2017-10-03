@@ -43,9 +43,11 @@ public class CommandHelp implements Command {
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         if (args.length == 1) {
             for (Command c : TVBot.registeredCommands) {
-                if (c.getName().equalsIgnoreCase(args[0])) {
+                if (c.getName().equalsIgnoreCase(args[0]) || c.getAliases().contains(args[0].toLowerCase())) {
                     Util.syntaxError(c, message);
                     break;
+                } else {
+                    Util.simpleEmbed(message.getChannel(), "Sorry, I couldn't find a command named " + args[0]);
                 }
             }
         } else {
@@ -53,26 +55,39 @@ public class CommandHelp implements Command {
             embed.withTitle("Commands:");
 
             List<Long> roles = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
+            StringBuilder bld = new StringBuilder();
             for (Command c : TVBot.registeredCommands) {
 
                 if (c.getDescription() != null) {
 
-                    String aliases = "";
+                    String aliases = "Aliases: ";
                     if (c.getAliases() != null) {
-                        aliases = "\n*Aliases:* " + c.getAliases().toString();
+                        int commas = c.getAliases().size() - 1;
+                        for (String a : c.getAliases()) {
+                            if (commas > 0) {
+                                aliases += a + ", ";
+                                commas--;
+                            } else {
+                                aliases += a;
+                            }
+                        }
                     }
 
-                    if (c.getPermissions() == null) {
-                        embed.appendField(c.getSyntax(), c.getDescription() + aliases, false);
-                    } else if (!Collections.disjoint(roles, c.getPermissions())) {
-                        embed.appendField(TVBot.getPrefix() + c.getSyntax(), c.getDescription() + aliases, false);
+                    if (c.getPermissions() == null || !Collections.disjoint(roles, c.getPermissions())) {
+                        if (aliases.equals("Aliases: ")) {
+                            bld.append("- " + c.getName() + "\n");
+                        } else {
+                            bld.append("- " + c.getName() + "\n    " + aliases + "\n");
+                        }
                     }
 
                 }
 
             }
 
-            embed.withFooterText("You only see commands you have permission to use");
+            embed.withDesc(bld.toString());
+
+            embed.withFooterText("Use " + TVBot.getPrefix() + "help <commandName> to see more info about a command.");
 
             Util.sendEmbed(message.getAuthor().getOrCreatePMChannel(), embed.withColor(Util.getBotColor()).build());
         }
