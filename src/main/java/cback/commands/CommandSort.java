@@ -3,10 +3,11 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
+import cback.apiutil.GuildChannelEditRequest;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class CommandSort implements Command {
 
@@ -51,15 +51,15 @@ public class CommandSort implements Command {
 
         this.count = 0;
 
-        ICategory staff = guild.getCategoryByID(355901035597922304l);
-        ICategory info = guild.getCategoryByID(355910636464504832l);
-        ICategory disc = guild.getCategoryByID(355910667812995084l);
-        ICategory fun = guild.getCategoryByID(358679449451102210l);
-        ICategory af = guild.getCategoryByID(358038418208587785l);
-        ICategory gl = guild.getCategoryByID(358038474894606346l);
-        ICategory mr = guild.getCategoryByID(358038505244327937l);
-        ICategory sz = guild.getCategoryByID(358038532780195840l);
-        ICategory closed = guild.getCategoryByID(355904962200469504l);
+        ICategory staff = guild.getCategoryByID(355901035597922304L);
+        ICategory info = guild.getCategoryByID(355910636464504832L);
+        ICategory disc = guild.getCategoryByID(355910667812995084L);
+        ICategory fun = guild.getCategoryByID(358679449451102210L);
+        ICategory af = guild.getCategoryByID(358038418208587785L);
+        ICategory gl = guild.getCategoryByID(358038474894606346L);
+        ICategory mr = guild.getCategoryByID(358038505244327937L);
+        ICategory sz = guild.getCategoryByID(358038532780195840L);
+        ICategory closed = guild.getCategoryByID(355904962200469504L);
 
         List<ICategory> permCategories = new ArrayList<>();
         permCategories.add(staff);
@@ -79,28 +79,7 @@ public class CommandSort implements Command {
                 .sorted(Comparator.comparing(chan -> getSortName(chan.getName())))
                 .collect(Collectors.toList());
 
-
-        //apply new positions
-        IntStream.range(0, showsChannelsSorted.size()).forEach(position -> {
-            IChannel channel = showsChannelsSorted.get(position);
-            if (!(channel.getPosition() == position)) { //don't sort if position is already correct
-                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    try {
-                        channel.changePosition(position);
-                        count++;
-                        return true;
-                    } catch (DiscordException e) {
-                        Util.reportHome(message, e);
-                    } catch (MissingPermissionsException e) {
-                        Util.reportHome(message, e);
-                    }
-                    return false;
-                });
-                future.get(); //wait for request to complete
-            }
-        });
-
-        //put all the unsorted channels into their categories
+        //put all the incorrectly sorted channels into their categories
         for (IChannel c : guild.getChannels()) {
             if (!permChannels.contains(c)) {
                 String channelName = getSortName(c.getName());
@@ -119,6 +98,9 @@ public class CommandSort implements Command {
             }
         }
 
+        //apply new positions
+        batchSortChannels(guild, showsChannelsSorted);
+
         Util.simpleEmbed(message.getChannel(), "All done! " + count + " channel(s) sorted.");
     }
 
@@ -134,10 +116,36 @@ public class CommandSort implements Command {
     private int count = 0;
 
     private void changeCategory(IChannel channel, ICategory category) {
-        RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-            channel.changeCategory(category);
-            return true;
-        });
-        future.get(); //wait for request to complete
+        if(channel.getCategory() == null || !channel.getCategory().equals(category)) {
+            RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
+                channel.changeCategory(category);
+                return true;
+            });
+            future.get(); //wait for request to complete
+        }
+    }
+
+    public void batchSortChannels(IGuild guild, List<IChannel> sortedChannels) {
+        try {
+
+            GuildChannelEditRequest[] edits = new GuildChannelEditRequest[sortedChannels.size()];
+            for (int i = 0; i < sortedChannels.size(); i++) {
+                IChannel channel = sortedChannels.get(i);
+                GuildChannelEditRequest edit = new GuildChannelEditRequest.Builder().id(channel.getLongID()).position(i).build();
+                edits[i] = edit;
+            }
+
+            ((DiscordClientImpl) guild.getClient())
+                    .REQUESTS
+                    .PATCH
+                    .makeRequest
+                            (
+                                    DiscordEndpoints.GUILDS + guild.getStringID() + "/channels"
+                                    , edits
+                            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
