@@ -1,5 +1,6 @@
 package cback;
 
+import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
 import sx.blah.discord.handle.obj.IChannel;
@@ -94,7 +95,8 @@ public class Scheduler {
         nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
             try {
                 Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
-                if (show != null) {
+                boolean isPermChannel = CommandSort.getPermChannels(bot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID)).contains(bot.getClient().getChannelByID(Long.parseLong(show.getChannelID())).getCategory());
+                if (show != null && !isPermChannel) {
                     TraktManager tm = bot.getTraktManager();
                     String network = tm.showSummary(show.getShowID()).network;
 
