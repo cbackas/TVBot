@@ -51,27 +51,7 @@ public class CommandSort implements Command {
 
         this.count = 0;
 
-        ICategory staff = guild.getCategoryByID(355901035597922304L);
-        ICategory info = guild.getCategoryByID(355910636464504832L);
-        ICategory disc = guild.getCategoryByID(355910667812995084L);
-        ICategory fun = guild.getCategoryByID(358679449451102210L);
-        ICategory af = guild.getCategoryByID(358038418208587785L);
-        ICategory gl = guild.getCategoryByID(358038474894606346L);
-        ICategory mr = guild.getCategoryByID(358038505244327937L);
-        ICategory sz = guild.getCategoryByID(358038532780195840L);
-        ICategory closed = guild.getCategoryByID(355904962200469504L);
-
-        List<ICategory> permCategories = new ArrayList<>();
-        permCategories.add(staff);
-        permCategories.add(info);
-        permCategories.add(disc);
-        permCategories.add(fun);
-        permCategories.add(closed);
-
-        List<IChannel> permChannels = new ArrayList<>();
-        for (ICategory cat : permCategories) {
-            permChannels.addAll(cat.getChannels());
-        }
+        List<IChannel> permChannels = getPermChannels(guild);
 
         //sort non permanent channels
         List<IChannel> showsChannelsSorted = guild.getChannels().stream()
@@ -79,6 +59,11 @@ public class CommandSort implements Command {
                 .sorted(Comparator.comparing(chan -> getSortName(chan.getName())))
                 .collect(Collectors.toList());
 
+
+        ICategory af = guild.getCategoryByID(358038418208587785L);
+        ICategory gl = guild.getCategoryByID(358038474894606346L);
+        ICategory mr = guild.getCategoryByID(358038505244327937L);
+        ICategory sz = guild.getCategoryByID(358038532780195840L);
         //put all the incorrectly sorted channels into their categories
         for (IChannel c : guild.getChannels()) {
             if (!permChannels.contains(c)) {
@@ -147,5 +132,27 @@ public class CommandSort implements Command {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static List<IChannel> getPermChannels(IGuild guild) {
+        ICategory staff = guild.getCategoryByID(355901035597922304L);
+        ICategory info = guild.getCategoryByID(355910636464504832L);
+        ICategory disc = guild.getCategoryByID(355910667812995084L);
+        ICategory fun = guild.getCategoryByID(358679449451102210L);
+        ICategory closed = guild.getCategoryByID(355904962200469504L);
+
+        List<ICategory> permCategories = new ArrayList<>();
+        permCategories.add(staff);
+        permCategories.add(info);
+        permCategories.add(disc);
+        permCategories.add(fun);
+        permCategories.add(closed);
+
+        List<IChannel> permChannels = new ArrayList<>();
+        for (ICategory cat : permCategories) {
+            permChannels.addAll(cat.getChannels());
+        }
+
+        return permChannels;
     }
 }
