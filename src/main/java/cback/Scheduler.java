@@ -218,6 +218,16 @@ public class Scheduler {
         //if it airs in next 24 hours it goes on the count
         long count = nextAirings.stream().filter(airing -> airing.getAiringTime() - Util.getCurrentTime() <= DAILY_INTERVAL).count();
 
+        StringBuilder bld = new StringBuilder().append("**NUMBERS**");
+        for (Airing nA : nextAirings) {
+            long airingTime = nA.getAiringTime();
+            int curTime = Util.getCurrentTime();
+            long output = airingTime - curTime;
+            bld.append(airingTime + " - " + curTime + " = " + output);
+            bld.append("\n");
+        }
+        Util.simpleEmbed(bot.getClient().getChannelByID(TVBot.ERRORLOG_CH_ID), bld.toString());
+
         embed
                 .withTitle(dayOfWeek + ", " + month + " " + day)
                 .withColor(Util.BOT_COLOR);
