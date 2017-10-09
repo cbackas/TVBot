@@ -50,9 +50,11 @@ public class CommandCloseChannel implements Command {
                 c.changeCategory(closed);
 
                 try {
-                    RequestBuffer.request(() -> {
+                    RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
                         c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+                        return true;
                     });
+                    future.get();
                     mentions.append(c.mention() + " ");
                 } catch (MissingPermissionsException | DiscordException e) {
                     Util.reportHome(e);

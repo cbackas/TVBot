@@ -50,9 +50,11 @@ public class CommandOpenChannel implements Command {
                 c.changeCategory(unsorted);
 
                 try {
-                    RequestBuffer.request(() -> {
+                    RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
                         c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.allOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+                        return true;
                     });
+                    future.get();
                     mentions.append(c.mention() + " ");
                 } catch (MissingPermissionsException | DiscordException e) {
                     Util.reportHome(e);
