@@ -42,6 +42,7 @@ public class TVBot {
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
     public static final long CBACK_USR_ID = 73416411443113984l;
+    public static final long HOMESERVER_GLD_ID = 192441520178200577L;
 
     public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
     public static final long NEWEPISODE_CH_ID = 263184398894104577l;
