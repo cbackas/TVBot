@@ -43,19 +43,23 @@ public class CommandCloseChannel implements Command {
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         List<IChannel> channels = message.getChannelMentions();
         if (channels.size() >= 1) {
+            StringBuilder mentions = new StringBuilder();
             for (IChannel c : channels) {
                 if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
                 ICategory closed = guild.getCategoryByID(355904962200469504L);
                 c.changeCategory(closed);
 
-                RequestBuffer.request(() -> {
-                    try {
+                try {
+                    RequestBuffer.request(() -> {
                         c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
-                    } catch (MissingPermissionsException | DiscordException e) {
-                        Util.reportHome(e);
-                    }
-                });
+                    });
+                    mentions.append(c.mention() + " ");
+                } catch (MissingPermissionsException | DiscordException e) {
+                    Util.reportHome(e);
+                }
             }
+
+            Util.simpleEmbed(message.getChannel(), "Moved " + channels.size() + " channel(s) to the close category.\n" + mentions.toString());
         } else {
             Util.syntaxError(this, message);
         }
