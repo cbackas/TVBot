@@ -59,7 +59,9 @@ public class CommandCloseChannel implements Command {
                 }
             }
 
-            Util.simpleEmbed(message.getChannel(), "Moved " + channels.size() + " channel(s) to the close category.\n" + mentions.toString());
+            String text = "Closed " + channels.size() + " channel(s).\n" + mentions.toString();
+            Util.simpleEmbed(message.getChannel(), text);
+            Util.sendLog(message, text);
         } else {
             Util.syntaxError(this, message);
         }
