@@ -9,10 +9,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.shard.ReconnectSuccessEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -210,9 +212,14 @@ public class TVBot {
         client = event.getClient();
 
         //Set status
-        client.changePlayingText("Type " + prefix + "help");
+        RequestBuffer.request(() -> client.changePlayingText("Type " + prefix + "help"));
 
         startTime = System.currentTimeMillis();
+    }
+
+    @EventSubscriber
+    public void onReconnectEvent(ReconnectSuccessEvent event) {
+        RequestBuffer.request(() -> client.changePlayingText("Type " + prefix + "help"));
     }
 
     public static TVBot getInstance() {
