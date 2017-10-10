@@ -4,15 +4,10 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,13 +41,33 @@ public class CommandChannelAdd implements Command {
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
         String channelNames[] = channelName.split("-\\|-");
+        if (channelNames.length >= 1) {
+            IMessage response = Util.simpleEmbed(message.getChannel(), "Attempting to create " + channelNames.length + " channels ...");
+            ICategory unsorted = guild.getCategoryByID(358043583355289600L);
 
-        for (String c : channelNames) {
-            RequestBuffer.request(() -> guild.createChannel(c));
-            Util.sendLog(message, "Added " + c + " channel.");
+            StringBuilder mentions = new StringBuilder();
+            int counter = 0;
+            for (String c : channelNames) {
+                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
+                    IChannel newChannel = guild.createChannel(c);
+                    newChannel.changeCategory(unsorted);
+                    mentions.append(newChannel.mention() + " ");
+                    return true;
+                });
+                future.get();
+                counter++;
+            }
+
+            Util.deleteMessage(response);
+
+            String text = "Created " + counter + " channel(s).\n" + mentions.toString();
+            Util.simpleEmbed(message.getChannel(), text);
+            Util.sendLog(message, text);
+
+            Util.deleteMessage(message);
+        } else {
+            Util.syntaxError(this, message);
         }
-
-        Util.deleteMessage(message);
     }
 
 }
