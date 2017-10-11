@@ -74,6 +74,7 @@ public class MessageChange {
 
                 IChannel MESSAGE_LOGS = event.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
                 Util.sendEmbed(MESSAGE_LOGS, bld.build());
+                bot.censorMessages(message);
             }
         }
     }
