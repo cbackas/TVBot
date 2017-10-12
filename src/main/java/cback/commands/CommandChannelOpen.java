@@ -13,25 +13,25 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-public class CommandCloseChannel implements Command {
+public class CommandChannelOpen implements Command {
     @Override
     public String getName() {
-        return "closechannel";
+        return "openchannel";
     }
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("close");
+        return Arrays.asList("open");
     }
 
     @Override
     public String getSyntax() {
-        return "closechannel #channel";
+        return "openchannel #channel";
     }
 
     @Override
     public String getDescription() {
-        return "Closes a TV show channel and makes it all secret.";
+        return "Moves desired channels from the closed category and opens them up to the world.";
     }
 
     @Override
@@ -46,12 +46,12 @@ public class CommandCloseChannel implements Command {
             StringBuilder mentions = new StringBuilder();
             for (IChannel c : channels) {
                 if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
-                ICategory closed = guild.getCategoryByID(355904962200469504L);
-                c.changeCategory(closed);
+                ICategory unsorted = guild.getCategoryByID(358043583355289600L);
+                c.changeCategory(unsorted);
 
                 try {
                     RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                        c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+                        c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.allOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
                         return true;
                     });
                     future.get();
@@ -61,7 +61,7 @@ public class CommandCloseChannel implements Command {
                 }
             }
 
-            String text = "Closed " + channels.size() + " channel(s).\n" + mentions.toString();
+            String text = "Opened " + channels.size() + " channel(s).\n" + mentions.toString();
             Util.simpleEmbed(message.getChannel(), text);
             Util.sendLog(message, text);
         } else {
