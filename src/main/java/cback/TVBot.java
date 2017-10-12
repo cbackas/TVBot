@@ -329,4 +329,10 @@ public class TVBot {
         toggleManager.toggleToggleValue(toggleKey);
     }
 
+    /**
+     * Get toggle bool
+     */
+    public Boolean toggleBool(String toggleKey) {
+        return toggleManager.getToggleValue(toggleKey);
+    }
 }
