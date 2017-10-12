@@ -105,9 +105,10 @@ public class Scheduler {
 
                     if (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon")) {
                         if (bulkShowIDs.contains(show.getShowID())) {
+                            bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                             return;
                         } else {
-                            Pattern pattern = Pattern.compile("^S([0-9]+)E[0-9]+");
+                            Pattern pattern = Pattern.compile("^S([0-9]+)E.+");
                             Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
                             String season = matcher.group(1);
                             message = "**" + show.getShowName() + " season " + season + " is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";
