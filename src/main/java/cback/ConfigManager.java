@@ -28,7 +28,6 @@ public class ConfigManager {
         defaultConfig.put("joined", "0");
         defaultConfig.put("left", "0");
         defaultConfig.put("muted", new ArrayList<String>());
-        defaultConfig.put("permanentchannels", new ArrayList<String>());
         defaultConfig.put("bannedWords", new ArrayList<String>());
         defaultConfig.put("bot_color", "023563");
         defaultConfig.put("HOMESERVER_ID", "192441520178200577");
