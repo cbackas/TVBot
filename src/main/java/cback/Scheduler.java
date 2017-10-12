@@ -6,6 +6,7 @@ import cback.database.tv.Show;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.VerificationLevel;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDate;
@@ -53,10 +54,9 @@ public class Scheduler {
 
             //establish current time (will be 5 min interval)
             int currentTime = Util.getCurrentTime();
-            //announce new airings
+
             processNewAirings(currentTime);
-            //delete messages for old airings
-            //processOldAirings(currentTime);
+            processOldAirings(currentTime);
 
         }, airingCheckWaitTime, CHECK_AIRING_INTERVAL, TimeUnit.SECONDS);
 
@@ -69,14 +69,11 @@ public class Scheduler {
 
         }, 0, DAILY_INTERVAL, TimeUnit.SECONDS);
 
-        //update user count at midnight every night
+        //midnight
         int currentTimeEST = time - 14400; //EST time, subtract 4 hours from UTC
         int midnightWaitTime = roundUp(currentTimeEST, DAILY_INTERVAL) - currentTimeEST + 45; //seconds until midnight
         exec.scheduleAtFixedRate(() -> {
 
-            /**
-             * todo : message at midnight in the new episodes channel saying date and how many shows are airing that day
-             */
             updateUserCount();
             resetUserChange();
             sendDailyMessage();
@@ -140,8 +137,9 @@ public class Scheduler {
     /**
      * Delete messages for episodes that have finished airing and set database values accordingly
      */
-    /*public void processOldAirings(int currentTime) {
-        //get last 30 shows alerted
+    public void processOldAirings(int currentTime) {
+        //Old delete announcement stuff
+        /*//get last 30 shows alerted
         List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
         //if episode aired over 2 hours ago, delete message from announcements channel
         oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
@@ -162,7 +160,18 @@ public class Scheduler {
                 bot.getDatabaseManager().getTV().updateAiringMessage(airing);
             }
         });
-    }*/
+        */
+
+        //Set security level if a show is airing
+        List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
+        //if episode aired over 2 hours ago, delete message from announcements channel
+        long aCount = oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).count();
+        if (aCount >= 1) {
+            setSecurity(VerificationLevel.MEDIUM);
+        } else {
+            setSecurity(VerificationLevel.HIGH);
+        }
+    }
 
     /***
      * Delete airing entries from the database if episode aired over a week ago
@@ -243,5 +252,14 @@ public class Scheduler {
         }
 
         Util.sendEmbed(bot.getClient().getChannelByID(TVBot.DEV_CH_ID), embed.build());
+    }
+
+    private void setSecurity(VerificationLevel level) {
+        try {
+            IGuild lounge = TVBot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID);
+            lounge.changeVerificationLevel(level);
+        } catch (Exception e) {
+            Util.reportHome(e);
+        }
     }
 }
