@@ -34,6 +34,7 @@ public class TVBot {
     private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
+    private ToggleManager toggleManager;
     private Scheduler scheduler;
 
     public static ArrayList<Long> messageCache = new ArrayList<>();
@@ -71,6 +72,7 @@ public class TVBot {
         //instantiate config manager first as connect() relies on tokens
         configManager = new ConfigManager(this);
         commandManager = new CommandManager(this);
+        toggleManager = new ToggleManager(this);
         prefixes.add(TVBot.getPrefix());
         prefixes.add("t!");
         prefixes.add("!g");
@@ -150,15 +152,14 @@ public class TVBot {
                     /**
                      * If user has permission to run the command: Command executes and botlogs
                      */
-                    //message.getChannel().setTypingStatus(true);
+                    message.getChannel().setTypingStatus(true);
                     if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
                         Util.botLog(message);
                         cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
-                        //message.getChannel().setTypingStatus(false);
                     } else {
                         Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
-                        //message.getChannel().setTypingStatus(false);
                     }
+                    message.getChannel().setTypingStatus(false);
                 }
             } else if (commandManager.getCommandValue(baseCommand) != null) {
 
@@ -242,6 +243,8 @@ public class TVBot {
         return commandManager;
     }
 
+    public ToggleManager getToggleMangager() { return toggleManager; }
+
     public static IDiscordClient getClient() {
         return client;
     }
@@ -317,6 +320,13 @@ public class TVBot {
                 message.getChannel().setTypingStatus(false);
             }
         }
+    }
+
+    /**
+     * Setting toggles
+     */
+    public void toggleSetting(String toggleKey) {
+        toggleManager.toggleToggleValue(toggleKey);
     }
 
 }
