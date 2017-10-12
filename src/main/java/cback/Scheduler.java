@@ -162,14 +162,16 @@ public class Scheduler {
         });
         */
 
-        //Set security level if a show is airing
-        List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
-        //if episode aired over 2 hours ago, delete message from announcements channel
-        long aCount = oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).count();
-        if (aCount >= 1) {
-            setSecurity(VerificationLevel.MEDIUM);
-        } else {
-            setSecurity(VerificationLevel.HIGH);
+        if (bot.toggleBool("autosecure")) {
+            //Set security level if a show is airing
+            List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
+            //if episode aired over 2 hours ago, delete message from announcements channel
+            long aCount = oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).count();
+            if (aCount >= 1) {
+                setSecurity(VerificationLevel.MEDIUM);
+            } else {
+                setSecurity(VerificationLevel.HIGH);
+            }
         }
     }
 
