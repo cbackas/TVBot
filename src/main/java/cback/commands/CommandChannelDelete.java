@@ -15,7 +15,7 @@ import sx.blah.discord.util.RequestBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommandChannelRemove implements Command {
+public class CommandChannelDelete implements Command {
     @Override
     public String getName() {
         return "deletechannel";
