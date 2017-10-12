@@ -220,18 +220,26 @@ public class Scheduler {
      * Sends a message in the new show channel daily to separate days
      */
     public void sendDailyMessage() {
-        EmbedBuilder embed = new EmbedBuilder();
-
         LocalDate now = LocalDate.now();
         String dayOfWeek = now.getDayOfWeek().name();
         String month = now.getMonth().name();
         int day = now.getDayOfMonth();
 
         List<Airing> nextAirings = bot.getDatabaseManager().getTV().getNewAirings();
-        //if it airs in next 24 hours it goes on the count
-        long count = nextAirings.stream().filter(airing -> airing.getAiringTime() - Util.getCurrentTime() <= DAILY_INTERVAL).count();
 
-        StringBuilder bld = new StringBuilder().append("**NUMBERS**");
+        //if it airs in next 24 hours it goes on the count
+        int count = 0;
+        for(Airing a : nextAirings) {
+            if ((a.getAiringTime() - Util.getCurrentTime() <= DAILY_INTERVAL) && (a.getAiringTime() - Util.getCurrentTime() > 0)) {
+                Show show = bot.getDatabaseManager().getTV().getShow(a.getShowID());
+                if (show != null) {
+                    count++;
+                }
+            }
+        }
+
+        //debugging
+        /*StringBuilder bld = new StringBuilder().append("**NUMBERS**");
         for (Airing nA : nextAirings) {
             long airingTime = nA.getAiringTime();
             int curTime = Util.getCurrentTime();
@@ -240,6 +248,9 @@ public class Scheduler {
             bld.append("\n");
         }
         Util.simpleEmbed(bot.getClient().getChannelByID(TVBot.ERRORLOG_CH_ID), bld.toString());
+        */
+
+        EmbedBuilder embed = new EmbedBuilder();
 
         embed
                 .withTitle(dayOfWeek + ", " + month + " " + day)
