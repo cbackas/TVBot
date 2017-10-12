@@ -168,9 +168,9 @@ public class Scheduler {
             //if episode aired over 2 hours ago, delete message from announcements channel
             long aCount = oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).count();
             if (aCount >= 1) {
-                setSecurity(VerificationLevel.MEDIUM);
+                Util.setSecurity(VerificationLevel.MEDIUM);
             } else {
-                setSecurity(VerificationLevel.HIGH);
+                Util.setSecurity(VerificationLevel.HIGH);
             }
         }
     }
@@ -254,14 +254,5 @@ public class Scheduler {
         }
 
         Util.sendEmbed(bot.getClient().getChannelByID(TVBot.DEV_CH_ID), embed.build());
-    }
-
-    private void setSecurity(VerificationLevel level) {
-        try {
-            IGuild lounge = TVBot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID);
-            lounge.changeVerificationLevel(level);
-        } catch (Exception e) {
-            Util.reportHome(e);
-        }
     }
 }

@@ -393,4 +393,16 @@ public class Util {
             return 0;
         }
     }
+
+    /**
+     * Sets the lounge's security level
+     */
+    public static void setSecurity(VerificationLevel level) {
+        try {
+            IGuild lounge = TVBot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID);
+            lounge.changeVerificationLevel(level);
+        } catch (Exception e) {
+            Util.reportHome(e);
+        }
+    }
 }
