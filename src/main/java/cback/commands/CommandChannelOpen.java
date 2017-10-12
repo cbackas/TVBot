@@ -42,30 +42,39 @@ public class CommandChannelOpen implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         List<IChannel> channels = message.getChannelMentions();
+        if (channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
+            channels.add(message.getChannel());
+        }
+
         if (channels.size() >= 1) {
-            StringBuilder mentions = new StringBuilder();
-            for (IChannel c : channels) {
-                if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
-                ICategory unsorted = guild.getCategoryByID(358043583355289600L);
-                c.changeCategory(unsorted);
+            String mentions = openChannels(guild, channels);
 
-                try {
-                    RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                        c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.allOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
-                        return true;
-                    });
-                    future.get();
-                    mentions.append(c.mention() + " ");
-                } catch (MissingPermissionsException | DiscordException e) {
-                    Util.reportHome(e);
-                }
-            }
-
-            String text = "Opened " + channels.size() + " channel(s).\n" + mentions.toString();
+            String text = "Opened " + channels.size() + " channel(s).\n" + mentions;
             Util.simpleEmbed(message.getChannel(), text);
             Util.sendLog(message, text);
         } else {
             Util.syntaxError(this, message);
         }
+    }
+
+    private String openChannels(IGuild guild, List<IChannel> channels) {
+        StringBuilder mentions = new StringBuilder();
+        for (IChannel c : channels) {
+            if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
+            ICategory unsorted = guild.getCategoryByID(358043583355289600L);
+            c.changeCategory(unsorted);
+
+            try {
+                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
+                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.allOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+                    return true;
+                });
+                future.get();
+                mentions.append(c.mention() + " ");
+            } catch (MissingPermissionsException | DiscordException e) {
+                Util.reportHome(e);
+            }
+        }
+        return mentions.toString();
     }
 }

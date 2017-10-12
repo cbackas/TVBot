@@ -4,10 +4,7 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
@@ -43,33 +40,37 @@ public class CommandChannelDelete implements Command {
 
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<IChannel> mentionsC = message.getChannelMentions();
-        if (!mentionsC.isEmpty()) {
-            for (IChannel c : mentionsC) {
-                RequestBuffer.request(() -> {
-                    try {
-                        c.delete();
-                        Util.sendLog(message, "Deleted " + c.getName() + " channel.");
-                    } catch (DiscordException | MissingPermissionsException e) {
-                        Util.reportHome(message, e);
-                    }
-                });
-            }
-        } else if (args[0].equalsIgnoreCase("here")) {
-            IChannel here = message.getChannel();
-
-            RequestBuffer.request(() -> {
-                try {
-                    here.delete();
-                } catch (DiscordException | MissingPermissionsException e) {
-                    Util.reportHome(message, e);
-                }
-            });
-        } else {
-            Util.simpleEmbed(message.getChannel(), "Error! Couldn't find channel to delete.");
+        List<IChannel> channels = message.getChannelMentions();
+        if (channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
+            channels.add(message.getChannel());
         }
 
-        Util.deleteMessage(message);
+        if (channels.size() >= 1) {
+            String mentions = deleteChannels(channels);
+
+            String text = "Deleted " + channels.size() + " channel(s).\n" + mentions;
+            Util.simpleEmbed(message.getChannel(), text);
+            Util.sendLog(message, text);
+        } else {
+            Util.syntaxError(this, message);
+        }
+    }
+
+    private String deleteChannels(List<IChannel> channels) {
+        StringBuilder mentions = new StringBuilder();
+        for (IChannel c : channels) {
+            try {
+                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
+                    c.delete();
+                    return true;
+                });
+                future.get();
+                mentions.append(c.mention() + " ");
+            } catch (MissingPermissionsException | DiscordException e) {
+                Util.reportHome(e);
+            }
+        }
+        return mentions.toString();
     }
 
 }
