@@ -239,18 +239,6 @@ public class Scheduler {
             }
         }
 
-        //debugging
-        /*StringBuilder bld = new StringBuilder().append("**NUMBERS**");
-        for (Airing nA : nextAirings) {
-            long airingTime = nA.getAiringTime();
-            int curTime = Util.getCurrentTime();
-            long output = airingTime - curTime;
-            bld.append(airingTime + " - " + curTime + " = " + output);
-            bld.append("\n");
-        }
-        Util.simpleEmbed(bot.getClient().getChannelByID(TVBot.ERRORLOG_CH_ID), bld.toString());
-        */
-
         EmbedBuilder embed = new EmbedBuilder();
 
         embed
@@ -265,6 +253,6 @@ public class Scheduler {
             embed.withDesc("There aren't any new episodes airing today. Maybe tomorrow will be interesting.");
         }
 
-        Util.sendEmbed(bot.getClient().getChannelByID(TVBot.DEV_CH_ID), embed.build());
+        Util.sendEmbed(bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID), embed.build());
     }
 }
