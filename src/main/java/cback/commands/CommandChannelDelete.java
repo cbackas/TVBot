@@ -65,7 +65,7 @@ public class CommandChannelDelete implements Command {
                     return true;
                 });
                 future.get();
-                mentions.append(c.mention() + " ");
+                mentions.append("#" + c.getName() + " ");
             } catch (MissingPermissionsException | DiscordException e) {
                 Util.reportHome(e);
             }
