@@ -5,6 +5,8 @@ import cback.TVRoles;
 import cback.Util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.Arrays;
@@ -43,24 +45,12 @@ public class CommandChannelAdd implements Command {
         String channelNames[] = channelName.split("-\\|-");
         if (channelNames.length >= 1) {
             IMessage response = Util.simpleEmbed(message.getChannel(), "Attempting to create " + channelNames.length + " channels ...");
-            ICategory unsorted = guild.getCategoryByID(358043583355289600L);
 
-            StringBuilder mentions = new StringBuilder();
-            int counter = 0;
-            for (String c : channelNames) {
-                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    IChannel newChannel = guild.createChannel(c);
-                    newChannel.changeCategory(unsorted);
-                    mentions.append(newChannel.mention() + " ");
-                    return true;
-                });
-                future.get();
-                counter++;
-            }
+            String mentions = createChannels(guild, channelNames);
 
             Util.deleteMessage(response);
 
-            String text = "Created " + counter + " channel(s).\n" + mentions.toString();
+            String text = "Created " + getCounter() + " channel(s).\n" + mentions;
             Util.simpleEmbed(message.getChannel(), text);
             Util.sendLog(message, text);
 
@@ -69,5 +59,40 @@ public class CommandChannelAdd implements Command {
             Util.syntaxError(this, message);
         }
     }
+
+    private String createChannels(IGuild guild, String[] names) {
+        StringBuilder mentions = new StringBuilder();
+        ICategory unsorted = guild.getCategoryByID(358043583355289600L);
+        resetCounter();
+        for (String s : names) {
+            try {
+                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
+                    IChannel c = guild.createChannel(s);
+                    c.changeCategory(unsorted);
+                    mentions.append("#" + c.getName() + " ");
+                    return true;
+                });
+                future.get();
+                incCounter();
+            } catch (MissingPermissionsException | DiscordException e) {
+                Util.reportHome(e);
+            }
+        }
+        return mentions.toString();
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+
+    public void resetCounter() {
+        this.counter = 0;
+    }
+
+    public void incCounter() {
+        this.counter++;
+    }
+
+    int counter = 0;
 
 }
