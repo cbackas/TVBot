@@ -39,14 +39,25 @@ public class CommandToggle implements Command {
 
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<String> toggles = bot.getToggleMangager().getToggleList();
-        if (args.length == 1 && toggles.contains(args[0])) {
-            toggles.stream().filter(toggle -> toggle.equalsIgnoreCase(args[0])).forEach(toggle -> bot.toggleSetting(toggle));
+        if (args.length == 1) {
+            List<String> toggles = bot.getToggleMangager().getToggleList();
+            if (args[0].equalsIgnoreCase("list")) {
+                ToggleManager tm = bot.getToggleMangager();
+                String toggleList = buildToggleList(tm, toggles);
+                Util.simpleEmbed(message.getChannel(), "**Toggles**: \n" + toggleList);
+            } else if (toggles.contains(args[0])) {
+                toggles.stream().filter(toggle -> toggle.equalsIgnoreCase(args[0])).forEach(toggle ->  {
+                    boolean state = bot.toggleSetting(toggle);
+                    String stateText;
+                    if (state) {
+                        stateText = "true";
+                    } else {
+                        stateText = "false";
+                    }
+                    Util.simpleEmbed(message.getChannel(), "**" + toggle + "** set to state ``" + stateText + "``");
+                });
+            }
         } else {
-            ToggleManager tm = bot.getToggleMangager();
-            String toggleList = buildToggleList(tm, toggles);
-
-            Util.simpleEmbed(message.getChannel(), "**Toggles**:\n" + toggleList);
             Util.syntaxError(this, message);
         }
     }
