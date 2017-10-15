@@ -325,14 +325,15 @@ public class TVBot {
     /**
      * Setting toggles
      */
-    public void toggleSetting(String toggleKey) {
+    public boolean toggleSetting(String toggleKey) {
         toggleManager.toggleToggleValue(toggleKey);
+        return toggleManager.getToggleValue(toggleKey);
     }
 
     /**
      * Get toggle bool
      */
-    public Boolean toggleBool(String toggleKey) {
+    public boolean toggleState(String toggleKey) {
         return toggleManager.getToggleValue(toggleKey);
     }
 }

@@ -163,7 +163,7 @@ public class Scheduler {
         });
         */
 
-        if (bot.toggleBool("autosecure")) {
+        if (bot.toggleState("autosecure")) {
             //Set security level if a show is airing
             List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
             //if episode aired over 2 hours ago, delete message from announcements channel
