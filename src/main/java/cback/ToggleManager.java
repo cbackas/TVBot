@@ -24,6 +24,7 @@ public class ToggleManager {
         defaultToggles.put("autosecure", "false");
         defaultToggles.put("censorwords", "false");
         defaultToggles.put("censorlinks", "false");
+        defaultToggles.put("limitmentions", "false");
     }
 
     public ToggleManager(TVBot bot) {
