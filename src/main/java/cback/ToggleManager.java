@@ -22,6 +22,8 @@ public class ToggleManager {
     static {
         //Insert all default config values here. They will be added on startup if they do not exist.
         defaultToggles.put("autosecure", "false");
+        defaultToggles.put("censorwords", "false");
+        defaultToggles.put("censorlinks", "false");
     }
 
     public ToggleManager(TVBot bot) {
