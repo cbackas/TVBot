@@ -25,12 +25,15 @@ public class MessageChange {
                 if (event.getChannel().getLongID() != TVBot.DEV_CH_ID) {
                     TVBot.messageCache.remove(event.getMessageID());
                     IMessage message = event.getMessage();
+                    String content = message.getFormattedContent();
                     IUser author = event.getAuthor();
                     IChannel channel = event.getChannel();
 
+                    if (content.contains(":spoiler:")) return; // ignore spoilerbot caused stuff
+
                     Boolean tripped = true;
                     for (String p : bot.prefixes) {
-                        if (message.getContent().startsWith(p)) {
+                        if (content.startsWith(p)) {
                             tripped = false;
                         }
                     }
