@@ -281,11 +281,23 @@ public class Util {
         Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), message);
     }
 
+    /**
+     * Sending private messages
+     */
     public static void sendPrivateMessage(IUser user, String message) {
         try {
             user.getClient().getOrCreatePMChannel(user).sendMessage(message);
         } catch (Exception e) {
-            e.printStackTrace();
+            reportHome(e);
+        }
+    }
+
+    public static void sendPrivateEmbed(IUser user, String message) {
+        try {
+            IChannel pmChannel = user.getClient().getOrCreatePMChannel(user);
+            simpleEmbed(pmChannel, message);
+        } catch (Exception e) {
+            reportHome(e);
         }
     }
 
