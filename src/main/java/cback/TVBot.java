@@ -3,6 +3,8 @@ package cback;
 import cback.eventFunctions.*;
 import cback.commands.*;
 import cback.database.DatabaseManager;
+import org.nibor.autolink.LinkExtractor;
+import org.nibor.autolink.LinkSpan;
 import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -186,6 +188,7 @@ public class TVBot {
             Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), bld.build());
         } else {
             censorMessages(message);
+            censorLinks(message);
 
             /**
              * Deletes messages/bans users for using too many @ mentions
@@ -290,34 +293,106 @@ public class TVBot {
      * Checks for dirty words :o
      */
     public void censorMessages(IMessage message) {
-        if (message.getGuild().getStringID().equals(getHomeGuild().getStringID())) {
-            List<String> bannedWords = TVBot.getInstance().getConfigManager().getConfigArray("bannedWords");
-            String content = message.getFormattedContent().toLowerCase();
-            Boolean tripped = false;
-            for (String word : bannedWords) {
-                if (content.matches("\\n?.*\\b\\n?" + word + "\\n?\\b.*\\n?.*") || content.matches("\\n?.*\\b\\n?" + word + "s\\n?\\b.*\\n?.*")) {
-                    tripped = true;
+        if (toggleState("censorwords")) {
+            boolean homeGuild = message.getGuild().getLongID() == TVBot.HOMESERVER_GLD_ID;
+            boolean staffChannel = message.getChannel().getCategory().getLongID() == 355901035597922304L || message.getChannel().getCategory().getLongID() == 355910636464504832L;
+            boolean staffMember = message.getAuthor().hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
+            if (homeGuild && !staffChannel && !staffMember) {
+                List<String> bannedWords = TVBot.getInstance().getConfigManager().getConfigArray("bannedWords");
+                String content = message.getFormattedContent().toLowerCase();
+
+                String word = "";
+                Boolean tripped = false;
+                for (String w : bannedWords) {
+                    if (content.matches("\\n?.*\\b\\n?" + w + "\\n?\\b.*\\n?.*") || content.matches("\\n?.*\\b\\n?" + w + "s\\n?\\b.*\\n?.*")) {
+                        tripped = true;
+                        word = w;
+                        break;
+                    }
+                }
+                if (tripped) {
+
+                    IUser author = message.getAuthor();
+
+                    EmbedBuilder bld = new EmbedBuilder();
+                    bld
+                            .withAuthorIcon(author.getAvatarURL())
+                            .withAuthorName(Util.getTag(author))
+                            .withDesc(message.getFormattedContent())
+                            .withTimestamp(System.currentTimeMillis())
+                            .withFooterText("Auto-deleted from #" + message.getChannel().getName());
+
+                    Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(Util.getBotColor()).build());
+
+                    StringBuilder sBld = new StringBuilder().append("Your message has been automatically removed for containing a banned word. If this is an error, message a staff member.");
+                    if (!word.isEmpty()) {
+                        sBld
+                                .append("\n\n")
+                                .append(word);
+                    }
+                    Util.sendPrivateEmbed(author, sBld.toString());
+
+                    messageCache.add(message.getLongID());
+                    Util.deleteMessage(message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Censor links
+     */
+    public void censorLinks(IMessage message) {
+        if (toggleState("censorlinks")) {
+            IUser author = message.getAuthor();
+
+            boolean homeGuild = message.getGuild().getLongID() == TVBot.HOMESERVER_GLD_ID;
+            boolean staffChannel = message.getChannel().getCategory().getLongID() == 355901035597922304L || message.getChannel().getCategory().getLongID() == 355910636464504832L;
+            boolean staffMember = author.hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
+
+            boolean trusted = false;
+            List<IRole> userRoles = author.getRolesForGuild(message.getGuild());
+            int tPos = client.getRoleByID(TVRoles.TRUSTED.id).getPosition();
+            for (IRole r : userRoles) {
+                int rPos = r.getPosition();
+                if (rPos >= tPos) {
+                    trusted = true;
                     break;
                 }
             }
-            if (tripped) {
-                message.getChannel().setTypingStatus(true);
-                IUser author = message.getAuthor();
 
-                EmbedBuilder bld = new EmbedBuilder();
-                bld
-                        .withAuthorIcon(author.getAvatarURL())
-                        .withAuthorName(Util.getTag(author))
-                        .withDesc(message.getFormattedContent())
-                        .withTimestamp(System.currentTimeMillis())
-                        .withFooterText("Auto-deleted from #" + message.getChannel().getName());
+            if (homeGuild && !staffChannel && !staffMember && !trusted) {
+                String content = message.getFormattedContent().toLowerCase();
+                List<String> linksFound = new ArrayList<>();
 
-                Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(Util.getBotColor()).build());
-                Util.sendPrivateMessage(author, "Your message has been automatically removed for a banned word or something");
+                LinkExtractor linkExtractor = LinkExtractor.builder().build();
+                Iterable<LinkSpan> links = linkExtractor.extractLinks(content);
+                if (links.iterator().hasNext()) {
+                    for (LinkSpan l : links) {
+                        String f = message.getContent().substring(l.getBeginIndex(), l.getEndIndex());
+                        linksFound.add(f);
+                    }
+                }
 
-                messageCache.add(message.getLongID());
-                message.delete();
-                message.getChannel().setTypingStatus(false);
+                if (linksFound.size() >= 1) {
+                    String collectedLinks = "";
+                    for (String s : linksFound) {
+                        collectedLinks += s + " ";
+                    }
+
+                    EmbedBuilder bld = new EmbedBuilder();
+                    bld
+                            .withAuthorIcon(author.getAvatarURL())
+                            .withAuthorName(Util.getTag(author))
+                            .withDesc(message.getFormattedContent())
+                            .withTimestamp(System.currentTimeMillis())
+                            .withFooterText("Auto-deleted from #" + message.getChannel().getName());
+
+                    Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(Util.getBotColor()).build());
+                    Util.sendPrivateEmbed(author, "Your message has been automatically removed for containing a link. If this is an error, message a staff member.\n\n" + collectedLinks);
+                    messageCache.add(message.getLongID());
+                    Util.deleteMessage(message);
+                }
             }
         }
     }
