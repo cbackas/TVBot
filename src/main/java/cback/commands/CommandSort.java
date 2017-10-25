@@ -49,7 +49,8 @@ public class CommandSort implements Command {
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         Util.simpleEmbed(message.getChannel(), "Lets get sorting!");
 
-        this.count = 0;
+        ICategory unsorted = guild.getCategoryByID(358043583355289600L);
+        int count = unsorted.getChannels().size();
 
         List<IChannel> permChannels = getPermChannels(guild);
 
@@ -98,10 +99,8 @@ public class CommandSort implements Command {
         return newName;
     }
 
-    private int count = 0;
-
     private void changeCategory(IChannel channel, ICategory category) {
-        if(channel.getCategory() == null || !channel.getCategory().equals(category)) {
+        if (channel.getCategory() == null || !channel.getCategory().equals(category)) {
             RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
                 channel.changeCategory(category);
                 return true;
