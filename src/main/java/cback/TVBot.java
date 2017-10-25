@@ -185,6 +185,10 @@ public class TVBot {
                     .withAuthorIcon(message.getAuthor().getAvatarURL())
                     .withDesc(message.getContent());
 
+            for (IMessage.Attachment a : message.getAttachments()) {
+                bld.withImage(a.getUrl());
+            }
+
             Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), bld.build());
         } else {
             censorMessages(message);
