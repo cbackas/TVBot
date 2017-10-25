@@ -93,7 +93,7 @@ public class TVDatabase {
     public List<Airing> getNewAirings() {
         try {
             Statement statement = dbManager.getConnection().createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE message_id = 'NONE' ORDER BY time ASC LIMIT 30;");
+            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE message_id = 'NONE' ORDER BY time ASC LIMIT 100;");
             List<Airing> airings = new ArrayList<>();
             while (rs.next()) {
                 airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id")));
