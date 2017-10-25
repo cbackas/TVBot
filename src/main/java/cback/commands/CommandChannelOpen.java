@@ -66,7 +66,7 @@ public class CommandChannelOpen implements Command {
 
             try {
                 RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.allOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.of(Permissions.READ_MESSAGES), EnumSet.noneOf(Permissions.class));
                     return true;
                 });
                 future.get();
