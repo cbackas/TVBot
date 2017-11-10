@@ -154,14 +154,14 @@ public class TVBot {
                     /**
                      * If user has permission to run the command: Command executes and botlogs
                      */
-                    message.getChannel().setTypingStatus(true);
+                    //message.getChannel().setTypingStatus(true);
                     if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
                         Util.botLog(message);
                         cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
                     } else {
                         Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
                     }
-                    message.getChannel().setTypingStatus(false);
+                    //message.getChannel().setTypingStatus(false);
                 }
             } else if (commandManager.getCommandValue(baseCommand) != null) {
 
@@ -230,6 +230,8 @@ public class TVBot {
 
     @EventSubscriber
     public void onReconnectEvent(ReconnectSuccessEvent event) {
+        client = event.getClient();
+
         RequestBuffer.request(() -> client.changePlayingText("Type " + prefix + "help"));
     }
 
