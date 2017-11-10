@@ -70,7 +70,8 @@ public class Scheduler {
         }, 0, DAILY_INTERVAL, TimeUnit.SECONDS);
 
         //midnight
-        int currentTimeEST = time - 14400; //EST time, subtract 4 hours from UTC
+        //todo make this work with daylight savings bologna
+        int currentTimeEST = time - 18000; //EST time, subtract 5 hours from UTC
         int midnightWaitTime = roundUp(currentTimeEST, DAILY_INTERVAL) - currentTimeEST + 45; //seconds until midnight
         exec.scheduleAtFixedRate(() -> {
 
