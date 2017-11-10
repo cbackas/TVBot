@@ -42,13 +42,17 @@ public class CommandHelp implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         if (args.length == 1) {
+            boolean tripped = false;
             for (Command c : TVBot.registeredCommands) {
-                if (c.getName().equalsIgnoreCase(args[0]) || c.getAliases().contains(args[0].toLowerCase())) {
+                if (c.getName().equalsIgnoreCase(args[0]) || (c.getAliases() != null && c.getAliases().contains(args[0].toLowerCase()))) {
                     Util.syntaxError(c, message);
+                    tripped = true;
                     break;
-                } else {
-                    Util.simpleEmbed(message.getChannel(), "Sorry, I couldn't find a command named " + args[0]);
                 }
+            }
+
+            if (!tripped) {
+                Util.simpleEmbed(message.getChannel(), "Sorry, I couldn't find a command named " + args[0]);
             }
         } else {
             EmbedBuilder embed = Util.getEmbed();
