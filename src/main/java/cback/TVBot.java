@@ -49,6 +49,8 @@ public class TVBot {
     public static final long CBACK_USR_ID = 73416411443113984l;
     public static final long HOMESERVER_GLD_ID = 192441520178200577L;
 
+    public static final long CLOSED_CAT_ID = 355904962200469504L;
+
     public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
     public static final long NEWEPISODE_CH_ID = 263184398894104577l;
     public static final long GENERAL_CH_ID = 192441520178200577l;
@@ -57,6 +59,7 @@ public class TVBot {
     public static final long SERVERLOG_CH_ID = 217456105679224846l;
     public static final long DEV_CH_ID = 269638376376893440l;
 
+    //hub channels
     public static final long ERRORLOG_CH_ID = 346104666796589056l;
     public static final long BOTLOG_CH_ID = 346483682376286208l;
     public static final long BOTPM_CH_ID = 346104720903110656l;

@@ -45,6 +45,7 @@ public class CommandInfo implements Command {
         int userCount = guild.getUsers().size();
         int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int channelCount = guild.getChannels().size();
+        int closedChannels = guild.getCategoryByID(TVBot.CLOSED_CAT_ID).getChannels().size();
 
         int newCount = userCount - oldUserCount;
         String leaveJoin = " (-" + bot.getConfigManager().getConfigValue("left") + " +" + bot.getConfigManager().getConfigValue("joined") + ")";
@@ -61,6 +62,7 @@ public class CommandInfo implements Command {
         embed.appendField("Users: ", Integer.toString(userCount), true);
         embed.appendField("New Users: ", userChange, true);
         embed.appendField("Text Channels: ", String.valueOf(channelCount), true);
+        embed.appendField("Closed Channels: ", String.valueOf(closedChannels), true);
 
         embed.appendField("\u200B", "\u200B", false);
 
