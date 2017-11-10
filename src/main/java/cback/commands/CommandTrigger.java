@@ -39,7 +39,8 @@ public class CommandTrigger implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         if (author.getStringID().equals("73416411443113984")) {
-
+            String text = String.valueOf(Util.getCurrentTime());
+            Util.sendMessage(message.getChannel(), text);
 
             Util.deleteMessage(message);
         }
