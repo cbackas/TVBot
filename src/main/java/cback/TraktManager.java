@@ -146,7 +146,6 @@ public class TraktManager {
             if (search.isSuccessful() && !search.body().results.isEmpty()) {
                 Response<com.uwetrottmann.tmdb2.entities.TvExternalIds> show = tmdb.tvService().externalIds(search.body().results.get(0).id, null).execute();
                 if (show.isSuccessful()) {
-                    System.out.println(show.body().imdb_id);
                     return show.body().imdb_id;
                 }
             }
