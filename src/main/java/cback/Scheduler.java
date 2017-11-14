@@ -75,6 +75,7 @@ public class Scheduler {
         int midnightWaitTime = roundUp(currentTimeEST, DAILY_INTERVAL) - currentTimeEST + 45; //seconds until midnight
         exec.scheduleAtFixedRate(() -> {
 
+            System.out.println("Midnight processed.");
             updateUserCount();
             resetUserChange();
             sendDailyMessage();
