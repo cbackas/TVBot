@@ -43,24 +43,26 @@ public class CommandCensor implements Command {
         EmbedBuilder bld = new EmbedBuilder();
         List<String> bannedWords = bot.getConfigManager().getConfigArray("bannedWords");
 
-        if (args.length == 2) {
+        if (args.length >= 2) {
             if (args[0].equalsIgnoreCase("add")) {
-                if (bannedWords.contains(args[1])) {
-                    bld.withDesc(args[1] + " is already a banned word!");
+                String word = content.split(" ", 3)[2];
+                if (bannedWords.contains(word)) {
+                    bld.withDesc(word + " is already a banned word!");
                 } else {
-                    bannedWords.add(args[1]);
+                    bannedWords.add(word);
                     bot.getConfigManager().setConfigValue("bannedWords", bannedWords);
 
-                    bld.withDesc(args[1] + " has been added to the list of banned words.");
+                    bld.withDesc(word + " has been added to the list of banned words.");
                 }
             } else if (args[0].equalsIgnoreCase("remove")) {
-                if (bannedWords.contains(args[1])) {
-                    bannedWords.remove(args[1]);
+                String word = content.split(" ", 3)[2];
+                if (bannedWords.contains(word)) {
+                    bannedWords.remove(word);
                     bot.getConfigManager().setConfigValue("bannedWords", bannedWords);
 
-                    bld.withDesc(args[1] + " has been removed from the list of banned words.");
+                    bld.withDesc(word + " has been removed from the list of banned words.");
                 } else {
-                    bld.withDesc(args[1] + " is not a censored word... Remove failed.");
+                    bld.withDesc(word + " is not a censored word... Remove failed.");
                 }
             } else {
                 bld.appendField(getSyntax(), getDescription(), false);
