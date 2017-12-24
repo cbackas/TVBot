@@ -50,6 +50,7 @@ public class TVBot {
     public static final long HOMESERVER_GLD_ID = 192441520178200577L;
 
     public static final long CLOSED_CAT_ID = 355904962200469504L;
+    public static final long UNSORTED_CAT_ID = 358043583355289600L;
 
     public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
     public static final long NEWEPISODE_CH_ID = 263184398894104577l;

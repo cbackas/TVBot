@@ -62,7 +62,7 @@ public class CommandChannelAdd implements Command {
 
     private String createChannels(IGuild guild, String[] names) {
         StringBuilder mentions = new StringBuilder();
-        ICategory unsorted = guild.getCategoryByID(358043583355289600L);
+        ICategory unsorted = guild.getCategoryByID(TVBot.UNSORTED_CAT_ID);
         resetCounter();
         for (String s : names) {
             try {
