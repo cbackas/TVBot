@@ -2,14 +2,13 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
-import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +54,7 @@ public class CommandInfo implements Command {
 
         EmbedBuilder embed = Util.getEmbed(message.getAuthor()).withThumbnail(Util.getAvatar(client.getOurUser()));
         embed.withTitle(guild.getName());
-        embed.appendField("Created: ", guild.getCreationDate().format(formatter), true);
+        embed.appendField("Created: ", guild.getCreationDate().atOffset(ZoneOffset.ofHours(0)).format(formatter), true);
 
         embed.appendField("\u200B", "\u200B", false);
 
