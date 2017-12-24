@@ -61,10 +61,10 @@ public class CommandSort implements Command {
                 .collect(Collectors.toList());
 
 
-        ICategory af = guild.getCategoryByID(358038418208587785L);
-        ICategory gl = guild.getCategoryByID(358038474894606346L);
-        ICategory mr = guild.getCategoryByID(358038505244327937L);
-        ICategory sz = guild.getCategoryByID(358038532780195840L);
+        ICategory af = guild.getCategoryByID(TVBot.AF_CAT_ID);
+        ICategory gl = guild.getCategoryByID(TVBot.GL_CAT_ID);
+        ICategory mr = guild.getCategoryByID(TVBot.MR_CAT_ID);
+        ICategory sz = guild.getCategoryByID(TVBot.SZ_CAT_ID);
         //put all the incorrectly sorted channels into their categories
         for (IChannel c : guild.getChannels()) {
             if (!permChannels.contains(c)) {
@@ -134,11 +134,11 @@ public class CommandSort implements Command {
     }
 
     public static List<IChannel> getPermChannels(IGuild guild) {
-        ICategory staff = guild.getCategoryByID(355901035597922304L);
-        ICategory info = guild.getCategoryByID(355910636464504832L);
-        ICategory disc = guild.getCategoryByID(355910667812995084L);
-        ICategory fun = guild.getCategoryByID(358679449451102210L);
-        ICategory closed = guild.getCategoryByID(355904962200469504L);
+        ICategory staff = guild.getCategoryByID(TVBot.STAFF_CAT_ID);
+        ICategory info = guild.getCategoryByID(TVBot.INFO_CAT_ID);
+        ICategory disc = guild.getCategoryByID(TVBot.DISCUSSION_CAT_ID);
+        ICategory fun = guild.getCategoryByID(TVBot.FUN_CAT_ID);
+        ICategory closed = guild.getCategoryByID(TVBot.CLOSED_CAT_ID);
 
         List<ICategory> permCategories = new ArrayList<>();
         permCategories.add(staff);

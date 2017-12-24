@@ -46,24 +46,32 @@ public class TVBot {
     public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
-    public static final long CBACK_USR_ID = 73416411443113984l;
+    public static final long CBACK_USR_ID = 73416411443113984L;
     public static final long HOMESERVER_GLD_ID = 192441520178200577L;
 
-    public static final long CLOSED_CAT_ID = 355904962200469504L;
     public static final long UNSORTED_CAT_ID = 358043583355289600L;
+    public static final long STAFF_CAT_ID = 355901035597922304L;
+    public static final long INFO_CAT_ID = 355910636464504832L;
+    public static final long DISCUSSION_CAT_ID = 355910667812995084L;
+    public static final long FUN_CAT_ID = 358679449451102210L;
+    public static final long CLOSED_CAT_ID = 355904962200469504L;
+    public static final long AF_CAT_ID = 358038418208587785L;
+    public static final long GL_CAT_ID = 358038474894606346L;
+    public static final long MR_CAT_ID = 358038505244327937L;
+    public static final long SZ_CAT_ID = 358038532780195840L;
 
-    public static final long ANNOUNCEMENT_CH_ID = 345774506373021716l;
-    public static final long NEWEPISODE_CH_ID = 263184398894104577l;
-    public static final long GENERAL_CH_ID = 192441520178200577l;
-    public static final long SUGGEST_CH_ID = 192444470942236672l;
-    public static final long MESSAGELOG_CH_ID = 305073652280590339l;
-    public static final long SERVERLOG_CH_ID = 217456105679224846l;
-    public static final long DEV_CH_ID = 269638376376893440l;
+    public static final long ANNOUNCEMENT_CH_ID = 345774506373021716L;
+    public static final long NEWEPISODE_CH_ID = 263184398894104577L;
+    public static final long GENERAL_CH_ID = 192441520178200577L;
+    public static final long SUGGEST_CH_ID = 192444470942236672L;
+    public static final long MESSAGELOG_CH_ID = 305073652280590339L;
+    public static final long SERVERLOG_CH_ID = 217456105679224846L;
+    public static final long DEV_CH_ID = 269638376376893440L;
 
     //hub channels
-    public static final long ERRORLOG_CH_ID = 346104666796589056l;
-    public static final long BOTLOG_CH_ID = 346483682376286208l;
-    public static final long BOTPM_CH_ID = 346104720903110656l;
+    public static final long ERRORLOG_CH_ID = 346104666796589056L;
+    public static final long BOTLOG_CH_ID = 346483682376286208L;
+    public static final long BOTPM_CH_ID = 346104720903110656L;
 
     private long startTime;
 
@@ -158,14 +166,12 @@ public class TVBot {
                     /**
                      * If user has permission to run the command: Command executes and botlogs
                      */
-                    //message.getChannel().setTypingStatus(true);
                     if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
                         Util.botLog(message);
                         cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
                     } else {
                         Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
                     }
-                    //message.getChannel().setTypingStatus(false);
                 }
             } else if (commandManager.getCommandValue(baseCommand) != null) {
 
