@@ -67,8 +67,7 @@ public class CommandChannelAdd implements Command {
         for (String s : names) {
             try {
                 RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    IChannel c = guild.createChannel(s);
-                    c.changeCategory(unsorted);
+                    IChannel c = unsorted.createChannel(s);
                     mentions.append("#" + c.getName() + " ");
                     return true;
                 });
