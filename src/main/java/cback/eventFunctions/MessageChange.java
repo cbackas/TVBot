@@ -3,8 +3,7 @@ package cback.eventFunctions;
 import cback.TVBot;
 import cback.Util;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.*;
 import sx.blah.discord.handle.impl.events.guild.member.NicknameChangedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -57,6 +56,10 @@ public class MessageChange {
 
     @EventSubscriber
     public void messageEdited(MessageUpdateEvent event) {
+        if (event instanceof MessagePinEvent || event instanceof MessageUnpinEvent || event instanceof MessageEmbedEvent) {
+            return;
+        }
+
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID()) && event.getMessage() != null) {
             if (!event.getAuthor().isBot()) {
                 IMessage message = event.getMessage();
