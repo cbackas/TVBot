@@ -226,16 +226,9 @@ public class TVBot {
         client = event.getClient();
 
         //Set status
-        RequestBuffer.request(() -> client.changePlayingText("Type " + prefix + "help"));
+        client.changePresence(StatusType.ONLINE, ActivityType.LISTENING, "all of your messages. \n\n Type " + prefix + "help");
 
         startTime = System.currentTimeMillis();
-    }
-
-    @EventSubscriber
-    public void onReconnectEvent(ReconnectSuccessEvent event) {
-        client = event.getClient();
-
-        RequestBuffer.request(() -> client.changePlayingText("Type " + prefix + "help"));
     }
 
     public static TVBot getInstance() {
