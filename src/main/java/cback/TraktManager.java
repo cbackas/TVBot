@@ -81,7 +81,6 @@ public class TraktManager {
 
     public String getShowTitle(String imdbID) {
         try {
-            //Response<List<SearchResult>> search = trakt.search().idLookup(IdType.IMDB, imdbID, 1, 1).execute();
             Response<List<SearchResult>> search = trakt.search().idLookup(IdType.IMDB, imdbID, Type.SHOW, Extended.NOSEASONS, 1, 1).execute();
             if (search.isSuccessful() && !search.body().isEmpty()) {
                 return search.body().get(0).show.title;
@@ -93,9 +92,9 @@ public class TraktManager {
 
     public Show showSummary(String imdbID) {
         try {
-            Response<Show> show = trakt.shows().summary(imdbID, Extended.FULL).execute();
-            if (show.isSuccessful()) {
-                return show.body();
+            Response<List<SearchResult>> search = trakt.search().idLookup(IdType.IMDB, imdbID, Type.SHOW, Extended.FULL, 1, 1).execute();
+            if (search.isSuccessful()) {
+                return search.body().get(0).show;
             }
         } catch (Exception e) {
         }
