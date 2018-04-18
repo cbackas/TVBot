@@ -41,15 +41,19 @@ public class CommandChannelDelete implements Command {
     @Override
     public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         List<IChannel> channels = message.getChannelMentions();
+        IChannel here = message.getChannel();
         if (channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
-            channels.add(message.getChannel());
+            channels.add(here);
         }
 
         if (channels.size() >= 1) {
             String mentions = deleteChannels(channels);
 
             String text = "Deleted " + channels.size() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(message.getChannel(), text);
+            if (!channels.contains(here)) {
+                Util.simpleEmbed(message.getChannel(), text);
+            }
+
             Util.sendLog(message, text);
         } else {
             Util.syntaxError(this, message);
