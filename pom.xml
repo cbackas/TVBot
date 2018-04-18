@@ -20,12 +20,12 @@
         <dependency>
             <groupId>com.github.austinv11</groupId>
             <artifactId>Discord4J</artifactId>
-            <version>ee46f68</version>
+            <version>9b1c81a</version>
         </dependency>
         <dependency>
             <groupId>com.uwetrottmann.trakt5</groupId>
             <artifactId>trakt-java</artifactId>
-            <version>5.7.1</version>
+            <version>5.8.1</version>
         </dependency>
         <dependency>
             <groupId>com.uwetrottmann.tmdb2</groupId>
