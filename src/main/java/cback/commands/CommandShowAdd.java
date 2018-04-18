@@ -51,6 +51,7 @@ public class CommandShowAdd implements Command {
             if (channelID.equalsIgnoreCase("here")) channelID = message.getChannel().getStringID();
             Show showData = bot.getTraktManager().showSummary(imdbID);
             String showName = showData.title;
+            String network = showData.network;
             IChannel channel = client.getChannelByID(Long.parseLong(channelID));
             if (channel == null) {
                 Util.simpleEmbed(message.getChannel(), "Error: No channel by this ID found.");
@@ -60,7 +61,7 @@ public class CommandShowAdd implements Command {
                 Util.simpleEmbed(message.getChannel(), "Error: Couldn't find a show associated with this IMDB ID");
                 return;
             }
-            bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, channelID);
+            bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, network, channelID);
             Util.simpleEmbed(message.getChannel(), "Set channel " + channel.mention() + " for " + showName + ".");
             System.out.println("@" + message.getAuthor().getName() + " added show " + showName);
             Util.simpleEmbed(client.getChannelByID(TVBot.BOTLOG_CH_ID), showName + " assigned to " + channel.getName());

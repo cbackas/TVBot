@@ -21,8 +21,8 @@ public class TVDatabase {
         try {
             Statement statement = dbManager.getConnection().createStatement();
 
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS airing (episode_id TEXT PRIMARY KEY, show_id TEXT, time INT, episode_info TEXT, message_id TEXT);");
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS showdata (show_id TEXT PRIMARY KEY, show_name TEXT, channel_id TEXT);");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS airing (episode_id TEXT PRIMARY KEY, show_id TEXT, time INT, episode_info TEXT, sent_status INT);");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS showdata (show_id TEXT PRIMARY KEY, show_name TEXT, network TEXT, channel_id TEXT);");
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -34,7 +34,7 @@ public class TVDatabase {
             statement.setString(1, showID);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                return new Show(showID, rs.getString("show_name"), rs.getString("channel_id"));
+                return new Show(showID, rs.getString("show_name"), rs.getString("network"), rs.getString("channel_id"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,7 +49,7 @@ public class TVDatabase {
             ResultSet rs = statement.executeQuery();
             List<Show> shows = new ArrayList<>();
             while (rs.next()) {
-                shows.add(new Show(rs.getString("show_id"), rs.getString("show_name"), channelID));
+                shows.add(new Show(rs.getString("show_id"), rs.getString("show_name"), rs.getString("network"), channelID));
             }
             return shows;
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public class TVDatabase {
             statement.setString(1, episodeID);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                return new Airing(episodeID, rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id"));
+                return new Airing(episodeID, rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getBoolean("sent_status"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,10 +93,10 @@ public class TVDatabase {
     public List<Airing> getNewAirings() {
         try {
             Statement statement = dbManager.getConnection().createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE message_id = 'NONE' ORDER BY time ASC LIMIT 100;");
+            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE sent_status = 0 ORDER BY time ASC LIMIT 100;");
             List<Airing> airings = new ArrayList<>();
             while (rs.next()) {
-                airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id")));
+                airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getBoolean("sent_status")));
             }
             return airings;
         } catch (Exception e) {
@@ -106,15 +106,15 @@ public class TVDatabase {
     }
 
     /**
-     * Gets airings that have been announced but not deleted
+     * Gets airings that have been announced but not deleted from database
      */
     public List<Airing> getOldAirings() {
         try {
             Statement statement = dbManager.getConnection().createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE NOT message_id = 'NONE' AND NOT message_id = 'DELETED' ORDER BY time ASC LIMIT 30;");
+            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE sent_status = 1 ORDER BY time ASC;");
             List<Airing> airings = new ArrayList<>();
             while (rs.next()) {
-                airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id")));
+                airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getBoolean("sent_status")));
             }
             return airings;
         } catch (Exception e) {
@@ -123,42 +123,28 @@ public class TVDatabase {
         return null;
     }
 
-    /**
-     * Gets airings that have been deleted but not wiped from the database
-     */
-    public List<Airing> getDeletedAirings() {
-        try {
-            Statement statement = dbManager.getConnection().createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM airing WHERE message_id = 'DELETED';");
-            List<Airing> airings = new ArrayList<>();
-            while (rs.next()) {
-                airings.add(new Airing(rs.getString("episode_id"), rs.getString("show_id"), rs.getInt("time"), rs.getString("episode_info"), rs.getString("message_id")));
-            }
-            return airings;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public void insertAiring(String episodeID, String showID, int time, String episodeInfo, String messageID) {
+    public void insertAiring(String episodeID, String showID, int time, String episodeInfo, boolean sentStatus) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("INSERT OR IGNORE INTO airing VALUES (?,?,?,?,?);");
             statement.setString(1, episodeID);
             statement.setString(2, showID);
             statement.setInt(3, time);
             statement.setString(4, episodeInfo);
-            statement.setString(5, messageID);
+            statement.setInt(5, sentStatus ? 1 : 0);
             statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void updateAiringMessage(Airing airing) {
+    /**
+     * Writes airing's new sent status to database
+     * @param airing
+     */
+    public void updateAiringSentStatus(Airing airing) {
         try {
-            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE airing SET message_id= ? WHERE episode_id= ?;");
-            statement.setString(1, airing.getMessageID());
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE airing SET sent_status = ? WHERE episode_id= ?;");
+            statement.setInt(1, airing.getSentStatus() ? 1 : 0);
             statement.setString(2, airing.getEpisodeID());
             statement.executeUpdate();
         } catch (Exception e) {
@@ -166,12 +152,24 @@ public class TVDatabase {
         }
     }
 
-    public void insertShowData(String showID, String showName, String channelID) {
+    public void insertShowData(String showID, String showName, String network, String channelID) {
         try {
             PreparedStatement statement = dbManager.getConnection().prepareStatement("REPLACE INTO showdata VALUES (?,?,?);");
             statement.setString(1, showID);
             statement.setString(2, showName);
-            statement.setString(3, channelID);
+            statement.setString(3, network);
+            statement.setString(4, channelID);
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateShowNetwork(Show show){
+        try {
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE showdata SET network = ? WHERE show_id= ?;");
+            statement.setString(1, show.getNetwork());
+            statement.setString(2, show.getShowID());
             statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

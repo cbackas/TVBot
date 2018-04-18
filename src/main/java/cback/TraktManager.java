@@ -68,7 +68,7 @@ public class TraktManager {
                         //don't add if already aired or if airing already in database
                         if ((bot.getDatabaseManager().getTV().getAiring(episodeID) == null) && (airTime > currentTime)) {
                             String episodeInfo = "S" + entry.episode.season + "E" + entry.episode.number + " - " + entry.episode.title;
-                            bot.getDatabaseManager().getTV().insertAiring(episodeID, id, airTime, episodeInfo, "NONE");
+                            bot.getDatabaseManager().getTV().insertAiring(episodeID, id, airTime, episodeInfo, false);
                             System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - " + airTime);
                         }
                     }

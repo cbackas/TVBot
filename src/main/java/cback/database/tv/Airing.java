@@ -6,14 +6,14 @@ public class Airing {
     private String showID;
     private long airingTime;
     private String episodeInfo;
-    private String messageID;
+    private boolean sentStatus;
 
-    public Airing(String episodeID, String showID, long airingTime, String episodeInfo, String messageID) {
+    public Airing(String episodeID, String showID, long airingTime, String episodeInfo, boolean sentStatus) {
         this.episodeID = episodeID;
         this.showID = showID;
         this.airingTime = airingTime;
         this.episodeInfo = episodeInfo;
-        this.messageID = messageID;
+        this.sentStatus = sentStatus;
     }
 
     public String getEpisodeID() {
@@ -32,11 +32,11 @@ public class Airing {
         return episodeInfo;
     }
 
-    public String getMessageID() {
-        return messageID;
+    public boolean getSentStatus() {
+        return sentStatus;
     }
 
-    public void setMessageID(String messageID) {
-        this.messageID = messageID;
+    public void setSentStatus(boolean sentStatus) {
+        this.sentStatus = sentStatus;
     }
 }

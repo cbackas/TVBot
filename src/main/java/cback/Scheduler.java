@@ -5,8 +5,6 @@ import cback.database.tv.Airing;
 import cback.database.tv.Show;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.VerificationLevel;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDate;
@@ -21,7 +19,7 @@ import java.util.regex.Pattern;
 public class Scheduler {
 
     /**
-     * Check for airings (and delete messages from old airings) every X seconds
+     * Check for airings every X seconds
      */
     private static final int CHECK_AIRING_INTERVAL = 300; //5 minutes
     /**
@@ -33,9 +31,9 @@ public class Scheduler {
      */
     private static final int ALERT_TIME_THRESHOLD = 660; //11 minutes
     /**
-     * Delete message from announcements channel if show aired over X seconds from time of checking
+     * Delete message from database if show aired over X seconds from time of checking
      */
-    private static final int DELETE_THRESHOLD = 7000; //~2 hours
+    private static final int DELETE_THRESHOLD = 86400; //1 day
 
     private TVBot bot;
 
@@ -56,7 +54,6 @@ public class Scheduler {
             int currentTime = Util.getCurrentTime();
 
             processNewAirings(currentTime);
-            processOldAirings(currentTime);
 
         }, airingCheckWaitTime, CHECK_AIRING_INTERVAL, TimeUnit.SECONDS);
 
@@ -97,8 +94,16 @@ public class Scheduler {
                 Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
                 boolean isPermChannel = CommandSort.getPermChannels(bot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID)).contains(bot.getClient().getChannelByID(Long.parseLong(show.getChannelID())).getCategory());
                 if (show != null && !isPermChannel) {
-                    TraktManager tm = bot.getTraktManager();
-                    String network = tm.showSummary(show.getShowID()).network;
+
+                    String network;
+                    if(show.getNetwork() == null || show.getNetwork().equalsIgnoreCase("null")){
+                        TraktManager tm = bot.getTraktManager();
+                        network = tm.showSummary(show.getShowID()).network;
+                        show.setNetwork(network);
+                        bot.getDatabaseManager().getTV().updateShowNetwork(show);
+                    } else {
+                        network = show.getNetwork();
+                    }
 
                     IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
                     IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
@@ -119,64 +124,25 @@ public class Scheduler {
                         }
                     }
 
-                    IMessage announceMessage = Util.sendBufferedMessage(announceChannel, message);
-                    airing.setMessageID(announceMessage.getStringID());
-                    bot.getDatabaseManager().getTV().updateAiringMessage(airing);
+                    Util.sendBufferedMessage(announceChannel, message);
                     Util.sendBufferedMessage(globalChannel, message);
                     Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
 
+                    //sent message - set database values accordingly
+                    airing.setSentStatus(true);
+                    bot.getDatabaseManager().getTV().updateAiringSentStatus(airing);
+
                     System.out.println("Sent announcement for " + airing.getEpisodeInfo());
-                    //Delete airing once it's done
-                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+
                 } else {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                 }
 
             } catch (Exception e) {
+                Util.reportHome(e);
             }
         });
-    }
-
-    /**
-     * Delete messages for episodes that have finished airing and set database values accordingly
-     */
-    public void processOldAirings(int currentTime) {
-        //Old delete announcement stuff
-        /*//get last 30 shows alerted
-        List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
-        //if episode aired over 2 hours ago, delete message from announcements channel
-        oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
-            try {
-
-                IMessage toDelete = bot.getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID).getMessageByID(airing.getMessageID());
-                if(toDelete == null)
-                    throw new NullPointerException("Message to delete was not found!");
-                Util.deleteBufferedMessage(toDelete);
-
-                System.out.println("Deleted announcement message for " + airing.getEpisodeInfo());
-
-            } catch (Exception e) {
-                System.out.println("Error deleting announcement message for " + airing.getEpisodeInfo());
-                e.printStackTrace();
-            } finally {
-                airing.setMessageID("DELETED");
-                bot.getDatabaseManager().getTV().updateAiringMessage(airing);
-            }
-        });
-        */
-
-        if (bot.toggleState("autosecure")) {
-            //Set security level if a show is airing
-            List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
-            //if episode aired over 2 hours ago, delete message from announcements channel
-            long aCount = oldAirings.stream().filter(airing -> currentTime - airing.getAiringTime() >= DELETE_THRESHOLD).count();
-            if (aCount >= 1) {
-                Util.setSecurity(VerificationLevel.MEDIUM);
-            } else {
-                Util.setSecurity(VerificationLevel.HIGH);
-            }
-        }
     }
 
     /***
@@ -184,8 +150,8 @@ public class Scheduler {
      */
     public void pruneDeletedAirings() {
         //delete week old airings whose announcements were deleted
-        List<Airing> deletedAirings = bot.getDatabaseManager().getTV().getDeletedAirings();
-        deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= 86400).forEach(airing -> {
+        List<Airing> deletedAirings = bot.getDatabaseManager().getTV().getOldAirings();
+        deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
             bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
         });
     }
