@@ -54,7 +54,7 @@ public class TraktManager {
         try {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
-            Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 3).execute();
+            Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 5).execute();
             if (response.isSuccessful()) {
                 List<CalendarShowEntry> shows = response.body();
                 List<String> desiredShows = bot.getDatabaseManager().getTV().getShowIDs();
@@ -74,7 +74,7 @@ public class TraktManager {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Util.reportHome(e);
         }
     }
