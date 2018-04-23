@@ -154,7 +154,7 @@ public class TVDatabase {
 
     public void insertShowData(String showID, String showName, String network, String channelID) {
         try {
-            PreparedStatement statement = dbManager.getConnection().prepareStatement("REPLACE INTO showdata VALUES (?,?,?);");
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("REPLACE INTO showdata VALUES (?,?,?,?);");
             statement.setString(1, showID);
             statement.setString(2, showName);
             statement.setString(3, network);
