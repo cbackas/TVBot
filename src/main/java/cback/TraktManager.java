@@ -52,6 +52,7 @@ public class TraktManager {
 
     public void updateAiringData() {
         try {
+            System.out.println("Grabbing new airings from Trakt...");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
             Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 7).execute();
@@ -86,6 +87,7 @@ public class TraktManager {
                 return search.body().get(0).show.title;
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -97,6 +99,7 @@ public class TraktManager {
                 return search.body().get(0).show;
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -108,6 +111,7 @@ public class TraktManager {
                 return search.body().get(0).show;
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -119,6 +123,7 @@ public class TraktManager {
                 return search.body().get(0).movie;
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -134,6 +139,7 @@ public class TraktManager {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -149,6 +155,7 @@ public class TraktManager {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }

@@ -3,6 +3,7 @@ package cback;
 import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
+import org.apache.commons.lang3.StringUtils;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.EmbedBuilder;
@@ -47,7 +48,9 @@ public class Scheduler {
 
         int time = Util.getCurrentTime(); //current epoch time in seconds
 
+        //Checks periodically for upcoming airings to announce them
         int airingCheckWaitTime = roundUp(time, CHECK_AIRING_INTERVAL) - time; //seconds until next 5 minute interval
+        System.out.println(airingCheckWaitTime + " seconds until first 5min check");
         exec.scheduleAtFixedRate(() -> {
 
             //establish current time (will be 5 min interval)
@@ -57,6 +60,7 @@ public class Scheduler {
 
         }, airingCheckWaitTime, CHECK_AIRING_INTERVAL, TimeUnit.SECONDS);
 
+        //Checks daily (and at startup) to grab future airings from Trakt and prune database
         exec.scheduleAtFixedRate(() -> {
 
             //delete old airings from database
@@ -87,60 +91,97 @@ public class Scheduler {
     public void processNewAirings(int currentTime) {
         //get next 30 shows airing
         List<Airing> nextAirings = bot.getDatabaseManager().getTV().getNewAirings();
+
+        ///Debugging stuff so the bot never breaks again
+        System.out.println("Checking through " + nextAirings.size() + " airings...");
+        nextAirings.forEach(airing -> System.out.println(airing.getEpisodeInfo() + " is " + (airing.getAiringTime() - currentTime) + " away"));
+        System.out.println("-----------------------");
+        ///////////////////////////////////////////////////////
+
         List<String> bulkShowIDs = new ArrayList<>();
         //if it airs in next 11 minutes, send message and update in database
+
+        ///Debugging stuff so the bot never breaks again
+        System.out.println(nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).count() + " airings within 10 minutes!");
+        System.out.println(StringUtils.join(nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).map(airing -> airing.getShowID() + " " + airing.getEpisodeInfo() + " " + airing.getAiringTime()).toArray(), ", "));
+        System.out.println("-----------------------");
+        ////////////////////////////////////////////////////////
+
         nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
             try {
+                System.out.println("Starting announce for airing " + airing.getShowID() + " " + airing.getEpisodeInfo() + " " + airing.getAiringTime());
                 Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
-                boolean isPermChannel = CommandSort.getPermChannels(bot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID)).contains(bot.getClient().getChannelByID(Long.parseLong(show.getChannelID())).getCategory());
-                if (show != null && !isPermChannel) {
 
-                    String network;
-                    if(show.getNetwork() == null || show.getNetwork().equalsIgnoreCase("null")){
+                if (show == null) { //only announce if show is still in database
+                    System.out.println("Tried to announce airing for unsaved show, deleting airing...");
+                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+                    return;
+                } else if (bot.getClient().getChannelByID(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
+                    System.out.println("Tried to announce airing for show with no channel, deleting show and airing...");
+                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+                    bot.getDatabaseManager().getTV().deleteShow(show.getShowID());
+                    return;
+                } else if (airing.getAiringTime() - currentTime < -660) { //only announce if it hasnt already aired in the past
+                    System.out.println("Tried to announce old airing, deleting...");
+                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+                    return;
+                }
+
+                ////Temporary to populate database with show networks
+                String network = "null";
+                if (show.getNetwork() == null || show.getNetwork().equalsIgnoreCase("null")) {
+                    try {
                         TraktManager tm = bot.getTraktManager();
                         network = tm.showSummary(show.getShowID()).network;
                         show.setNetwork(network);
                         bot.getDatabaseManager().getTV().updateShowNetwork(show);
-                    } else {
-                        network = show.getNetwork();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-
-                    IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
-                    IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
-                    IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
-
-                    String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.mention() + " for live episode discussion!";
-
-                    if (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon")) {
-                        if (bulkShowIDs.contains(show.getShowID())) {
-                            bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
-                            return;
-                        } else {
-                            Pattern pattern = Pattern.compile("^S([0-9]+)E.+");
-                            Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
-                            String season = matcher.group(1);
-                            message = "**" + show.getShowName() + " season " + season + " is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";
-                            bulkShowIDs.add(show.getShowID());
-                        }
-                    }
-
-                    Util.sendBufferedMessage(announceChannel, message);
-                    Util.sendBufferedMessage(globalChannel, message);
-                    Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
-
-                    //sent message - set database values accordingly
-                    airing.setSentStatus(true);
-                    bot.getDatabaseManager().getTV().updateAiringSentStatus(airing);
-
-                    System.out.println("Sent announcement for " + airing.getEpisodeInfo());
-
                 } else {
-                    System.out.println("Tried to announce airing for unsaved show, deleting airing...");
-                    bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+                    network = show.getNetwork();
                 }
+                /////////////////////////////////////////////////////
+
+                IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
+                IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
+                IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
+
+                String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.mention() + " for live episode discussion!";
+
+                if (!network.equalsIgnoreCase("null") && (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon"))) {
+                    //TODO we're actually gonna hold off on this for now.. some Netflix shows don't air weekly now
+                    System.out.println("skipped netflix/amazon show");
+                    return;
+//                    if (bulkShowIDs.contains(show.getShowID())) {
+//                        bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+//                        return;
+//                    } else {
+//                        Pattern pattern = Pattern.compile("^S([0-9]+).+");
+//                        Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
+//                        if (matcher.matches()) {
+//                            String season = matcher.group(1);
+//                            message = "**" + show.getShowName() + " Season " + season + "** is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";
+//                            bulkShowIDs.add(show.getShowID());
+//                        }
+//                    }
+                }
+
+                System.out.println("Message: " + message);
+
+                Util.sendBufferedMessage(announceChannel, message);
+                Util.sendBufferedMessage(globalChannel, message);
+                Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
+
+                //sent message - set database values accordingly
+                airing.setSentStatus(true);
+                bot.getDatabaseManager().getTV().updateAiringSentStatus(airing);
+
+                System.out.println("Sent announcement for " + airing.getEpisodeInfo());
 
             } catch (Exception e) {
                 Util.reportHome(e);
+                e.printStackTrace();
             }
         });
     }
@@ -160,7 +201,7 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        IGuild loungeGuild = bot.getClient().getGuildByID(192441520178200577l);
+        IGuild loungeGuild = bot.getClient().getGuildByID(192441520178200577L);
         if (loungeGuild != null) {
             bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
         }
@@ -199,7 +240,7 @@ public class Scheduler {
 
         //if it airs in next 24 hours it goes on the count
         int count = 0;
-        for(Airing a : nextAirings) {
+        for (Airing a : nextAirings) {
             if ((a.getAiringTime() - Util.getCurrentTime() <= DAILY_INTERVAL) && (a.getAiringTime() - Util.getCurrentTime() > 0)) {
                 Show show = bot.getDatabaseManager().getTV().getShow(a.getShowID());
                 if (show != null) {
