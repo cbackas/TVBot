@@ -42,7 +42,7 @@ public class TVBot {
     public static List<Command> registeredCommands = new ArrayList<>();
     static private String prefix = "!";
     public List<String> prefixes = new ArrayList<>();
-    private static final Pattern COMMAND_PATTERN = Pattern.compile("^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
     public static final long CBACK_USR_ID = 73416411443113984L;
     public static final long HOMESERVER_GLD_ID = 192441520178200577L;
