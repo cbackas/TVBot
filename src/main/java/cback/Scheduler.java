@@ -10,7 +10,9 @@ import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -71,9 +73,7 @@ public class Scheduler {
         }, 0, DAILY_INTERVAL, TimeUnit.SECONDS);
 
         //midnight
-        //winter - 18000s
-        //summer - 14400s
-        int currentTimeEST = time - 14400; //EST time, subtract hours from UTC
+        int currentTimeEST = time - getOffset(); //EST time, second offset changes depending on daylight savings
         int midnightWaitTime = roundUp(currentTimeEST, DAILY_INTERVAL) - currentTimeEST + 45; //seconds until midnight
         exec.scheduleAtFixedRate(() -> {
 
@@ -83,6 +83,18 @@ public class Scheduler {
             sendDailyMessage();
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
+    }
+
+    private static int getOffset() {
+        //winter - 18000s
+        //summer - 14400s
+
+        boolean inSavingsTime = TimeZone.getTimeZone( "US/Eastern").inDaylightTime( new Date() );
+        if (inSavingsTime) {
+            return 14400;
+        } else {
+            return 18000;
+        }
     }
 
     /**
