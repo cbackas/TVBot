@@ -4,8 +4,10 @@ import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
 import org.apache.commons.lang3.StringUtils;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDate;
@@ -81,6 +83,8 @@ public class Scheduler {
             updateUserCount();
             resetUserChange();
             sendDailyMessage();
+            //Set status
+            bot.getClient().changePresence(StatusType.ONLINE, ActivityType.WATCHING,"all of your messages. Type " + TVBot.prefix + "help");
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
     }

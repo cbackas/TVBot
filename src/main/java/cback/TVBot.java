@@ -41,7 +41,7 @@ public class TVBot {
     public static ArrayList<Long> messageCache = new ArrayList<>();
 
     public static List<Command> registeredCommands = new ArrayList<>();
-    static private String prefix = "!";
+    static public String prefix = "!";
     public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
@@ -231,7 +231,7 @@ public class TVBot {
         client = event.getClient();
 
         //Set status
-        client.changePresence(StatusType.ONLINE, ActivityType.LISTENING, "all of your messages. \n\n Type " + prefix + "help");
+        client.changePresence(StatusType.ONLINE, ActivityType.WATCHING,"all of your messages. Type " + prefix + "help");
 
         startTime = System.currentTimeMillis();
     }
