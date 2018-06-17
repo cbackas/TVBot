@@ -417,4 +417,36 @@ public class Util {
             Util.reportHome(e);
         }
     }
+
+    /**
+     * Returns an embed object for a simple botpm
+     */
+    public static EmbedObject buildBotPMEmbed(IMessage message, int type) {
+        try {
+            IUser author = message.getAuthor();
+
+            EmbedBuilder bld = new EmbedBuilder()
+                    .withAuthorName(author.getName() + '#' + author.getDiscriminator())
+                    .withAuthorIcon(author.getAvatarURL())
+                    .withDesc(message.getContent())
+                    .withTimestamp(System.currentTimeMillis());
+
+            for (IMessage.Attachment a : message.getAttachments()) {
+                bld.withImage(a.getUrl());
+            }
+
+            if (type == 1) {
+                bld.withFooterText(author.getStringID())
+                        .withColor(getBotColor());
+            } else if (type == 2) {
+                bld.withFooterText("in #" + message.getChannel().getName())
+                        .withColor(Color.orange);
+            }
+
+            return bld.build();
+        } catch (Exception e) {
+            reportHome(message, e);
+            return null;
+        }
+    }
 }

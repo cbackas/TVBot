@@ -9,6 +9,7 @@ import org.reflections.Reflections;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
@@ -186,19 +187,10 @@ public class TVBot {
              * Forwards the random stuff people PM to the bot - to me
              */
         } else if (message.getChannel().isPrivate()) {
-            EmbedBuilder bld = new EmbedBuilder()
-                    .withColor(Util.getBotColor())
-                    .withTimestamp(System.currentTimeMillis())
-                    .withAuthorName(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator())
-                    .withAuthorIcon(message.getAuthor().getAvatarURL())
-                    .withDesc(message.getContent());
-
-            for (IMessage.Attachment a : message.getAttachments()) {
-                bld.withImage(a.getUrl());
-            }
-
-            Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), bld.build());
+            EmbedObject embed = Util.buildBotPMEmbed(message, 1);
+            Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), embed);
         } else {
+            //below here are just regular chat messages
             censorMessages(message);
             censorLinks(message);
 
@@ -222,6 +214,14 @@ public class TVBot {
 
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);
+
+            /**
+             * Messages containing my name go to botpms now too cuz im watching
+             */
+            if (message.getContent().toLowerCase().contains("cback")) {
+                EmbedObject embed = Util.buildBotPMEmbed(message, 2);
+                Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), embed);
+            }
         }
     }
 
