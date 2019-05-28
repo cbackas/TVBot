@@ -1,15 +1,9 @@
 package cback;
 
-import cback.commands.CommandSort;
+//import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
-import org.apache.commons.lang3.StringUtils;
-import sx.blah.discord.handle.obj.ActivityType;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.StatusType;
-import sx.blah.discord.util.EmbedBuilder;
-
+//import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;

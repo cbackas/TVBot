@@ -18,10 +18,26 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.austinv11</groupId>
-            <artifactId>Discord4J</artifactId>
-            <version>9b1c81a</version>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>3.8.3_463</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.jagrosh</groupId>
+            <artifactId>jda-utilities</artifactId>
+            <version>2.1.5</version>
+            <scope>compile</scope>
+            <type>pom</type>
+        </dependency>
+
+
         <dependency>
             <groupId>com.uwetrottmann.trakt5</groupId>
             <artifactId>trakt-java</artifactId>

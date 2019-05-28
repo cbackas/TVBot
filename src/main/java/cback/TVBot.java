@@ -1,22 +1,22 @@
 package cback;
 
 import cback.eventFunctions.*;
-import cback.commands.*;
+//import cback.commands.*;
 import cback.database.DatabaseManager;
+
+import com.jagrosh.jdautilities.command.CommandClientBuilder;
+import net.dv8tion.jda.client.JDAClient;
+
+import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
 import org.reflections.Reflections;
-import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
 
+import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,18 +29,19 @@ import java.util.stream.Collectors;
 public class TVBot {
 
     private static TVBot instance;
-    private static IDiscordClient client;
+    private static JDAClient client;
+    private static JDA jda;
 
     private DatabaseManager databaseManager;
-    private TraktManager traktManager;
+    //private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
-    private Scheduler scheduler;
+    //private Scheduler scheduler;
 
     public static ArrayList<Long> messageCache = new ArrayList<>();
 
-    public static List<Command> registeredCommands = new ArrayList<>();
+    //public static List<Command> registeredCommands = new ArrayList<>();
     static public String prefix = "!";
     public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
@@ -74,11 +75,11 @@ public class TVBot {
 
     private long startTime;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws LoginException, InterruptedException {
         new TVBot();
     }
 
-    public TVBot() {
+    public TVBot() throws LoginException, InterruptedException {
 
         instance = this;
 
@@ -94,21 +95,21 @@ public class TVBot {
         prefixes.add("?");
 
         connect();
-        client.getDispatcher().registerListener(this);
+        /*client.getDispatcher().registerListener(this);
         client.getDispatcher().registerListener(new ChannelChange(this));
         client.getDispatcher().registerListener(new MemberChange(this));
-        client.getDispatcher().registerListener(new MessageChange(this));
+        client.getDispatcher().registerListener(new MessageChange(this));*/
 
         databaseManager = new DatabaseManager(this);
-        traktManager = new TraktManager(this);
-        scheduler = new Scheduler(this);
+        //traktManager = new TraktManager(this);
+        //scheduler = new Scheduler(this);
 
-        registerAllCommands();
+        //registerAllCommands();
     }
 
-    private void connect() {
+    private void connect() throws LoginException, InterruptedException {
         //don't load external modules and don't attempt to create modules folder
-        Configuration.LOAD_EXTERNAL_MODULES = false;
+        //Configuration.LOAD_EXTERNAL_MODULES = false;
 
         Optional<String> token = configManager.getTokenValue("botToken");
         if (!token.isPresent()) {
@@ -119,21 +120,36 @@ public class TVBot {
             System.exit(0);
             return;
         }
+        CommandClientBuilder commandBuilder = new CommandClientBuilder();
+        commandBuilder.setOwnerId("73463573900173312");
+        commandBuilder.setPrefix(prefix);
+        commandBuilder.setAlternativePrefix(prefixes.toString());
+        commandBuilder.setGame(Game.watching("all of your messages. Type " + prefix + "help"));
 
-        ClientBuilder clientBuilder = new ClientBuilder();
+        startTime = System.currentTimeMillis();
+
+        JDABuilder builder = new JDABuilder(AccountType.BOT)
+                .setToken(token.get())
+                .addEventListener(commandBuilder.build());
+                //.addEventListener(new ChannelChange(this), new MemberChange(this), new MessageChange(this), this);
+        jda = builder.build();
+
+
+
+        /*ClientBuilder clientBuilder = new ClientBuilder();
         clientBuilder.withToken(token.get());
         clientBuilder.setMaxReconnectAttempts(5);
         try {
             client = clientBuilder.login();
         } catch (DiscordException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     /*
      * Message Central Choo Choo
      */
-    @EventSubscriber
+    /*@EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         if (event.getMessage().getAuthor().isBot()) return; //ignore bot messages
         IMessage message = event.getMessage();
@@ -162,9 +178,9 @@ public class TVBot {
                     IUser author = message.getAuthor();
                     String content = message.getContent();
 
-                    /**
+                    *//**
                      * If user has permission to run the command: Command executes and botlogs
-                     */
+                     *//*
                     if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
                         Util.botLog(message);
                         cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
@@ -183,9 +199,9 @@ public class TVBot {
 
                 Util.deleteMessage(message);
             }
-            /**
+            *//**
              * Forwards the random stuff people PM to the bot - to me
-             */
+             *//*
         } else if (message.getChannel().isPrivate()) {
             EmbedObject embed = Util.buildBotPMEmbed(message, 1);
             Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), embed);
@@ -194,9 +210,9 @@ public class TVBot {
             censorMessages(message);
             censorLinks(message);
 
-            /**
+            *//**
              * Deletes messages/bans users for using too many @ mentions
-             */
+             *//*
             boolean staffMember = message.getAuthor().hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
             if (!staffMember && toggleState("limitmentions")) {
                 if (Util.mentionsCount(message.getContent()) > 10) {
@@ -215,25 +231,19 @@ public class TVBot {
             //Increment message count if message was not a command
             databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);
 
-            /**
+            *//**
              * Messages containing my name go to botpms now too cuz im watching
-             */
+             *//*
             if (message.getContent().toLowerCase().contains("cback")) {
                 EmbedObject embed = Util.buildBotPMEmbed(message, 2);
                 Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), embed);
             }
         }
-    }
+    }*/
 
-    @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         System.out.println("Logged in.");
-        client = event.getClient();
 
-        //Set status
-        client.changePresence(StatusType.ONLINE, ActivityType.WATCHING,"all of your messages. Type " + prefix + "help");
-
-        startTime = System.currentTimeMillis();
     }
 
     public static TVBot getInstance() {
@@ -244,9 +254,9 @@ public class TVBot {
         return databaseManager;
     }
 
-    public TraktManager getTraktManager() {
+    /*public TraktManager getTraktManager() {
         return traktManager;
-    }
+    }*/
 
     public static ConfigManager getConfigManager() {
         return configManager;
@@ -258,7 +268,7 @@ public class TVBot {
 
     public ToggleManager getToggleMangager() { return toggleManager; }
 
-    public static IDiscordClient getClient() {
+    public static JDAClient getClient() {
         return client;
     }
 
@@ -266,11 +276,11 @@ public class TVBot {
         return prefix;
     }
 
-    public static IGuild getHomeGuild() {
+    /*public static IGuild getHomeGuild() {
         return client.getGuildByID(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
-    }
+    }*/
 
-    private void registerAllCommands() {
+    /*private void registerAllCommands() {
         new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
             try {
                 Command command = commandImpl.newInstance();
@@ -289,7 +299,7 @@ public class TVBot {
                 e.printStackTrace();
             }
         });
-    }
+    }*/
 
     public String getUptime() {
         long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
@@ -302,7 +312,7 @@ public class TVBot {
     /**
      * Checks for dirty words :o
      */
-    public void censorMessages(IMessage message) {
+    /*public void censorMessages(IMessage message) {
         if (toggleState("censorwords")) {
             boolean homeGuild = message.getGuild().getLongID() == TVBot.HOMESERVER_GLD_ID;
             boolean staffChannel = message.getChannel().getCategory().getLongID() == 355901035597922304L || message.getChannel().getCategory().getLongID() == 355910636464504832L;
@@ -349,9 +359,9 @@ public class TVBot {
         }
     }
 
-    /**
+    *//**
      * Censor links
-     */
+     *//*
     public void censorLinks(IMessage message) {
         if (toggleState("censorlinks")) {
             IUser author = message.getAuthor();
@@ -405,7 +415,7 @@ public class TVBot {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Setting toggles

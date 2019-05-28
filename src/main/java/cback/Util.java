@@ -1,10 +1,6 @@
 package cback;
 
-import cback.commands.Command;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+//import cback.commands.Command;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -17,7 +13,7 @@ import java.util.regex.Pattern;
 public class Util {
     private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@!?(\\d+)>$");
 
-    static IDiscordClient client = TVBot.getClient();
+    //static IDiscordClient client = TVBot.getClient();
     static ConfigManager cm = TVBot.getConfigManager();
     static Color BOT_COLOR = Color.decode("#" + cm.getConfigValue("bot_color"));
 
@@ -28,18 +24,18 @@ public class Util {
         return BOT_COLOR;
     }
 
-    public static void sendMessage(IChannel channel, String message) {
+    /*public static void sendMessage(IChannel channel, String message) {
         try {
             channel.sendMessage(message);
         } catch (Exception e) {
             reportHome(e);
         }
-    }
+    }*/
 
     /**
      * Send report
      */
-    public static void reportHome(IMessage message, Exception e) {
+    /*public static void reportHome(IMessage message, Exception e) {
         e.printStackTrace();
 
         IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);
@@ -98,9 +94,9 @@ public class Util {
         sendEmbed(errorChannel, bld.build());
     }
 
-    /**
+    *//**
      * Send botLog
-     */
+     *//*
     public static void botLog(IMessage message) {
         try {
             IChannel botLogChannel = client.getChannelByID(TVBot.BOTLOG_CH_ID);
@@ -119,9 +115,9 @@ public class Util {
         }
     }
 
-    /**
+    *//**
      * Command syntax error
-     */
+     *//*
     public static void syntaxError(Command command, IMessage message) {
         try {
             EmbedBuilder bld = new EmbedBuilder()
@@ -137,9 +133,9 @@ public class Util {
         }
     }
 
-    /**
+    *//**
      * Delete a message
-     */
+     *//*
     public static void deleteMessage(IMessage message) {
         try {
             message.delete();
@@ -148,9 +144,9 @@ public class Util {
         }
     }
 
-    /**
+    *//**
      * Add a server log
-     */
+     *//*
     public static IMessage sendLog(IMessage message, String text) {
         RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
             try {
@@ -203,9 +199,9 @@ public class Util {
         return future.get();
     }
 
-    /**
+    *//**
      * Send simple fast embeds
-     */
+     *//*
     public static IMessage simpleEmbed(IChannel channel, String message) {
         return sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(BOT_COLOR).build());
     }
@@ -249,9 +245,9 @@ public class Util {
         });
     }
 
-    /**
+    *//**
      * Bulk deletes a list of messages
-     */
+     *//*
     public static void bulkDelete(IChannel channel, List<IMessage> toDelete) {
         RequestBuffer.request(() -> {
             if (toDelete.size() > 0) {
@@ -273,17 +269,17 @@ public class Util {
         });
     }
 
-    /**
+    *//**
      * Sends an announcement (message in general and announcements)
-     */
+     *//*
     public static void sendAnnouncement(String message) {
         Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CH_ID), message);
         Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), message);
     }
 
-    /**
+    *//**
      * Sending private messages
-     */
+     *//*
     public static void sendPrivateMessage(IUser user, String message) {
         try {
             user.getClient().getOrCreatePMChannel(user).sendMessage(message);
@@ -334,7 +330,7 @@ public class Util {
         int discrim = Integer.parseInt(user.getDiscriminator());
         discrim %= defaults.length;
         return "https://discordapp.com/assets/" + defaults[discrim] + ".png";
-    }
+    }*/
 
     //END EMBED BUILDER STUFF
 
@@ -351,13 +347,13 @@ public class Util {
         return toInt(System.currentTimeMillis() / 1000);
     }
 
-    public static IUser getUserFromMentionArg(String arg) {
+    /*public static IUser getUserFromMentionArg(String arg) {
         Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
         if (matcher.matches()) {
             return TVBot.getInstance().getClient().getUserByID(Long.parseLong(matcher.group(1)));
         }
         return null;
-    }
+    }*/
 
     /**
      * Changes the time to a 12 hour format
@@ -368,7 +364,7 @@ public class Util {
             Date dateObj = sdf.parse(time);
             return new SimpleDateFormat("K:mm").format(dateObj);
         } catch (Exception e) {
-            reportHome(e);
+            //reportHome(e);
         }
         return time;
     }
@@ -376,7 +372,7 @@ public class Util {
     /**
      * returns the string content of a rule, given the message ID of where it's found
      */
-    public static String getRule(Long ruleID) {
+    /*public static String getRule(Long ruleID) {
         try {
             String rule = TVBot.getInstance().getClient().getChannelByID(263184364811059200l).getMessageByID(ruleID).getContent();
 
@@ -385,7 +381,7 @@ public class Util {
             reportHome(e);
         }
         return null;
-    }
+    }*/
 
     /**
      * returns a count of mentions
@@ -409,7 +405,7 @@ public class Util {
     /**
      * Sets the lounge's security level
      */
-    public static void setSecurity(VerificationLevel level) {
+   /* public static void setSecurity(VerificationLevel level) {
         try {
             IGuild lounge = TVBot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID);
             lounge.changeVerificationLevel(level);
@@ -418,9 +414,9 @@ public class Util {
         }
     }
 
-    /**
+    *//**
      * Returns an embed object for a simple botpm
-     */
+     *//*
     public static EmbedObject buildBotPMEmbed(IMessage message, int type) {
         try {
             IUser author = message.getAuthor();
@@ -448,5 +444,5 @@ public class Util {
             reportHome(message, e);
             return null;
         }
-    }
+    }*/
 }

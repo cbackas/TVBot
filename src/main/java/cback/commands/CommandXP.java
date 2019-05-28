@@ -3,10 +3,6 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import cback.database.xp.UserXP;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
 import java.util.List;
 

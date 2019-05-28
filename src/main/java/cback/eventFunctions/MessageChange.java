@@ -2,13 +2,6 @@ package cback.eventFunctions;
 
 import cback.TVBot;
 import cback.Util;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.channel.message.*;
-import sx.blah.discord.handle.impl.events.guild.member.NicknameChangedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
 public class MessageChange {
     private TVBot bot;
@@ -17,7 +10,7 @@ public class MessageChange {
         this.bot = bot;
     }
 
-    @EventSubscriber
+    /*@EventSubscriber
     public void messageDeleted(MessageDeleteEvent event) {
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID()) && event.getMessage() != null) {
             if (!event.getAuthor().isBot() && !TVBot.messageCache.contains(event.getMessageID())) {
@@ -113,6 +106,6 @@ public class MessageChange {
             IChannel MESSAGE_LOGS = event.getClient().getChannelByID(TVBot.MESSAGELOG_CH_ID);
             Util.sendEmbed(MESSAGE_LOGS, bld.build());
         }
-    }
+    }*/
 
 }

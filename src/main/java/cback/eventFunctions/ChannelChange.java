@@ -5,16 +5,6 @@ import cback.TraktManager;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Status;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -30,7 +20,7 @@ public class ChannelChange {
         this.bot = bot;
     }
 
-    @EventSubscriber //Set all
+    /*@EventSubscriber //Set all
     public void setMuteRoleMASS(MessageReceivedEvent event) {
         if (event.getGuild().getStringID().equals(TVBot.getHomeGuild().getStringID())) {
             IMessage message = event.getMessage();
@@ -104,6 +94,6 @@ public class ChannelChange {
                 bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
             }
         }
-    }
+    }*/
 
 }
