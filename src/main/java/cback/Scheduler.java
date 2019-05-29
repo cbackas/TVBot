@@ -3,7 +3,10 @@ package cback;
 //import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
-//import org.apache.commons.lang3.StringUtils;
+import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.Guild;
+import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,7 +81,8 @@ public class Scheduler {
             resetUserChange();
             sendDailyMessage();
             //Set status
-            bot.getClient().changePresence(StatusType.ONLINE, ActivityType.WATCHING,"all of your messages. Type " + TVBot.prefix + "help");
+            bot.commandBuilder.setGame(Game.watching("all of your messages. Type " + TVBot.prefix + "help"));
+
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
     }
@@ -153,7 +157,7 @@ public class Scheduler {
                 }
                 /////////////////////////////////////////////////////
 
-                IChannel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
+                Channel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
                 IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
                 IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
 
@@ -211,7 +215,7 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        IGuild loungeGuild = bot.getClient().getGuildByID(192441520178200577L);
+        Guild loungeGuild = bot.getClient().getGuildByID(192441520178200577L);
         if (loungeGuild != null) {
             bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
         }

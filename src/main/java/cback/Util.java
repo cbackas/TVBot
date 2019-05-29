@@ -2,8 +2,13 @@ package cback;
 
 //import cback.commands.Command;
 
+import net.dv8tion.jda.client.JDAClient;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.Message;
+
 import java.awt.*;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,7 +18,7 @@ import java.util.regex.Pattern;
 public class Util {
     private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@!?(\\d+)>$");
 
-    //static IDiscordClient client = TVBot.getClient();
+    static JDAClient client = TVBot.getClient();
     static ConfigManager cm = TVBot.getConfigManager();
     static Color BOT_COLOR = Color.decode("#" + cm.getConfigValue("bot_color"));
 
@@ -24,31 +29,41 @@ public class Util {
         return BOT_COLOR;
     }
 
-    /*public static void sendMessage(IChannel channel, String message) {
+    public static void sendMessage(IChannel channel, String message) {
         try {
             channel.sendMessage(message);
         } catch (Exception e) {
             reportHome(e);
         }
-    }*/
+    }
 
     /**
      * Send report
      */
-    /*public static void reportHome(IMessage message, Exception e) {
+    public static void reportHome(Message message, Exception e) {
         e.printStackTrace();
+        EmbedBuilder bld = new EmbedBuilder();
+
+        Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld
+                .setColor(BOT_COLOR)
+                .setTimestamp(Instant.now())
+                .setAuthor(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator(), null, message.getAuthor().getAvatarUrl())
+                .setDescription(message.getContentRaw())
+                .addField("\u200B", "\u200B", false)
+                .addField("Exeption:", e.toString(), false)
+
+                .build()).queue();
 
         IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);
 
         EmbedBuilder bld = new EmbedBuilder()
-                .withColor(BOT_COLOR)
-                .withTimestamp(System.currentTimeMillis())
-                .withAuthorName(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator())
-                .withAuthorIcon(getAvatar(message.getAuthor()))
-                .withDesc(message.getContent())
-                .appendField("\u200B", "\u200B", false)
+                .setColor(BOT_COLOR)
+                .setTimestamp(Instant.now())
+                .setAuthor(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator(), null, message.getAuthor().getAvatarUrl())
+                .setDescription(message.getContentRaw())
+                .addField("\u200B", "\u200B", false)
 
-                .appendField("Exeption:", e.toString(), false);
+                .addField("Exeption:", e.toString(), false);
 
         StringBuilder stack = new StringBuilder();
         for (StackTraceElement s : e.getStackTrace()) {
@@ -62,12 +77,12 @@ public class Util {
         }
 
         bld
-                .appendField("Stack:", stackString, false);
+                .addField("Stack:", stackString, false);
 
         sendEmbed(errorChannel, bld.build());
     }
 
-    public static void reportHome(Exception e) {
+    /*public static void reportHome(Exception e) {
         e.printStackTrace();
 
         IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);

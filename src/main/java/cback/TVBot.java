@@ -11,13 +11,17 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.events.ReadyEvent;
+
+import net.dv8tion.jda.core.entities.Guild;
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
+
 import org.reflections.Reflections;
 
 import javax.security.auth.login.LoginException;
+
 import java.awt.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,11 +37,11 @@ public class TVBot {
     private static JDA jda;
 
     private DatabaseManager databaseManager;
-    //private TraktManager traktManager;
+    private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
-    //private Scheduler scheduler;
+    private Scheduler scheduler;
 
     public static ArrayList<Long> messageCache = new ArrayList<>();
 
@@ -60,7 +64,7 @@ public class TVBot {
     public static final long MR_CAT_ID = 358038505244327937L;
     public static final long SZ_CAT_ID = 358038532780195840L;
 
-    public static final long ANNOUNCEMENT_CH_ID = 345774506373021716L;
+    /*public static final long ANNOUNCEMENT_CH_ID = 345774506373021716L;
     public static final long NEWEPISODE_CH_ID = 263184398894104577L;
     public static final long GENERAL_CH_ID = 192441520178200577L;
     public static final long SUGGEST_CH_ID = 192444470942236672L;
@@ -71,9 +75,11 @@ public class TVBot {
     //hub channels
     public static final long ERRORLOG_CH_ID = 346104666796589056L;
     public static final long BOTLOG_CH_ID = 346483682376286208L;
-    public static final long BOTPM_CH_ID = 346104720903110656L;
+    public static final long BOTPM_CH_ID = 346104720903110656L;*/
 
     private long startTime;
+
+    public CommandClientBuilder commandBuilder = new CommandClientBuilder();
 
     public static void main(String[] args) throws LoginException, InterruptedException {
         new TVBot();
@@ -95,16 +101,10 @@ public class TVBot {
         prefixes.add("?");
 
         connect();
-        /*client.getDispatcher().registerListener(this);
-        client.getDispatcher().registerListener(new ChannelChange(this));
-        client.getDispatcher().registerListener(new MemberChange(this));
-        client.getDispatcher().registerListener(new MessageChange(this));*/
 
         databaseManager = new DatabaseManager(this);
-        //traktManager = new TraktManager(this);
-        //scheduler = new Scheduler(this);
-
-        //registerAllCommands();
+        traktManager = new TraktManager(this);
+        scheduler = new Scheduler(this);
     }
 
     private void connect() throws LoginException, InterruptedException {
@@ -120,7 +120,7 @@ public class TVBot {
             System.exit(0);
             return;
         }
-        CommandClientBuilder commandBuilder = new CommandClientBuilder();
+
         commandBuilder.setOwnerId("73463573900173312");
         commandBuilder.setPrefix(prefix);
         commandBuilder.setAlternativePrefix(prefixes.toString());
@@ -130,20 +130,8 @@ public class TVBot {
 
         JDABuilder builder = new JDABuilder(AccountType.BOT)
                 .setToken(token.get())
-                .addEventListener(commandBuilder.build());
-                //.addEventListener(new ChannelChange(this), new MemberChange(this), new MessageChange(this), this);
+                .addEventListener(new ChannelChange(this), new MemberChange(this), new MessageChange(this), commandBuilder.build());
         jda = builder.build();
-
-
-
-        /*ClientBuilder clientBuilder = new ClientBuilder();
-        clientBuilder.withToken(token.get());
-        clientBuilder.setMaxReconnectAttempts(5);
-        try {
-            client = clientBuilder.login();
-        } catch (DiscordException e) {
-            e.printStackTrace();
-        }*/
     }
 
     /*
@@ -241,11 +229,6 @@ public class TVBot {
         }
     }*/
 
-    public void onReadyEvent(ReadyEvent event) {
-        System.out.println("Logged in.");
-
-    }
-
     public static TVBot getInstance() {
         return instance;
     }
@@ -254,9 +237,9 @@ public class TVBot {
         return databaseManager;
     }
 
-    /*public TraktManager getTraktManager() {
+    public TraktManager getTraktManager() {
         return traktManager;
-    }*/
+    }
 
     public static ConfigManager getConfigManager() {
         return configManager;
@@ -276,30 +259,9 @@ public class TVBot {
         return prefix;
     }
 
-    /*public static IGuild getHomeGuild() {
-        return client.getGuildByID(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
-    }*/
-
-    /*private void registerAllCommands() {
-        new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
-            try {
-                Command command = commandImpl.newInstance();
-                Optional<Command> existingCommand = registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();
-                if (!existingCommand.isPresent()) {
-                    registeredCommands.add(command);
-                    System.out.println("Registered command: " + command.getName());
-                } else {
-                    System.out.println("Attempted to register two commands with the same name: " + existingCommand.get().getName());
-                    System.out.println("Existing: " + existingCommand.get().getClass().getName());
-                    System.out.println("Attempted: " + commandImpl.getName());
-                }
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        });
-    }*/
+    public static Guild getHomeGuild() {
+        return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
+    }
 
     public String getUptime() {
         long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
