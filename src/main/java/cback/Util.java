@@ -4,7 +4,6 @@ package cback;
 
 import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.MessageEmbed;
@@ -32,10 +31,6 @@ public class Util {
         return BOT_COLOR;
     }
 
-
-    /**
-     * MAKE WORK
-     */
     public static void sendMessage(MessageChannel channel, String message) {
         try {
             channel.sendMessage(message).queue();
@@ -84,7 +79,8 @@ public class Util {
         }
 
     }
-    /*public static void reportHome(Message message, Exception e) {
+
+    public static void reportHome(Message message, Exception e) {
         e.printStackTrace();
         EmbedBuilder bld = new EmbedBuilder();
 
@@ -131,7 +127,7 @@ public class Util {
                 .addField("Exeption:", e.toString(), false)
                 .addField("Stack:", stackString, false)
                 .build()).queue();
-    }*/
+    }
 
     /**
      * Send botLog
