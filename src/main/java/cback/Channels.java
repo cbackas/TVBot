@@ -16,6 +16,7 @@ public enum Channels {
     DEV_CH_ID("269638376376893440"),
 
     //hub channels
+    TEST_CH_ID("576886075994275841"),
     ERRORLOG_CH_ID("346104666796589056"),
     BOTLOG_CH_ID("346483682376286208"),
     BOTPM_CH_ID("346104720903110656");
@@ -24,6 +25,6 @@ public enum Channels {
     private final String id;
 
     public TextChannel getChannel() {
-        return TVBot.getHomeGuild().getTextChannelById(id);
+        return TVBot.getGuild().getTextChannelById(id);
     }
 }

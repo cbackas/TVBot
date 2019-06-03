@@ -43,7 +43,7 @@ public class MemberChange {
 
             //Mute Check
             if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getStringID())) {
-                Util.sendMessage(event.getGuild().getChannelByID(192444648545845248l), user + " is muted and left the server. Their mute will be applied again when/if they return.");
+                Util.sendMessage(user + " is muted and left the server. Their mute will be applied again when/if they return.");
             }
 
             //Leave Counter

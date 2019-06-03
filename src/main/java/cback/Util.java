@@ -4,13 +4,16 @@ package cback;
 
 import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,20 +32,72 @@ public class Util {
         return BOT_COLOR;
     }
 
-    public static void sendMessage(IChannel channel, String message) {
+
+    /**
+     * MAKE WORK
+     */
+    public static void sendMessage(MessageChannel channel, String message) {
         try {
-            channel.sendMessage(message);
+            channel.sendMessage(message).queue();
         } catch (Exception e) {
-            reportHome(e);
+            reportHome("Message failed to send in " + channel.getName(), e, null);
         }
     }
 
     /**
      * Send report
      */
-    public static void reportHome(Message message, Exception e) {
+
+    public static void reportHome(String text, Exception e, Message message) {
+        TextChannel errorChannel = Channels.TEST_CH_ID.getChannel();
+
+        StringBuilder stack = new StringBuilder();
+        for(StackTraceElement s : e.getStackTrace()) {
+            stack.append(s.toString());
+            stack.append("\n");
+        }
+        String stackString = stack.toString();
+        if(stackString.length() > 800) {
+            stackString = stackString.substring(0, 800);
+        }
+
+        EmbedBuilder bld = new EmbedBuilder()
+                .setColor(Color.ORANGE)
+                .setTimestamp(Instant.now());
+
+        if(message != null) {
+            bld
+                    .setAuthor(message.getAuthor().getName() + "#" + message.getAuthor().getDiscriminator(), message.getAuthor().getEffectiveAvatarUrl())
+                    .appendDescription(message.getContentRaw())
+                    .addBlankField(false);
+        }
+
+        bld
+                .appendDescription(text)
+                .addField("Exception:", e.toString(), false)
+                .addField("Stack:", stackString, false);
+
+        try {
+            errorChannel.sendMessage(bld.build()).queue();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+    /*public static void reportHome(Message message, Exception e) {
         e.printStackTrace();
         EmbedBuilder bld = new EmbedBuilder();
+
+        StringBuilder stack = new StringBuilder();
+        for (StackTraceElement s : e.getStackTrace()) {
+            stack.append(s.toString());
+            stack.append("\n");
+        }
+
+        String stackString = stack.toString();
+        if (stackString.length() > 1024) {
+            stackString = stackString.substring(0, 1800);
+        }
 
         Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld
                 .setColor(BOT_COLOR)
@@ -51,107 +106,73 @@ public class Util {
                 .setDescription(message.getContentRaw())
                 .addField("\u200B", "\u200B", false)
                 .addField("Exeption:", e.toString(), false)
-
+                .addField("Stack:", stackString, false)
                 .build()).queue();
+    }
 
-        IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);
+    public static void reportHome(Exception e) {
+        e.printStackTrace();
+        EmbedBuilder bld = new EmbedBuilder();
 
-        EmbedBuilder bld = new EmbedBuilder()
+        StringBuilder stack = new StringBuilder();
+        for (StackTraceElement s : e.getStackTrace()) {
+            stack.append(s.toString());
+            stack.append("\n");
+        }
+
+        String stackString = stack.toString();
+        if (stackString.length() > 1024) {
+            stackString = stackString.substring(0, 1800);
+        }
+
+        Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld
                 .setColor(BOT_COLOR)
                 .setTimestamp(Instant.now())
-                .setAuthor(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator(), null, message.getAuthor().getAvatarUrl())
-                .setDescription(message.getContentRaw())
-                .addField("\u200B", "\u200B", false)
+                .addField("Exeption:", e.toString(), false)
+                .addField("Stack:", stackString, false)
+                .build()).queue();
+    }*/
 
-                .addField("Exeption:", e.toString(), false);
-
-        StringBuilder stack = new StringBuilder();
-        for (StackTraceElement s : e.getStackTrace()) {
-            stack.append(s.toString());
-            stack.append("\n");
-        }
-
-        String stackString = stack.toString();
-        if (stackString.length() > 1024) {
-            stackString = stackString.substring(0, 1800);
-        }
-
-        bld
-                .addField("Stack:", stackString, false);
-
-        sendEmbed(errorChannel, bld.build());
-    }
-
-    /*public static void reportHome(Exception e) {
-        e.printStackTrace();
-
-        IChannel errorChannel = client.getChannelByID(TVBot.ERRORLOG_CH_ID);
-
-        EmbedBuilder bld = new EmbedBuilder()
-                .withColor(BOT_COLOR)
-                .withTimestamp(System.currentTimeMillis())
-                .appendField("Exeption:", e.toString(), false);
-
-        StringBuilder stack = new StringBuilder();
-        for (StackTraceElement s : e.getStackTrace()) {
-            stack.append(s.toString());
-            stack.append("\n");
-        }
-
-        String stackString = stack.toString();
-        if (stackString.length() > 1024) {
-            stackString = stackString.substring(0, 1800);
-        }
-
-        bld
-                .appendField("Stack:", stackString, false);
-
-        sendEmbed(errorChannel, bld.build());
-    }
-
-    *//**
+    /**
      * Send botLog
-     *//*
-    public static void botLog(IMessage message) {
+     */
+    public static void botLog(Message message) {
         try {
-            IChannel botLogChannel = client.getChannelByID(TVBot.BOTLOG_CH_ID);
-
-            EmbedBuilder bld = new EmbedBuilder()
-                    .withColor(BOT_COLOR)
-                    .withAuthorName(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator())
-                    .withAuthorIcon(getAvatar(message.getAuthor()))
-                    .withDesc(message.getFormattedContent())
-                    .withFooterText(message.getGuild().getName() + "/#" + message.getChannel().getName())
-                    .withTimestamp(System.currentTimeMillis());
-
-            sendEmbed(botLogChannel, bld.build());
+            Channels.BOTLOG_CH_ID.getChannel().sendMessage(new EmbedBuilder()
+                    .setColor(BOT_COLOR)
+                    .setAuthor(message.getAuthor().getName() + "#" + message.getAuthor().getDiscriminator(), null, null)
+                    .setDescription(message.getContentDisplay())
+                    .setFooter(message.getGuild().getName() + "/#" + message.getChannel().getName(), null)
+                    .setTimestamp(Instant.now())
+                    .build()).queue();
         } catch (Exception e) {
             reportHome(message, e);
         }
     }
 
-    *//**
+    /**
      * Command syntax error
-     *//*
-    public static void syntaxError(Command command, IMessage message) {
+     */
+    /*public static void syntaxError(Command command, Message message) {
         try {
+
+
             EmbedBuilder bld = new EmbedBuilder()
-                    .withColor(BOT_COLOR)
-                    .withAuthorName(command.getName())
-                    .withAuthorIcon(TVBot.getClient().getApplicationIconURL())
-                    .withDesc(command.getDescription())
-                    .appendField("Syntax:", TVBot.getPrefix() + command.getSyntax(), false);
+                    .setColor(BOT_COLOR)
+                    .setAuthor(command.getName(), TVBot.getClient().getApplicationById("583042681496797198").complete().getIconUrl())
+                    .setDescription(command.getDescription())
+                    .addField("Syntax:", TVBot.getPrefix() + command.getSyntax(), false);
 
             sendEmbed(message.getChannel(), bld.build());
         } catch (Exception e) {
             reportHome(message, e);
         }
-    }
+    }*/
 
-    *//**
+    /**
      * Delete a message
-     *//*
-    public static void deleteMessage(IMessage message) {
+     */
+    public static void deleteMessage(Message message) {
         try {
             message.delete();
         } catch (Exception e) {
@@ -159,11 +180,11 @@ public class Util {
         }
     }
 
-    *//**
+    /**
      * Add a server log
-     *//*
-    public static IMessage sendLog(IMessage message, String text) {
-        RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
+     */
+    /*public static Message sendLog(Message message, String text) {
+        RequestBuffer.RequestFuture<Message> future = RequestBuffer.request(() -> {
             try {
                 IUser user = message.getAuthor();
 
@@ -177,7 +198,7 @@ public class Util {
 
                 embed.withTimestamp(System.currentTimeMillis());
 
-                IDiscordClient client = TVBot.getInstance().getClient();
+                JDAClient client = TVBot.getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(Color.GRAY).build())
                         .withChannel(TVBot.SERVERLOG_CH_ID).send();
             } catch (MissingPermissionsException | DiscordException e) {
@@ -186,10 +207,10 @@ public class Util {
             return null;
         });
         return future.get();
-    }
+    }*/
 
-    public static IMessage sendLog(IMessage message, String text, Color color) {
-        RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
+    /*public static Message sendLog(Message message, String text, Color color) {
+        RequestBuffer.RequestFuture<Message> future = RequestBuffer.request(() -> {
             try {
                 IUser user = message.getAuthor();
 
@@ -203,7 +224,7 @@ public class Util {
 
                 embed.withTimestamp(System.currentTimeMillis());
 
-                IDiscordClient client = TVBot.getInstance().getClient();
+                JDAClient client = TVBot.getClient();
                 return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
                         .withChannel(TVBot.SERVERLOG_CH_ID).send();
             } catch (MissingPermissionsException | DiscordException e) {
@@ -212,32 +233,42 @@ public class Util {
             return null;
         });
         return future.get();
-    }
+    }*/
 
-    *//**
+    /**
      * Send simple fast embeds
-     *//*
-    public static IMessage simpleEmbed(IChannel channel, String message) {
-        return sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(BOT_COLOR).build());
+     */
+    public static void simpleEmbed(MessageChannel channel, String message) {
+        try {
+            MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
+        } catch(Exception ex) {
+            System.out.println("Failed to send Embed!");
+            ex.printStackTrace();
+            reportHome("Embed failed to send in " + channel.getName(), ex, null);
+        }
     }
 
-    public static IMessage simpleEmbed(IChannel channel, String message, Color color) {
-        return sendEmbed(channel, new EmbedBuilder().withDescription(message).withColor(color).build());
+    public static void simpleEmbed(MessageChannel channel, String message, Color color) {
+        try {
+            MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(color).build();
+            channel.sendMessage(embed).queue();
+        } catch(Exception ex) {
+            System.out.println("Failed to send Embed");
+            reportHome("Embed failed to send in " + channel.getName(), ex, null);
+        }
     }
 
-    public static IMessage sendEmbed(IChannel channel, EmbedObject embedObject) {
-        RequestBuffer.RequestFuture<IMessage> future = RequestBuffer.request(() -> {
-            try {
-                return new MessageBuilder(TVBot.getInstance().getClient()).withEmbed(embedObject)
-                        .withChannel(channel).send();
-            } catch (MissingPermissionsException | DiscordException e) {
-                reportHome(e);
-            }
-            return null;
-        });
-        return future.get();
+    public static void sendEmbed(MessageChannel channel, MessageEmbed embed) {
+        try {
+            channel.sendMessage(embed).queue();
+        } catch(Exception ex) {
+            System.out.println("Failed to send Embed");
+            ex.printStackTrace();
+            reportHome("Embed failed to send in " + channel.getName(), ex, null);
+        }
     }
 
+    /*
     public static IMessage sendBufferedMessage(IChannel channel, String message) {
         RequestBuffer.RequestFuture<IMessage> sentMessage = RequestBuffer.request(() -> {
             try {

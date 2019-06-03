@@ -1,6 +1,5 @@
 package cback;
 
-import cback.eventFunctions.*;
 //import cback.commands.*;
 import cback.database.DatabaseManager;
 
@@ -8,27 +7,20 @@ import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import net.dv8tion.jda.client.JDAClient;
 
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
 
 import net.dv8tion.jda.core.entities.Guild;
-import org.nibor.autolink.LinkExtractor;
-import org.nibor.autolink.LinkSpan;
-
-import org.reflections.Reflections;
+import net.dv8tion.jda.core.entities.Message;
 
 import javax.security.auth.login.LoginException;
 
-import java.awt.*;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+        import java.util.ArrayList;
+        import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+        import java.util.regex.Pattern;
 
 public class TVBot {
 
@@ -37,11 +29,11 @@ public class TVBot {
     private static JDA jda;
 
     private DatabaseManager databaseManager;
-    private TraktManager traktManager;
+    //private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
-    private Scheduler scheduler;
+    //private Scheduler scheduler;
 
     public static ArrayList<Long> messageCache = new ArrayList<>();
 
@@ -103,8 +95,8 @@ public class TVBot {
         connect();
 
         databaseManager = new DatabaseManager(this);
-        traktManager = new TraktManager(this);
-        scheduler = new Scheduler(this);
+        //traktManager = new TraktManager(this);
+        //scheduler = new Scheduler(this);
     }
 
     private void connect() throws LoginException, InterruptedException {
@@ -128,10 +120,12 @@ public class TVBot {
 
         startTime = System.currentTimeMillis();
 
+
         JDABuilder builder = new JDABuilder(AccountType.BOT)
                 .setToken(token.get())
-                .addEventListener(new ChannelChange(this), new MemberChange(this), new MessageChange(this), commandBuilder.build());
+                .addEventListener(commandBuilder.build());
         jda = builder.build();
+        Util.sendMessage(Channels.TEST_CH_ID.getChannel(), "omg");
     }
 
     /*
@@ -237,9 +231,9 @@ public class TVBot {
         return databaseManager;
     }
 
-    public TraktManager getTraktManager() {
+    /*public TraktManager getTraktManager() {
         return traktManager;
-    }
+    }*/
 
     public static ConfigManager getConfigManager() {
         return configManager;
@@ -263,6 +257,10 @@ public class TVBot {
         return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
     }
 
+    public static Guild getGuild() {
+        return jda.getGuildById("247394948331077632");
+    }
+
     public String getUptime() {
         long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
         long seconds = totalSeconds % 60;
@@ -274,7 +272,7 @@ public class TVBot {
     /**
      * Checks for dirty words :o
      */
-    /*public void censorMessages(IMessage message) {
+    /*public void censorMessages(Message message) {
         if (toggleState("censorwords")) {
             boolean homeGuild = message.getGuild().getLongID() == TVBot.HOMESERVER_GLD_ID;
             boolean staffChannel = message.getChannel().getCategory().getLongID() == 355901035597922304L || message.getChannel().getCategory().getLongID() == 355910636464504832L;
@@ -319,9 +317,9 @@ public class TVBot {
                 }
             }
         }
-    }
+    }*/
 
-    *//**
+    /**
      * Censor links
      *//*
     public void censorLinks(IMessage message) {
