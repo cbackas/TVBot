@@ -130,7 +130,7 @@ public class Scheduler {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
-                } else if (bot.getClient().getChannelByID(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
+                } else if (TVBot.getClient().getChannelByID(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
                     System.out.println("Tried to announce airing for show with no channel, deleting show and airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     bot.getDatabaseManager().getTV().deleteShow(show.getShowID());

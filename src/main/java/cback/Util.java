@@ -4,10 +4,12 @@ package cback;
 
 import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.requests.restaction.MessageAction;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -179,31 +181,26 @@ public class Util {
     /**
      * Add a server log
      */
-    /*public static Message sendLog(Message message, String text) {
-        RequestBuffer.RequestFuture<Message> future = RequestBuffer.request(() -> {
+    public static MessageAction sendLog(Message message, String text) {
             try {
-                IUser user = message.getAuthor();
 
                 new EmbedBuilder();
                 EmbedBuilder embed = new EmbedBuilder();
 
-                embed.withFooterIcon(getAvatar(user));
-                embed.withFooterText("Action by @" + getTag(user));
+                embed.setFooter("Action by @" + message.getAuthor().getName(), message.getAuthor().getEffectiveAvatarUrl());
 
-                embed.withDescription(text);
+                embed.setDescription(text);
 
-                embed.withTimestamp(System.currentTimeMillis());
+                embed.setTimestamp(Instant.now());
 
                 JDAClient client = TVBot.getClient();
-                return new MessageBuilder(client).withEmbed(embed.withColor(Color.GRAY).build())
-                        .withChannel(TVBot.SERVERLOG_CH_ID).send();
-            } catch (MissingPermissionsException | DiscordException e) {
+                return new MessageBuilder().setEmbed(embed.setColor(Color.GRAY).build())
+                        .sendTo(Channels.SERVERLOG_CH_ID.getChannel());
+            } catch (Exception e) {
                 reportHome(e);
             }
             return null;
-        });
-        return future.get();
-    }*/
+    }
 
     /*public static Message sendLog(Message message, String text, Color color) {
         RequestBuffer.RequestFuture<Message> future = RequestBuffer.request(() -> {
@@ -313,13 +310,13 @@ public class Util {
 
     *//**
      * Sends an announcement (message in general and announcements)
-     *//*
+     */
     public static void sendAnnouncement(String message) {
-        Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.GENERAL_CH_ID), message);
-        Util.sendMessage(TVBot.getInstance().getClient().getChannelByID(TVBot.ANNOUNCEMENT_CH_ID), message);
+        Util.sendMessage(Channels.GENERAL_CH_ID.getChannel(), message);
+        Util.sendMessage(Channels.ANNOUNCEMENT_CH_ID.getChannel(), message);
     }
 
-    *//**
+    /**
      * Sending private messages
      *//*
     public static void sendPrivateMessage(IUser user, String message) {

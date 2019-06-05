@@ -56,19 +56,6 @@ public class TVBot {
     public static final long MR_CAT_ID = 358038505244327937L;
     public static final long SZ_CAT_ID = 358038532780195840L;
 
-    /*public static final long ANNOUNCEMENT_CH_ID = 345774506373021716L;
-    public static final long NEWEPISODE_CH_ID = 263184398894104577L;
-    public static final long GENERAL_CH_ID = 192441520178200577L;
-    public static final long SUGGEST_CH_ID = 192444470942236672L;
-    public static final long MESSAGELOG_CH_ID = 305073652280590339L;
-    public static final long SERVERLOG_CH_ID = 217456105679224846L;
-    public static final long DEV_CH_ID = 269638376376893440L;
-
-    //hub channels
-    public static final long ERRORLOG_CH_ID = 346104666796589056L;
-    public static final long BOTLOG_CH_ID = 346483682376286208L;
-    public static final long BOTPM_CH_ID = 346104720903110656L;*/
-
     private long startTime;
 
     public CommandClientBuilder commandBuilder = new CommandClientBuilder();
