@@ -2,19 +2,18 @@ package cback;
 
 //import cback.commands.Command;
 
+import com.jagrosh.jdautilities.command.Command;
 import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.MessageEmbed;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.requests.restaction.MessageAction;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +37,17 @@ public class Util {
             channel.sendMessage(message).queue();
         } catch (Exception e) {
             reportHome("Message failed to send in " + channel.getName(), e, null);
+        }
+    }
+
+    /**
+     * Delete a message
+     */
+    public static void deleteMessage(Message message) {
+        try {
+            message.delete().queue();
+        } catch (Exception e) {
+            reportHome(message, e);
         }
     }
 
@@ -151,28 +161,16 @@ public class Util {
     /**
      * Command syntax error
      */
-    /*public static void syntaxError(Command command, Message message) {
+    public static void syntaxError(Command command, Message message) {
         try {
-
 
             EmbedBuilder bld = new EmbedBuilder()
                     .setColor(BOT_COLOR)
                     .setAuthor(command.getName(), TVBot.getClient().getApplicationById("583042681496797198").complete().getIconUrl())
-                    .setDescription(command.getDescription())
-                    .addField("Syntax:", TVBot.getPrefix() + command.getSyntax(), false);
+                    .setDescription(command.getHelp())
+                    .addField("Syntax:", TVBot.getPrefix() + command.getName(), false);
 
             sendEmbed(message.getChannel(), bld.build());
-        } catch (Exception e) {
-            reportHome(message, e);
-        }
-    }*/
-
-    /**
-     * Delete a message
-     */
-    public static void deleteMessage(Message message) {
-        try {
-            message.delete();
         } catch (Exception e) {
             reportHome(message, e);
         }
@@ -202,31 +200,26 @@ public class Util {
             return null;
     }
 
-    /*public static Message sendLog(Message message, String text, Color color) {
-        RequestBuffer.RequestFuture<Message> future = RequestBuffer.request(() -> {
+    public static MessageAction sendLog(Message message, String text, Color color) {
             try {
-                IUser user = message.getAuthor();
+                User user = message.getAuthor();
 
                 new EmbedBuilder();
                 EmbedBuilder embed = new EmbedBuilder();
 
-                embed.withFooterIcon(getAvatar(user));
-                embed.withFooterText("Action by @" + getTag(user));
+                embed.setFooter("Action by @" + getTag(user), getAvatar(user));
+                embed.setDescription(text);
 
-                embed.withDescription(text);
-
-                embed.withTimestamp(System.currentTimeMillis());
+                embed.setTimestamp(Instant.now());
 
                 JDAClient client = TVBot.getClient();
-                return new MessageBuilder(client).withEmbed(embed.withColor(color).build())
-                        .withChannel(TVBot.SERVERLOG_CH_ID).send();
-            } catch (MissingPermissionsException | DiscordException e) {
+                return new MessageBuilder().setEmbed(embed.setColor(color).build())
+                        .sendTo(Channels.SERVERLOG_CH_ID.getChannel());
+            } catch (Exception e) {
                 reportHome(e);
             }
             return null;
-        });
-        return future.get();
-    }*/
+    }
 
     /**
      * Send simple fast embeds
@@ -261,54 +254,45 @@ public class Util {
         }
     }
 
-    /*
-    public static IMessage sendBufferedMessage(IChannel channel, String message) {
-        RequestBuffer.RequestFuture<IMessage> sentMessage = RequestBuffer.request(() -> {
-            try {
-                return channel.sendMessage(message);
-            } catch (MissingPermissionsException | DiscordException e) {
-                reportHome(e);
-            }
-            return null;
-        });
-        return sentMessage.get();
+    public static MessageAction sendBufferedMessage(TextChannel channel, String message) {
+        try {
+            return channel.sendMessage(message);
+        } catch (Exception e) {
+            reportHome(e);
+        }
+        return null;
     }
 
-    public static void deleteBufferedMessage(IMessage message) {
-        RequestBuffer.request(() -> {
-            try {
-                message.delete();
-            } catch (MissingPermissionsException | DiscordException e) {
-                e.printStackTrace();
-            }
-        });
+    public static void deleteBufferedMessage(Message message) {
+        try {
+            message.delete().queue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    *//**
+    /**
      * Bulk deletes a list of messages
-     *//*
-    public static void bulkDelete(IChannel channel, List<IMessage> toDelete) {
-        RequestBuffer.request(() -> {
-            if (toDelete.size() > 0) {
-                if (toDelete.size() == 1) {
-                    try {
-                        toDelete.get(0).delete();
-                    } catch (MissingPermissionsException | DiscordException e) {
-                        reportHome(e);
-                    }
-                } else {
-                    try {
-                        channel.bulkDelete(toDelete);
-                    } catch (DiscordException | MissingPermissionsException e) {
-                        reportHome(e);
-                    }
-
+     */
+    public static void bulkDelete(TextChannel channel, List<Message> toDelete) {
+        if (toDelete.size() > 0) {
+            if (toDelete.size() == 1) {
+                try {
+                    toDelete.get(0).delete().queue();
+                } catch (Exception e) {
+                    reportHome(e);
+                }
+            } else {
+                try {
+                    channel.deleteMessages(toDelete).queue();
+                } catch (Exception e) {
+                    reportHome(e);
                 }
             }
-        });
+        }
     }
 
-    *//**
+    /**
      * Sends an announcement (message in general and announcements)
      */
     public static void sendAnnouncement(String message) {
@@ -318,18 +302,20 @@ public class Util {
 
     /**
      * Sending private messages
-     *//*
-    public static void sendPrivateMessage(IUser user, String message) {
+     */
+    public static void sendPrivateMessage(User user, String message) {
         try {
-            user.getClient().getOrCreatePMChannel(user).sendMessage(message);
+            user.openPrivateChannel().queue((privateChannel) ->
+                    privateChannel.sendMessage(message).queue());
         } catch (Exception e) {
             reportHome(e);
         }
     }
 
-    public static void sendPrivateEmbed(IUser user, String message) {
+    public static void sendPrivateEmbed(User user, String message) {
         try {
-            IChannel pmChannel = user.getClient().getOrCreatePMChannel(user);
+             user.openPrivateChannel().queue((privateChannel) ->
+                    privateChannel.sendMessage(message).queue());
             simpleEmbed(pmChannel, message);
         } catch (Exception e) {
             reportHome(e);
@@ -347,29 +333,27 @@ public class Util {
 
     public static EmbedBuilder getEmbed() {
         return new EmbedBuilder()
-                .withAuthorIcon(getAvatar(TVBot.getInstance().getClient().getOurUser()))
-                .withAuthorUrl("https://github.com/cbackas/")
-                .withAuthorName(getTag(TVBot.getInstance().getClient().getOurUser()));
+                .setAuthor(client.getJDA().getSelfUser().getName(), "https://github.com/cbackas/", client.getJDA().getSelfUser().getEffectiveAvatarUrl());
     }
 
-    public static String getTag(IUser user) {
+    public static String getTag(User user) {
         return user.getName() + '#' + user.getDiscriminator();
     }
 
-    public static EmbedBuilder getEmbed(IUser user) {
-        return getEmbed().withFooterIcon(getAvatar(user))
-                .withFooterText("Requested by @" + getTag(user));
+    public static EmbedBuilder getEmbed(User user) {
+        return getEmbed()
+                .setFooter("Requested by @" + getTag(user), getAvatar(user));
     }
 
-    public static String getAvatar(IUser user) {
-        return user.getAvatar() != null ? user.getAvatarURL() : getDefaultAvatar(user);
+    public static String getAvatar(User user) {
+        return user.getAvatarId() != null ? user.getAvatarUrl() : getDefaultAvatar(user);
     }
 
-    public static String getDefaultAvatar(IUser user) {
+    public static String getDefaultAvatar(User user) {
         int discrim = Integer.parseInt(user.getDiscriminator());
         discrim %= defaults.length;
         return "https://discordapp.com/assets/" + defaults[discrim] + ".png";
-    }*/
+    }
 
     //END EMBED BUILDER STUFF
 
@@ -386,13 +370,13 @@ public class Util {
         return toInt(System.currentTimeMillis() / 1000);
     }
 
-    /*public static IUser getUserFromMentionArg(String arg) {
+    public static Member getUserFromMentionArg(String arg) {
         Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
         if (matcher.matches()) {
-            return TVBot.getInstance().getClient().getUserByID(Long.parseLong(matcher.group(1)));
+            return TVBot.getGuild().getMemberById(Long.parseLong(matcher.group(1)));
         }
         return null;
-    }*/
+    }
 
     /**
      * Changes the time to a 12 hour format
@@ -411,16 +395,14 @@ public class Util {
     /**
      * returns the string content of a rule, given the message ID of where it's found
      */
-    /*public static String getRule(Long ruleID) {
+    public static String getRule(Long ruleID) {
         try {
-            String rule = TVBot.getInstance().getClient().getChannelByID(263184364811059200l).getMessageByID(ruleID).getContent();
-
-            return rule;
+            return TVBot.getClient().getJDA().getTextChannelById(263184364811059200L).getMessageById(ruleID).toString();
         } catch (Exception e) {
             reportHome(e);
         }
         return null;
-    }*/
+    }
 
     /**
      * returns a count of mentions
@@ -444,38 +426,37 @@ public class Util {
     /**
      * Sets the lounge's security level
      */
-   /* public static void setSecurity(VerificationLevel level) {
+    public static void setSecurity() {
         try {
-            IGuild lounge = TVBot.getClient().getGuildByID(TVBot.HOMESERVER_GLD_ID);
-            lounge.changeVerificationLevel(level);
+            Guild lounge = TVBot.getHomeGuild();
+            lounge.getVerificationLevel();
         } catch (Exception e) {
             Util.reportHome(e);
         }
     }
 
-    *//**
+    /**
      * Returns an embed object for a simple botpm
-     *//*
-    public static EmbedObject buildBotPMEmbed(IMessage message, int type) {
+     */
+    public static MessageEmbed buildBotPMEmbed(Message message, int type) {
         try {
-            IUser author = message.getAuthor();
+            User author = message.getAuthor();
 
             EmbedBuilder bld = new EmbedBuilder()
-                    .withAuthorName(author.getName() + '#' + author.getDiscriminator())
-                    .withAuthorIcon(author.getAvatarURL())
-                    .withDesc(message.getContent())
-                    .withTimestamp(System.currentTimeMillis());
+                    .setAuthor(author.getName() + '#' + author.getDiscriminator(), null, author.getEffectiveAvatarUrl())
+                    .setDescription(message.getContentRaw())
+                    .setTimestamp(Instant.now());
 
-            for (IMessage.Attachment a : message.getAttachments()) {
-                bld.withImage(a.getUrl());
+            for (Message.Attachment a : message.getAttachments()) {
+                bld.setImage(a.getUrl());
             }
 
             if (type == 1) {
-                bld.withFooterText(author.getStringID())
-                        .withColor(getBotColor());
+                bld.setFooter(author.getId(), null)
+                        .setColor(getBotColor());
             } else if (type == 2) {
-                bld.withFooterText("in #" + message.getChannel().getName())
-                        .withColor(Color.orange);
+                bld.setFooter("in #" + message.getChannel().getName(), null)
+                        .setColor(Color.orange);
             }
 
             return bld.build();
@@ -483,5 +464,5 @@ public class Util {
             reportHome(message, e);
             return null;
         }
-    }*/
+    }
 }
