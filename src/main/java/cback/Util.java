@@ -316,7 +316,7 @@ public class Util {
         try {
              user.openPrivateChannel().queue((privateChannel) ->
                     privateChannel.sendMessage(message).queue());
-            simpleEmbed(pmChannel, message);
+            //simpleEmbed(pmChannel, message);
         } catch (Exception e) {
             reportHome(e);
         }

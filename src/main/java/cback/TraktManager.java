@@ -159,5 +159,4 @@ public class TraktManager {
         }
         return null;
     }
-
 }

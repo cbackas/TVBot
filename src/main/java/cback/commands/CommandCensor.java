@@ -3,82 +3,67 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
-import java.util.Arrays;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
+
 import java.util.List;
 
-public class CommandCensor implements Command {
-    @Override
-    public String getName() {
-        return "censor";
+public class CommandCensor extends Command {
+
+    private TVBot bot;
+
+    public CommandCensor(TVBot bot) {
+        this.bot = bot;
+        this.name = "censor";
+        this.arguments = "censor add|remove|list [word]";
+        this.help = "Adds or removes a word to be censored from the server";
+        this.requiredRole = TVRoles.ADMIN.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
-
-    @Override
-    public String getSyntax() {
-        return "censor add|remove|list [word]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "adds or removes a word to be censored from the server";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+    protected void execute(CommandEvent commandEvent) {
         EmbedBuilder bld = new EmbedBuilder();
-        List<String> bannedWords = bot.getConfigManager().getConfigArray("bannedWords");
+        List<String> bannedWords = bot.getConfigManager().getConfigArray("bannedwords");
 
-        if (args.length >= 2) {
-            if (args[0].equalsIgnoreCase("add")) {
-                String word = content.split(" ", 3)[2];
-                if (bannedWords.contains(word)) {
-                    bld.withDesc(word + " is already a banned word!");
+        if(commandEvent.getArgs().length() >= 2) {
+            if(commandEvent.getArgs().equalsIgnoreCase("add")) {
+                String word = commandEvent.getMessage().getContentRaw().split(" ", 3)[2];
+                if(bannedWords.contains(word)) {
+                    bld.setDescription(word + " is already a banned word!");
                 } else {
                     bannedWords.add(word);
                     bot.getConfigManager().setConfigValue("bannedWords", bannedWords);
 
-                    bld.withDesc(word + " has been added to the list of banned words.");
+                    bld.setDescription(word + " has been added to the list of banned words.");
                 }
-            } else if (args[0].equalsIgnoreCase("remove")) {
-                String word = content.split(" ", 3)[2];
-                if (bannedWords.contains(word)) {
+            } else if(commandEvent.getArgs().equalsIgnoreCase("remove")) {
+                String word = commandEvent.getMessage().getContentRaw().split(" ", 3)[2];
+                if(bannedWords.contains(word)) {
                     bannedWords.remove(word);
                     bot.getConfigManager().setConfigValue("bannedWords", bannedWords);
 
-                    bld.withDesc(word + " has been removed from the list of banned words.");
+                    bld.setDescription(word + " has been removed from the list of banned words.");
                 } else {
-                    bld.withDesc(word + " is not a censored word... Remove failed.");
+                    bld.setDescription(word + " is not a censored word... Removed failed.");
                 }
             } else {
-                bld.appendField(getSyntax(), getDescription(), false);
+                bld.addField(getArguments(), getHelp(), false);
             }
-        } else if (args.length == 1 && args[0].equals("list")) {
+        } else if(commandEvent.getArgs().length() == 1 && commandEvent.getArgs().equals("list")) {
             String sexyList = "";
 
-            for (String s : bannedWords) {
+            for(String s : bannedWords) {
                 sexyList = sexyList + s + "\n";
             }
 
-            bld.withDesc(sexyList);
+            bld.setDescription(sexyList);
         } else {
-            bld.appendField(getSyntax(), getDescription(), false);
+            bld.addField(getArguments(), getHelp(), false);
         }
 
-        Util.sendEmbed(message.getChannel(), bld.withColor(Util.getBotColor()).build());
+        Util.sendEmbed(commandEvent.getChannel(), bld.setColor(Util.getBotColor()).build());
     }
 }

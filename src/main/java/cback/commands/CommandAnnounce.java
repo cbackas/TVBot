@@ -3,49 +3,30 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
-public class CommandAnnounce implements Command {
-    @Override
-    public String getName() {
-        return "announce";
+public class CommandAnnounce extends Command {
+
+    private TVBot bot;
+
+    public CommandAnnounce(TVBot bot) {
+        this.bot = bot;
+        this.name = "announce";
+        this.help = "Sends a message in the announcement channel and the general channel";
+        this.arguments = "announce [message]";
+        this.requiredRole = TVRoles.ADMIN.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
-
-    @Override
-    public String getSyntax() {
-        return "announce [message]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Sends a message in the announcement channel and the general channel";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length >= 1) {
-            String announcement = content.split(" ", 2)[1];
+    protected void execute(CommandEvent commandEvent) {
+        if(arguments.length() >= 1) {
+            String announcement = commandEvent.getMessage().getContentRaw().split(" ", 2)[1];
             Util.sendAnnouncement(announcement);
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
-        Util.deleteMessage(message);
+        Util.deleteMessage(commandEvent.getMessage());
     }
-
 }

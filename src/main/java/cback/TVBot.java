@@ -58,7 +58,7 @@ public class TVBot {
 
     private long startTime;
 
-    public CommandClientBuilder commandBuilder = new CommandClientBuilder();
+    CommandClientBuilder commandBuilder = new CommandClientBuilder();
 
     public static void main(String[] args) throws LoginException, InterruptedException {
         new TVBot();
@@ -222,7 +222,7 @@ public class TVBot {
         return traktManager;
     }*/
 
-    public static ConfigManager getConfigManager() {
+    public ConfigManager getConfigManager() {
         return configManager;
     }
 
