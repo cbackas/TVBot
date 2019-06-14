@@ -3,53 +3,36 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
-public class CommandCommandAdd implements Command {
-    @Override
-    public String getName() {
-        return "addcommand";
+public class CommandCommandAdd extends Command {
+
+    private TVBot bot;
+
+    public CommandCommandAdd(TVBot bot) {
+        this.bot = bot;
+        this.name = "addcommand";
+        this.arguments = "addcommand commandname \"custom response\"";
+        this.help = "Creates a simple custom command";
+        this.requiredRole = TVRoles.ADMIN.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
-
-    @Override
-    public String getSyntax() {
-        return "addcommand commandname \"custom response\"";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Creates a simple custom command";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
         String commandName = args[0];
-        String commandResponse = content.split(" ", 3)[2];
+        String commandResponse = commandEvent.getMessage().getContentRaw().split(" ", 3)[2];
 
-        if (commandName != null && commandResponse != null && bot.getCommandManager().getCommandValue(commandName) == null && !TVBot.getInstance().registeredCommands.contains(commandName)) {
+        if(commandName != null && commandResponse != null && bot.getCommandManager().getCommandValue(commandName) == null && !TVBot.registeredCommands.contains(commandName)) {
             bot.getCommandManager().setConfigValue(commandName, commandResponse);
 
-            Util.simpleEmbed(message.getChannel(), "Custom command added: ``" + commandName + "``");
+            Util.simpleEmbed(commandEvent.getChannel(), "Custom command added: ``" + commandName + "``");
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
-
-        Util.deleteMessage(message);
+        Util.deleteMessage(commandEvent.getMessage());
     }
 }

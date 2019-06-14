@@ -1,50 +1,38 @@
 package cback.commands;
 
+import cback.Channels;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
-public class CommandLog implements Command {
-    @Override
-    public String getName() {
-        return "addlog";
+
+public class CommandLog extends Command {
+
+    private TVBot bot;
+
+    public CommandLog(TVBot bot) {
+        this.bot = bot;
+        this.name = "addlog";
+        this.aliases = new String[]{"log"};
+        this.arguments = "addlog [message]";
+        this.help = "Submits a serverlog with some info attached";
+        this.requiredRole = TVRoles.STAFF.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("log");
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return "addlog [message]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Submits a serverlog with some info attached";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.STAFF.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length >= 1) {
-            String finalText = message.getFormattedContent().split(" ", 2)[1];
-            Util.sendLog(message, finalText);
-            Util.simpleEmbed(message.getChannel(), "Log added. " + guild.getChannelByID(TVBot.SERVERLOG_CH_ID).mention());
-            Util.deleteMessage(message);
+        if(args.length >= 1) {
+            String finalText = commandEvent.getMessage().getContentDisplay().split(" ", 2)[1];
+            Util.sendLog(commandEvent.getMessage(), finalText);
+            Util.simpleEmbed(commandEvent.getChannel(), "Log added. " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention());
+            Util.deleteMessage(commandEvent.getMessage());
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
-
 }

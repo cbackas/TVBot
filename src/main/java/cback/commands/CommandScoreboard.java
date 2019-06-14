@@ -3,46 +3,34 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import cback.database.xp.UserXP;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+
+import net.dv8tion.jda.core.entities.Member;
+
 import java.util.Iterator;
 import java.util.List;
 
-public class CommandScoreboard implements Command {
-    @Override
-    public String getName() {
-        return "scoreboard";
+public class CommandScoreboard extends Command {
+
+    private TVBot bot;
+
+    public CommandScoreboard(TVBot bot) {
+        this.bot = bot;
+        this.name = "scoreboard";
+        this.aliases = new String[]{"leaderboard", "topxp", "top"};
+        this.arguments = "scoreboard [#]";
+        this.help = "Shows a list of people with the most xp!";
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("leaderboard", "topxp", "top");
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return "scoreboard [#]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Shows a list of people with the most xp!";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
         int defaultCount = 5;
-        if (args.length == 1 && Integer.parseInt(args[0]) > 5) {
-            if (Integer.parseInt(args[0]) <= 30) {
+        if(args.length == 1 && Integer.parseInt(args[0]) > 5) {
+            if(Integer.parseInt(args[0]) <= 30) {
                 defaultCount = Integer.parseInt(args[0]);
             } else {
                 defaultCount = 30;
@@ -50,32 +38,28 @@ public class CommandScoreboard implements Command {
         }
 
         List<UserXP> topUsers = bot.getDatabaseManager().getXP().getTopUsers(defaultCount);
-        if (topUsers != null && topUsers.size() > 0) {
+        if(topUsers != null && topUsers.size() > 0) {
             StringBuilder scoreboard = new StringBuilder();
             scoreboard.append("**Most Active Lounge Users**\n");
 
             Iterator<UserXP> userXPIterator = topUsers.iterator();
             int index = 0;
-            while (userXPIterator.hasNext()) {
+            while(userXPIterator.hasNext()) {
                 UserXP userXP = userXPIterator.next();
-                IUser user = userXP.getUser();
-                if (user == null) continue;
+                Member user = userXP.getUser();
+                if(user == null) continue;
                 index++;
 
                 scoreboard.append("**").append(index).append(".** ");
-                scoreboard.append(user.getName());
+                scoreboard.append(user.getEffectiveName());
                 scoreboard.append(" (").append(userXP.getMessageCount()).append(")");
 
-                if (userXPIterator.hasNext()) scoreboard.append("\n");
+                if(userXPIterator.hasNext()) scoreboard.append("\n");
             }
-
-            Util.simpleEmbed(message.getChannel(), scoreboard.toString());
-
+            Util.simpleEmbed(commandEvent.getChannel(), scoreboard.toString());
         } else {
-            Util.simpleEmbed(message.getChannel(), "No scoreboard data found.");
+            Util.simpleEmbed(commandEvent.getChannel(), "No scoreboard data found.");
         }
-
-        Util.deleteMessage(message);
+        Util.deleteMessage(commandEvent.getMessage());
     }
-
 }

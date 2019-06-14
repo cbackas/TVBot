@@ -1,50 +1,36 @@
 package cback.commands;
 
+import cback.Channels;
 import cback.TVBot;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class CommandSuggest implements Command {
-    @Override
-    public String getName() {
-        return "suggest";
+public class CommandSuggest extends Command {
+
+    private TVBot bot;
+
+    public CommandSuggest(TVBot bot) {
+        this.bot = bot;
+        this.name = "suggest";
+        this.aliases = new String[]{"idea", "suggestion"};
+        this.arguments = "suggest [suggestion text]";
+        this.help = "Pins your message, making it an official suggestion.";
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("idea","suggestion");
-    }
-
-    @Override
-    public String getSyntax() {
-        return "suggest [suggestion text]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Pins your message, making it an official suggestion.";
-    }
-    @Override
-    public List<Long> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<Long> suggestable = Arrays.asList(TVBot.SUGGEST_CH_ID);
-        if (suggestable.contains(message.getChannel().getLongID())) {
+    protected void execute(CommandEvent commandEvent) {
+        List<Long> suggestable = Collections.singletonList(Channels.SUGGEST_CH_ID.getChannel().getIdLong());
+        if(suggestable.contains(commandEvent.getChannel().getIdLong())) {
             try {
-                message.getChannel().pin(message);
-            } catch (Exception e) {
-                Util.reportHome(message, e);
+                commandEvent.getTextChannel().pinMessageById(commandEvent.getMessage().getIdLong()).queue();
+            } catch(Exception ex) {
+                Util.reportHome(commandEvent.getMessage(), ex);
             }
         }
     }
-
 }

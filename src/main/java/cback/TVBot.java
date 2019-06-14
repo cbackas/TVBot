@@ -3,6 +3,7 @@ package cback;
 //import cback.commands.*;
 import cback.database.DatabaseManager;
 
+import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import net.dv8tion.jda.client.JDAClient;
 
@@ -10,14 +11,15 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
-
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import org.nibor.autolink.LinkExtractor;
+import org.nibor.autolink.LinkSpan;
 
 import javax.security.auth.login.LoginException;
 
-        import java.util.ArrayList;
+import java.time.Instant;
+import java.util.ArrayList;
         import java.util.List;
 import java.util.Optional;
         import java.util.regex.Pattern;
@@ -29,7 +31,7 @@ public class TVBot {
     private static JDA jda;
 
     private DatabaseManager databaseManager;
-    //private TraktManager traktManager;
+    private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
@@ -37,7 +39,7 @@ public class TVBot {
 
     public static ArrayList<Long> messageCache = new ArrayList<>();
 
-    //public static List<Command> registeredCommands = new ArrayList<>();
+    public static List<Command> registeredCommands = new ArrayList<>();
     static public String prefix = "!";
     public List<String> prefixes = new ArrayList<>();
     private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
@@ -82,7 +84,7 @@ public class TVBot {
         connect();
 
         databaseManager = new DatabaseManager(this);
-        //traktManager = new TraktManager(this);
+        traktManager = new TraktManager(this);
         //scheduler = new Scheduler(this);
     }
 
@@ -218,9 +220,9 @@ public class TVBot {
         return databaseManager;
     }
 
-    /*public TraktManager getTraktManager() {
+    public TraktManager getTraktManager() {
         return traktManager;
-    }*/
+    }
 
     public ConfigManager getConfigManager() {
         return configManager;
@@ -308,19 +310,20 @@ public class TVBot {
 
     /**
      * Censor links
-     *//*
-    public void censorLinks(IMessage message) {
+     */
+    public void censorLinks(Message message, GuildMessageReceivedEvent event) {
         if (toggleState("censorlinks")) {
-            IUser author = message.getAuthor();
+            User author = message.getAuthor();
+            List<Role> role = event.getMember().getRoles();
 
-            boolean homeGuild = message.getGuild().getLongID() == TVBot.HOMESERVER_GLD_ID;
-            boolean staffChannel = message.getChannel().getCategory().getLongID() == 355901035597922304L || message.getChannel().getCategory().getLongID() == 355910636464504832L;
+            boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
+            boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
             boolean staffMember = author.hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
 
             boolean trusted = false;
-            List<IRole> userRoles = author.getRolesForGuild(message.getGuild());
-            int tPos = client.getRoleByID(TVRoles.TRUSTED.id).getPosition();
-            for (IRole r : userRoles) {
+            List<Role> userRoles = author.getJDA().getRoles();
+            int tPos = client.getJDA().getRoleById(TVRoles.TRUSTED.id).getPosition();
+            for (Role r : userRoles) {
                 int rPos = r.getPosition();
                 if (rPos >= tPos) {
                     trusted = true;
@@ -329,14 +332,14 @@ public class TVBot {
             }
 
             if (homeGuild && !staffChannel && !staffMember && !trusted) {
-                String content = message.getFormattedContent().toLowerCase();
+                String content = message.getContentDisplay().toLowerCase();
                 List<String> linksFound = new ArrayList<>();
 
                 LinkExtractor linkExtractor = LinkExtractor.builder().build();
                 Iterable<LinkSpan> links = linkExtractor.extractLinks(content);
                 if (links.iterator().hasNext()) {
                     for (LinkSpan l : links) {
-                        String f = message.getContent().substring(l.getBeginIndex(), l.getEndIndex());
+                        String f = message.getContentRaw().substring(l.getBeginIndex(), l.getEndIndex());
                         linksFound.add(f);
                     }
                 }
@@ -349,20 +352,19 @@ public class TVBot {
 
                     EmbedBuilder bld = new EmbedBuilder();
                     bld
-                            .withAuthorIcon(author.getAvatarURL())
-                            .withAuthorName(Util.getTag(author))
-                            .withDesc(message.getFormattedContent())
-                            .withTimestamp(System.currentTimeMillis())
-                            .withFooterText("Auto-deleted from #" + message.getChannel().getName());
+                            .setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl())
+                            .setDescription(message.getContentDisplay())
+                            .setTimestamp(Instant.now())
+                            .setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
 
-                    Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(Util.getBotColor()).build());
+                    Util.sendEmbed(message.getGuild().getChannelByID(Channels.MESSAGELOG_CH_ID), bld.setColor(Util.getBotColor()).build());
                     Util.sendPrivateEmbed(author, "Your message has been automatically removed for containing a link. If this is an error, message a staff member.\n\n" + collectedLinks);
                     messageCache.add(message.getLongID());
                     Util.deleteMessage(message);
                 }
             }
         }
-    }*/
+    }
 
     /**
      * Setting toggles

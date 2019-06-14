@@ -224,7 +224,7 @@ public class Util {
     /**
      * Send simple fast embeds
      */
-    public static void simpleEmbed(MessageChannel channel, String message) {
+    public static Message simpleEmbed(MessageChannel channel, String message) {
         try {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
         } catch(Exception ex) {
@@ -232,6 +232,7 @@ public class Util {
             ex.printStackTrace();
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
         }
+        return null;
     }
 
     public static void simpleEmbed(MessageChannel channel, String message, Color color) {
@@ -303,7 +304,7 @@ public class Util {
     /**
      * Sending private messages
      */
-    public static void sendPrivateMessage(User user, String message) {
+    public static void sendPrivateMessage(Member user, String message) {
         try {
             user.openPrivateChannel().queue((privateChannel) ->
                     privateChannel.sendMessage(message).queue());

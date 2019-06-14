@@ -3,78 +3,61 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.requests.RequestFuture;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class CommandChannelDelete implements Command {
-    @Override
-    public String getName() {
-        return "deletechannel";
+public class CommandChannelDelete extends Command {
+
+    private TVBot bot;
+
+    public CommandChannelDelete(TVBot bot) {
+        this.bot = bot;
+        this.name = "deletechannel";
+        this.aliases = new String[]{"removechannel"};
+        this.arguments = "deletechannel #channel";
+        this.help = "Deletes any and all mentioned channels you provide";
+        this.requiredRole = TVRoles.ADMIN.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("removechannel");
-    }
-
-    @Override
-    public String getSyntax() {
-        return "deletechannel #channel";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Deletes any and all mentioned channels you provide";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<IChannel> channels = message.getChannelMentions();
-        IChannel here = message.getChannel();
-        if (channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
+    protected void execute(CommandEvent commandEvent) {
+        List<TextChannel> channels = commandEvent.getMessage().getMentionedChannels();
+        TextChannel here = commandEvent.getTextChannel();
+        if(channels.size() == 0 && commandEvent.getArgs().equalsIgnoreCase("here")) {
             channels.add(here);
         }
 
-        if (channels.size() >= 1) {
+        if(channels.size() >= 1) {
             String mentions = deleteChannels(channels);
 
             String text = "Deleted " + channels.size() + " channel(s).\n" + mentions;
-            if (!channels.contains(here)) {
-                Util.simpleEmbed(message.getChannel(), text);
+            if(!channels.contains(here)) {
+                Util.simpleEmbed(commandEvent.getChannel(), text);
             }
 
-            Util.sendLog(message, text);
+            Util.sendLog(commandEvent.getMessage(), text);
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
 
-    private String deleteChannels(List<IChannel> channels) {
+    private String deleteChannels(List<TextChannel> channels) {
         StringBuilder mentions = new StringBuilder();
-        for (IChannel c : channels) {
+        for (TextChannel c : channels) {
             try {
-                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    c.delete();
-                    return true;
-                });
-                future.get();
+                c.delete().queue();
                 mentions.append("#" + c.getName() + " ");
-            } catch (MissingPermissionsException | DiscordException e) {
+            } catch (Exception e) {
                 Util.reportHome(e);
             }
         }
         return mentions.toString();
     }
-
 }

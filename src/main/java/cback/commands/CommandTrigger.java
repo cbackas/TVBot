@@ -1,49 +1,28 @@
 package cback.commands;
 
-import cback.Scheduler;
 import cback.TVBot;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
 import java.util.List;
 
-public class CommandTrigger implements Command {
-    @Override
-    public String getName() {
-        return "trigger";
+public class CommandTrigger extends Command {
+
+    private TVBot bot;
+
+    public CommandTrigger(TVBot bot) {
+        this.bot = bot;
+        this.name = "trigger";
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
-
-    @Override
-    public String getSyntax() {
-        return null;
-    }
-
-    @Override
-    public String getDescription() {
-        return null;
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (author.getStringID().equals("73416411443113984")) {
+    protected void execute(CommandEvent commandEvent) {
+        if(commandEvent.getAuthor().getId().equals("73416411443113984")) {
             String text = String.valueOf(Util.getCurrentTime());
-            Util.sendMessage(message.getChannel(), text);
+            Util.sendMessage(commandEvent.getChannel(), text);
 
-            Util.deleteMessage(message);
+            Util.deleteMessage(commandEvent.getMessage());
         }
     }
-
 }

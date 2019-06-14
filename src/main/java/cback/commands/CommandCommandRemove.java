@@ -3,54 +3,34 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
-import java.util.Arrays;
-import java.util.List;
+public class CommandCommandRemove extends Command {
 
-public class CommandCommandRemove implements Command {
-    @Override
-    public String getName() {
-        return "removecommand";
+    private TVBot bot;
+
+    public CommandCommandRemove(TVBot bot) {
+        this.bot = bot;
+        this.name = "removecommand";
+        this.aliases = new String[]{"rcom"};
+        this.arguments = "removecommand [commandname]";
+        this.help = "Deletes a custom command form the official custom command database!";
+        this.requiredRole = TVRoles.ADMIN.name;
     }
-
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("rcom");
-    }
-
-    @Override
-    public String getSyntax() {
-        return "removecommand [commandname]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Deletes a custom command from the official custom command database!";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length == 1) {
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        if(args.length == 1) {
             String command = args[0];
 
-            if (bot.getCommandManager().getCommandValue(command) != null) {
+            if(bot.getCommandManager().getCommandValue(command) != null) {
                 bot.getCommandManager().removeConfigValue(command);
-
-                Util.simpleEmbed(message.getChannel(), "Custom command removed: ``" + command + "``");
+                Util.simpleEmbed(commandEvent.getChannel(), "Custom command removed: ``" + command + "``");
             }
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
-
-        Util.deleteMessage(message);
+        Util.deleteMessage(commandEvent.getMessage());
     }
 }

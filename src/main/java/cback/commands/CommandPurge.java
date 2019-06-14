@@ -3,62 +3,49 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageHistory;
+import net.dv8tion.jda.core.entities.Role;
 import org.apache.commons.lang3.StringUtils;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.MessageComparator;
-import sx.blah.discord.util.MessageHistory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommandPurge implements Command {
+public class CommandPurge extends Command {
 
-    @Override
-    public String getName() {
-        return "purge";
+    private TVBot bot;
+
+    public CommandPurge(TVBot bot) {
+        this.bot = bot;
+        this.name = "purge";
+        this.aliases = new String[]{"prune"};
+        this.arguments = "prune <#> @user";
+        this.help = "For mass deleting messages. It works sometimes I think?";
+        this.requiredRole = TVRoles.STAFF.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("prune");
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return "prune <#> @user";
-    }
-
-    @Override
-    public String getDescription() {
-        return "For mass deleting messages. It works sometimes I think?";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.STAFF.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<IRole> userRoles = author.getRolesForGuild(guild);
+        List<Role> userRoles = commandEvent.getAuthor().getJDA().getRoles();
         if (args.length >= 1) {
 
             String numberArg = args[0];
 
             int maxDeletions = 0;
-            IUser userToDelete;
+            Member userToDelete;
 
             if (StringUtils.isNumeric(numberArg)) {
                 try {
                     maxDeletions = Integer.parseInt(numberArg);
                     if (maxDeletions <= 0) {
-                        Util.deleteMessage(message);
-                        Util.simpleEmbed(message.getChannel(), "Invalid number \"" + numberArg + "\".");
+                        Util.deleteMessage(commandEvent.getMessage());
+                        Util.simpleEmbed(commandEvent.getChannel(), "Invalid number \"" + numberArg + "\".");
                         return;
                     }
                 } catch (NumberFormatException e) {
@@ -68,53 +55,52 @@ public class CommandPurge implements Command {
             if (args.length >= 2) { //user specified
                 userToDelete = Util.getUserFromMentionArg(args[1]);
                 if (userToDelete == null) {
-                    Util.deleteMessage(message);
-                    Util.simpleEmbed(message.getChannel(), "Invalid user \"" + args[1] + "\".");
+                    Util.deleteMessage(commandEvent.getMessage());
+                    Util.simpleEmbed(commandEvent.getChannel(), "Invalid user \"" + args[1] + "\".");
                     return;
                 }
             } else {
                 userToDelete = null;
-                if (!userRoles.contains(guild.getRoleByID(TVRoles.ADMIN.id))) {
+                if (!userRoles.contains(commandEvent.getGuild().getRoleById(TVRoles.ADMIN.id))) {
                     //Must be admin to purge all without entering user
-                    Util.deleteMessage(message);
-                    Util.simpleEmbed(message.getChannel(), "You must specify a user.");
+                    Util.deleteMessage(commandEvent.getMessage());
+                    Util.simpleEmbed(commandEvent.getChannel(), "You must specify a user.");
                     return;
                 }
             }
 
             //sort messages by date
-            MessageHistory messageHistory = message.getChannel().getMessageHistory();
+            MessageHistory messageHistory = commandEvent.getChannel().getHistory();
             messageHistory.sort(MessageComparator.REVERSED);
 
             if (userToDelete != null) { //this is a prune
 
-                List<IMessage> toDelete = messageHistory.stream()
-                        .filter(msg -> msg.getAuthor().equals(userToDelete) && !msg.equals(message))
+                List<Message> toDelete = messageHistory.stream()
+                        .filter(msg -> commandEvent.getAuthor().equals(userToDelete) && !msg.equals(message))
                         .limit(maxDeletions)
                         .collect(Collectors.toList());
 
-                Util.bulkDelete(message.getChannel(), toDelete);
-                Util.sendLog(message, userToDelete.getDisplayName(guild) + "'s messages have been pruned in " + message.getChannel().getName() + ".");
+                Util.bulkDelete(commandEvent.getTextChannel(), toDelete);
+                Util.sendLog(commandEvent.getMessage(), userToDelete.getEffectiveName() + "'s messages have been pruned in " + commandEvent.getChannel().getName() + ".");
 
             } else { //this is a purge
 
                 List<IMessage> toDelete = messageHistory.stream()
-                        .filter(msg -> !msg.equals(message))
+                        .filter(msg -> !msg.equals(commandEvent.getMessage()))
                         .limit(maxDeletions)
                         .collect(Collectors.toList());
 
-                Util.bulkDelete(message.getChannel(), toDelete);
-                Util.sendLog(message, numberArg + " messages have been purged in " + message.getChannel().getName() + ".");
+                Util.bulkDelete(commandEvent.getTextChannel(), toDelete);
+                Util.sendLog(commandEvent.getMessage(), numberArg + " messages have been purged in " + commandEvent.getChannel().getName() + ".");
 
             }
 
         } else {
-            Util.syntaxError(this, message);
-            Util.deleteMessage(message);
+            Util.syntaxError(this, commandEvent.getMessage());
+            Util.deleteMessage(commandEvent.getMessage());
             return;
         }
 
-        Util.deleteBufferedMessage(message);
+        Util.deleteBufferedMessage(commandEvent.getMessage());
     }
-
 }

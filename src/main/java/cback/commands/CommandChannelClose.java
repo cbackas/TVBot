@@ -3,40 +3,34 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Category;
+import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-public class CommandChannelClose implements Command {
-    @Override
-    public String getName() {
-        return "closechannel";
-    }
+public class CommandChannelClose extends Command {
 
-    @Override
-    public List<String> getAliases() {
-        return Arrays.asList("close");
-    }
+    private TVBot bot;
 
-    @Override
-    public String getSyntax() {
-        return "closechannel #channel";
+    public CommandChannelClose(TVBot bot) {
+        this.bot = bot;
+        this.name = "closechannel";
+        this.aliases = new String[]{"close"};
+        this.arguments = "closechannel #channel";
+        this.help = "Closes a TV show channel and makes it all secret. If you don't specify a channel, it will just close";
+        this.requiredRole = TVRoles.ADMIN.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
-
     @Override
-    public String getDescription() {
-        return "Closes a TV show channel and makes it all secret. If you don't specify a channel, it will just close";
-    }
+    protected void execute(CommandEvent commandEvent) {
 
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
     }
 
     @Override
@@ -57,21 +51,21 @@ public class CommandChannelClose implements Command {
         }
     }
 
-    private String closeChannels(IGuild guild, List<IChannel> channels) {
+    private String closeChannels(Guild guild, List<TextChannel> channels) {
         StringBuilder mentions = new StringBuilder();
-        for (IChannel c : channels) {
+        for (Channel c : channels) {
             if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
-            ICategory closed = guild.getCategoryByID(355904962200469504L);
+            net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(355904962200469504L);
             c.changeCategory(closed);
 
             try {
                 RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.READ_MESSAGES));
+                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.noneOf(Permission.class), EnumSet.of(Permission.MESSAGE_READ));
                     return true;
                 });
                 future.get();
-                mentions.append("#" + c.getName() + " ");
-            } catch (MissingPermissionsException | DiscordException e) {
+                mentions.append("#").append(c.getName()).append(" ");
+            } catch (Exception e) {
                 Util.reportHome(e);
             }
         }

@@ -1,74 +1,55 @@
 package cback.commands;
 
+import cback.Channels;
 import cback.TVBot;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.Member;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CommandReply implements Command {
-    @Override
-    public String getName() {
-        return "reply";
-    }
+public class CommandReply extends Command {
 
-    @Override
-    public List<String> getAliases() {
-        return null;
-    }
+    private TVBot bot;
 
-    @Override
-    public String getSyntax() {
-        return null;
+    public CommandReply(TVBot bot) {
+        this.bot = bot;
+        this.name = "reply";
     }
-
     @Override
-    public String getDescription() {
-        return null;
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        String stuff = message.getContent().split(" ", 2)[1];
+    protected void execute(CommandEvent commandEvent) {
+        String stuff = commandEvent.getMessage().getContentRaw().split(" ", 2)[1];
 
         Pattern pattern = Pattern.compile("^(\\d+) ?(.+)?");
         Matcher matcher = pattern.matcher(stuff);
-        if (matcher.find()) {
+        if(matcher.find()) {
             String user = matcher.group(1);
             String reply = matcher.group(2);
 
-            if (reply != null) {
-                IUser replyTo = client.getUserByID(Long.parseLong(user));
-
+            if(reply != null) {
+                Member replyTo = commandEvent.getGuild().getMemberById(Long.parseLong(user));
                 Util.sendPrivateMessage(replyTo, reply);
 
                 EmbedBuilder bld = new EmbedBuilder()
-                        .withAuthorName("To: " + replyTo.getName())
-                        .withAuthorIcon(author.getAvatarURL())
-                        .withDescription(reply)
-                        .withColor(Color.GREEN)
-                        .withFooterText("message sent")
-                        .withTimestamp(System.currentTimeMillis());
+                        .setAuthor("To: " + replyTo.getEffectiveName(), null, commandEvent.getAuthor().getEffectiveAvatarUrl())
+                        .setDescription(reply)
+                        .setColor(Color.GREEN)
+                        .setFooter("message sent", null)
+                        .setTimestamp(Instant.now());
 
-                Util.sendEmbed(client.getChannelByID(TVBot.BOTPM_CH_ID), bld.build());
-                Util.deleteMessage(message);
+                Util.sendEmbed(commandEvent.getJDA().getTextChannelById(Channels.BOTPM_CH_ID.getId()), bld.build());
+                Util.deleteMessage(commandEvent.getMessage());
             } else {
-                Util.syntaxError(this, message);
+                Util.syntaxError(this, commandEvent.getMessage());
             }
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
 }

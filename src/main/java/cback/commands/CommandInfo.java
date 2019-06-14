@@ -27,12 +27,12 @@ public class CommandInfo extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         int userCount = commandEvent.getGuild().getMembers().size();
-        int oldUserCount = Integer.valueOf(TVBot.getConfigManager().getConfigValue("userCount"));
+        int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int channelCount = commandEvent.getGuild().getChannels().size();
         int closedChannels = commandEvent.getGuild().getCategoryById(TVBot.CLOSED_CAT_ID).getChannels().size();
 
         int newCount = userCount - oldUserCount;
-        String leaveJoin = " (-" + TVBot.getConfigManager().getConfigValue("left") + " +" + TVBot.getConfigManager().getConfigValue("joined") + ")";
+        String leaveJoin = " (-" + bot.getConfigManager().getConfigValue("left") + " +" + bot.getConfigManager().getConfigValue("joined") + ")";
         String userChange = newCount + leaveJoin;
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
@@ -40,7 +40,6 @@ public class CommandInfo extends Command {
 
         EmbedBuilder embed = Util.getEmbed(commandEvent.getAuthor()).setThumbnail(Util.getAvatar(TVBot.getClient().getJDA().getSelfUser()));
         embed.setTitle(commandEvent.getGuild().getName());
-        //TO-DO Guild Creation Date
         embed.addField("Created: ", commandEvent.getGuild().getJDA().asBot().getApplicationInfo().complete().getCreationTime().format(formatter), true);
         embed.addField("Users: ", Integer.toString(userCount), true);
         embed.addField("New Users: ", userChange, true);

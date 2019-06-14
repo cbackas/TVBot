@@ -4,75 +4,60 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import cback.apiutil.GuildChannelEditRequest;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordClientImpl;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.RequestBuffer;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.entities.Category;
+import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.requests.Request;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class CommandSort implements Command {
+public class CommandSort extends Command {
 
-    @Override
-    public String getName() {
-        return "sort";
+    private TVBot bot;
+
+    public CommandSort(TVBot bot) {
+        this.bot = bot;
+        this.name = "sort";
+        this.arguments = "sort";
+        this.help = "Alphabetically sorts the channels";
+        this.requiredRole = TVRoles.ADMIN.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
+    protected void execute(CommandEvent commandEvent) {
+        Util.simpleEmbed(commandEvent.getChannel(), "Lets get sorting!");
 
-    @Override
-    public String getSyntax() {
-        return "sort";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Alphabetically sorts the channels";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        Util.simpleEmbed(message.getChannel(), "Lets get sorting!");
-
-        ICategory unsorted = guild.getCategoryByID(358043583355289600L);
+        net.dv8tion.jda.core.entities.Category unsorted = commandEvent.getGuild().getCategoryById(358043583355289600L);
         int count = unsorted.getChannels().size();
 
-        List<IChannel> permChannels = getPermChannels(guild);
+        List<Channel> permChannels = getPermChannels(commandEvent.getGuild());
 
         //sort non permanent channels
-        List<IChannel> showsChannelsSorted = guild.getChannels().stream()
+        List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
                 .filter(chan -> !permChannels.contains(chan))
                 .sorted(Comparator.comparing(chan -> getSortName(chan.getName())))
                 .collect(Collectors.toList());
 
+        net.dv8tion.jda.core.entities.Category af = commandEvent.getGuild().getCategoryById(TVBot.AF_CAT_ID);
+        net.dv8tion.jda.core.entities.Category gl = commandEvent.getGuild().getCategoryById(TVBot.GL_CAT_ID);
+        net.dv8tion.jda.core.entities.Category mr = commandEvent.getGuild().getCategoryById(TVBot.MR_CAT_ID);
+        net.dv8tion.jda.core.entities.Category sz = commandEvent.getGuild().getCategoryById(TVBot.SZ_CAT_ID);
 
-        ICategory af = guild.getCategoryByID(TVBot.AF_CAT_ID);
-        ICategory gl = guild.getCategoryByID(TVBot.GL_CAT_ID);
-        ICategory mr = guild.getCategoryByID(TVBot.MR_CAT_ID);
-        ICategory sz = guild.getCategoryByID(TVBot.SZ_CAT_ID);
         //put all the incorrectly sorted channels into their categories
-        for (IChannel c : guild.getChannels()) {
-            if (!permChannels.contains(c)) {
+        for(Channel c : commandEvent.getGuild().getChannels()) {
+            if(!permChannels.contains(c)) {
                 String channelName = getSortName(c.getName());
                 String alph = "abcdefghijklmnopqrstuvwxyz";
                 char firstLetter = channelName.toLowerCase().charAt(0);
                 int index = alph.indexOf(firstLetter) + 1;
-                if (index <= 6) {
+                if(index <= 6) {
                     changeCategory(c, af);
                 } else if (index > 6 && index <= 12) {
                     changeCategory(c, gl);
@@ -85,9 +70,9 @@ public class CommandSort implements Command {
         }
 
         //apply new positions
-        batchSortChannels(guild, showsChannelsSorted);
+        batchSortChannels(commandEvent.getGuild(), showChannelsSorted);
 
-        Util.simpleEmbed(message.getChannel(), "All done! " + count + " channel(s) sorted.");
+        Util.simpleEmbed(commandEvent.getChannel(), "All done!" + count + " channe;(s) sorted.");
     }
 
     public static String getSortName(String channelName) {
@@ -99,27 +84,23 @@ public class CommandSort implements Command {
         return newName;
     }
 
-    private void changeCategory(IChannel channel, ICategory category) {
-        if (channel.getCategory() == null || !channel.getCategory().equals(category)) {
-            RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                channel.changeCategory(category);
-                return true;
-            });
-            future.get(); //wait for request to complete
+    private void changeCategory(Channel channel, net.dv8tion.jda.core.entities.Category category) {
+        if (channel.getParent() == null || !channel.getParent().equals(category)) {
+                channel.getManager().setParent(category).queue();
         }
     }
 
-    public void batchSortChannels(IGuild guild, List<IChannel> sortedChannels) {
+    public void batchSortChannels(Guild guild, List<Channel> sortedChannels) {
         try {
 
             GuildChannelEditRequest[] edits = new GuildChannelEditRequest[sortedChannels.size()];
             for (int i = 0; i < sortedChannels.size(); i++) {
-                IChannel channel = sortedChannels.get(i);
-                GuildChannelEditRequest edit = new GuildChannelEditRequest.Builder().id(channel.getLongID()).position(i).build();
+                Channel channel = sortedChannels.get(i);
+                GuildChannelEditRequest edit = new GuildChannelEditRequest.Builder().id(channel.getIdLong()).position(i).build();
                 edits[i] = edit;
             }
 
-            ((DiscordClientImpl) guild.getClient())
+            ((Request) guild.getJDA())
                     .REQUESTS
                     .PATCH
                     .makeRequest
@@ -133,22 +114,22 @@ public class CommandSort implements Command {
         }
     }
 
-    public static List<IChannel> getPermChannels(IGuild guild) {
-        ICategory staff = guild.getCategoryByID(TVBot.STAFF_CAT_ID);
-        ICategory info = guild.getCategoryByID(TVBot.INFO_CAT_ID);
-        ICategory disc = guild.getCategoryByID(TVBot.DISCUSSION_CAT_ID);
-        ICategory fun = guild.getCategoryByID(TVBot.FUN_CAT_ID);
-        ICategory closed = guild.getCategoryByID(TVBot.CLOSED_CAT_ID);
+    public static List<Channel> getPermChannels(Guild guild) {
+        net.dv8tion.jda.core.entities.Category staff = guild.getCategoryById(TVBot.STAFF_CAT_ID);
+        net.dv8tion.jda.core.entities.Category info = guild.getCategoryById(TVBot.INFO_CAT_ID);
+        net.dv8tion.jda.core.entities.Category disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
+        net.dv8tion.jda.core.entities.Category fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
+        net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(TVBot.CLOSED_CAT_ID);
 
-        List<ICategory> permCategories = new ArrayList<>();
+        List<net.dv8tion.jda.core.entities.Category> permCategories = new ArrayList<>();
         permCategories.add(staff);
         permCategories.add(info);
         permCategories.add(disc);
         permCategories.add(fun);
         permCategories.add(closed);
 
-        List<IChannel> permChannels = new ArrayList<>();
-        for (ICategory cat : permCategories) {
+        List<Channel> permChannels = new ArrayList<>();
+        for (net.dv8tion.jda.core.entities.Category cat : permCategories) {
             permChannels.addAll(cat.getChannels());
         }
 

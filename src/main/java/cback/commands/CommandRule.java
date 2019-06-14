@@ -4,62 +4,45 @@ import cback.Rules;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+
+import net.dv8tion.jda.core.EmbedBuilder;
 
 
-public class CommandRule implements Command {
-    @Override
-    public String getName() {
-        return "rule";
+public class CommandRule extends Command {
+
+    private TVBot bot;
+
+    public CommandRule(TVBot bot) {
+        this.bot = bot;
+        this.name = "rule";
+        this.arguments = "rule #";
+        this.help = "Returns the rule requested";
+        this.requiredRole = TVRoles.STAFF.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return "rule #";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Returns the rule requested";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.STAFF.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length == 1) {
+        if(args.length == 1) {
             String ruleNumber = args[0];
             Rules rule = Rules.getRule(ruleNumber);
 
-            if (rule != null) {
+            if(rule != null) {
                 EmbedBuilder ruleEmbed = new EmbedBuilder();
 
                 ruleEmbed
-                        .withAuthorName(rule.title)
-                        .withDescription(rule.fullRule);
-
-                Util.sendEmbed(message.getChannel(), ruleEmbed.withColor(Util.getBotColor()).build());
+                        .setAuthor(rule.title, null)
+                        .setDescription(rule.fullRule);
+                Util.sendEmbed(commandEvent.getChannel(), ruleEmbed.setColor(Util.getBotColor()).build());
             } else {
-                Util.simpleEmbed(message.getChannel(), "Rule not found");
+                Util.simpleEmbed(commandEvent.getChannel(), "Rule not found");
             }
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
-
 }

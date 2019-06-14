@@ -3,75 +3,59 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
 
-import java.util.Arrays;
-import java.util.EnumSet;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
+
 import java.util.List;
 
-public class CommandChannelOpen implements Command {
-    @Override
-    public String getName() {
-        return "openchannel";
+public class CommandChannelOpen extends Command {
+
+    private TVBot bot;
+
+    public CommandChannelOpen(TVBot bot) {
+        this.bot = bot;
+        this.name = "openchannel";
+        this.aliases = new String[]{"open"};
+        this.arguments = "openchannel #channel";
+        this.help = "Moves desired channels from the closed category and opens them up to the world.";
+        this.requiredRole = TVRoles.ADMIN.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("open");
-    }
-
-    @Override
-    public String getSyntax() {
-        return "openchannel #channel";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Moves desired channels from the closed category and opens them up to the world.";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<IChannel> channels = message.getChannelMentions();
-        if (channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
-            channels.add(message.getChannel());
+    protected void execute(CommandEvent commandEvent) {
+        List<TextChannel> channels = commandEvent.getMessage().getMentionedChannels();
+        if(channels.size() == 0 && commandEvent.getArgs().equalsIgnoreCase("here")) {
+            channels.add(commandEvent.getTextChannel());
         }
 
-        if (channels.size() >= 1) {
-            String mentions = openChannels(guild, channels);
+        if(channels.size() >= 1) {
+            String mentions = openChannels(commandEvent.getGuild(), channels);
 
             String text = "Opened " + channels.size() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(message.getChannel(), text);
-            Util.sendLog(message, text);
+            Util.simpleEmbed(commandEvent.getChannel(), text);
+            Util.sendLog(commandEvent.getMessage(), text);
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
 
-    private String openChannels(IGuild guild, List<IChannel> channels) {
+    private String openChannels(Guild guild, List<TextChannel> channels) {
         StringBuilder mentions = new StringBuilder();
-        for (IChannel c : channels) {
-            if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
-            ICategory unsorted = guild.getCategoryByID(358043583355289600L);
-            c.changeCategory(unsorted);
+        for (TextChannel c : channels) {
+            if (CommandSort.getPermChannels(guild).contains(c.getParent())) continue;
+            net.dv8tion.jda.core.entities.Category unsorted = guild.getCategoryById(358043583355289600L);
+            c.getManager().setParent(unsorted).queue();
 
             try {
-                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.of(Permissions.READ_MESSAGES), EnumSet.noneOf(Permissions.class));
-                    return true;
-                });
-                future.get();
+                c.putPermissionOverride(guild.getPublicRole()).setDeny(Permission.MESSAGE_READ).queue();
                 mentions.append("#" + c.getName() + " ");
-            } catch (MissingPermissionsException | DiscordException e) {
+            } catch (Exception e) {
                 Util.reportHome(e);
             }
         }

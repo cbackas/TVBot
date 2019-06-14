@@ -2,65 +2,47 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.entities.Role;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CommandRoleGet implements Command {
-    @Override
-    public String getName() {
-        return "roleid";
+public class CommandRoleGet extends Command {
+
+    private TVBot bot;
+
+    public CommandRoleGet(TVBot bot) {
+        this.bot = bot;
+        this.name = "roleid";
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return null;
-    }
+        if(args.length == 1) {
+            String roleName = String.join(" ", args);
+            List<Role> serverRole = commandEvent.getGuild().getRoles();
 
-    @Override
-    public String getDescription() {
-        return null;
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length == 1) {
-            String roleName = Arrays.stream(args).collect(Collectors.joining(" "));
-            List<IRole> serverRoles = guild.getRoles();
-
-            if (roleName.equalsIgnoreCase("listall")) {
-                String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getStringID()).reduce("", (a, b) -> a + b + "\n");
-
-                Util.sendBufferedMessage(message.getChannel(), roleList);
+            if(roleName.equalsIgnoreCase("listall")) {
+                String roleList = serverRole.stream().map(role -> role.getName() + " " + role.getId()).reduce("", (a, b) -> a + b + "\n");
+                Util.sendBufferedMessage(commandEvent.getTextChannel(), roleList);
             } else {
-                Optional<IRole> foundRole = serverRoles.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
-
-                if (foundRole.isPresent()) {
-                    Util.simpleEmbed(message.getChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getStringID());
+                Optional<Role> foundRole = serverRole.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
+                if(foundRole.isPresent()) {
+                    Util.simpleEmbed(commandEvent.getChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getId());
                 } else {
-                    Util.simpleEmbed(message.getChannel(), "Role not found");
+                    Util.simpleEmbed(commandEvent.getChannel(), "Role not found");
                 }
             }
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
-        Util.deleteMessage(message);
+        Util.deleteMessage(commandEvent.getMessage());
     }
 }

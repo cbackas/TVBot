@@ -3,77 +3,60 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.requests.restaction.ChannelAction;
+
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class CommandChannelAdd implements Command {
-    @Override
-    public String getName() {
-        return "addchannel";
+public class CommandChannelAdd extends Command {
+
+    private TVBot bot;
+
+    public CommandChannelAdd(TVBot bot) {
+        this.bot = bot;
+        this.name = "addchannel";
+        this.aliases = new String[]{"newchannel, createchannel"};
+        this.arguments = "addchannel [channelname]";
+        this.help = "Creates channels with the provided names. Tip: use \"|\" between multiple names to create multiple channels";
+        this.requiredRole = TVRoles.ADMIN.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return Arrays.asList("newchannel", "createchannel");
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String channelName = Stream.of(commandEvent.getArgs()).collect(Collectors.joining("-"));
+        String channelNames[] = channelName.split("-\\|");
 
-    @Override
-    public String getSyntax() {
-        return "addchannel [channelname]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Creates channels with the provided names. Tip: use \"|\" between multiple names to create multiple channels";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id, TVRoles.NETWORKMOD.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        String channelName = Arrays.stream(args).collect(Collectors.joining("-"));
-        String channelNames[] = channelName.split("-\\|-");
-        if (channelNames.length >= 1) {
-            IMessage response = Util.simpleEmbed(message.getChannel(), "Attempting to create " + channelNames.length + " channels ...");
-
-            String mentions = createChannels(guild, channelNames);
+        if(channelNames.length >= 1) {
+            Message response = Util.simpleEmbed(commandEvent.getChannel(), "Attempting to create" + channelNames.length + " channels ...");
+            String mentions = createChannels(commandEvent.getGuild(), channelNames);
 
             Util.deleteMessage(response);
 
             String text = "Created " + getCounter() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(message.getChannel(), text);
-            Util.sendLog(message, text);
+            Util.simpleEmbed(commandEvent.getChannel(), text);
+            Util.sendLog(commandEvent.getMessage(), text);
 
-            Util.deleteMessage(message);
+            Util.deleteMessage(commandEvent.getMessage());
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
 
-    private String createChannels(IGuild guild, String[] names) {
+    private String createChannels(Guild guild, String[] names) {
         StringBuilder mentions = new StringBuilder();
-        ICategory unsorted = guild.getCategoryByID(TVBot.UNSORTED_CAT_ID);
+        net.dv8tion.jda.core.entities.Category unsorted = guild.getCategoryById(TVBot.UNSORTED_CAT_ID);
         resetCounter();
         for (String s : names) {
             try {
-                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    IChannel c = unsorted.createChannel(s);
-                    mentions.append("#" + c.getName() + " ");
-                    return true;
-                });
-                future.get();
+                    ChannelAction c = unsorted.createTextChannel(s);
+                    mentions.append("#").append(unsorted.getName()).append(" ");
                 incCounter();
-            } catch (MissingPermissionsException | DiscordException e) {
+            } catch (Exception e) {
                 Util.reportHome(e);
             }
         }
