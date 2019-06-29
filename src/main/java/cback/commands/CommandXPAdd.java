@@ -4,61 +4,47 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import cback.database.xp.UserXP;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
 
-public class CommandXPAdd implements Command {
-    @Override
-    public String getName() {
-        return "addxp";
+import net.dv8tion.jda.core.entities.Member;
+
+
+public class CommandXPAdd extends Command {
+
+    private TVBot bot;
+
+    public CommandXPAdd(TVBot bot) {
+        this.bot = bot;
+        this.name = "addxp";
+        this.arguments = "addxp @user #";
+        this.help = "Adds a certain number of xp to the desired user.";
+        this.requiredRole = TVRoles.ADMIN.name;
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return "addxp @user #";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Adds a certain number of xp to the desired user.";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return Arrays.asList(TVRoles.ADMIN.id);
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        if (args.length >= 1) {
-            IUser mentioned = Util.getUserFromMentionArg(args[0]);
-            if (mentioned != null) {
-                UserXP xp = bot.getDatabaseManager().getXP().getUserXP(mentioned.getStringID());
-                if (xp != null) {
-
+        if(args.length >= 1) {
+            Member mentioned = Util.getUserFromMentionArg(args[0]);
+            if(mentioned != null) {
+                UserXP xp = bot.getDatabaseManager().getXP().getUserXP(mentioned.getUser().getId());
+                if(xp != null) {
                     int number = Integer.parseInt(args[1]);
 
-                    bot.getDatabaseManager().getXP().addXP(mentioned.getStringID(), number);
-                    Util.simpleEmbed(message.getChannel(), "Granted " + number + " xp to " + mentioned.getDisplayName(guild));
+                    bot.getDatabaseManager().getXP().addXP(mentioned.getUser().getId(), number);
+                    Util.simpleEmbed(commandEvent.getChannel(), "Granted " + number + " xp to " + mentioned.getEffectiveName());
                 } else {
-                    Util.simpleEmbed(message.getChannel(), "No xp data found for " + mentioned.getDisplayName(guild));
+                    Util.simpleEmbed(commandEvent.getChannel(), "No xp data found for " + mentioned.getEffectiveName());
                 }
             } else {
-                Util.simpleEmbed(message.getChannel(), "Invalid user \"" + args[0] + "\".");
+                Util.simpleEmbed(commandEvent.getChannel(), "Invalid user \"" + args[0] + "\".");
             }
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
-        Util.deleteMessage(message);
+        Util.deleteMessage(commandEvent.getMessage());
     }
 }

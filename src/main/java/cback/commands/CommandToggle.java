@@ -7,7 +7,6 @@ import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class CommandToggle extends Command {

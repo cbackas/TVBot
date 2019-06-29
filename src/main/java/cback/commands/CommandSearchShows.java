@@ -1,55 +1,41 @@
 package cback.commands;
 
+import cback.Channels;
 import cback.TVBot;
 import cback.Util;
+
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Status;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
+
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.Message;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public class CommandSearchShows implements Command {
-    @Override
-    public String getName() {
-        return "show";
+public class CommandSearchShows extends Command {
+
+    private TVBot bot;
+
+    public CommandSearchShows(TVBot bot) {
+        this.bot = bot;
+        this.name = "show";
+        this.arguments = "show [show name]";
+        this.help = "Searches trakt.tv for the provided show. Sometimes it works, sometimes it don't";
     }
 
     @Override
-    public List<String> getAliases() {
-        return null;
-    }
+    protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    @Override
-    public String getSyntax() {
-        return "show [show name]";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Searches trakt.tv for the provided show. Sometimes it works, sometimes it doesn't.";
-    }
-
-    @Override
-    public List<Long> getPermissions() {
-        return null;
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        String showName = Arrays.stream(args).collect(Collectors.joining(" "));
-
-        IMessage initialMessage = Util.simpleEmbed(message.getChannel(), "Searching <https://trakt.tv/> for " + showName + " ...");
+        String showName = String.join(" ", args);
+        Message initialMessage = Util.simpleEmbed(commandEvent.getChannel(), "Searching <https://trakt.tv/> for " + showName + " ...");
 
         Show showData = bot.getTraktManager().showSummaryFromName(showName);
-        if (showData != null) {
+        if(showData != null) {
             String title = showData.title + " (" + Integer.toString(showData.year) + ") ";
             String overview = showData.overview;
             String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
@@ -60,27 +46,27 @@ public class CommandSearchShows implements Command {
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";
 
             try {
-                overview = guild.getChannelByID(Long.parseLong(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID())).mention() + "\n" + overview;
-            } catch (Exception ignored) {
+                overview = commandEvent.getGuild().getTextChannelById(Long.parseLong(bot.getDatabaseManager().getTV().getShow(showData.ids.imdb).getChannelID())).getAsMention() + "\n" + overview;
+            } catch(Exception ignore) {
             }
 
-            EmbedBuilder embed = Util.getEmbed(message.getAuthor());
+            EmbedBuilder embed = Util.getEmbed(commandEvent.getAuthor());
 
-            embed.withTitle(title);
-            embed.withDescription(overview);
-            embed.appendField("References:", homepage, false);
-            embed.appendField("AIRS:", airs, true);
-            embed.appendField("RUNTIME:", runtime, true);
-            embed.appendField("PREMIERED:", premier, true);
-            embed.appendField("COUNTRY:", country.toUpperCase(), true);
-            embed.appendField("GENRES:", String.join(", ", showData.genres), true);
+            embed.setTitle(title);
+            embed.setDescription(overview);
+            embed.addField("References:", homepage, false);
+            embed.addField("AIRS:", airs, true);
+            embed.addField("RUNTIME:" , runtime, true);
+            embed.addField("PREMIERED:", premier, true);
+            embed.addField("COUNTRY:", country.toUpperCase(), true);
+            embed.addField("GENRES:", String.join(", ", showData.genres), true);
 
-            initialMessage.edit("Found it!", embed.withColor(Util.getBotColor()).build());
+            initialMessage.editMessage("Found it!");
+            embed.setColor(Util.getBotColor()).build();
         } else {
-            initialMessage.edit("Oops...", new EmbedBuilder().withDesc("Error: Show not found").withColor(Util.getBotColor()).build());
-            Util.simpleEmbed(client.getChannelByID(TVBot.ERRORLOG_CH_ID), "Couldn't find show " + showName + " in " + guild.getName() + "/" + message.getChannel().getName());
+            initialMessage.editMessage("Oops...");
+            new EmbedBuilder().setDescription("Error: Show not found").setColor(Util.getBotColor()).build();
+            Util.simpleEmbed(commandEvent.getGuild().getTextChannelById(Channels.ERRORLOG_CH_ID.getId()), "Couldn't find show " + showName + " in " + commandEvent.getGuild().getName() + "/" + commandEvent.getChannel().getName());
         }
     }
-
 }
-

@@ -3,16 +3,15 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
+
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+
 import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Category;
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 
-import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 
 public class CommandChannelClose extends Command {
@@ -30,40 +29,33 @@ public class CommandChannelClose extends Command {
     }
     @Override
     protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-    }
-
-    @Override
-    public void execute(IMessage message, String content, String[] args, IUser author, IGuild guild, List<Long> roleIDs, boolean isPrivate, IDiscordClient client, TVBot bot) {
-        List<IChannel> channels = message.getChannelMentions();
-        if (channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
-            channels.add(message.getChannel());
+        List<TextChannel> channels = commandEvent.getMessage().getMentionedChannels();
+        if(channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
+            channels.add(commandEvent.getTextChannel());
         }
 
-        if (channels.size() >= 1) {
-            String mentions = closeChannels(guild, channels);
+        if(channels.size() >= 1) {
+            String mentions = closeChannels(commandEvent.getGuild(), channels);
 
             String text = "Closed " + channels.size() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(message.getChannel(), text);
-            Util.sendLog(message, text);
+            Util.simpleEmbed(commandEvent.getChannel(), text);
+            Util.sendLog(commandEvent.getMessage(), text);
         } else {
-            Util.syntaxError(this, message);
+            Util.syntaxError(this, commandEvent.getMessage());
         }
     }
 
     private String closeChannels(Guild guild, List<TextChannel> channels) {
         StringBuilder mentions = new StringBuilder();
         for (Channel c : channels) {
-            if (CommandSort.getPermChannels(guild).contains(c.getCategory())) continue;
+            if (CommandSort.getPermChannels(guild).contains(c.getParent())) continue;
             net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(355904962200469504L);
-            c.changeCategory(closed);
+            c.getManager().setParent(closed).queue();
 
             try {
-                RequestBuffer.RequestFuture<Boolean> future = RequestBuffer.request(() -> {
-                    c.overrideRolePermissions(guild.getEveryoneRole(), EnumSet.noneOf(Permission.class), EnumSet.of(Permission.MESSAGE_READ));
-                    return true;
-                });
-                future.get();
+                c.createPermissionOverride(guild.getPublicRole()).setDeny(Permission.MESSAGE_READ).queue();
                 mentions.append("#").append(c.getName()).append(" ");
             } catch (Exception e) {
                 Util.reportHome(e);

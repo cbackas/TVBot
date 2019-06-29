@@ -3,10 +3,10 @@ package cback.commands;
 import cback.Channels;
 import cback.TVBot;
 import cback.Util;
+
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

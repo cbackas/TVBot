@@ -3,17 +3,17 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
+
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.Role;
+
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommandPurge extends Command {
 
@@ -71,26 +71,16 @@ public class CommandPurge extends Command {
 
             //sort messages by date
             MessageHistory messageHistory = commandEvent.getChannel().getHistory();
-            messageHistory.sort(MessageComparator.REVERSED);
+            messageHistory.getRetrievedHistory();
 
             if (userToDelete != null) { //this is a prune
 
-                List<Message> toDelete = messageHistory.stream()
-                        .filter(msg -> commandEvent.getAuthor().equals(userToDelete) && !msg.equals(message))
-                        .limit(maxDeletions)
-                        .collect(Collectors.toList());
-
-                Util.bulkDelete(commandEvent.getTextChannel(), toDelete);
+                commandEvent.getChannel().getHistoryBefore(commandEvent.getMessage(), maxDeletions).queue((history) -> commandEvent.getChannel().purgeMessages(history.getRetrievedHistory()));
                 Util.sendLog(commandEvent.getMessage(), userToDelete.getEffectiveName() + "'s messages have been pruned in " + commandEvent.getChannel().getName() + ".");
 
             } else { //this is a purge
 
-                List<IMessage> toDelete = messageHistory.stream()
-                        .filter(msg -> !msg.equals(commandEvent.getMessage()))
-                        .limit(maxDeletions)
-                        .collect(Collectors.toList());
-
-                Util.bulkDelete(commandEvent.getTextChannel(), toDelete);
+                commandEvent.getChannel().getHistoryBefore(commandEvent.getMessage(), numberArg.length()).queue((history) -> commandEvent.getChannel().purgeMessages(history.getRetrievedHistory()));
                 Util.sendLog(commandEvent.getMessage(), numberArg + " messages have been purged in " + commandEvent.getChannel().getName() + ".");
 
             }

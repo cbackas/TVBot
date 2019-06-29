@@ -304,7 +304,7 @@ public class Util {
     /**
      * Sending private messages
      */
-    public static void sendPrivateMessage(Member user, String message) {
+    public static void sendPrivateMessage(User user, String message) {
         try {
             user.openPrivateChannel().queue((privateChannel) ->
                     privateChannel.sendMessage(message).queue());

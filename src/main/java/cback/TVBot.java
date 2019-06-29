@@ -5,14 +5,15 @@ import cback.database.DatabaseManager;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import net.dv8tion.jda.client.JDAClient;
 
+import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
 
@@ -20,9 +21,9 @@ import javax.security.auth.login.LoginException;
 
 import java.time.Instant;
 import java.util.ArrayList;
-        import java.util.List;
+import java.util.List;
 import java.util.Optional;
-        import java.util.regex.Pattern;
+import java.util.regex.Pattern;
 
 public class TVBot {
 
@@ -224,7 +225,7 @@ public class TVBot {
         return traktManager;
     }
 
-    public ConfigManager getConfigManager() {
+    public static ConfigManager getConfigManager() {
         return configManager;
     }
 
@@ -261,14 +262,17 @@ public class TVBot {
     /**
      * Checks for dirty words :o
      */
-    /*public void censorMessages(Message message) {
+    public void censorMessages(Message message) {
         if (toggleState("censorwords")) {
-            boolean homeGuild = message.getGuild().getLongID() == TVBot.HOMESERVER_GLD_ID;
-            boolean staffChannel = message.getChannel().getCategory().getLongID() == 355901035597922304L || message.getChannel().getCategory().getLongID() == 355910636464504832L;
-            boolean staffMember = message.getAuthor().hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
+            User author = message.getAuthor();
+
+            boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
+            boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
+            boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
+
             if (homeGuild && !staffChannel && !staffMember) {
-                List<String> bannedWords = TVBot.getInstance().getConfigManager().getConfigArray("bannedWords");
-                String content = message.getFormattedContent().toLowerCase();
+                List<String> bannedWords = getConfigManager().getConfigArray("bannedWords");
+                String content = message.getContentDisplay().toLowerCase();
 
                 String word = "";
                 Boolean tripped = false;
@@ -281,17 +285,14 @@ public class TVBot {
                 }
                 if (tripped) {
 
-                    IUser author = message.getAuthor();
-
                     EmbedBuilder bld = new EmbedBuilder();
                     bld
-                            .withAuthorIcon(author.getAvatarURL())
-                            .withAuthorName(Util.getTag(author))
-                            .withDesc(message.getFormattedContent())
-                            .withTimestamp(System.currentTimeMillis())
-                            .withFooterText("Auto-deleted from #" + message.getChannel().getName());
+                            .setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl())
+                            .setDescription(message.getContentDisplay())
+                            .setTimestamp(Instant.now())
+                            .setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
 
-                    Util.sendEmbed(message.getGuild().getChannelByID(MESSAGELOG_CH_ID), bld.withColor(Util.getBotColor()).build());
+                    Util.sendEmbed(message.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId()), bld.setColor(Util.getBotColor()).build());
 
                     StringBuilder sBld = new StringBuilder().append("Your message has been automatically removed for containing a banned word. If this is an error, message a staff member.");
                     if (!word.isEmpty()) {
@@ -301,12 +302,12 @@ public class TVBot {
                     }
                     Util.sendPrivateEmbed(author, sBld.toString());
 
-                    messageCache.add(message.getLongID());
+                    messageCache.add(message.getIdLong());
                     Util.deleteMessage(message);
                 }
             }
         }
-    }*/
+    }
 
     /**
      * Censor links
@@ -314,11 +315,11 @@ public class TVBot {
     public void censorLinks(Message message, GuildMessageReceivedEvent event) {
         if (toggleState("censorlinks")) {
             User author = message.getAuthor();
-            List<Role> role = event.getMember().getRoles();
 
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
             boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
-            boolean staffMember = author.hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
+            boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
+
 
             boolean trusted = false;
             List<Role> userRoles = author.getJDA().getRoles();
@@ -357,9 +358,9 @@ public class TVBot {
                             .setTimestamp(Instant.now())
                             .setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
 
-                    Util.sendEmbed(message.getGuild().getChannelByID(Channels.MESSAGELOG_CH_ID), bld.setColor(Util.getBotColor()).build());
+                    Util.sendEmbed(message.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId()), bld.setColor(Util.getBotColor()).build());
                     Util.sendPrivateEmbed(author, "Your message has been automatically removed for containing a link. If this is an error, message a staff member.\n\n" + collectedLinks);
-                    messageCache.add(message.getLongID());
+                    messageCache.add(message.getIdLong());
                     Util.deleteMessage(message);
                 }
             }

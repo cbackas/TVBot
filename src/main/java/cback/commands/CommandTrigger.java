@@ -2,10 +2,10 @@ package cback.commands;
 
 import cback.TVBot;
 import cback.Util;
+
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
-import java.util.List;
 
 public class CommandTrigger extends Command {
 
