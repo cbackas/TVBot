@@ -10,7 +10,6 @@ import net.dv8tion.jda.core.entities.Member;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +33,7 @@ public class CommandReply extends Command {
 
             if(reply != null) {
                 Member replyTo = commandEvent.getGuild().getMemberById(Long.parseLong(user));
-                Util.sendPrivateMessage(replyTo, reply);
+                Util.sendPrivateMessage(replyTo.getUser(), reply);
 
                 EmbedBuilder bld = new EmbedBuilder()
                         .setAuthor("To: " + replyTo.getEffectiveName(), null, commandEvent.getAuthor().getEffectiveAvatarUrl())

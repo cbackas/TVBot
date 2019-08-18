@@ -1,6 +1,7 @@
 package cback;
 
 //import cback.commands.*;
+import cback.commands.CommandInfo;
 import cback.database.DatabaseManager;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -32,7 +33,7 @@ public class TVBot {
     private static JDA jda;
 
     private DatabaseManager databaseManager;
-    private TraktManager traktManager;
+    //private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
@@ -85,7 +86,7 @@ public class TVBot {
         connect();
 
         databaseManager = new DatabaseManager(this);
-        traktManager = new TraktManager(this);
+        //traktManager = new TraktManager(this);
         //scheduler = new Scheduler(this);
     }
 
@@ -94,7 +95,7 @@ public class TVBot {
         //Configuration.LOAD_EXTERNAL_MODULES = false;
 
         Optional<String> token = configManager.getTokenValue("botToken");
-        if (!token.isPresent()) {
+        if (token.isEmpty()) {
             System.out.println("-------------------------------------");
             System.out.println("Insert your bot's token in the config.");
             System.out.println("Exiting......");
@@ -104,9 +105,10 @@ public class TVBot {
         }
 
         commandBuilder.setOwnerId("73463573900173312");
-        commandBuilder.setPrefix(prefix);
+        commandBuilder.setPrefix("!");
         commandBuilder.setAlternativePrefix(prefixes.toString());
         commandBuilder.setGame(Game.watching("all of your messages. Type " + prefix + "help"));
+        commandBuilder.addCommand(new CommandInfo());
 
         startTime = System.currentTimeMillis();
 
@@ -115,7 +117,7 @@ public class TVBot {
                 .setToken(token.get())
                 .addEventListener(commandBuilder.build());
         jda = builder.build();
-        Util.sendMessage(Channels.TEST_CH_ID.getChannel(), "omg");
+        //Util.sendMessage(Channels.TEST_CH_ID.getChannel(), "omg");
     }
 
     /*
@@ -221,9 +223,9 @@ public class TVBot {
         return databaseManager;
     }
 
-    public TraktManager getTraktManager() {
+    /*public TraktManager getTraktManager() {
         return traktManager;
-    }
+    }*/
 
     public static ConfigManager getConfigManager() {
         return configManager;
@@ -248,7 +250,7 @@ public class TVBot {
     }
 
     public static Guild getGuild() {
-        return jda.getGuildById("247394948331077632");
+        return jda.getGuildById("247394948331077632"); // CHANGE THIS
     }
 
     public String getUptime() {

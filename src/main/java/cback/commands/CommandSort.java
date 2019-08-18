@@ -4,12 +4,12 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import cback.apiutil.GuildChannelEditRequest;
+
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Category;
+
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.requests.Request;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -94,20 +94,23 @@ public class CommandSort extends Command {
         try {
 
             GuildChannelEditRequest[] edits = new GuildChannelEditRequest[sortedChannels.size()];
+
+            guild.getController().modifyTextChannelPositions().queue();
+
             for (int i = 0; i < sortedChannels.size(); i++) {
                 Channel channel = sortedChannels.get(i);
                 GuildChannelEditRequest edit = new GuildChannelEditRequest.Builder().id(channel.getIdLong()).position(i).build();
                 edits[i] = edit;
             }
 
-            ((Request) guild.getJDA())
+            /*((Method) guild.getJDA())
                     .REQUESTS
                     .PATCH
                     .makeRequest
                             (
                                     DiscordEndpoints.GUILDS + guild.getStringID() + "/channels"
                                     , edits
-                            );
+                            );*/
 
         } catch (Exception e) {
             e.printStackTrace();

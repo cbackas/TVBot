@@ -3,10 +3,14 @@ package cback;
 //import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
-import net.dv8tion.jda.core.entities.Channel;
+
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
+
 import org.apache.commons.lang3.StringUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,8 +19,6 @@ import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Scheduler {
 
@@ -67,7 +69,7 @@ public class Scheduler {
             //delete old airings from database
             pruneDeletedAirings();
             //update database with new airings for next 3 days
-            bot.getTraktManager().updateAiringData();
+            //bot.getTraktManager().updateAiringData();
 
         }, 0, DAILY_INTERVAL, TimeUnit.SECONDS);
 
@@ -130,7 +132,7 @@ public class Scheduler {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
-                } else if (TVBot.getClient().getChannelByID(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
+                } else if (TVBot.getGuild().getTextChannelById(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
                     System.out.println("Tried to announce airing for show with no channel, deleting show and airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     bot.getDatabaseManager().getTV().deleteShow(show.getShowID());
@@ -145,8 +147,8 @@ public class Scheduler {
                 String network = "null";
                 if (show.getNetwork() == null || show.getNetwork().equalsIgnoreCase("null")) {
                     try {
-                        TraktManager tm = bot.getTraktManager();
-                        network = tm.showSummary(show.getShowID()).network;
+                        //TraktManager tm = bot.getTraktManager();
+                        //network = tm.showSummary(show.getShowID()).network;
                         show.setNetwork(network);
                         bot.getDatabaseManager().getTV().updateShowNetwork(show);
                     } catch (Exception e) {
@@ -157,11 +159,11 @@ public class Scheduler {
                 }
                 /////////////////////////////////////////////////////
 
-                Channel announceChannel = bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID);
-                IChannel globalChannel = bot.getClient().getChannelByID(TVBot.GENERAL_CH_ID);
-                IChannel showChannel = bot.getClient().getChannelByID(Long.parseLong(show.getChannelID()));
+                TextChannel announceChannel = TVBot.getGuild().getTextChannelById(Channels.NEWEPISODE_CH_ID.getId());
+                TextChannel globalChannel = TVBot.getGuild().getTextChannelById(Channels.GENERAL_CH_ID.getId());
+                TextChannel showChannel = TVBot.getGuild().getTextChannelById(Long.parseLong(show.getChannelID()));
 
-                String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.mention() + " for live episode discussion!";
+                String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
                 if (!network.equalsIgnoreCase("null") && (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon"))) {
                     //TODO we're actually gonna hold off on this for now.. some Netflix shows don't air weekly now
@@ -215,9 +217,10 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        Guild loungeGuild = bot.getClient().getGuildByID(192441520178200577L);
+        Guild loungeGuild = TVBot.getClient().getJDA().getGuildById(192441520178200577L);
+
         if (loungeGuild != null) {
-            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getUsers().size()));
+            TVBot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getMembers().size()));
         }
     }
 
@@ -225,8 +228,8 @@ public class Scheduler {
      * Reset daily user change
      */
     public void resetUserChange() {
-        bot.getConfigManager().setConfigValue("left", "0");
-        bot.getConfigManager().setConfigValue("joined", "0");
+        TVBot.getConfigManager().setConfigValue("left", "0");
+        TVBot.getConfigManager().setConfigValue("joined", "0");
     }
 
     /**
@@ -266,17 +269,17 @@ public class Scheduler {
         EmbedBuilder embed = new EmbedBuilder();
 
         embed
-                .withTitle(dayOfWeek + ", " + month + " " + day)
-                .withColor(Util.BOT_COLOR);
+                .setTitle(dayOfWeek + ", " + month + " " + day)
+                .setColor(Util.BOT_COLOR);
 
         if (count > 1) {
-            embed.withDesc("There are " + count + " episodes airing today! Stick around to see what they are.");
+            embed.setDescription("There are " + count + " episodes airing today! Stick around to see what they are.");
         } else if (count == 1) {
-            embed.withDesc("There is " + count + " episode airing today! Stick around to see what it is.");
+            embed.setDescription("There is " + count + " episode airing today! Stick around to see what it is.");
         } else {
-            embed.withDesc("There aren't any new episodes airing today. Maybe tomorrow will be interesting.");
+            embed.setDescription("There aren't any new episodes airing today. Maybe tomorrow will be interesting.");
         }
 
-        Util.sendEmbed(bot.getClient().getChannelByID(TVBot.NEWEPISODE_CH_ID), embed.build());
+        Util.sendEmbed(TVBot.getGuild().getTextChannelById(Channels.NEWEPISODE_CH_ID.getId()), embed.build());
     }
 }

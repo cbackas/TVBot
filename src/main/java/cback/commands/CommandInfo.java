@@ -14,10 +14,7 @@ import java.time.format.DateTimeFormatter;
 
 public class CommandInfo extends Command {
 
-    private TVBot bot;
-
-    public CommandInfo(TVBot bot) {
-        this.bot = bot;
+    public CommandInfo() {
         this.name = "info";
         this.aliases = new String[]{"serverinfo", "server", "stats", "about"};
         this.help = "Displays some statistics about the server and the bot";
@@ -27,12 +24,12 @@ public class CommandInfo extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         int userCount = commandEvent.getGuild().getMembers().size();
-        int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
+        int oldUserCount = Integer.valueOf(TVBot.getConfigManager().getConfigValue("userCount"));
         int channelCount = commandEvent.getGuild().getChannels().size();
         int closedChannels = commandEvent.getGuild().getCategoryById(TVBot.CLOSED_CAT_ID).getChannels().size();
 
         int newCount = userCount - oldUserCount;
-        String leaveJoin = " (-" + bot.getConfigManager().getConfigValue("left") + " +" + bot.getConfigManager().getConfigValue("joined") + ")";
+        String leaveJoin = " (-" + TVBot.getConfigManager().getConfigValue("left") + " +" + TVBot.getConfigManager().getConfigValue("joined") + ")";
         String userChange = newCount + leaveJoin;
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
