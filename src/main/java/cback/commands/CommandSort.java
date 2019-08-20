@@ -3,13 +3,11 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-import cback.apiutil.GuildChannelEditRequest;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,6 +19,7 @@ import java.util.stream.Collectors;
 public class CommandSort extends Command {
 
     private TVBot bot;
+    private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
 
     public CommandSort(TVBot bot) {
         this.bot = bot;
@@ -40,10 +39,7 @@ public class CommandSort extends Command {
         List<Channel> permChannels = getPermChannels(commandEvent.getGuild());
 
         //sort non permanent channels
-        List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
-                .filter(chan -> !permChannels.contains(chan))
-                .sorted(Comparator.comparing(chan -> getSortName(chan.getName())))
-                .collect(Collectors.toList());
+        List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream().filter(chan -> !permChannels.contains(chan)).sorted(Comparator.comparing(chan -> getSortName(chan.getName()))).collect(Collectors.toList());
 
         net.dv8tion.jda.core.entities.Category af = commandEvent.getGuild().getCategoryById(TVBot.AF_CAT_ID);
         net.dv8tion.jda.core.entities.Category gl = commandEvent.getGuild().getCategoryById(TVBot.GL_CAT_ID);
@@ -51,20 +47,19 @@ public class CommandSort extends Command {
         net.dv8tion.jda.core.entities.Category sz = commandEvent.getGuild().getCategoryById(TVBot.SZ_CAT_ID);
 
         //put all the incorrectly sorted channels into their categories
-        for(Channel c : commandEvent.getGuild().getChannels()) {
-            if(!permChannels.contains(c)) {
+        for (Channel c : commandEvent.getGuild().getChannels()) {
+            if (!permChannels.contains(c)) {
                 String channelName = getSortName(c.getName());
-                String alph = "abcdefghijklmnopqrstuvwxyz";
                 char firstLetter = channelName.toLowerCase().charAt(0);
-                int index = alph.indexOf(firstLetter) + 1;
-                if(index <= 6) {
-                    changeCategory(c, af);
+                int index = ALPHABET.indexOf(firstLetter) + 1;
+                if (index <= 6) {
+                    changeCategory(c, af); // A-F
                 } else if (index > 6 && index <= 12) {
-                    changeCategory(c, gl);
+                    changeCategory(c, gl); // G-L
                 } else if (index > 12 && index <= 18) {
-                    changeCategory(c, mr);
+                    changeCategory(c, mr); // M-R
                 } else if (index > 18 && index <= 26) {
-                    changeCategory(c, sz);
+                    changeCategory(c, sz); // S-Z
                 }
             }
         }
@@ -86,31 +81,37 @@ public class CommandSort extends Command {
 
     private void changeCategory(Channel channel, net.dv8tion.jda.core.entities.Category category) {
         if (channel.getParent() == null || !channel.getParent().equals(category)) {
-                channel.getManager().setParent(category).queue();
+            channel.getManager().setParent(category).queue();
         }
     }
 
     public void batchSortChannels(Guild guild, List<Channel> sortedChannels) {
         try {
 
-            GuildChannelEditRequest[] edits = new GuildChannelEditRequest[sortedChannels.size()];
+            //ChannelOrderAction instance to bulk sort channels
+            var channelOrderAction = guild.getController().modifyTextChannelPositions();
 
-            guild.getController().modifyTextChannelPositions().queue();
-
+            //iterate sorted channels and set their positions accordingly
             for (int i = 0; i < sortedChannels.size(); i++) {
-                Channel channel = sortedChannels.get(i);
-                GuildChannelEditRequest edit = new GuildChannelEditRequest.Builder().id(channel.getIdLong()).position(i).build();
-                edits[i] = edit;
+                //we can only sort TextChannel instances
+                if (sortedChannels.get(i) instanceof TextChannel) {
+                    var sortedChannel = (TextChannel) sortedChannels.get(i);
+                    //select the channel
+                    channelOrderAction.selectPosition(sortedChannel);
+                    //set its position to its position in the sorted array
+                    channelOrderAction.moveTo(i);
+                }
             }
 
-            /*((Method) guild.getJDA())
-                    .REQUESTS
-                    .PATCH
-                    .makeRequest
-                            (
-                                    DiscordEndpoints.GUILDS + guild.getStringID() + "/channels"
-                                    , edits
-                            );*/
+            //queue up the sort
+            channelOrderAction.queue(successReturn -> {
+                //TODO on success - send message?
+                System.out.println("Successfully sorted channels");
+            }, failureReturn -> {
+                //TODO on failure - send message?
+                System.out.println("Failed to sort channels");
+                failureReturn.printStackTrace();
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
