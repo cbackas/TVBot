@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.ToggleManager;
 import cback.Util;
 
@@ -18,6 +19,7 @@ public class CommandToggle extends Command {
         this.name = "toggle";
         this.aliases = new String[]{"switch"};
         this.arguments = "toggle [setting]";
+        this.requiredRole = TVRoles.ADMIN.name;
     }
 
     @Override

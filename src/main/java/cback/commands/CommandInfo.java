@@ -18,7 +18,6 @@ public class CommandInfo extends Command {
         this.name = "info";
         this.aliases = new String[]{"serverinfo", "server", "stats", "about"};
         this.help = "Displays some statistics about the server and the bot";
-        this.userPermissions = null;
     }
 
     @Override

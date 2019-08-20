@@ -19,6 +19,7 @@ public class CommandRoleGet extends Command {
     public CommandRoleGet(TVBot bot) {
         this.bot = bot;
         this.name = "roleid";
+        this.ownerCommand = true;
     }
 
     @Override

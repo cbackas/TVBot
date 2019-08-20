@@ -20,6 +20,7 @@ public class CommandReply extends Command {
     public CommandReply(TVBot bot) {
         this.bot = bot;
         this.name = "reply";
+        this.ownerCommand = true;
     }
     @Override
     protected void execute(CommandEvent commandEvent) {

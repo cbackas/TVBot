@@ -19,8 +19,7 @@ public class CommandShowRemove extends Command {
         this.name = "removeshow";
         this.arguments = "removeshow [imdbID]";
         this.help = "Removes a show from the database and disassociates it from any channels";
-        this.requiredRole = TVRoles.ADMIN.name;
-        this.requiredRole = TVRoles.HEADMOD.name;
+        this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override

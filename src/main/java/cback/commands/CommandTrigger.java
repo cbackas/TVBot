@@ -14,6 +14,7 @@ public class CommandTrigger extends Command {
     public CommandTrigger(TVBot bot) {
         this.bot = bot;
         this.name = "trigger";
+        this.ownerCommand = true;
     }
 
     @Override
