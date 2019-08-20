@@ -52,8 +52,7 @@ public class CommandSort extends Command {
         net.dv8tion.jda.core.entities.Category sz = commandEvent.getGuild().getCategoryById(TVBot.SZ_CAT_ID);
 
         //put all the incorrectly sorted channels into their categories
-        for (Channel c : commandEvent.getGuild().getChannels()) {
-            if (!permChannels.contains(c)) {
+        for (Channel c : showChannelsSorted) {
                 String channelName = getSortName(c.getName());
                 char firstLetter = channelName.toLowerCase().charAt(0);
                 int index = ALPHABET.indexOf(firstLetter) + 1;
@@ -66,7 +65,6 @@ public class CommandSort extends Command {
                 } else if (index > 18 && index <= 26) {
                     changeCategory(c, sz); // S-Z
                 }
-            }
         }
 
         //apply new positions
