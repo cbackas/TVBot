@@ -1,29 +1,29 @@
 package cback;
 
 //import cback.commands.*;
-import cback.commands.CommandInfo;
-import cback.database.DatabaseManager;
 
+import cback.database.DatabaseManager;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-
 import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
+import org.reflections.Reflections;
 
 import javax.security.auth.login.LoginException;
-
+import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TVBot {
@@ -33,21 +33,22 @@ public class TVBot {
     private static JDA jda;
 
     private DatabaseManager databaseManager;
-    //private TraktManager traktManager;
+    private TraktManager traktManager;
     private static ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
-    //private Scheduler scheduler;
+    private Scheduler scheduler;
 
     public static ArrayList<Long> messageCache = new ArrayList<>();
 
     public static List<Command> registeredCommands = new ArrayList<>();
+    CommandClientBuilder commandBuilder = new CommandClientBuilder();
     static public String prefix = "!";
     public List<String> prefixes = new ArrayList<>();
-    private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^!([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^" + prefix + "([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
-    public static final long CBACK_USR_ID = 73416411443113984L;
-    public static final long HOMESERVER_GLD_ID = 192441520178200577L;
+    public static final long CBACK_USR_ID = 73416411443113984l;
+    public static final long HOMESERVER_GLD_ID = 192441520178200577l;
 
     public static final long UNSORTED_CAT_ID = 358043583355289600L;
     public static final long STAFF_CAT_ID = 355901035597922304L;
@@ -62,14 +63,11 @@ public class TVBot {
 
     private long startTime;
 
-    CommandClientBuilder commandBuilder = new CommandClientBuilder();
-
     public static void main(String[] args) throws LoginException, InterruptedException {
         new TVBot();
     }
 
     public TVBot() throws LoginException, InterruptedException {
-
         instance = this;
 
         //instantiate config manager first as connect() relies on tokens
@@ -86,8 +84,8 @@ public class TVBot {
         connect();
 
         databaseManager = new DatabaseManager(this);
-        //traktManager = new TraktManager(this);
-        //scheduler = new Scheduler(this);
+        traktManager = new TraktManager(this);
+        scheduler = new Scheduler(this);
     }
 
     private void connect() throws LoginException, InterruptedException {
@@ -104,161 +102,96 @@ public class TVBot {
             return;
         }
 
-        commandBuilder.setOwnerId("73463573900173312");
-        commandBuilder.setPrefix("!");
-        commandBuilder.setAlternativePrefix(prefixes.toString());
+        commandBuilder.setOwnerId(String.valueOf(CBACK_USR_ID));
+        commandBuilder.setPrefix(TVBot.getPrefix());
         commandBuilder.setGame(Game.watching("all of your messages. Type " + prefix + "help"));
-        commandBuilder.addCommand(new CommandInfo());
+
+        new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
+            try {
+                Command command = commandImpl.getDeclaredConstructor().newInstance();
+                Optional<Command> existingCommand =
+                        registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();
+                if (!existingCommand.isPresent()) {
+                    registeredCommands.add(command);
+                    System.out.println("Registered command: " + command.getName());
+                } else {
+                    System.out.println("Attempted to register two commands with the same name: " + existingCommand.get().getName());
+                    System.out.println("Existing: " + existingCommand.get().getClass().getName());
+                    System.out.println("Attempted: " + commandImpl.getName());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        registeredCommands.forEach(c -> commandBuilder.addCommand(c));
 
         startTime = System.currentTimeMillis();
 
-
-        JDABuilder builder = new JDABuilder(AccountType.BOT)
-                .setToken(token.get())
-                .addEventListener(commandBuilder.build());
+        JDABuilder builder =
+                new JDABuilder(AccountType.BOT).setToken(token.get()).addEventListener(commandBuilder.build());
         jda = builder.build();
-        //Util.sendMessage(Channels.TEST_CH_ID.getChannel(), "omg");
     }
 
     /*
      * Message Central Choo Choo
      */
-    /*@EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         if (event.getMessage().getAuthor().isBot()) return; //ignore bot messages
-        IMessage message = event.getMessage();
-        IGuild guild = null;
-        boolean isPrivate = message.getChannel().isPrivate();
+        Message message = event.getMessage();
+        Guild guild = null;
+        boolean isPrivate = message.isFromType(ChannelType.PRIVATE);
         if (!isPrivate) guild = message.getGuild();
-        String text = message.getContent();
+        String text = message.getContentRaw();
         Matcher matcher = COMMAND_PATTERN.matcher(text);
         if (matcher.matches()) {
             String baseCommand = matcher.group(1).toLowerCase();
-            Optional<Command> command = registeredCommands.stream()
-                    .filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && com.getAliases().contains(baseCommand)))
-                    .findAny();
-            if (command.isPresent()) {
-                Command cCommand = command.get();
-
-                if (cCommand.getDescription() != null || message.getAuthor().getLongID() == CBACK_USR_ID) {
-                    System.out.println("@" + message.getAuthor().getName() + " issued \"" + text + "\" in " +
-                            (isPrivate ? ("@" + message.getAuthor().getName()) : guild.getName()));
-
-                    String args = matcher.group(2);
-                    String[] argsArr = args.isEmpty() ? new String[0] : args.split(" ");
-
-                    List<Long> roleIDs = message.getAuthor().getRolesForGuild(guild).stream().map(role -> role.getLongID()).collect(Collectors.toList());
-
-                    IUser author = message.getAuthor();
-                    String content = message.getContent();
-
-                    *//**
-                     * If user has permission to run the command: Command executes and botlogs
-                     *//*
-                    if (cCommand.getPermissions() == null || !Collections.disjoint(roleIDs, cCommand.getPermissions())) {
-                        Util.botLog(message);
-                        cCommand.execute(message, content, argsArr, author, guild, roleIDs, isPrivate, client, this);
-                    } else {
-                        Util.simpleEmbed(message.getChannel(), "You don't have permission to perform this command.");
-                    }
-                }
-            } else if (commandManager.getCommandValue(baseCommand) != null) {
-
+            Optional<Command> command =
+                    registeredCommands.stream().filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && List.of(com.getAliases()).contains(baseCommand))).findAny();
+            if (!command.isPresent() && commandManager.getCommandValue(baseCommand) != null) {
                 String response = commandManager.getCommandValue(baseCommand);
 
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("``" + message.getAuthor().getDisplayName(guild) + "``\n").append(response);
+                stringBuilder.append("``" + message.getAuthor().getName() + "``\n").append(response);
 
                 Util.sendMessage(message.getChannel(), stringBuilder.toString());
 
                 Util.deleteMessage(message);
             }
-            *//**
-             * Forwards the random stuff people PM to the bot - to me
-             *//*
-        } else if (message.getChannel().isPrivate()) {
-            EmbedObject embed = Util.buildBotPMEmbed(message, 1);
-            Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), embed);
+            //Forwards the random stuff people PM to the bot - to me
+        } else if (isPrivate) {
+            MessageEmbed embed = Util.buildBotPMEmbed(message, 1);
+            Util.sendEmbed(Channels.BOTPM_CH_ID.getChannel(), embed);
         } else {
             //below here are just regular chat messages
             censorMessages(message);
             censorLinks(message);
 
-            *//**
-             * Deletes messages/bans users for using too many @ mentions
-             *//*
-            boolean staffMember = message.getAuthor().hasRole(message.getClient().getRoleByID(TVRoles.STAFF.id));
+            //Deletes messages/bans users for using too many @mentions
+            boolean staffMember = message.getAuthor().getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
             if (!staffMember && toggleState("limitmentions")) {
-                if (Util.mentionsCount(message.getContent()) > 10) {
+                int mentionCount = message.getMentions(Message.MentionType.USER, Message.MentionType.EVERYONE, Message.MentionType.HERE).size();
+                if (mentionCount > 10) {
                     try {
-                        guild.banUser(message.getAuthor(), "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/", 0);
-                        Util.simpleEmbed(message.getChannel(), message.getAuthor().getDisplayName(guild) + " was just banned for mentioning more than 10 users.");
+                        guild.getController().ban(message.getAuthor(), 0, "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/");
+                        Util.simpleEmbed(message.getChannel(), message.getAuthor().getName() + " was just banned for mentioning more than 10 users.");
                         Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                     } catch (Exception e) {
                         Util.reportHome(e);
                     }
-                } else if (Util.mentionsCount(message.getContent()) > 5) {
+                } else if (mentionCount > 5) {
                     Util.deleteMessage(message);
                 }
             }
 
             //Increment message count if message was not a command
-            databaseManager.getXP().addXP(message.getAuthor().getStringID(), 1);
+            databaseManager.getXP().addXP(message.getAuthor().getId(), 1);
 
-            *//**
-             * Messages containing my name go to botpms now too cuz im watching
-             *//*
-            if (message.getContent().toLowerCase().contains("cback")) {
-                EmbedObject embed = Util.buildBotPMEmbed(message, 2);
-                Util.sendEmbed(client.getChannelByID(BOTPM_CH_ID), embed);
+            //Messages containing my name go to botpms now too cuz im watching//
+            if (message.getContentRaw().toLowerCase().contains("cback")) {
+                MessageEmbed embed = Util.buildBotPMEmbed(message, 2);
+                Util.sendEmbed(Channels.BOTPM_CH_ID.getChannel(), embed);
             }
         }
-    }*/
-
-    public static TVBot getInstance() {
-        return instance;
-    }
-
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
-    }
-
-    /*public TraktManager getTraktManager() {
-        return traktManager;
-    }*/
-
-    public static ConfigManager getConfigManager() {
-        return configManager;
-    }
-
-    public CommandManager getCommandManager() {
-        return commandManager;
-    }
-
-    public ToggleManager getToggleMangager() { return toggleManager; }
-
-    public static JDAClient getClient() {
-        return client;
-    }
-
-    public static String getPrefix() {
-        return prefix;
-    }
-
-    public static Guild getHomeGuild() {
-        return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
-    }
-
-    public static Guild getGuild() {
-        return jda.getGuildById("247394948331077632"); // CHANGE THIS
-    }
-
-    public String getUptime() {
-        long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
-        long seconds = totalSeconds % 60;
-        long minutes = (totalSeconds / 60) % 60;
-        long hours = (totalSeconds / 3600);
-        return (hours < 10 ? "0" + hours : hours) + "h " + (minutes < 10 ? "0" + minutes : minutes) + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
     }
 
     /**
@@ -269,7 +202,8 @@ public class TVBot {
             User author = message.getAuthor();
 
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
-            boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
+            boolean staffChannel =
+                    message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
             boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
 
             if (homeGuild && !staffChannel && !staffMember) {
@@ -288,19 +222,14 @@ public class TVBot {
                 if (tripped) {
 
                     EmbedBuilder bld = new EmbedBuilder();
-                    bld
-                            .setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl())
-                            .setDescription(message.getContentDisplay())
-                            .setTimestamp(Instant.now())
-                            .setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
+                    bld.setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl()).setDescription(message.getContentDisplay()).setTimestamp(Instant.now()).setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
 
                     Util.sendEmbed(message.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId()), bld.setColor(Util.getBotColor()).build());
 
-                    StringBuilder sBld = new StringBuilder().append("Your message has been automatically removed for containing a banned word. If this is an error, message a staff member.");
+                    StringBuilder sBld =
+                            new StringBuilder().append("Your message has been automatically removed for containing a banned word. If this is an error, message a staff member.");
                     if (!word.isEmpty()) {
-                        sBld
-                                .append("\n\n")
-                                .append(word);
+                        sBld.append("\n\n").append(word);
                     }
                     Util.sendPrivateEmbed(author, sBld.toString());
 
@@ -314,12 +243,13 @@ public class TVBot {
     /**
      * Censor links
      */
-    public void censorLinks(Message message, GuildMessageReceivedEvent event) {
+    public void censorLinks(Message message) {
         if (toggleState("censorlinks")) {
             User author = message.getAuthor();
 
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
-            boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
+            boolean staffChannel =
+                    message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
             boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
 
 
@@ -354,11 +284,7 @@ public class TVBot {
                     }
 
                     EmbedBuilder bld = new EmbedBuilder();
-                    bld
-                            .setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl())
-                            .setDescription(message.getContentDisplay())
-                            .setTimestamp(Instant.now())
-                            .setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
+                    bld.setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl()).setDescription(message.getContentDisplay()).setTimestamp(Instant.now()).setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
 
                     Util.sendEmbed(message.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId()), bld.setColor(Util.getBotColor()).build());
                     Util.sendPrivateEmbed(author, "Your message has been automatically removed for containing a link. If this is an error, message a staff member.\n\n" + collectedLinks);
@@ -368,6 +294,72 @@ public class TVBot {
             }
         }
     }
+
+    public static TVBot getInstance() {
+        return instance;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public TraktManager getTraktManager() {
+        return traktManager;
+    }
+
+    public static ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    public ToggleManager getToggleMangager() {
+        return toggleManager;
+    }
+
+    public static JDAClient getClient() {
+        return client;
+    }
+
+    public static String getPrefix() {
+        return prefix;
+    }
+
+    public static Guild getHomeGuild() {
+        return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
+    }
+
+    public static Guild getGuild() {
+        return jda.getGuildById("247394948331077632"); // todo CHANGE THIS
+    }
+
+    private void registerAllCommands() {
+        new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
+            Command command = commandImpl.cast(Command.class);
+            Optional<Command> existingCommand =
+                    registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();
+            if (!existingCommand.isPresent()) {
+                registeredCommands.add(command);
+                System.out.println("Registered command: " + command.getName());
+            } else {
+                System.out.println("Attempted to register two commands with the same name: " + existingCommand.get().getName());
+                System.out.println("Existing: " + existingCommand.get().getClass().getName());
+                System.out.println("Attempted: " + commandImpl.getName());
+            }
+        });
+    }
+
+    public String getUptime() {
+        long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+        long seconds = totalSeconds % 60;
+        long minutes = (totalSeconds / 60) % 60;
+        long hours = (totalSeconds / 3600);
+        return (hours < 10 ? "0" + hours : hours) + "h " + (minutes < 10 ? "0" + minutes : minutes) + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
+    }
+
+
 
     /**
      * Setting toggles

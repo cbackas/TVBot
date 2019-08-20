@@ -11,6 +11,7 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberNickChangeEvent;
 import net.dv8tion.jda.core.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageUpdateEvent;
 
 import java.time.Instant;
 
@@ -22,8 +23,9 @@ public class MessageChange {
     }
 
     public void messageDeleted(GuildMessageDeleteEvent event) {
-        if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId()) && event.getMessage() != null) {
-            if (!event.getAuthor().isBot() && !TVBot.messageCache.contains(event.getMessageID())) {
+        /*Message message = event.getMessageIdLong()
+        if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId())) {
+            if (!event. && !TVBot.messageCache.contains(event.getMessageID())) {
                 if (event.getChannel().equals(Channels.DEV_CH_ID.getChannel())) {
                     TVBot.messageCache.remove(event.getMessageIdLong());
                     Message message = event.getMessage();
@@ -56,10 +58,10 @@ public class MessageChange {
         }
     }
 
-    public void messageEdited(MessageUpdateEvent event) {
-        /*if (event instanceof MessagePinEvent || event instanceof MessageUnpinEvent || event instanceof MessageEmbedEvent) {
+    public void messageEdited(GuildMessageUpdateEvent event) {
+        *//*if (event instanceof MessagePinEvent || event instanceof MessageUnpinEvent || event instanceof MessageEmbedEvent) {
             return;
-        }*/
+        }*//*
 
         if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId()) && event.getMessage() != null) {
             if (!event.getAuthor().isBot()) {
@@ -82,7 +84,7 @@ public class MessageChange {
                 Util.sendEmbed(MESSAGE_LOGS, bld.build());
                 bot.censorMessages(message);
             }
-        }
+        }*/
     }
 
     public void nicknameChange(GuildMemberNickChangeEvent event) {
