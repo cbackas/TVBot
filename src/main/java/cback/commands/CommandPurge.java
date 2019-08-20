@@ -11,6 +11,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.Role;
 
+import net.dv8tion.jda.core.entities.User;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -19,8 +20,8 @@ public class CommandPurge extends Command {
 
     private TVBot bot;
 
-    public CommandPurge(TVBot bot) {
-        this.bot = bot;
+    public CommandPurge() {
+        this.bot = TVBot.getInstance();
         this.name = "purge";
         this.aliases = new String[]{"prune"};
         this.arguments = "prune <#> @user";
@@ -38,14 +39,14 @@ public class CommandPurge extends Command {
             String numberArg = args[0];
 
             int maxDeletions = 0;
-            Member userToDelete;
+            User userToDelete;
 
             if (StringUtils.isNumeric(numberArg)) {
                 try {
                     maxDeletions = Integer.parseInt(numberArg);
                     if (maxDeletions <= 0) {
                         Util.deleteMessage(commandEvent.getMessage());
-                        Util.simpleEmbed(commandEvent.getChannel(), "Invalid number \"" + numberArg + "\".");
+                        Util.simpleEmbed(commandEvent.getTextChannel(), "Invalid number \"" + numberArg + "\".");
                         return;
                     }
                 } catch (NumberFormatException e) {
@@ -56,7 +57,7 @@ public class CommandPurge extends Command {
                 userToDelete = Util.getUserFromMentionArg(args[1]);
                 if (userToDelete == null) {
                     Util.deleteMessage(commandEvent.getMessage());
-                    Util.simpleEmbed(commandEvent.getChannel(), "Invalid user \"" + args[1] + "\".");
+                    Util.simpleEmbed(commandEvent.getTextChannel(), "Invalid user \"" + args[1] + "\".");
                     return;
                 }
             } else {
@@ -64,7 +65,7 @@ public class CommandPurge extends Command {
                 if (!userRoles.contains(commandEvent.getGuild().getRoleById(TVRoles.ADMIN.id))) {
                     //Must be admin to purge all without entering user
                     Util.deleteMessage(commandEvent.getMessage());
-                    Util.simpleEmbed(commandEvent.getChannel(), "You must specify a user.");
+                    Util.simpleEmbed(commandEvent.getTextChannel(), "You must specify a user.");
                     return;
                 }
             }
@@ -74,9 +75,8 @@ public class CommandPurge extends Command {
             messageHistory.getRetrievedHistory();
 
             if (userToDelete != null) { //this is a prune
-
                 commandEvent.getChannel().getHistoryBefore(commandEvent.getMessage(), maxDeletions).queue((history) -> commandEvent.getChannel().purgeMessages(history.getRetrievedHistory()));
-                Util.sendLog(commandEvent.getMessage(), userToDelete.getEffectiveName() + "'s messages have been pruned in " + commandEvent.getChannel().getName() + ".");
+                Util.sendLog(commandEvent.getMessage(), userToDelete.getName() + "'s messages have been pruned in " + commandEvent.getChannel().getName() + ".");
 
             } else { //this is a purge
 

@@ -14,8 +14,8 @@ public class CommandSuggest extends Command {
 
     private TVBot bot;
 
-    public CommandSuggest(TVBot bot) {
-        this.bot = bot;
+    public CommandSuggest() {
+        this.bot = TVBot.getInstance();
         this.name = "suggest";
         this.aliases = new String[]{"idea", "suggestion"};
         this.arguments = "suggest [suggestion text]";

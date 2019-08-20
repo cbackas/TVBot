@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 public class TVBot {
 
     private static TVBot instance;
-    private static JDAClient client;
     private static JDA jda;
 
     private DatabaseManager databaseManager;
@@ -102,7 +101,7 @@ public class TVBot {
             return;
         }
 
-        commandBuilder.setOwnerId(String.valueOf(CBACK_USR_ID));
+        commandBuilder.setOwnerId("73416411443113984");
         commandBuilder.setPrefix(TVBot.getPrefix());
         commandBuilder.setGame(Game.watching("all of your messages. Type " + prefix + "help"));
 
@@ -123,13 +122,15 @@ public class TVBot {
                 e.printStackTrace();
             }
         });
-        registeredCommands.forEach(c -> commandBuilder.addCommand(c));
+        registeredCommands.forEach(c -> {
+            commandBuilder.addCommand(c);
+        });
 
         startTime = System.currentTimeMillis();
 
         JDABuilder builder =
                 new JDABuilder(AccountType.BOT).setToken(token.get()).addEventListener(commandBuilder.build());
-        jda = builder.build();
+        this.jda = builder.build();
     }
 
     /*
@@ -153,7 +154,7 @@ public class TVBot {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("``" + message.getAuthor().getName() + "``\n").append(response);
 
-                Util.sendMessage(message.getChannel(), stringBuilder.toString());
+                Util.sendMessage(message.getTextChannel(), stringBuilder.toString());
 
                 Util.deleteMessage(message);
             }
@@ -173,7 +174,7 @@ public class TVBot {
                 if (mentionCount > 10) {
                     try {
                         guild.getController().ban(message.getAuthor(), 0, "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/");
-                        Util.simpleEmbed(message.getChannel(), message.getAuthor().getName() + " was just banned for mentioning more than 10 users.");
+                        Util.simpleEmbed(message.getTextChannel(), message.getAuthor().getName() + " was just banned for mentioning more than 10 users.");
                         Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                     } catch (Exception e) {
                         Util.reportHome(e);
@@ -255,7 +256,7 @@ public class TVBot {
 
             boolean trusted = false;
             List<Role> userRoles = author.getJDA().getRoles();
-            int tPos = client.getJDA().getRoleById(TVRoles.TRUSTED.id).getPosition();
+            int tPos = jda.getRoleById(TVRoles.TRUSTED.id).getPosition();
             for (Role r : userRoles) {
                 int rPos = r.getPosition();
                 if (rPos >= tPos) {
@@ -319,8 +320,8 @@ public class TVBot {
         return toggleManager;
     }
 
-    public static JDAClient getClient() {
-        return client;
+    public static JDA getClient() {
+        return jda;
     }
 
     public static String getPrefix() {
@@ -329,10 +330,6 @@ public class TVBot {
 
     public static Guild getHomeGuild() {
         return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
-    }
-
-    public static Guild getGuild() {
-        return jda.getGuildById("247394948331077632"); // todo CHANGE THIS
     }
 
     private void registerAllCommands() {

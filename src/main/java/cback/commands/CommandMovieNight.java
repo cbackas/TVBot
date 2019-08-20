@@ -18,8 +18,8 @@ public class CommandMovieNight extends Command {
 
     private TVBot bot;
 
-    public CommandMovieNight(TVBot bot) {
-        this.bot = bot;
+    public CommandMovieNight() {
+        this.bot = TVBot.getInstance();
         this.name = "movienight";
         this.aliases = new String[]{"mn"};
         this.arguments = "mn ping|set|announce|start";

@@ -20,8 +20,8 @@ public class CommandSearchShows extends Command {
 
     private TVBot bot;
 
-    public CommandSearchShows(TVBot bot) {
-        this.bot = bot;
+    public CommandSearchShows() {
+        this.bot = TVBot.getInstance();
         this.name = "show";
         this.arguments = "show [show name]";
         this.help = "Searches trakt.tv for the provided show. Sometimes it works, sometimes it don't";
@@ -32,7 +32,7 @@ public class CommandSearchShows extends Command {
         String[] args = commandEvent.getArgs().split("\\s+", 1);
 
         String showName = String.join(" ", args);
-        Message initialMessage = Util.simpleEmbed(commandEvent.getChannel(), "Searching <https://trakt.tv/> for " + showName + " ...");
+        Message initialMessage = Util.simpleEmbed(commandEvent.getTextChannel(), "Searching <https://trakt.tv/> for " + showName + " ...");
 
         Show showData = bot.getTraktManager().showSummaryFromName(showName);
         if(showData != null) {

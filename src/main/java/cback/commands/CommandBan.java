@@ -21,8 +21,8 @@ public class CommandBan extends Command {
 
     private TVBot bot;
 
-    public CommandBan(TVBot bot) {
-        this.bot = bot;
+    public CommandBan() {
+        this.bot = TVBot.getInstance();
         this.name = "ban";
         this.help = "Bans a user from the server and logs the reason";
         this.arguments = "ban @user [reason]";
@@ -41,14 +41,14 @@ public class CommandBan extends Command {
             Member user = commandEvent.getGuild().getMemberById(Long.parseLong(userInput));
             if(reason != null && user != null) {
                 if(user.getEffectiveName().equals(commandEvent.getAuthor().getId())) {
-                    Util.sendMessage(commandEvent.getChannel(), "You're gonna have to try harder than that.");
+                    Util.sendMessage(commandEvent.getTextChannel(), "You're gonna have to try harder than that.");
                 } else {
                     try {
                         gC.ban(user.getUser(), 1, reason + " Appeal at https://www.reddit.com/r/LoungeBan/").queue();
                         Util.sendLog(commandEvent.getMessage(), "Banned " + user.getEffectiveName() + "\n**Reason:** " + reason, Color.RED);
-                        Util.simpleEmbed(commandEvent.getChannel(), user.getEffectiveName() + " has been banned. Check " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.");
+                        Util.simpleEmbed(commandEvent.getTextChannel(), user.getEffectiveName() + " has been banned. Check " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.");
                     } catch(Exception ex) {
-                        Util.simpleEmbed(commandEvent.getChannel(), "Error running " + this.getName() + " - error recorded");
+                        Util.simpleEmbed(commandEvent.getTextChannel(), "Error running " + this.getName() + " - error recorded");
                         Util.reportHome(commandEvent.getMessage(), ex);
                     }
                 }

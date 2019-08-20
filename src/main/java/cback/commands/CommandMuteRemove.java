@@ -6,6 +6,7 @@ import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Role;
 
 import java.awt.*;
 import java.util.List;
@@ -16,8 +17,8 @@ public class CommandMuteRemove extends Command {
 
     private TVBot bot;
 
-    public CommandMuteRemove(TVBot bot) {
-        this.bot = bot;
+    public CommandMuteRemove() {
+        this.bot = TVBot.getInstance();
         this.name = "unmute";
         this.arguments = "unmute @user";
         this.help = "Unmutes a user";
@@ -26,6 +27,8 @@ public class CommandMuteRemove extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         String[] args = commandEvent.getArgs().split("\\s+", 1);
+
+        Role muteRole = commandEvent.getGuild().getRolesByName("muted", true).get(0);
 
         if(args.length == 1) {
             String user = args[0];
@@ -36,12 +39,12 @@ public class CommandMuteRemove extends Command {
                 Member userInput = commandEvent.getGuild().getMemberById(Long.parseLong(u));
                 if(userInput != null) {
                     if(commandEvent.getAuthor().getId().equals(u)) {
-                        Util.sendMessage(commandEvent.getChannel(), "Not sure how you typed this command... but you can't unmute yourself");
+                        Util.sendMessage(commandEvent.getTextChannel(), "Not sure how you typed this command... but you can't unmute yourself");
                     } else {
                         try {
-                            userInput.getRoles().remove(commandEvent.getGuild().getRoleById(231269949635559424L));
+                            commandEvent.getGuild().getController().removeSingleRoleFromMember(userInput, muteRole);
 
-                            Util.simpleEmbed(commandEvent.getChannel(), userInput.getEffectiveName() + "has been unmuted");
+                            Util.simpleEmbed(commandEvent.getTextChannel(), userInput.getEffectiveName() + " has been unmuted");
 
                             List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
                             if(mutedUsers.contains(u)) {
@@ -50,7 +53,7 @@ public class CommandMuteRemove extends Command {
                             }
                             Util.sendLog(commandEvent.getMessage(), userInput.getEffectiveName() + "has been unmuted.", Color.gray);
                         } catch(Exception ex) {
-                            Util.simpleEmbed(commandEvent.getChannel(), "Error running " + this.getName() + " - error recorded");
+                            Util.simpleEmbed(commandEvent.getTextChannel(), "Error running " + this.getName() + " - error recorded");
                             Util.reportHome(commandEvent.getMessage(), ex);
                         }
                     }

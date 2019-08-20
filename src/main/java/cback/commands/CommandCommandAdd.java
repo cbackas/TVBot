@@ -11,8 +11,8 @@ public class CommandCommandAdd extends Command {
 
     private TVBot bot;
 
-    public CommandCommandAdd(TVBot bot) {
-        this.bot = bot;
+    public CommandCommandAdd() {
+        this.bot = TVBot.getInstance();
         this.name = "addcommand";
         this.arguments = "addcommand commandname \"custom response\"";
         this.help = "Creates a simple custom command";
@@ -29,7 +29,7 @@ public class CommandCommandAdd extends Command {
         if(commandName != null && commandResponse != null && bot.getCommandManager().getCommandValue(commandName) == null && !TVBot.registeredCommands.contains(commandName)) {
             bot.getCommandManager().setConfigValue(commandName, commandResponse);
 
-            Util.simpleEmbed(commandEvent.getChannel(), "Custom command added: ``" + commandName + "``");
+            Util.simpleEmbed(commandEvent.getTextChannel(), "Custom command added: ``" + commandName + "``");
         } else {
             Util.syntaxError(this, commandEvent.getMessage());
         }

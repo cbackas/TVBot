@@ -17,8 +17,8 @@ public class CommandReply extends Command {
 
     private TVBot bot;
 
-    public CommandReply(TVBot bot) {
-        this.bot = bot;
+    public CommandReply() {
+        this.bot = TVBot.getInstance();
         this.name = "reply";
         this.ownerCommand = true;
     }

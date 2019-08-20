@@ -7,6 +7,7 @@ import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Role;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -18,18 +19,21 @@ public class CommandMuteAdd extends Command {
 
     private TVBot bot;
 
-    public CommandMuteAdd(TVBot bot) {
-        this.bot = bot;
+    public CommandMuteAdd() {
+        this.bot = TVBot.getInstance();
         this.name = "mute";
         this.arguments = "mute @user [reason?]";
         this.help = "Mutes a user and logs the action";
         this.requiredRole = TVRoles.STAFF.name;
     }
+    
     @Override
     protected void execute(CommandEvent commandEvent) {
         String[] args = commandEvent.getArgs().split("\\s+", 1);
 
         List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
+
+        Role muteRole = commandEvent.getGuild().getRolesByName("muted", true).get(0);
 
         if(args[0].equalsIgnoreCase("list")) {
             StringBuilder mutedList = new StringBuilder();
@@ -46,7 +50,7 @@ public class CommandMuteAdd extends Command {
             } else {
                 mutedList.append("\n").append("There are currently no mutes users.");
             }
-            Util.simpleEmbed(commandEvent.getChannel(), "Muted Users: (plain text for users not on server)\n" + mutedList.toString());
+            Util.simpleEmbed(commandEvent.getTextChannel(), "Muted Users: (plain text for users not on server)\n" + mutedList.toString());
         } else if(args.length >= 1) {
             Pattern pattern = Pattern.compile("^!mute <@!?(\\d+)> ?(.+)?");
             Matcher matcher = pattern.matcher(commandEvent.getMessage().getContentRaw());
@@ -62,11 +66,11 @@ public class CommandMuteAdd extends Command {
                     }
 
                     if (commandEvent.getAuthor().getId().equals(u)) {
-                        Util.simpleEmbed(commandEvent.getChannel(), "You probably shouldn't mute yourself");
+                        Util.simpleEmbed(commandEvent.getTextChannel(), "You probably shouldn't mute yourself");
                     } else {
                         try {
-                            userInput.getRoles().add(commandEvent.getGuild().getRoleById(231269949635559424L));
-                            Util.simpleEmbed(commandEvent.getChannel(), userInput.getEffectiveName() + " has been muted. Check " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.");
+                            commandEvent.getGuild().getController().addSingleRoleToMember(userInput, muteRole);
+                            Util.simpleEmbed(commandEvent.getTextChannel(), userInput.getEffectiveName() + " has been muted. Check " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.");
                             if (!mutedUsers.contains(u)) {
                                 mutedUsers.add(u);
                                 bot.getConfigManager().setConfigValue("muted", mutedUsers);
@@ -74,7 +78,7 @@ public class CommandMuteAdd extends Command {
 
                             Util.sendLog(commandEvent.getMessage(), "Muted " + userInput.getEffectiveName() + "\n**Reason:** " + reason, Color.gray);
                         } catch (Exception e) {
-                            Util.simpleEmbed(commandEvent.getChannel(), "Error running " + this.getName() + " - error recorded");
+                            Util.simpleEmbed(commandEvent.getTextChannel(), "Error running " + this.getName() + " - error recorded");
                             Util.reportHome(commandEvent.getMessage(), e);
                         }
                     }

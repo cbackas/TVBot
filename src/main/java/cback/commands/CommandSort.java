@@ -22,8 +22,8 @@ public class CommandSort extends Command {
     private TVBot bot;
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
 
-    public CommandSort(TVBot bot) {
-        this.bot = bot;
+    public CommandSort() {
+        this.bot = TVBot.getInstance();
         this.name = "sort";
         this.arguments = "sort";
         this.help = "Alphabetically sorts the channels";
@@ -32,7 +32,7 @@ public class CommandSort extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        Util.simpleEmbed(commandEvent.getChannel(), "Lets get sorting!");
+        Util.simpleEmbed(commandEvent.getTextChannel(), "Lets get sorting!");
 
         net.dv8tion.jda.core.entities.Category unsorted = commandEvent.getGuild().getCategoryById(358043583355289600L);
         int count = unsorted.getChannels().size();
@@ -70,7 +70,7 @@ public class CommandSort extends Command {
         //apply new positions
         batchSortChannels(commandEvent.getGuild(), showChannelsSorted);
 
-        Util.simpleEmbed(commandEvent.getChannel(), "All done!" + count + " channe;(s) sorted.");
+        Util.simpleEmbed(commandEvent.getTextChannel(), "All done!" + count + " channe;(s) sorted.");
     }
 
     public static String getSortName(String channelName) {

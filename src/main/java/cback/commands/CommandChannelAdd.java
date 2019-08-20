@@ -16,8 +16,8 @@ public class CommandChannelAdd extends Command {
 
     private TVBot bot;
 
-    public CommandChannelAdd(TVBot bot) {
-        this.bot = bot;
+    public CommandChannelAdd() {
+        this.bot = TVBot.getInstance();
         this.name = "addchannel";
         this.aliases = new String[]{"newchannel, createchannel"};
         this.arguments = "addchannel [channelname]";
@@ -32,13 +32,13 @@ public class CommandChannelAdd extends Command {
         String channelNames[] = channelName.split("-\\|");
 
         if(channelNames.length >= 1) {
-            Message response = Util.simpleEmbed(commandEvent.getChannel(), "Attempting to create" + channelNames.length + " channels ...");
+            Message response = Util.simpleEmbed(commandEvent.getTextChannel(), "Attempting to create" + channelNames.length + " channels ...");
             String mentions = createChannels(commandEvent.getGuild(), channelNames);
 
             Util.deleteMessage(response);
 
             String text = "Created " + getCounter() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(commandEvent.getChannel(), text);
+            Util.simpleEmbed(commandEvent.getTextChannel(), text);
             Util.sendLog(commandEvent.getMessage(), text);
 
             Util.deleteMessage(commandEvent.getMessage());

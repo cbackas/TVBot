@@ -16,8 +16,8 @@ public class CommandScoreboard extends Command {
 
     private TVBot bot;
 
-    public CommandScoreboard(TVBot bot) {
-        this.bot = bot;
+    public CommandScoreboard() {
+        this.bot = TVBot.getInstance();
         this.name = "scoreboard";
         this.aliases = new String[]{"leaderboard", "topxp", "top"};
         this.arguments = "scoreboard [#]";
@@ -56,9 +56,9 @@ public class CommandScoreboard extends Command {
 
                 if(userXPIterator.hasNext()) scoreboard.append("\n");
             }
-            Util.simpleEmbed(commandEvent.getChannel(), scoreboard.toString());
+            Util.simpleEmbed(commandEvent.getTextChannel(), scoreboard.toString());
         } else {
-            Util.simpleEmbed(commandEvent.getChannel(), "No scoreboard data found.");
+            Util.simpleEmbed(commandEvent.getTextChannel(), "No scoreboard data found.");
         }
         Util.deleteMessage(commandEvent.getMessage());
     }

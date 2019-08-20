@@ -8,13 +8,14 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.User;
 
 public class CommandXP extends Command {
 
     private TVBot bot;
 
-    public CommandXP(TVBot bot) {
-        this.bot = bot;
+    public CommandXP() {
+        this.bot = TVBot.getInstance();
         this.name = "xp";
         this.arguments = "xp [@user]";
         this.help = "Shows you your xp or the person you mentioned's xp";
@@ -24,22 +25,22 @@ public class CommandXP extends Command {
     protected void execute(CommandEvent commandEvent) {
         String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-        Member user;
+        User user;
         if(args.length >= 1) {
             user = Util.getUserFromMentionArg(args[0]);
         } else {
-            user = commandEvent.getMember();
+            user = commandEvent.getAuthor();
         }
 
         if(user != null) {
-            UserXP xp = bot.getDatabaseManager().getXP().getUserXP(user.getGuild().getId());
+            UserXP xp = bot.getDatabaseManager().getXP().getUserXP(user.getId());
             if(xp != null) {
-                Util.simpleEmbed(commandEvent.getChannel(), "**" + user.getGuild().getName() + "** ( Rank **#" + xp.getRank() + "** )\nXP: `" + xp .getMessageCount() + "`");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "**" + user.getName() + "** ( Rank **#" + xp.getRank() + "** )\nXP: `" + xp .getMessageCount() + "`");
             } else {
-                Util.simpleEmbed(commandEvent.getChannel(), " No xp data found for " + user.getGuild().getName());
+                Util.simpleEmbed(commandEvent.getTextChannel(), " No xp data found for " + user.getName());
             }
         } else {
-            Util.simpleEmbed(commandEvent.getChannel(), "Invalid user \"" + args[0] + "\". You muse use an @mention");
+            Util.simpleEmbed(commandEvent.getTextChannel(), "Invalid user \"" + args[0] + "\". You muse use an @mention");
         } Util.deleteMessage(commandEvent.getMessage());
     }
 }

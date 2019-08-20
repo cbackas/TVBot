@@ -15,8 +15,8 @@ public class CommandRule extends Command {
 
     private TVBot bot;
 
-    public CommandRule(TVBot bot) {
-        this.bot = bot;
+    public CommandRule() {
+        this.bot = TVBot.getInstance();
         this.name = "rule";
         this.arguments = "rule #";
         this.help = "Returns the rule requested";
@@ -39,7 +39,7 @@ public class CommandRule extends Command {
                         .setDescription(rule.fullRule);
                 Util.sendEmbed(commandEvent.getChannel(), ruleEmbed.setColor(Util.getBotColor()).build());
             } else {
-                Util.simpleEmbed(commandEvent.getChannel(), "Rule not found");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Rule not found");
             }
         } else {
             Util.syntaxError(this, commandEvent.getMessage());

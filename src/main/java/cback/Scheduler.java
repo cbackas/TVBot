@@ -132,7 +132,7 @@ public class Scheduler {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
-                } else if (TVBot.getGuild().getTextChannelById(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
+                } else if (TVBot.getClient().getTextChannelById(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
                     System.out.println("Tried to announce airing for show with no channel, deleting show and airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     bot.getDatabaseManager().getTV().deleteShow(show.getShowID());
@@ -159,9 +159,9 @@ public class Scheduler {
                 }
                 /////////////////////////////////////////////////////
 
-                TextChannel announceChannel = TVBot.getGuild().getTextChannelById(Channels.NEWEPISODE_CH_ID.getId());
-                TextChannel globalChannel = TVBot.getGuild().getTextChannelById(Channels.GENERAL_CH_ID.getId());
-                TextChannel showChannel = TVBot.getGuild().getTextChannelById(Long.parseLong(show.getChannelID()));
+                TextChannel announceChannel = Channels.NEWEPISODE_CH_ID.getChannel();
+                TextChannel globalChannel = Channels.GENERAL_CH_ID.getChannel();
+                TextChannel showChannel = TVBot.getClient().getTextChannelById(Long.parseLong(show.getChannelID()));
 
                 String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
@@ -217,7 +217,7 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        Guild loungeGuild = TVBot.getClient().getJDA().getGuildById(192441520178200577L);
+        Guild loungeGuild = TVBot.getClient().getGuildById(192441520178200577L);
 
         if (loungeGuild != null) {
             TVBot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getMembers().size()));
@@ -280,6 +280,6 @@ public class Scheduler {
             embed.setDescription("There aren't any new episodes airing today. Maybe tomorrow will be interesting.");
         }
 
-        Util.sendEmbed(TVBot.getGuild().getTextChannelById(Channels.NEWEPISODE_CH_ID.getId()), embed.build());
+        Util.sendEmbed(Channels.NEWEPISODE_CH_ID.getChannel(), embed.build());
     }
 }

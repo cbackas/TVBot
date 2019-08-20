@@ -22,8 +22,8 @@ public class CommandSearchMovies extends Command {
 
     private TVBot bot;
 
-    public CommandSearchMovies(TVBot bot) {
-        this.bot = bot;
+    public CommandSearchMovies() {
+        this.bot = TVBot.getInstance();
         this.name = "movie";
         this.arguments = "move [movie name]";
         this.help = "Searches trakt.tv for the provided movie. Sometimes it works, sometimes it don't";
@@ -35,7 +35,7 @@ public class CommandSearchMovies extends Command {
 
         String movieName = String.join(" ", args);
 
-        Message initialMessage = Util.simpleEmbed(commandEvent.getChannel(), "Searching <https://trakt.tv/> for " + movieName + " ...");
+        Message initialMessage = Util.simpleEmbed(commandEvent.getTextChannel(), "Searching <https://trakt.tv/> for " + movieName + " ...");
 
         Movie movieData = bot.getTraktManager().movieSummaryFromName(movieName);
         if(movieData != null) {

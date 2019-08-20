@@ -17,8 +17,8 @@ public class CommandChannelOpen extends Command {
 
     private TVBot bot;
 
-    public CommandChannelOpen(TVBot bot) {
-        this.bot = bot;
+    public CommandChannelOpen() {
+        this.bot = TVBot.getInstance();
         this.name = "openchannel";
         this.aliases = new String[]{"open"};
         this.arguments = "openchannel #channel";
@@ -38,7 +38,7 @@ public class CommandChannelOpen extends Command {
             String mentions = openChannels(commandEvent.getGuild(), channels);
 
             String text = "Opened " + channels.size() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(commandEvent.getChannel(), text);
+            Util.simpleEmbed(commandEvent.getTextChannel(), text);
             Util.sendLog(commandEvent.getMessage(), text);
         } else {
             Util.syntaxError(this, commandEvent.getMessage());

@@ -14,8 +14,8 @@ public class CommandShowRemove extends Command {
 
     private TVBot bot;
 
-    public CommandShowRemove(TVBot bot) {
-        this.bot = bot;
+    public CommandShowRemove() {
+        this.bot = TVBot.getInstance();
         this.name = "removeshow";
         this.arguments = "removeshow [imdbID]";
         this.help = "Removes a show from the database and disassociates it from any channels";
@@ -31,11 +31,11 @@ public class CommandShowRemove extends Command {
             Show show = bot.getDatabaseManager().getTV().getShow(showID);
             int entriesDeleted = bot.getDatabaseManager().getTV().deleteShow(showID);
             if(show != null && entriesDeleted > 0) {
-                Util.sendMessage(commandEvent.getChannel(), "Removed show: " + show.getShowName() + ".");
+                Util.sendMessage(commandEvent.getTextChannel(), "Removed show: " + show.getShowName() + ".");
                 System.out.println("@" + commandEvent.getAuthor().getName() + " removed show " + show.getShowName());
                 Util.simpleEmbed(commandEvent.getGuild().getTextChannelById(Channels.BOTLOG_CH_ID.getId()), show.getShowName() + " removed from the database.");
             } else {
-                Util.simpleEmbed(commandEvent.getChannel(), "No saved show found by this IMDB ID.");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "No saved show found by this IMDB ID.");
             }
         } else {
             Util.syntaxError(this, commandEvent.getMessage());

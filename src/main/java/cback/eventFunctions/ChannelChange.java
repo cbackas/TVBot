@@ -86,7 +86,7 @@ public class ChannelChange {
                     if (bot.getDatabaseManager().getTV().deleteShow(show.getShowID()) > 0) {
                         String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
                         System.out.println(message);
-                        Util.simpleEmbed(TVBot.getGuild().getTextChannelById(231499461740724224L), message);
+                        Util.simpleEmbed(TVBot.getClient().getTextChannelById(231499461740724224L), message);
                     }
                 });
             }

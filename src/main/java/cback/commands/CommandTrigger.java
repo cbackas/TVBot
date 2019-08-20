@@ -11,8 +11,8 @@ public class CommandTrigger extends Command {
 
     private TVBot bot;
 
-    public CommandTrigger(TVBot bot) {
-        this.bot = bot;
+    public CommandTrigger() {
+        this.bot = TVBot.getInstance();
         this.name = "trigger";
         this.ownerCommand = true;
     }
@@ -21,7 +21,7 @@ public class CommandTrigger extends Command {
     protected void execute(CommandEvent commandEvent) {
         if(commandEvent.getAuthor().getId().equals("73416411443113984")) {
             String text = String.valueOf(Util.getCurrentTime());
-            Util.sendMessage(commandEvent.getChannel(), text);
+            Util.sendMessage(commandEvent.getTextChannel(), text);
 
             Util.deleteMessage(commandEvent.getMessage());
         }

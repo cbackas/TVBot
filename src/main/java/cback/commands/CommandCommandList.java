@@ -9,14 +9,14 @@ public class CommandCommandList extends Command {
 
     private TVBot bot;
 
-    public CommandCommandList(TVBot bot) {
-        this.bot = bot;
+    public CommandCommandList() {
+        this.bot = TVBot.getInstance();
         this.name = "listcommands";
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        Util.simpleEmbed(commandEvent.getChannel(), "**Custom Commands**: \n" + bot.getCommandManager().getCommandList());
+        Util.simpleEmbed(commandEvent.getTextChannel(), "**Custom Commands**: \n" + bot.getCommandManager().getCommandList());
         Util.deleteMessage(commandEvent.getMessage());
     }
 }

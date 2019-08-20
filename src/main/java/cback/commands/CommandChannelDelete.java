@@ -16,8 +16,8 @@ public class CommandChannelDelete extends Command {
 
     private TVBot bot;
 
-    public CommandChannelDelete(TVBot bot) {
-        this.bot = bot;
+    public CommandChannelDelete() {
+        this.bot = TVBot.getInstance();
         this.name = "deletechannel";
         this.aliases = new String[]{"removechannel"};
         this.arguments = "deletechannel #channel";
@@ -39,7 +39,7 @@ public class CommandChannelDelete extends Command {
 
             String text = "Deleted " + channels.size() + " channel(s).\n" + mentions;
             if(!channels.contains(here)) {
-                Util.simpleEmbed(commandEvent.getChannel(), text);
+                Util.simpleEmbed(commandEvent.getTextChannel(), text);
             }
 
             Util.sendLog(commandEvent.getMessage(), text);

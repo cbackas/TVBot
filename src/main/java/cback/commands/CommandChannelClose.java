@@ -18,8 +18,8 @@ public class CommandChannelClose extends Command {
 
     private TVBot bot;
 
-    public CommandChannelClose(TVBot bot) {
-        this.bot = bot;
+    public CommandChannelClose() {
+        this.bot = TVBot.getInstance();
         this.name = "closechannel";
         this.aliases = new String[]{"close"};
         this.arguments = "closechannel #channel";
@@ -40,7 +40,7 @@ public class CommandChannelClose extends Command {
             String mentions = closeChannels(commandEvent.getGuild(), channels);
 
             String text = "Closed " + channels.size() + " channel(s).\n" + mentions;
-            Util.simpleEmbed(commandEvent.getChannel(), text);
+            Util.simpleEmbed(commandEvent.getTextChannel(), text);
             Util.sendLog(commandEvent.getMessage(), text);
         } else {
             Util.syntaxError(this, commandEvent.getMessage());

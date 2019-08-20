@@ -1,6 +1,7 @@
 package cback.commands;
 
 import cback.TVBot;
+import cback.TVRoles;
 import cback.Util;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -16,10 +17,10 @@ public class CommandRoleGet extends Command {
 
     private TVBot bot;
 
-    public CommandRoleGet(TVBot bot) {
-        this.bot = bot;
+    public CommandRoleGet() {
+        this.bot = TVBot.getInstance();
         this.name = "roleid";
-        this.ownerCommand = true;
+        this.requiredRole = TVRoles.ADMIN.name;
     }
 
     @Override
@@ -36,9 +37,9 @@ public class CommandRoleGet extends Command {
             } else {
                 Optional<Role> foundRole = serverRole.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
                 if(foundRole.isPresent()) {
-                    Util.simpleEmbed(commandEvent.getChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getId());
+                    Util.simpleEmbed(commandEvent.getTextChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getId());
                 } else {
-                    Util.simpleEmbed(commandEvent.getChannel(), "Role not found");
+                    Util.simpleEmbed(commandEvent.getTextChannel(), "Role not found");
                 }
             }
         } else {

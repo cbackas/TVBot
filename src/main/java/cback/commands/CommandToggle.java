@@ -14,8 +14,8 @@ public class CommandToggle extends Command {
 
     private TVBot bot;
 
-    public CommandToggle(TVBot bot) {
-        this.bot = bot;
+    public CommandToggle() {
+        this.bot = TVBot.getInstance();
         this.name = "toggle";
         this.aliases = new String[]{"switch"};
         this.arguments = "toggle [setting]";
@@ -31,7 +31,7 @@ public class CommandToggle extends Command {
             if(args[0].equalsIgnoreCase("list")) {
                 ToggleManager tm = bot.getToggleMangager();
                 String toggleList = buildToggleList(tm, toggles);
-                Util.simpleEmbed(commandEvent.getChannel(), "**Toggles**: \n" + toggleList);
+                Util.simpleEmbed(commandEvent.getTextChannel(), "**Toggles**: \n" + toggleList);
             } else if(toggles.contains(args[0])) {
                 toggles.stream().filter(toggle -> toggle.equalsIgnoreCase(args[0])).forEach(toggle -> {
                     boolean state = bot.toggleSetting(toggle);
@@ -41,7 +41,7 @@ public class CommandToggle extends Command {
                     } else {
                         stateText = "false";
                     }
-                    Util.simpleEmbed(commandEvent.getChannel(), "**" + toggle + "** set to state ``" + stateText + "``");
+                    Util.simpleEmbed(commandEvent.getTextChannel(), "**" + toggle + "** set to state ``" + stateText + "``");
                 });
             }
         } else {

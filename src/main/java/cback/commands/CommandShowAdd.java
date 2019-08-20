@@ -21,8 +21,8 @@ public class CommandShowAdd extends Command {
 
     private TVBot bot;
 
-    public CommandShowAdd(TVBot bot) {
-        this.bot = bot;
+    public CommandShowAdd() {
+        this.bot = TVBot.getInstance();
         this.name = "addshow";
         this.arguments = "addshow [imdbID] [here|channelID]";
         this.help = "Associates a channel and a show in the spooky bot database :o";
@@ -43,15 +43,15 @@ public class CommandShowAdd extends Command {
             String network = showData.network;
             TextChannel channel = commandEvent.getGuild().getTextChannelById(Long.parseLong(channelID));
             if(channel == null) {
-                Util.simpleEmbed(commandEvent.getChannel(), "Error: No channel by this ID found.");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Error: No channel by this ID found.");
                 return;
             }
             if(showName == null) {
-                Util.simpleEmbed(commandEvent.getChannel(), "Error: Couldn't find a show associated with this IMDB ID");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Error: Couldn't find a show associated with this IMDB ID");
                 return;
             }
             bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, network, channelID);
-            Util.simpleEmbed(commandEvent.getChannel(), "Set channel " + channel.getAsMention() + " for " + showName + ".");
+            Util.simpleEmbed(commandEvent.getTextChannel(), "Set channel " + channel.getAsMention() + " for " + showName + ".");
             System.out.println("@" + commandEvent.getAuthor().getName() + " added show " + showName);
             Util.simpleEmbed(commandEvent.getGuild().getTextChannelById(Channels.BOTLOG_CH_ID.getId()), showName + " assigned to " + channel.getName());
             //Update airing data after new show added

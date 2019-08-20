@@ -17,8 +17,8 @@ public class CommandHelp extends Command {
 
     private TVBot bot;
 
-    public CommandHelp(TVBot bot) {
-        this.bot = bot;
+    public CommandHelp() {
+        this.bot = TVBot.getInstance();
         this.name = "help";
         this.aliases = new String[]{"commands"};
         this.arguments = "help <command>";
@@ -39,7 +39,7 @@ public class CommandHelp extends Command {
             }
 
             if (!tripped) {
-                Util.simpleEmbed(commandEvent.getChannel(), "Sorry, I couldn't find a command named " + args[0]);
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Sorry, I couldn't find a command named " + args[0]);
             }
         } else {
             EmbedBuilder embed = Util.getEmbed();

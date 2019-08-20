@@ -10,8 +10,8 @@ public class CommandCommandRemove extends Command {
 
     private TVBot bot;
 
-    public CommandCommandRemove(TVBot bot) {
-        this.bot = bot;
+    public CommandCommandRemove() {
+        this.bot = TVBot.getInstance();
         this.name = "removecommand";
         this.aliases = new String[]{"rcom"};
         this.arguments = "removecommand [commandname]";
@@ -26,7 +26,7 @@ public class CommandCommandRemove extends Command {
 
             if(bot.getCommandManager().getCommandValue(command) != null) {
                 bot.getCommandManager().removeConfigValue(command);
-                Util.simpleEmbed(commandEvent.getChannel(), "Custom command removed: ``" + command + "``");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Custom command removed: ``" + command + "``");
             }
         } else {
             Util.syntaxError(this, commandEvent.getMessage());

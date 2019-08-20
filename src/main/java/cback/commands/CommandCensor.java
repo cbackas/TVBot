@@ -14,8 +14,8 @@ public class CommandCensor extends Command {
 
     private TVBot bot;
 
-    public CommandCensor(TVBot bot) {
-        this.bot = bot;
+    public CommandCensor() {
+        this.bot = TVBot.getInstance();
         this.name = "censor";
         this.arguments = "censor add|remove|list [word]";
         this.help = "Adds or removes a word to be censored from the server";

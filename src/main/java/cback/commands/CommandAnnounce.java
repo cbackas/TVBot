@@ -11,8 +11,8 @@ public class CommandAnnounce extends Command {
 
     private TVBot bot;
 
-    public CommandAnnounce(TVBot bot) {
-        this.bot = bot;
+    public CommandAnnounce() {
+        this.bot = TVBot.getInstance();
         this.name = "announce";
         this.help = "Sends a message in the announcement channel and the general channel";
         this.arguments = "announce [message]";
