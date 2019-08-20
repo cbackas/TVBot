@@ -6,6 +6,7 @@ import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 
@@ -39,7 +40,11 @@ public class CommandSort extends Command {
         List<Channel> permChannels = getPermChannels(commandEvent.getGuild());
 
         //sort non permanent channels
-        List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream().filter(chan -> !permChannels.contains(chan)).sorted(Comparator.comparing(chan -> getSortName(chan.getName()))).collect(Collectors.toList());
+        List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
+                .filter(chan -> !permChannels.contains(chan))
+                .filter(channel -> channel.getType() == ChannelType.TEXT)
+                .sorted(Comparator.comparing(chan -> getSortName(chan.getName())))
+                .collect(Collectors.toList());
 
         net.dv8tion.jda.core.entities.Category af = commandEvent.getGuild().getCategoryById(TVBot.AF_CAT_ID);
         net.dv8tion.jda.core.entities.Category gl = commandEvent.getGuild().getCategoryById(TVBot.GL_CAT_ID);
