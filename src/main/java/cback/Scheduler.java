@@ -69,7 +69,7 @@ public class Scheduler {
             //delete old airings from database
             pruneDeletedAirings();
             //update database with new airings for next 3 days
-            //bot.getTraktManager().updateAiringData();
+            bot.getTraktManager().updateAiringData();
 
         }, 0, DAILY_INTERVAL, TimeUnit.SECONDS);
 
