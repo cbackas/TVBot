@@ -27,9 +27,9 @@ public class CommandToggle extends Command {
         String[] args = commandEvent.getArgs().split("\\s+", 1);
 
         if(args.length == 1) {
-            List<String> toggles = bot.getToggleMangager().getToggleList();
+            List<String> toggles = bot.getToggleManager().getToggleList();
             if(args[0].equalsIgnoreCase("list")) {
-                ToggleManager tm = bot.getToggleMangager();
+                ToggleManager tm = bot.getToggleManager();
                 String toggleList = buildToggleList(tm, toggles);
                 Util.simpleEmbed(commandEvent.getTextChannel(), "**Toggles**: \n" + toggleList);
             } else if(toggles.contains(args[0])) {

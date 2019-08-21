@@ -26,7 +26,7 @@ public class CommandCommandAdd extends Command {
         String commandName = args[0];
         String commandResponse = commandEvent.getMessage().getContentRaw().split(" ", 3)[2];
 
-        if(commandName != null && commandResponse != null && bot.getCommandManager().getCommandValue(commandName) == null && !TVBot.registeredCommands.contains(commandName)) {
+        if(commandName != null && commandResponse != null && bot.getCommandManager().getCommandValue(commandName) == null && !bot.getRegisteredCommands().contains(commandName)) {
             bot.getCommandManager().setConfigValue(commandName, commandResponse);
 
             Util.simpleEmbed(commandEvent.getTextChannel(), "Custom command added: ``" + commandName + "``");

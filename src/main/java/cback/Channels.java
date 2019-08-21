@@ -24,6 +24,6 @@ public enum Channels {
     private final long id;
 
     public TextChannel getChannel() {
-        return TVBot.getClient().getTextChannelById(id);
+        return TVBot.getInstance().getClient().getTextChannelById(id);
     }
 }

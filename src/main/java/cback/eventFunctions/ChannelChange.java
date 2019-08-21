@@ -27,7 +27,7 @@ public class ChannelChange {
 
     //Set all
     public void setMuteRoleMASS(MessageReceivedEvent event) {
-        if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId())) {
+        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             Message message = event.getMessage();
             String text = message.getContentRaw();
             JDA client = event.getJDA();
@@ -52,7 +52,7 @@ public class ChannelChange {
 
     //New Channel
     public void newChannel(TextChannelCreateEvent event) {
-        if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId())) {
+        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             //Set muted role
             Guild guild = event.getJDA().getGuildById(192441520178200577L);
             Role muted = guild.getRoleById(231269949635559424L);
@@ -79,22 +79,22 @@ public class ChannelChange {
 
 
     public void onDeleteChannelEvent(TextChannelDeleteEvent event) {
-        if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId())) {
+        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             List<cback.database.tv.Show> shows = bot.getDatabaseManager().getTV().getShowsByChannel(event.getChannel().getId());
             if (shows != null) {
                 shows.forEach(show -> {
                     if (bot.getDatabaseManager().getTV().deleteShow(show.getShowID()) > 0) {
                         String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
                         System.out.println(message);
-                        Util.simpleEmbed(TVBot.getClient().getTextChannelById(231499461740724224L), message);
+                        Util.simpleEmbed(bot.getClient().getTextChannelById(231499461740724224L), message);
                     }
                 });
             }
 
-            List<String> permChannels = TVBot.getConfigManager().getConfigArray("permanentchannels");
+            List<String> permChannels = bot.getConfigManager().getConfigArray("permanentchannels");
             if (permChannels.contains(event.getChannel().getId())) {
                 permChannels.remove(event.getChannel().getId());
-                TVBot.getConfigManager().setConfigValue("permanentchannels", permChannels);
+                bot.getConfigManager().setConfigValue("permanentchannels", permChannels);
             }
         }
     }

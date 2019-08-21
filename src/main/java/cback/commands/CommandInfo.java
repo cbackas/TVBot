@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatter;
 
 public class CommandInfo extends Command {
 
+    private TVBot bot = TVBot.getInstance();
+
     public CommandInfo() {
         this.name = "info";
         this.aliases = new String[]{"serverinfo", "server", "stats", "about"};
@@ -23,18 +25,18 @@ public class CommandInfo extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         int userCount = commandEvent.getGuild().getMembers().size();
-        int oldUserCount = Integer.valueOf(TVBot.getConfigManager().getConfigValue("userCount"));
+        int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
         int channelCount = commandEvent.getGuild().getChannels().size();
         int closedChannels = commandEvent.getGuild().getCategoryById(TVBot.CLOSED_CAT_ID).getChannels().size();
 
         int newCount = userCount - oldUserCount;
-        String leaveJoin = " (-" + TVBot.getConfigManager().getConfigValue("left") + " +" + TVBot.getConfigManager().getConfigValue("joined") + ")";
+        String leaveJoin = " (-" + bot.getConfigManager().getConfigValue("left") + " +" + bot.getConfigManager().getConfigValue("joined") + ")";
         String userChange = newCount + leaveJoin;
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
         OffsetDateTime dt = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.ofHours(0));
 
-        EmbedBuilder embed = Util.getEmbed(commandEvent.getAuthor()).setThumbnail(Util.getAvatar(TVBot.getClient().getSelfUser()));
+        EmbedBuilder embed = Util.getEmbed(commandEvent.getAuthor()).setThumbnail(Util.getAvatar(bot.getClient().getSelfUser()));
         embed.setTitle(commandEvent.getGuild().getName());
         embed.addField("Created: ", commandEvent.getGuild().getJDA().asBot().getApplicationInfo().complete().getCreationTime().format(formatter), true);
         embed.addField("Users: ", Integer.toString(userCount), true);
@@ -50,7 +52,7 @@ public class CommandInfo extends Command {
 
         embed.addBlankField(false);
 
-        embed.addField("Made By: ", Util.getTag(TVBot.getClient().getSelfUser()), true);
+        embed.addField("Made By: ", Util.getTag(bot.getClient().getSelfUser()), true);
         embed.addField("Source: ", "[`GitHub`](https://github.com/cbackas/TVBot)", true);
 
         Util.sendEmbed(commandEvent.getChannel(), embed.setColor(Util.getBotColor()).build());

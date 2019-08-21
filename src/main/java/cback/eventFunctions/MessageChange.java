@@ -3,15 +3,11 @@ package cback.eventFunctions;
 import cback.Channels;
 import cback.TVBot;
 import cback.Util;
-
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberNickChangeEvent;
-import net.dv8tion.jda.core.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageUpdateEvent;
 
 import java.time.Instant;
 
@@ -88,7 +84,7 @@ public class MessageChange {
     }
 
     public void nicknameChange(GuildMemberNickChangeEvent event) {
-        if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId())) {
+        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             User user = event.getUser();
 
             String oldName = event.getUser().getName();

@@ -5,14 +5,12 @@ package cback;
 import cback.database.DatabaseManager;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import net.dv8tion.jda.client.JDAClient;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
 import org.reflections.Reflections;
@@ -21,6 +19,7 @@ import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -29,22 +28,22 @@ import java.util.regex.Pattern;
 public class TVBot {
 
     private static TVBot instance;
-    private static JDA jda;
+    private JDA jda;
 
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
-    private static ConfigManager configManager;
+    private ConfigManager configManager;
     private CommandManager commandManager;
     private ToggleManager toggleManager;
     private Scheduler scheduler;
 
-    public static ArrayList<Long> messageCache = new ArrayList<>();
+    public List<Command> registeredCommands = new ArrayList<>();
+    private List<String> commandPrefixes = Arrays.asList("!", "t!", "!g", "--", ".", "?");
 
-    public static List<Command> registeredCommands = new ArrayList<>();
-    CommandClientBuilder commandBuilder = new CommandClientBuilder();
-    static public String prefix = "!";
-    public List<String> prefixes = new ArrayList<>();
-    private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^" + prefix + "([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
+    private long startTime;
+
+    public static final String COMMAND_PREFIX = "!";
+    private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^" + COMMAND_PREFIX + "([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
     public static final long CBACK_USR_ID = 73416411443113984l;
     public static final long HOMESERVER_GLD_ID = 192441520178200577l;
@@ -60,8 +59,6 @@ public class TVBot {
     public static final long MR_CAT_ID = 358038505244327937L;
     public static final long SZ_CAT_ID = 358038532780195840L;
 
-    private long startTime;
-
     public static void main(String[] args) throws LoginException, InterruptedException {
         new TVBot();
     }
@@ -73,12 +70,6 @@ public class TVBot {
         configManager = new ConfigManager(this);
         commandManager = new CommandManager(this);
         toggleManager = new ToggleManager(this);
-        prefixes.add(TVBot.getPrefix());
-        prefixes.add("t!");
-        prefixes.add("!g");
-        prefixes.add("--");
-        prefixes.add(".");
-        prefixes.add("?");
 
         connect();
 
@@ -101,15 +92,17 @@ public class TVBot {
             return;
         }
 
-        commandBuilder.setOwnerId("73416411443113984");
-        commandBuilder.setPrefix(TVBot.getPrefix());
-        commandBuilder.setGame(Game.watching("all of your messages. Type " + prefix + "help"));
+        var commandClientBuilder = new CommandClientBuilder();
+        commandClientBuilder.setOwnerId(String.valueOf(CBACK_USR_ID));
+        commandClientBuilder.setPrefix(COMMAND_PREFIX);
+        commandClientBuilder.setGame(Game.watching("all of your messages. Type " + COMMAND_PREFIX + "help"));
 
         new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
             try {
                 Command command = commandImpl.getDeclaredConstructor().newInstance();
-                Optional<Command> existingCommand =
-                        registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();
+                Optional<Command> existingCommand = registeredCommands.stream()
+                        .filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName()))
+                        .findAny();
                 if (!existingCommand.isPresent()) {
                     registeredCommands.add(command);
                     System.out.println("Registered command: " + command.getName());
@@ -122,15 +115,12 @@ public class TVBot {
                 e.printStackTrace();
             }
         });
-        registeredCommands.forEach(c -> {
-            commandBuilder.addCommand(c);
-        });
+        registeredCommands.forEach(c -> commandClientBuilder.addCommand(c));
+
+        JDABuilder builder = new JDABuilder(AccountType.BOT).setToken(token.get()).addEventListener(commandClientBuilder.build());
+        this.jda = builder.build();
 
         startTime = System.currentTimeMillis();
-
-        JDABuilder builder =
-                new JDABuilder(AccountType.BOT).setToken(token.get()).addEventListener(commandBuilder.build());
-        this.jda = builder.build();
     }
 
     /*
@@ -139,15 +129,18 @@ public class TVBot {
     public void onMessageEvent(MessageReceivedEvent event) {
         if (event.getMessage().getAuthor().isBot()) return; //ignore bot messages
         Message message = event.getMessage();
-        Guild guild = null;
         boolean isPrivate = message.isFromType(ChannelType.PRIVATE);
+        Guild guild = null;
         if (!isPrivate) guild = message.getGuild();
         String text = message.getContentRaw();
+
         Matcher matcher = COMMAND_PATTERN.matcher(text);
         if (matcher.matches()) {
             String baseCommand = matcher.group(1).toLowerCase();
-            Optional<Command> command =
-                    registeredCommands.stream().filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && List.of(com.getAliases()).contains(baseCommand))).findAny();
+            Optional<Command> command = registeredCommands.stream()
+                    .filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && List.of(com.getAliases()).contains(baseCommand)))
+                    .findAny();
+
             if (!command.isPresent() && commandManager.getCommandValue(baseCommand) != null) {
                 String response = commandManager.getCommandValue(baseCommand);
 
@@ -158,8 +151,8 @@ public class TVBot {
 
                 Util.deleteMessage(message);
             }
-            //Forwards the random stuff people PM to the bot - to me
         } else if (isPrivate) {
+            //Forwards the random stuff people PM to the bot - to me
             MessageEmbed embed = Util.buildBotPMEmbed(message, 1);
             Util.sendEmbed(Channels.BOTPM_CH_ID.getChannel(), embed);
         } else {
@@ -232,9 +225,8 @@ public class TVBot {
                     if (!word.isEmpty()) {
                         sBld.append("\n\n").append(word);
                     }
-                    Util.sendPrivateEmbed(author, sBld.toString());
 
-                    messageCache.add(message.getIdLong());
+                    Util.sendPrivateEmbed(author, sBld.toString());
                     Util.deleteMessage(message);
                 }
             }
@@ -289,7 +281,6 @@ public class TVBot {
 
                     Util.sendEmbed(message.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId()), bld.setColor(Util.getBotColor()).build());
                     Util.sendPrivateEmbed(author, "Your message has been automatically removed for containing a link. If this is an error, message a staff member.\n\n" + collectedLinks);
-                    messageCache.add(message.getIdLong());
                     Util.deleteMessage(message);
                 }
             }
@@ -300,6 +291,10 @@ public class TVBot {
         return instance;
     }
 
+    public List<Command> getRegisteredCommands() {
+        return registeredCommands;
+    }
+
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
@@ -308,7 +303,7 @@ public class TVBot {
         return traktManager;
     }
 
-    public static ConfigManager getConfigManager() {
+    public ConfigManager getConfigManager() {
         return configManager;
     }
 
@@ -316,36 +311,20 @@ public class TVBot {
         return commandManager;
     }
 
-    public ToggleManager getToggleMangager() {
+    public ToggleManager getToggleManager() {
         return toggleManager;
     }
 
-    public static JDA getClient() {
+    public JDA getClient() {
         return jda;
     }
 
-    public static String getPrefix() {
-        return prefix;
-    }
-
-    public static Guild getHomeGuild() {
+    public Guild getHomeGuild() {
         return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
     }
 
-    private void registerAllCommands() {
-        new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
-            Command command = commandImpl.cast(Command.class);
-            Optional<Command> existingCommand =
-                    registeredCommands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName())).findAny();
-            if (!existingCommand.isPresent()) {
-                registeredCommands.add(command);
-                System.out.println("Registered command: " + command.getName());
-            } else {
-                System.out.println("Attempted to register two commands with the same name: " + existingCommand.get().getName());
-                System.out.println("Existing: " + existingCommand.get().getClass().getName());
-                System.out.println("Attempted: " + commandImpl.getName());
-            }
-        });
+    public Guild getGuild() {
+        return jda.getGuildById("247394948331077632"); // todo CHANGE THIS
     }
 
     public String getUptime() {
@@ -355,8 +334,6 @@ public class TVBot {
         long hours = (totalSeconds / 3600);
         return (hours < 10 ? "0" + hours : hours) + "h " + (minutes < 10 ? "0" + minutes : minutes) + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
     }
-
-
 
     /**
      * Setting toggles

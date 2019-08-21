@@ -4,7 +4,6 @@ package cback;
 
 import com.jagrosh.jdautilities.command.Command;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.requests.restaction.MessageAction;
 
@@ -18,11 +17,10 @@ import java.util.regex.Pattern;
 
 
 public class Util {
+
     private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@!?(\\d+)>$");
 
-    static JDA client = TVBot.getClient();
-    static ConfigManager cm = TVBot.getConfigManager();
-    static Color BOT_COLOR = Color.decode("#" + cm.getConfigValue("bot_color"));
+    private static Color BOT_COLOR = Color.decode("#" + TVBot.getInstance().getConfigManager().getConfigValue("bot_color"));
 
     /**
      * Returns the bot's color as a Color object
@@ -137,7 +135,7 @@ public class Util {
         try {
 
             EmbedBuilder bld =
-                    new EmbedBuilder().setColor(BOT_COLOR).setAuthor(command.getName()).setDescription(command.getHelp()).addField("Syntax:", TVBot.getPrefix() + command.getName(), false);
+                    new EmbedBuilder().setColor(BOT_COLOR).setAuthor(command.getName()).setDescription(command.getHelp()).addField("Syntax:", TVBot.COMMAND_PREFIX + command.getName(), false);
 
             sendEmbed(message.getChannel(), bld.build());
         } catch (Exception e) {
@@ -278,7 +276,7 @@ public class Util {
             {"6debd47ed13483642cf09e832ed0bc1b", "322c936a8c8be1b803cd94861bdfa868", "dd4dbc0016779df1378e7812eabaa04d", "0e291f67c9274a1abdddeb3fd919cbaa", "1cbd08c76f8af6dddce02c5138971129"};
 
     public static EmbedBuilder getEmbed() {
-        return new EmbedBuilder().setAuthor(client.getSelfUser().getName(), "https://github.com/cbackas/", client.getSelfUser().getEffectiveAvatarUrl());
+        return new EmbedBuilder().setAuthor(TVBot.getInstance().getClient().getSelfUser().getName(), "https://github.com/cbackas/", TVBot.getInstance().getClient().getSelfUser().getEffectiveAvatarUrl());
     }
 
     public static String getTag(User user) {
@@ -317,7 +315,7 @@ public class Util {
     public static User getUserFromMentionArg(String arg) {
         Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
         if (matcher.matches()) {
-            return TVBot.getClient().getUserById(matcher.group(1));
+            return TVBot.getInstance().getClient().getUserById(matcher.group(1));
         }
         return null;
     }
@@ -341,7 +339,7 @@ public class Util {
      */
     public static String getRule(Long ruleID) {
         try {
-            return client.getTextChannelById(263184364811059200L).getMessageById(ruleID).toString();
+            return TVBot.getInstance().getClient().getTextChannelById(263184364811059200L).getMessageById(ruleID).toString();
         } catch (Exception e) {
             reportHome(e);
         }
@@ -371,8 +369,9 @@ public class Util {
      * Sets the lounge's security level
      */
     public static void setSecurity() {
+        //TODO this does nothing? -troy
         try {
-            Guild lounge = TVBot.getHomeGuild();
+            Guild lounge = TVBot.getInstance().getHomeGuild();
             lounge.getVerificationLevel();
         } catch (Exception e) {
             Util.reportHome(e);

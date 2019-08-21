@@ -30,7 +30,7 @@ public class CommandHelp extends Command {
         String[] args = commandEvent.getArgs().split("\\s+", 1);
         if (args.length == 1) {
             boolean tripped = false;
-            for (Command c : TVBot.registeredCommands) {
+            for (Command c : bot.getRegisteredCommands()) {
                 if (c.getName().equalsIgnoreCase(args[0]) || (c.getAliases() != null && Arrays.toString(c.getAliases()).contains(args[0].toLowerCase()))) {
                     Util.syntaxError(c, commandEvent.getMessage());
                     tripped = true;
@@ -47,7 +47,7 @@ public class CommandHelp extends Command {
 
             List<Long> roles = commandEvent.getMessage().getAuthor().getJDA().getRoles().stream().map(ISnowflake::getIdLong).collect(Collectors.toList());
             StringBuilder bld = new StringBuilder();
-            for (Command c : TVBot.registeredCommands) {
+            for (Command c : bot.getRegisteredCommands()) {
                 if (c.getHelp() != null) {
                     String aliases = "Aliases: ";
                     if (c.getAliases() != null) {
@@ -73,7 +73,7 @@ public class CommandHelp extends Command {
             }
 
             embed.setDescription(bld.toString());
-            embed.setFooter("Use " + TVBot.getPrefix() + "help <commandName> to see more info about a command.", null);
+            embed.setFooter("Use " + TVBot.COMMAND_PREFIX + "help <commandName> to see more info about a command.", null);
             Util.sendEmbed((MessageChannel) commandEvent.getMessage().getAuthor().openPrivateChannel(), embed.setColor(Util.getBotColor()).build());
         }
     }

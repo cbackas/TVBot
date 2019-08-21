@@ -83,8 +83,7 @@ public class Scheduler {
             resetUserChange();
             sendDailyMessage();
             //Set status
-            bot.commandBuilder.setGame(Game.watching("all of your messages. Type " + TVBot.prefix + "help"));
-
+            bot.getClient().getPresence().setGame(Game.watching("all of your messages. Type " + TVBot.COMMAND_PREFIX + "help"));
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
     }
@@ -132,7 +131,7 @@ public class Scheduler {
                     System.out.println("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
-                } else if (TVBot.getClient().getTextChannelById(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
+                } else if (bot.getClient().getTextChannelById(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
                     System.out.println("Tried to announce airing for show with no channel, deleting show and airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     bot.getDatabaseManager().getTV().deleteShow(show.getShowID());
@@ -161,7 +160,7 @@ public class Scheduler {
 
                 TextChannel announceChannel = Channels.NEWEPISODE_CH_ID.getChannel();
                 TextChannel globalChannel = Channels.GENERAL_CH_ID.getChannel();
-                TextChannel showChannel = TVBot.getClient().getTextChannelById(Long.parseLong(show.getChannelID()));
+                TextChannel showChannel = bot.getClient().getTextChannelById(Long.parseLong(show.getChannelID()));
 
                 String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
@@ -217,10 +216,10 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        Guild loungeGuild = TVBot.getClient().getGuildById(192441520178200577L);
+        Guild loungeGuild = bot.getClient().getGuildById(192441520178200577L);
 
         if (loungeGuild != null) {
-            TVBot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getMembers().size()));
+            bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getMembers().size()));
         }
     }
 
@@ -228,8 +227,8 @@ public class Scheduler {
      * Reset daily user change
      */
     public void resetUserChange() {
-        TVBot.getConfigManager().setConfigValue("left", "0");
-        TVBot.getConfigManager().setConfigValue("joined", "0");
+        bot.getConfigManager().setConfigValue("left", "0");
+        bot.getConfigManager().setConfigValue("joined", "0");
     }
 
     /**
@@ -270,7 +269,7 @@ public class Scheduler {
 
         embed
                 .setTitle(dayOfWeek + ", " + month + " " + day)
-                .setColor(Util.BOT_COLOR);
+                .setColor(Util.getBotColor());
 
         if (count > 1) {
             embed.setDescription("There are " + count + " episodes airing today! Stick around to see what they are.");

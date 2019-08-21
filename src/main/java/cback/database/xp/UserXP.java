@@ -20,7 +20,7 @@ public class UserXP {
     }
 
     public Member getUser() {
-        if(user == null) user = TVBot.getHomeGuild().getMemberById(Long.parseLong(userID));
+        if(user == null) user = TVBot.getInstance().getHomeGuild().getMemberById(Long.parseLong(userID));
         return user;
     }
 
