@@ -69,7 +69,7 @@ public class CommandMuteAdd extends Command {
                         Util.simpleEmbed(commandEvent.getTextChannel(), "You probably shouldn't mute yourself");
                     } else {
                         try {
-                            commandEvent.getGuild().getController().addSingleRoleToMember(userInput, muteRole);
+                            commandEvent.getGuild().getController().addSingleRoleToMember(userInput, muteRole).queue();
                             Util.simpleEmbed(commandEvent.getTextChannel(), userInput.getEffectiveName() + " has been muted. Check " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.");
                             if (!mutedUsers.contains(u)) {
                                 mutedUsers.add(u);

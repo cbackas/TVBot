@@ -42,7 +42,7 @@ public class CommandMuteRemove extends Command {
                         Util.sendMessage(commandEvent.getTextChannel(), "Not sure how you typed this command... but you can't unmute yourself");
                     } else {
                         try {
-                            commandEvent.getGuild().getController().removeSingleRoleFromMember(userInput, muteRole);
+                            commandEvent.getGuild().getController().removeSingleRoleFromMember(userInput, muteRole).queue();
 
                             Util.simpleEmbed(commandEvent.getTextChannel(), userInput.getEffectiveName() + " has been unmuted");
 
