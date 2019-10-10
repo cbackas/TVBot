@@ -3,15 +3,12 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.entities.Role;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CommandRoleGet extends Command {
 
@@ -25,7 +22,7 @@ public class CommandRoleGet extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         if(args.length == 1) {
             String roleName = String.join(" ", args);

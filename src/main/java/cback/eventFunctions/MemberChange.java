@@ -4,22 +4,23 @@ import cback.Channels;
 import cback.TVBot;
 import cback.Util;
 import cback.database.xp.UserXP;
-
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GuildBanEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.util.List;
 
-public class MemberChange {
+public class MemberChange extends ListenerAdapter {
     private TVBot bot;
 
     public MemberChange(TVBot bot) {
         this.bot = bot;
     }
 
-    public void memberJoin(GuildMemberJoinEvent event) {
+    @Override
+    public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             //Mute Check
             if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getId())) {
@@ -36,7 +37,8 @@ public class MemberChange {
         }
     }
 
-    public void memberLeave(GuildMemberLeaveEvent event) {
+    @Override
+    public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
         if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             User user = event.getUser();
 
@@ -51,7 +53,8 @@ public class MemberChange {
         }
     }
 
-    public void memberBanned(GuildBanEvent event) {
+    @Override
+    public void onGuildBan(GuildBanEvent event) {
         if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
             User user = event.getUser();
 

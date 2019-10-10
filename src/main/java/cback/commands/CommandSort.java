@@ -10,7 +10,6 @@ import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,7 +36,7 @@ public class CommandSort extends Command {
         net.dv8tion.jda.core.entities.Category unsorted = commandEvent.getGuild().getCategoryById(358043583355289600L);
         int count = unsorted.getChannels().size();
 
-        List<Channel> permChannels = getPermChannels(commandEvent.getGuild());
+        List<Channel> permChannels = Util.getPermChannels(commandEvent.getGuild());
 
         //sort non permanent channels
         List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
@@ -119,27 +118,5 @@ public class CommandSort extends Command {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static List<Channel> getPermChannels(Guild guild) {
-        net.dv8tion.jda.core.entities.Category staff = guild.getCategoryById(TVBot.STAFF_CAT_ID);
-        net.dv8tion.jda.core.entities.Category info = guild.getCategoryById(TVBot.INFO_CAT_ID);
-        net.dv8tion.jda.core.entities.Category disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
-        net.dv8tion.jda.core.entities.Category fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
-        net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(TVBot.CLOSED_CAT_ID);
-
-        List<net.dv8tion.jda.core.entities.Category> permCategories = new ArrayList<>();
-        permCategories.add(staff);
-        permCategories.add(info);
-        permCategories.add(disc);
-        permCategories.add(fun);
-        permCategories.add(closed);
-
-        List<Channel> permChannels = new ArrayList<>();
-        for (net.dv8tion.jda.core.entities.Category cat : permCategories) {
-            permChannels.addAll(cat.getChannels());
-        }
-
-        return permChannels;
     }
 }

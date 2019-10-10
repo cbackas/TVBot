@@ -3,14 +3,10 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.Role;
-
 import net.dv8tion.jda.core.entities.User;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,7 +27,7 @@ public class CommandPurge extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         List<Role> userRoles = commandEvent.getAuthor().getJDA().getRoles();
         if (args.length >= 1) {

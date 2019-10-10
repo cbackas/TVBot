@@ -1,15 +1,11 @@
 package cback.commands;
 
-import cback.Channels;
 import cback.TVBot;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import com.uwetrottmann.trakt5.entities.Show;
 import com.uwetrottmann.trakt5.enums.Status;
-
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Message;
 
@@ -29,19 +25,20 @@ public class CommandSearchShows extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
 
-        String showName = String.join(" ", args);
-        Message initialMessage = Util.simpleEmbed(commandEvent.getTextChannel(), "Searching <https://trakt.tv/> for " + showName + " ...");
+        String showArg = commandEvent.getArgs();
 
-        Show showData = bot.getTraktManager().showSummaryFromName(showName);
+        Message initialMessage = Util.simpleEmbedSync(commandEvent.getTextChannel(), "Searching <https://trakt.tv/> for " + showArg + " ...");
+
+        Show showData = bot.getTraktManager().showSummaryFromName(showArg);
         if(showData != null) {
+
             String title = showData.title + " (" + Integer.toString(showData.year) + ") ";
             String overview = showData.overview;
             String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
                     ? showData.airs.day + " at " + Util.to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";
             String premier = new SimpleDateFormat("MMM dd, yyyy").format(new Date(showData.first_aired.toInstant().toEpochMilli()));
-            String runtime = Integer.toString(showData.runtime);
+            String runtime = showData.runtime + " min";
             String country = showData.country + " - " + showData.language;
             String homepage = "<https://trakt.tv/shows/" + showData.ids.slug + ">\n<http://www.imdb.com/title/" + showData.ids.imdb + ">";
 
@@ -54,19 +51,22 @@ public class CommandSearchShows extends Command {
 
             embed.setTitle(title);
             embed.setDescription(overview);
-            embed.addField("References:", homepage, false);
+            embed.addField("Referenced:", homepage, false);
             embed.addField("AIRS:", airs, true);
             embed.addField("RUNTIME:" , runtime, true);
             embed.addField("PREMIERED:", premier, true);
             embed.addField("COUNTRY:", country.toUpperCase(), true);
             embed.addField("GENRES:", String.join(", ", showData.genres), true);
 
-            initialMessage.editMessage("Found it!");
-            embed.setColor(Util.getBotColor()).build();
+            embed.setColor(Util.getBotColor());
+
+            initialMessage.editMessage("Found it!").queue();
+            initialMessage.editMessage(embed.build()).queue();
         } else {
-            initialMessage.editMessage("Oops...");
-            new EmbedBuilder().setDescription("Error: Show not found").setColor(Util.getBotColor()).build();
-            Util.simpleEmbed(commandEvent.getGuild().getTextChannelById(Channels.ERRORLOG_CH_ID.getId()), "Couldn't find show " + showName + " in " + commandEvent.getGuild().getName() + "/" + commandEvent.getChannel().getName());
+
+            var errorEmbed = new EmbedBuilder().setDescription("Error: Show not found").setColor(Util.getBotColor()).build();
+            initialMessage.editMessage("Oops...").queue();
+            initialMessage.editMessage(errorEmbed).queue();
         }
     }
 }

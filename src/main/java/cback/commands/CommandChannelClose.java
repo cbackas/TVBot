@@ -3,10 +3,8 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Guild;
@@ -50,7 +48,7 @@ public class CommandChannelClose extends Command {
     private String closeChannels(Guild guild, List<TextChannel> channels) {
         StringBuilder mentions = new StringBuilder();
         for (Channel c : channels) {
-            if (CommandSort.getPermChannels(guild).contains(c.getParent())) continue;
+            if (Util.getPermChannels(guild).contains(c)) continue;
             net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(355904962200469504L);
             c.getManager().setParent(closed).queue();
 

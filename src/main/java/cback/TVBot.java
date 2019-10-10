@@ -3,14 +3,20 @@ package cback;
 //import cback.commands.*;
 
 import cback.database.DatabaseManager;
+import cback.eventFunctions.ChannelChange;
+import cback.eventFunctions.MemberChange;
+import cback.eventFunctions.MessageChange;
 import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
 import org.reflections.Reflections;
@@ -25,7 +31,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TVBot {
+public class TVBot extends ListenerAdapter {
 
     private static TVBot instance;
     private JDA jda;
@@ -33,11 +39,11 @@ public class TVBot {
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
     private ConfigManager configManager;
-    private CommandManager commandManager;
+    private CustomCommandManager customCommandManager;
+    private CommandClient commandClient;
     private ToggleManager toggleManager;
     private Scheduler scheduler;
 
-    public List<Command> registeredCommands = new ArrayList<>();
     private List<String> commandPrefixes = Arrays.asList("!", "t!", "!g", "--", ".", "?");
 
     private long startTime;
@@ -68,7 +74,7 @@ public class TVBot {
 
         //instantiate config manager first as connect() relies on tokens
         configManager = new ConfigManager(this);
-        commandManager = new CommandManager(this);
+        customCommandManager = new CustomCommandManager(this);
         toggleManager = new ToggleManager(this);
 
         connect();
@@ -92,41 +98,46 @@ public class TVBot {
             return;
         }
 
-        var commandClientBuilder = new CommandClientBuilder();
-        commandClientBuilder.setOwnerId(String.valueOf(CBACK_USR_ID));
-        commandClientBuilder.setPrefix(COMMAND_PREFIX);
-        commandClientBuilder.setGame(Game.watching("all of your messages. Type " + COMMAND_PREFIX + "help"));
+        var commandClientBuilder = new CommandClientBuilder()
+                .setOwnerId(String.valueOf(CBACK_USR_ID))
+                .setPrefix(COMMAND_PREFIX)
+                .setGame(Game.watching("all of your messages. Type " + COMMAND_PREFIX + "help"))
+                .useHelpBuilder(false);
 
         new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
             try {
+
                 Command command = commandImpl.getDeclaredConstructor().newInstance();
-                Optional<Command> existingCommand = registeredCommands.stream()
-                        .filter(cmd -> cmd.getName().equalsIgnoreCase(command.getName()))
-                        .findAny();
-                if (!existingCommand.isPresent()) {
-                    registeredCommands.add(command);
-                    System.out.println("Registered command: " + command.getName());
-                } else {
-                    System.out.println("Attempted to register two commands with the same name: " + existingCommand.get().getName());
-                    System.out.println("Existing: " + existingCommand.get().getClass().getName());
-                    System.out.println("Attempted: " + commandImpl.getName());
-                }
+                commandClientBuilder.addCommand(command);
+                System.out.println("Registered command: " + command.getName());
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        registeredCommands.forEach(c -> commandClientBuilder.addCommand(c));
 
-        JDABuilder builder = new JDABuilder(AccountType.BOT).setToken(token.get()).addEventListener(commandClientBuilder.build());
+        this.commandClient = commandClientBuilder.build();
+
+        JDABuilder builder = new JDABuilder(AccountType.BOT)
+                .setToken(token.get())
+                .addEventListener(commandClient)
+                .addEventListener(this)
+                .addEventListener(new ChannelChange(this))
+                .addEventListener(new MemberChange(this))
+                .addEventListener(new MessageChange(this));
+
         this.jda = builder.build();
 
         startTime = System.currentTimeMillis();
     }
 
-    /*
-     * Message Central Choo Choo
-     */
-    public void onMessageEvent(MessageReceivedEvent event) {
+    @Override
+    public void onReady(ReadyEvent event) {
+        System.out.println(event.getJDA().asBot().getInviteUrl());
+    }
+
+    @Override
+    public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getMessage().getAuthor().isBot()) return; //ignore bot messages
         Message message = event.getMessage();
         boolean isPrivate = message.isFromType(ChannelType.PRIVATE);
@@ -136,13 +147,11 @@ public class TVBot {
 
         Matcher matcher = COMMAND_PATTERN.matcher(text);
         if (matcher.matches()) {
-            String baseCommand = matcher.group(1).toLowerCase();
-            Optional<Command> command = registeredCommands.stream()
-                    .filter(com -> com.getName().equalsIgnoreCase(baseCommand) || (com.getAliases() != null && List.of(com.getAliases()).contains(baseCommand)))
-                    .findAny();
 
-            if (!command.isPresent() && commandManager.getCommandValue(baseCommand) != null) {
-                String response = commandManager.getCommandValue(baseCommand);
+            //check for custom command
+            String baseCommand = matcher.group(1).toLowerCase();
+            if (customCommandManager.getCommandValue(baseCommand) != null) {
+                String response = customCommandManager.getCommandValue(baseCommand);
 
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("``" + message.getAuthor().getName() + "``\n").append(response);
@@ -151,6 +160,7 @@ public class TVBot {
 
                 Util.deleteMessage(message);
             }
+
         } else if (isPrivate) {
             //Forwards the random stuff people PM to the bot - to me
             MessageEmbed embed = Util.buildBotPMEmbed(message, 1);
@@ -162,7 +172,7 @@ public class TVBot {
 
             //Deletes messages/bans users for using too many @mentions
             boolean staffMember = message.getAuthor().getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
-            if (!staffMember && toggleState("limitmentions")) {
+            if (!staffMember && getToggleState("limitmentions")) {
                 int mentionCount = message.getMentions(Message.MentionType.USER, Message.MentionType.EVERYONE, Message.MentionType.HERE).size();
                 if (mentionCount > 10) {
                     try {
@@ -192,12 +202,11 @@ public class TVBot {
      * Checks for dirty words :o
      */
     public void censorMessages(Message message) {
-        if (toggleState("censorwords")) {
+        if (getToggleState("censorwords")) {
             User author = message.getAuthor();
 
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
-            boolean staffChannel =
-                    message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
+            boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
             boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
 
             if (homeGuild && !staffChannel && !staffMember) {
@@ -237,7 +246,7 @@ public class TVBot {
      * Censor links
      */
     public void censorLinks(Message message) {
-        if (toggleState("censorlinks")) {
+        if (getToggleState("censorlinks")) {
             User author = message.getAuthor();
 
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
@@ -291,10 +300,6 @@ public class TVBot {
         return instance;
     }
 
-    public List<Command> getRegisteredCommands() {
-        return registeredCommands;
-    }
-
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
@@ -307,8 +312,8 @@ public class TVBot {
         return configManager;
     }
 
-    public CommandManager getCommandManager() {
-        return commandManager;
+    public CustomCommandManager getCustomCommandManager() {
+        return customCommandManager;
     }
 
     public ToggleManager getToggleManager() {
@@ -319,13 +324,17 @@ public class TVBot {
         return jda;
     }
 
+    public CommandClient getCommandClient() {
+        return commandClient;
+    }
+
     public Guild getHomeGuild() {
         return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
     }
 
-    public Guild getGuild() {
-        return jda.getGuildById("247394948331077632"); // todo CHANGE THIS
-    }
+//    public Guild getGuild() {
+//        return jda.getGuildById("247394948331077632"); // todo CHANGE THIS
+//    }
 
     public String getUptime() {
         long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
@@ -346,7 +355,7 @@ public class TVBot {
     /**
      * Get toggle bool
      */
-    public boolean toggleState(String toggleKey) {
+    public boolean getToggleState(String toggleKey) {
         return toggleManager.getToggleValue(toggleKey);
     }
 }

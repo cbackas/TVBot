@@ -4,9 +4,9 @@ import cback.Channels;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import org.apache.commons.lang3.StringUtils;
 
 
 public class CommandLog extends Command {
@@ -24,11 +24,8 @@ public class CommandLog extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
-
-        if(args.length >= 1) {
-            String finalText = commandEvent.getMessage().getContentDisplay().split(" ", 2)[1];
-            Util.sendLog(commandEvent.getMessage(), finalText);
+        if (!StringUtils.isWhitespace(commandEvent.getArgs())) {
+            Util.sendLog(commandEvent.getMessage(), commandEvent.getArgs());
             Util.simpleEmbed(commandEvent.getTextChannel(), "Log added. " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention());
             Util.deleteMessage(commandEvent.getMessage());
         } else {

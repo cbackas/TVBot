@@ -4,10 +4,8 @@ import cback.Rules;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import net.dv8tion.jda.core.EmbedBuilder;
 
 
@@ -25,7 +23,7 @@ public class CommandRule extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         if(args.length == 1) {
             String ruleNumber = args[0];

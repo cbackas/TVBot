@@ -3,10 +3,8 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import cback.database.xp.UserXP;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import net.dv8tion.jda.core.entities.Member;
 
 import java.util.Iterator;
@@ -26,7 +24,7 @@ public class CommandScoreboard extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         int defaultCount = 5;
         if(args.length == 1 && Integer.parseInt(args[0]) > 5) {

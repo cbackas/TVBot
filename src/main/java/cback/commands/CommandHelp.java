@@ -6,10 +6,10 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.ISnowflake;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,22 +23,21 @@ public class CommandHelp extends Command {
         this.aliases = new String[]{"commands"};
         this.arguments = "help <command>";
         this.help = "Returns a list of commands (you're looking at it right now)";
+        this.guildOnly = false;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
-        if (args.length == 1) {
-            boolean tripped = false;
-            for (Command c : bot.getRegisteredCommands()) {
-                if (c.getName().equalsIgnoreCase(args[0]) || (c.getAliases() != null && Arrays.toString(c.getAliases()).contains(args[0].toLowerCase()))) {
-                    Util.syntaxError(c, commandEvent.getMessage());
-                    tripped = true;
-                    break;
-                }
-            }
+        String[] args = Util.splitArgs(commandEvent.getArgs());
+        if (args.length >= 1) {
 
-            if (!tripped) {
+            var result = bot.getCommandClient().getCommands().stream()
+                    .filter(command -> args[0].equalsIgnoreCase(command.getName()))
+                    .findAny();
+
+            if (result.isPresent()) {
+                Util.syntaxError(result.get(), commandEvent.getMessage());
+            } else {
                 Util.simpleEmbed(commandEvent.getTextChannel(), "Sorry, I couldn't find a command named " + args[0]);
             }
         } else {
@@ -46,27 +45,22 @@ public class CommandHelp extends Command {
             embed.setTitle("Commands:");
 
             List<Long> roles = commandEvent.getMessage().getAuthor().getJDA().getRoles().stream().map(ISnowflake::getIdLong).collect(Collectors.toList());
-            StringBuilder bld = new StringBuilder();
-            for (Command c : bot.getRegisteredCommands()) {
-                if (c.getHelp() != null) {
-                    String aliases = "Aliases: ";
-                    if (c.getAliases() != null) {
-                        int commas = c.getAliases().length - 1;
-                        for (String a : c.getAliases()) {
-                            if (commas > 0) {
-                                aliases += a + ", ";
-                                commas--;
-                            } else {
-                                aliases += a;
-                            }
-                        }
-                    }
 
-                    if (c.getUserPermissions() == null || !Collections.disjoint(roles, Arrays.asList(c.getUserPermissions()))) {
-                        if (aliases.equals("Aliases: ")) {
+            StringBuilder bld = new StringBuilder();
+            List<Command> sortedCommands = new ArrayList<>(bot.getCommandClient().getCommands());
+            sortedCommands.sort(Comparator.comparing(Command::getName));
+            for (Command c : bot.getCommandClient().getCommands()) {
+                if (c.getHelp() != null && !c.isOwnerCommand()) {
+
+                    boolean hasPerms =
+                            c.getRequiredRole() == null || bot.getHomeGuild().getMember(commandEvent.getAuthor()).getRoles().stream().anyMatch(role -> c.getRequiredRole().equalsIgnoreCase(role.getName()));
+
+                    if (hasPerms) {
+                        if (c.getAliases().length == 0) {
                             bld.append("- " + c.getName() + "\n");
                         } else {
-                            bld.append("- " + c.getName() + "\n    " + aliases + "\n");
+                            String aliases = " (" + StringUtils.join(c.getAliases(), ",") + ")";
+                            bld.append("- " + c.getName() + aliases + "\n");
                         }
                     }
                 }
@@ -74,7 +68,7 @@ public class CommandHelp extends Command {
 
             embed.setDescription(bld.toString());
             embed.setFooter("Use " + TVBot.COMMAND_PREFIX + "help <commandName> to see more info about a command.", null);
-            Util.sendEmbed((MessageChannel) commandEvent.getMessage().getAuthor().openPrivateChannel(), embed.setColor(Util.getBotColor()).build());
+            Util.sendEmbed(commandEvent.getMessage().getAuthor().openPrivateChannel().complete(), embed.setColor(Util.getBotColor()).build());
         }
     }
 }

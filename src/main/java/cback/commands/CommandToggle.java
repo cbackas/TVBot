@@ -4,7 +4,6 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.ToggleManager;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
@@ -24,7 +23,7 @@ public class CommandToggle extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         if(args.length == 1) {
             List<String> toggles = bot.getToggleManager().getToggleList();

@@ -16,7 +16,7 @@ public class CommandCommandList extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        Util.simpleEmbed(commandEvent.getTextChannel(), "**Custom Commands**: \n" + bot.getCommandManager().getCommandList());
+        Util.simpleEmbed(commandEvent.getTextChannel(), "**Custom Commands**: \n" + bot.getCustomCommandManager().getCommandList());
         Util.deleteMessage(commandEvent.getMessage());
     }
 }

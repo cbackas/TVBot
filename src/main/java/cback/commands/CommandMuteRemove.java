@@ -26,7 +26,7 @@ public class CommandMuteRemove extends Command {
     }
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         Role muteRole = commandEvent.getGuild().getRolesByName("muted", true).get(0);
 

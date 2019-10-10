@@ -3,16 +3,12 @@ package cback;
 //import cback.commands.CommandSort;
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
-
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -108,20 +104,17 @@ public class Scheduler {
         List<Airing> nextAirings = bot.getDatabaseManager().getTV().getNewAirings();
 
         ///Debugging stuff so the bot never breaks again
-        System.out.println("Checking through " + nextAirings.size() + " airings...");
-        nextAirings.forEach(airing -> System.out.println(airing.getEpisodeInfo() + " is " + (airing.getAiringTime() - currentTime) + " away"));
-        System.out.println("-----------------------");
+//        System.out.println(("----------------------"));
+//        System.out.println("Checking through " + nextAirings.size() + " airings...");
+//        System.out.println(("----------------------"));
+//        nextAirings.forEach(airing -> {
+//            Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
+//            System.out.println(show.getShowName() + " " + airing.getEpisodeInfo() + " is " + (airing.getAiringTime() - currentTime)/60 + "m away");
+//        });
+//        System.out.println("-----------------------");
         ///////////////////////////////////////////////////////
 
-        List<String> bulkShowIDs = new ArrayList<>();
         //if it airs in next 11 minutes, send message and update in database
-
-        ///Debugging stuff so the bot never breaks again
-        System.out.println(nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).count() + " airings within 10 minutes!");
-        System.out.println(StringUtils.join(nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).map(airing -> airing.getShowID() + " " + airing.getEpisodeInfo() + " " + airing.getAiringTime()).toArray(), ", "));
-        System.out.println("-----------------------");
-        ////////////////////////////////////////////////////////
-
         nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
             try {
                 System.out.println("Starting announce for airing " + airing.getShowID() + " " + airing.getEpisodeInfo() + " " + airing.getAiringTime());
@@ -136,7 +129,7 @@ public class Scheduler {
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     bot.getDatabaseManager().getTV().deleteShow(show.getShowID());
                     return;
-                } else if (airing.getAiringTime() - currentTime < -660) { //only announce if it hasnt already aired in the past
+                } else if (airing.getAiringTime() - currentTime < -ALERT_TIME_THRESHOLD) { //only announce if it hasnt already aired in the past
                     System.out.println("Tried to announce old airing, deleting...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
@@ -146,8 +139,9 @@ public class Scheduler {
                 String network = "null";
                 if (show.getNetwork() == null || show.getNetwork().equalsIgnoreCase("null")) {
                     try {
-                        //TraktManager tm = bot.getTraktManager();
-                        //network = tm.showSummary(show.getShowID()).network;
+                        TraktManager tm = bot.getTraktManager();
+                        network = tm.showSummary(show.getShowID()).network;
+                        System.out.println("new network " + network);
                         show.setNetwork(network);
                         bot.getDatabaseManager().getTV().updateShowNetwork(show);
                     } catch (Exception e) {
@@ -164,25 +158,25 @@ public class Scheduler {
 
                 String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
-                if (!network.equalsIgnoreCase("null") && (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon"))) {
-                    //TODO we're actually gonna hold off on this for now.. some Netflix shows don't air weekly now
-                    System.out.println("skipped netflix/amazon show");
-                    return;
-//                    if (bulkShowIDs.contains(show.getShowID())) {
-//                        bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
-//                        return;
-//                    } else {
-//                        Pattern pattern = Pattern.compile("^S([0-9]+).+");
-//                        Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
-//                        if (matcher.matches()) {
-//                            String season = matcher.group(1);
-//                            message = "**" + show.getShowName() + " Season " + season + "** is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";
-//                            bulkShowIDs.add(show.getShowID());
-//                        }
-//                    }
-                }
+//                if (!network.equalsIgnoreCase("null") && (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon"))) {
+//                    //TODO we're actually gonna hold off on this for now.. some Netflix shows don't air weekly now
+//                    System.out.println("skipped netflix/amazon show");
+//                    return;
+////                    if (bulkShowIDs.contains(show.getShowID())) {
+////                        bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
+////                        return;
+////                    } else {
+////                        Pattern pattern = Pattern.compile("^S([0-9]+).+");
+////                        Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
+////                        if (matcher.matches()) {
+////                            String season = matcher.group(1);
+////                            message = "**" + show.getShowName() + " Season " + season + "** is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";
+////                            bulkShowIDs.add(show.getShowID());
+////                        }
+////                    }
+//                }
 
-                System.out.println("Message: " + message);
+//                System.out.println("Message: " + message);
 
                 Util.sendBufferedMessage(announceChannel, message);
                 Util.sendBufferedMessage(globalChannel, message);
@@ -192,7 +186,7 @@ public class Scheduler {
                 airing.setSentStatus(true);
                 bot.getDatabaseManager().getTV().updateAiringSentStatus(airing);
 
-                System.out.println("Sent announcement for " + airing.getEpisodeInfo());
+                System.out.println("Sent announcement for " + show.getShowName() + " - " + airing.getEpisodeInfo());
 
             } catch (Exception e) {
                 Util.reportHome(e);

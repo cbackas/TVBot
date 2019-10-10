@@ -5,11 +5,12 @@ package cback;
 import com.jagrosh.jdautilities.command.Command;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.requests.restaction.MessageAction;
+import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -53,7 +54,7 @@ public class Util {
      */
 
     public static void reportHome(String text, Exception e, Message message) {
-        TextChannel errorChannel = Channels.TEST_CH_ID.getChannel();
+        TextChannel errorChannel = Channels.ERRORLOG_CH_ID.getChannel();
 
         StringBuilder stack = new StringBuilder();
         for (StackTraceElement s : e.getStackTrace()) {
@@ -103,18 +104,7 @@ public class Util {
         e.printStackTrace();
         EmbedBuilder bld = new EmbedBuilder();
 
-        StringBuilder stack = new StringBuilder();
-        for (StackTraceElement s : e.getStackTrace()) {
-            stack.append(s.toString());
-            stack.append("\n");
-        }
-
-        String stackString = stack.toString();
-        if (stackString.length() > 1024) {
-            stackString = stackString.substring(0, 1800);
-        }
-
-        Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld.setColor(BOT_COLOR).setTimestamp(Instant.now()).addField("Exeption:", e.toString(), false).addField("Stack:", stackString, false).build()).queue();
+        Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld.setColor(BOT_COLOR).setTimestamp(Instant.now()).addField("Exeption:", e.toString(), false).build()).queue();
     }
 
     /**
@@ -135,7 +125,11 @@ public class Util {
         try {
 
             EmbedBuilder bld =
-                    new EmbedBuilder().setColor(BOT_COLOR).setAuthor(command.getName()).setDescription(command.getHelp()).addField("Syntax:", TVBot.COMMAND_PREFIX + command.getName(), false);
+                    new EmbedBuilder()
+                            .setColor(BOT_COLOR)
+                            .setAuthor(command.getName())
+                            .setDescription(command.getHelp())
+                            .addField("Syntax:", TVBot.COMMAND_PREFIX + command.getArguments(), false);
 
             sendEmbed(message.getChannel(), bld.build());
         } catch (Exception e) {
@@ -146,36 +140,39 @@ public class Util {
     /**
      * Add a server log
      */
-    public static Message sendLog(Message message, String text) {
+    public static void sendLog(Message message, String text) {
         try {
             EmbedBuilder embed =
                     new EmbedBuilder().setFooter("Action by @" + message.getAuthor().getName(), message.getAuthor().getEffectiveAvatarUrl()).setDescription(text).setColor(Color.GRAY).setTimestamp(Instant.now());
 
-            return Channels.SERVERLOG_CH_ID.getChannel().sendMessage(embed.build()).complete();
+            Channels.SERVERLOG_CH_ID.getChannel().sendMessage(embed.build()).queue();
         } catch (Exception e) {
             reportHome(e);
         }
-        return null;
     }
 
-    public static Message sendLog(Message message, String text, Color color) {
+    public static void sendLog(Message message, String text, Color color) {
         try {
             EmbedBuilder embed =
                     new EmbedBuilder().setFooter("Action by @" + message.getAuthor().getName(), message.getAuthor().getEffectiveAvatarUrl()).setDescription(text).setColor(color).setTimestamp(Instant.now());
 
-            return Channels.SERVERLOG_CH_ID.getChannel().sendMessage(embed.build()).complete();
+            Channels.SERVERLOG_CH_ID.getChannel().sendMessage(embed.build()).queue();
         } catch (Exception e) {
             reportHome(e);
         }
-        return null;
     }
 
     /**
-     * Send simple fast embeds
+     * Synchronous simple embed
+     *
+     * @param channel
+     * @param message
+     * @return
      */
-    public static Message simpleEmbed(TextChannel channel, String message) {
-        MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
+    public static Message simpleEmbedSync(TextChannel channel, String message) {
+
         try {
+            MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
             return channel.sendMessage(embed).complete();
         } catch (Exception ex) {
             System.out.println("Failed to send Embed!");
@@ -183,6 +180,21 @@ public class Util {
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
         }
         return null;
+    }
+
+    /**
+     * Send simple fast embeds
+     */
+    public static void simpleEmbed(TextChannel channel, String message) {
+
+        try {
+            MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
+            channel.sendMessage(embed).queue();
+        } catch (Exception ex) {
+            System.out.println("Failed to send Embed!");
+            ex.printStackTrace();
+            reportHome("Embed failed to send in " + channel.getName(), ex, null);
+        }
     }
 
     public static void simpleEmbed(TextChannel channel, String message, Color color) {
@@ -205,13 +217,12 @@ public class Util {
         }
     }
 
-    public static MessageAction sendBufferedMessage(TextChannel channel, String message) {
+    public static void sendBufferedMessage(TextChannel channel, String message) {
         try {
-            return channel.sendMessage(message);
+            channel.sendMessage(message).queue();
         } catch (Exception e) {
             reportHome(e);
         }
-        return null;
     }
 
     public static void deleteBufferedMessage(Message message) {
@@ -403,5 +414,38 @@ public class Util {
             reportHome(message, e);
             return null;
         }
+    }
+
+    public static String[] splitArgs(String args, int limit) {
+        if (args.isEmpty() || StringUtils.isWhitespace(args)) {
+            return new String[0];
+        } else {
+            return args.split("\\s+", limit);
+        }
+    }
+
+    public static String[] splitArgs(String args) {
+        if (args.isEmpty() || StringUtils.isWhitespace(args)) {
+            return new String[0];
+        } else {
+            return args.split("\\s+");
+        }
+    }
+
+    public static List<Channel> getPermChannels(Guild guild) {
+        net.dv8tion.jda.core.entities.Category staff = guild.getCategoryById(TVBot.STAFF_CAT_ID);
+        net.dv8tion.jda.core.entities.Category info = guild.getCategoryById(TVBot.INFO_CAT_ID);
+        net.dv8tion.jda.core.entities.Category disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
+        net.dv8tion.jda.core.entities.Category fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
+        net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(TVBot.CLOSED_CAT_ID);
+
+        List<Channel> permChannels = new ArrayList<>();
+        permChannels.addAll(staff.getChannels());
+        permChannels.addAll(info.getChannels());
+        permChannels.addAll(disc.getChannels());
+        permChannels.addAll(fun.getChannels());
+        permChannels.addAll(closed.getChannels());
+
+        return permChannels;
     }
 }

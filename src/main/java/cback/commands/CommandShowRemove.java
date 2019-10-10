@@ -5,7 +5,6 @@ import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
 import cback.database.tv.Show;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
@@ -24,7 +23,7 @@ public class CommandShowRemove extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         if(args.length >= 1) {
             String showID = args[0];
@@ -33,7 +32,7 @@ public class CommandShowRemove extends Command {
             if(show != null && entriesDeleted > 0) {
                 Util.sendMessage(commandEvent.getTextChannel(), "Removed show: " + show.getShowName() + ".");
                 System.out.println("@" + commandEvent.getAuthor().getName() + " removed show " + show.getShowName());
-                Util.simpleEmbed(commandEvent.getGuild().getTextChannelById(Channels.BOTLOG_CH_ID.getId()), show.getShowName() + " removed from the database.");
+                Util.simpleEmbed(Channels.BOTLOG_CH_ID.getChannel(), show.getShowName() + " removed from the database.");
             } else {
                 Util.simpleEmbed(commandEvent.getTextChannel(), "No saved show found by this IMDB ID.");
             }

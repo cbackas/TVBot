@@ -1,24 +1,19 @@
 package cback.eventFunctions;
 
-import cback.Channels;
 import cback.TVBot;
-import cback.Util;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberNickChangeEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-import java.time.Instant;
-
-public class MessageChange {
+public class MessageChange extends ListenerAdapter {
     private TVBot bot;
 
     public MessageChange(TVBot bot) {
         this.bot = bot;
     }
 
-    public void messageDeleted(GuildMessageDeleteEvent event) {
+    @Override
+    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
         /*Message message = event.getMessageIdLong()
         if (event.getGuild().getId().equals(TVBot.getHomeGuild().getId())) {
             if (!event. && !TVBot.messageCache.contains(event.getMessageID())) {
@@ -83,31 +78,33 @@ public class MessageChange {
         }*/
     }
 
-    public void nicknameChange(GuildMemberNickChangeEvent event) {
-        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
-            User user = event.getUser();
-
-            String oldName = event.getUser().getName();
-            if (event.getPrevNick().isBlank()) {
-                oldName = event.getPrevNick();
-            }
-
-            String newName = event.getUser().getName();
-            if (event.getNewNick().isBlank()) {
-                newName = event.getNewNick();
-            }
-
-            EmbedBuilder bld = new EmbedBuilder().setColor(java.awt.Color.decode("#FFA500"));
-            bld
-                    .setAuthor(user.getName() + "#" + user.getDiscriminator(), null, Util.getAvatar(user))
-                    .setDescription(user.getAsMention() + " **nickname changed**")
-                    .addField("Before", oldName, false)
-                    .addField("After", newName, false)
-                    .setFooter("ID: " + user.getId(), null)
-                    .setTimestamp(Instant.now());
-
-            TextChannel MESSAGE_LOGS = event.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId());
-            Util.sendEmbed(MESSAGE_LOGS, bld.build());
-        }
+    @Override
+    public void onGuildMemberNickChange(GuildMemberNickChangeEvent event) {
+        //TODO idk
+//        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
+//            User user = event.getUser();
+//
+//            String oldName = event.getUser().getName();
+//            if (event.getPrevNick().isBlank()) {
+//                oldName = event.getPrevNick();
+//            }
+//
+//            String newName = event.getUser().getName();
+//            if (event.getNewNick().isBlank()) {
+//                newName = event.getNewNick();
+//            }
+//
+//            EmbedBuilder bld = new EmbedBuilder().setColor(java.awt.Color.decode("#FFA500"));
+//            bld
+//                    .setAuthor(user.getName() + "#" + user.getDiscriminator(), null, Util.getAvatar(user))
+//                    .setDescription(user.getAsMention() + " **nickname changed**")
+//                    .addField("Before", oldName, false)
+//                    .addField("After", newName, false)
+//                    .setFooter("ID: " + user.getId(), null)
+//                    .setTimestamp(Instant.now());
+//
+//            TextChannel MESSAGE_LOGS = event.getGuild().getTextChannelById(Channels.MESSAGELOG_CH_ID.getId());
+//            Util.sendEmbed(MESSAGE_LOGS, bld.build());
+//        }
     }
 }

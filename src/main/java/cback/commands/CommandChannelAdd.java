@@ -3,14 +3,16 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.requests.restaction.ChannelAction;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.TextChannel;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CommandChannelAdd extends Command {
 
@@ -28,16 +30,21 @@ public class CommandChannelAdd extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String channelName = Stream.of(commandEvent.getArgs()).collect(Collectors.joining("-"));
-        String channelNames[] = channelName.split("-\\|");
 
-        if(channelNames.length >= 1) {
-            Message response = Util.simpleEmbed(commandEvent.getTextChannel(), "Attempting to create" + channelNames.length + " channels ...");
+        List<String> channelNames = Arrays.asList(commandEvent.getArgs().split("\\|"))
+                .stream()
+                .map(arg -> {
+                    return StringUtils.trim(arg).replaceAll("\\s+", "-");
+                })
+                .collect(Collectors.toList());
+
+        if (channelNames.size() >= 1 && !StringUtils.isWhitespace(channelNames.get(0))) {
+            Message response = Util.simpleEmbedSync(commandEvent.getTextChannel(), "Attempting to create " + channelNames.size() + " channels ...");
             String mentions = createChannels(commandEvent.getGuild(), channelNames);
 
             Util.deleteMessage(response);
 
-            String text = "Created " + getCounter() + " channel(s).\n" + mentions;
+            String text = "Created channel(s):\n" + mentions;
             Util.simpleEmbed(commandEvent.getTextChannel(), text);
             Util.sendLog(commandEvent.getMessage(), text);
 
@@ -47,34 +54,20 @@ public class CommandChannelAdd extends Command {
         }
     }
 
-    private String createChannels(Guild guild, String[] names) {
-        StringBuilder mentions = new StringBuilder();
+    private String createChannels(Guild guild, List<String> names) {
+
         net.dv8tion.jda.core.entities.Category unsorted = guild.getCategoryById(TVBot.UNSORTED_CAT_ID);
-        resetCounter();
+
+        StringBuilder mentions = new StringBuilder();
         for (String s : names) {
             try {
-                    ChannelAction c = unsorted.createTextChannel(s);
-                    mentions.append("#").append(unsorted.getName()).append(" ");
-                incCounter();
+                TextChannel newChannel = (TextChannel) unsorted.createTextChannel(s).complete();
+                mentions.append(newChannel.getAsMention()).append("\n");
             } catch (Exception e) {
                 Util.reportHome(e);
             }
         }
         return mentions.toString();
     }
-
-    public int getCounter() {
-        return counter;
-    }
-
-    public void resetCounter() {
-        this.counter = 0;
-    }
-
-    public void incCounter() {
-        this.counter++;
-    }
-
-    int counter = 0;
 
 }

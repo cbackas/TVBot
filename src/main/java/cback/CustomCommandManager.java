@@ -8,9 +8,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class CommandManager {
+public class CustomCommandManager {
 
     private TVBot bot;
 
@@ -23,7 +24,7 @@ public class CommandManager {
         //Insert all default config values here. They will be added on startup if they do not exist.
     }
 
-    public CommandManager(TVBot bot) {
+    public CustomCommandManager(TVBot bot) {
         this.bot = bot;
         initConfig();
     }

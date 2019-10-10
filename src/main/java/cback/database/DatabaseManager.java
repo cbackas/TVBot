@@ -1,8 +1,7 @@
 package cback.database;
 
-import cback.CommandManager;
+import cback.CustomCommandManager;
 import cback.TVBot;
-import cback.Util;
 import cback.database.tv.TVDatabase;
 import cback.database.xp.XPDatabase;
 
@@ -27,7 +26,7 @@ public class DatabaseManager {
         if (connection == null) {
             try {
                 Class.forName("org.sqlite.JDBC");
-                connection = DriverManager.getConnection("jdbc:sqlite:" + CommandManager.botPath + "/showdata.db");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + CustomCommandManager.botPath + "/showdata.db");
             } catch (Exception e) {
                 e.printStackTrace();
             }

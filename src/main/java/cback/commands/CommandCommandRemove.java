@@ -18,15 +18,18 @@ public class CommandCommandRemove extends Command {
         this.help = "Deletes a custom command form the official custom command database!";
         this.requiredRole = TVRoles.ADMIN.name;
     }
+
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
         if(args.length == 1) {
             String command = args[0];
 
-            if(bot.getCommandManager().getCommandValue(command) != null) {
-                bot.getCommandManager().removeConfigValue(command);
+            if (bot.getCustomCommandManager().getCommandValue(command) != null) {
+                bot.getCustomCommandManager().removeConfigValue(command);
                 Util.simpleEmbed(commandEvent.getTextChannel(), "Custom command removed: ``" + command + "``");
+            } else {
+                Util.simpleEmbed(commandEvent.getTextChannel(), "That command doesn't exist.");
             }
         } else {
             Util.syntaxError(this, commandEvent.getMessage());

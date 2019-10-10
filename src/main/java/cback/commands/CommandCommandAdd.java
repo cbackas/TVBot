@@ -3,7 +3,6 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
@@ -22,14 +21,16 @@ public class CommandCommandAdd extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs(), 2);
         String commandName = args[0];
-        String commandResponse = commandEvent.getMessage().getContentRaw().split(" ", 3)[2];
 
-        if(commandName != null && commandResponse != null && bot.getCommandManager().getCommandValue(commandName) == null && !bot.getRegisteredCommands().contains(commandName)) {
-            bot.getCommandManager().setConfigValue(commandName, commandResponse);
-
-            Util.simpleEmbed(commandEvent.getTextChannel(), "Custom command added: ``" + commandName + "``");
+        if (args.length == 2) {
+            if (bot.getCustomCommandManager().getCommandValue(commandName) != null) {
+                Util.simpleEmbed(commandEvent.getTextChannel(), "This command already exists.");
+            } else {
+                bot.getCustomCommandManager().setConfigValue(commandName, args[1]);
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Custom command added: ``" + commandName + "``");
+            }
         } else {
             Util.syntaxError(this, commandEvent.getMessage());
         }

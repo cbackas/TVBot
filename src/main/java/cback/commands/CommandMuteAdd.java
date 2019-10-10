@@ -10,7 +10,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +28,7 @@ public class CommandMuteAdd extends Command {
     
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         List<String> mutedUsers = bot.getConfigManager().getConfigArray("muted");
 
@@ -38,17 +37,18 @@ public class CommandMuteAdd extends Command {
         if(args[0].equalsIgnoreCase("list")) {
             StringBuilder mutedList = new StringBuilder();
             if(!mutedUsers.isEmpty()) {
-                for(String userID : mutedUsers) {
-                    Member userO = commandEvent.getGuild().getMemberById(Long.parseLong(userID));
-                    String user = "<@" + commandEvent.getGuild().getMemberById(Long.parseLong(userID));
-
-                    if(userO != null) {
-                        user = userO.getAsMention();
+                for (String mutedID : mutedUsers) {
+                    Member mutedMember = commandEvent.getGuild().getMemberById(Long.parseLong(mutedID));
+                    String user;
+                    if (mutedMember != null) {
+                        user = mutedMember.getAsMention();
+                    } else {
+                        user = mutedID;
                     }
                     mutedList.append("\n").append(user);
                 }
             } else {
-                mutedList.append("\n").append("There are currently no mutes users.");
+                mutedList.append("\n").append("There are currently no muted users.");
             }
             Util.simpleEmbed(commandEvent.getTextChannel(), "Muted Users: (plain text for users not on server)\n" + mutedList.toString());
         } else if(args.length >= 1) {

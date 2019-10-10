@@ -3,10 +3,8 @@ package cback.commands;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -48,7 +46,7 @@ public class CommandChannelOpen extends Command {
     private String openChannels(Guild guild, List<TextChannel> channels) {
         StringBuilder mentions = new StringBuilder();
         for (TextChannel c : channels) {
-            if (CommandSort.getPermChannels(guild).contains(c.getParent())) continue;
+            if (Util.getPermChannels(guild).contains(c)) continue;
             net.dv8tion.jda.core.entities.Category unsorted = guild.getCategoryById(358043583355289600L);
             c.getManager().setParent(unsorted).queue();
 

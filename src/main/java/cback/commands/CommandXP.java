@@ -3,11 +3,8 @@ package cback.commands;
 import cback.TVBot;
 import cback.Util;
 import cback.database.xp.UserXP;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
 public class CommandXP extends Command {
@@ -19,11 +16,12 @@ public class CommandXP extends Command {
         this.name = "xp";
         this.arguments = "xp [@user]";
         this.help = "Shows you your xp or the person you mentioned's xp";
+        this.guildOnly = false;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         User user;
         if(args.length >= 1) {

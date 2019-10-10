@@ -3,12 +3,8 @@ package cback.commands;
 import cback.Channels;
 import cback.TVBot;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
-import java.util.Collections;
-import java.util.List;
 
 public class CommandSuggest extends Command {
 
@@ -24,8 +20,7 @@ public class CommandSuggest extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        List<Long> suggestable = Collections.singletonList(Channels.SUGGEST_CH_ID.getChannel().getIdLong());
-        if(suggestable.contains(commandEvent.getChannel().getIdLong())) {
+        if (commandEvent.getChannel().getIdLong() == Channels.SUGGEST_CH_ID.getId()) {
             try {
                 commandEvent.getTextChannel().pinMessageById(commandEvent.getMessage().getIdLong()).queue();
             } catch(Exception ex) {
