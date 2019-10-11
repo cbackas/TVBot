@@ -34,7 +34,7 @@ public class CommandMuteAdd extends Command {
 
         Role muteRole = commandEvent.getGuild().getRolesByName("muted", true).get(0);
 
-        if(args[0].equalsIgnoreCase("list")) {
+        if (args.length >= 1 && args[0].equalsIgnoreCase("list")) {
             StringBuilder mutedList = new StringBuilder();
             if(!mutedUsers.isEmpty()) {
                 for (String mutedID : mutedUsers) {

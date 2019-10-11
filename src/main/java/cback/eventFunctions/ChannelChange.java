@@ -4,8 +4,6 @@ import cback.TVBot;
 import cback.TraktManager;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.core.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;

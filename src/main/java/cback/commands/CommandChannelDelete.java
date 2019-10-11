@@ -50,7 +50,7 @@ public class CommandChannelDelete extends Command {
         for (TextChannel c : channels) {
             try {
                 c.delete().queue();
-                mentions.append("#" + c.getName() + " ");
+                mentions.append("#").append(c.getName()).append(" ");
             } catch (Exception e) {
                 Util.reportHome(e);
             }

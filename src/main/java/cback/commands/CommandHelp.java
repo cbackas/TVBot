@@ -57,10 +57,10 @@ public class CommandHelp extends Command {
 
                     if (hasPerms) {
                         if (c.getAliases().length == 0) {
-                            bld.append("- " + c.getName() + "\n");
+                            bld.append("- ").append(c.getName()).append("\n");
                         } else {
                             String aliases = " (" + StringUtils.join(c.getAliases(), ",") + ")";
-                            bld.append("- " + c.getName() + aliases + "\n");
+                            bld.append("- ").append(c.getName()).append(aliases).append("\n");
                         }
                     }
                 }

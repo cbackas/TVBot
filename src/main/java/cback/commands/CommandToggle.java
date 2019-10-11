@@ -52,7 +52,7 @@ public class CommandToggle extends Command {
         StringBuilder bld = new StringBuilder();
         for (String s : toggles) {
             boolean setting = tm.getToggleValue(s);
-            bld.append(s + " - ");
+            bld.append(s).append(" - ");
             if (setting) {
                 bld.append("true");
             } else {

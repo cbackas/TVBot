@@ -4,10 +4,8 @@ import cback.Channels;
 import cback.TVBot;
 import cback.TVRoles;
 import cback.Util;
-
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.managers.GuildController;
@@ -32,7 +30,7 @@ public class CommandBan extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         PermissionUtil.checkPermission(commandEvent.getTextChannel(), commandEvent.getMember(), Permission.BAN_MEMBERS);
-        Pattern pattern = Pattern.compile("^\\!ban <@!?(\\d+)> ?(.+)?");
+        Pattern pattern = Pattern.compile("^!ban <@!?(\\d+)> ?(.+)?");
         Matcher matcher = pattern.matcher(commandEvent.getMessage().getContentRaw());
         GuildController gC = new GuildController(commandEvent.getGuild());
         if(matcher.find()) {

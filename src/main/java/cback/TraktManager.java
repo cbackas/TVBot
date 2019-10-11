@@ -30,7 +30,7 @@ public class TraktManager {
         this.bot = bot;
 
         Optional<String> traktToken = bot.getConfigManager().getTokenValue("traktToken");
-        if (!traktToken.isPresent()) {
+        if (traktToken.isEmpty()) {
             System.out.println("-------------------------------------");
             System.out.println("Insert your Trakt token in the config.");
             System.out.println("Exiting......");
@@ -41,7 +41,7 @@ public class TraktManager {
         trakt = new TraktV2(traktToken.get());
 
         Optional<String> tmdbToken = bot.getConfigManager().getTokenValue("tmdbToken");
-        if (!tmdbToken.isPresent()) {
+        if (tmdbToken.isEmpty()) {
             System.out.println("-------------------------------------");
             System.out.println("Insert your tmdb token in the config.");
             System.out.println("Exiting......");

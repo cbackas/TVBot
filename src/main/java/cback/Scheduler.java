@@ -207,8 +207,8 @@ public class Scheduler {
      * @return the rounded number divisible by v
      */
     public static int roundUp(double i, int v) {
-        Double rounded = Math.ceil(i / v) * v;
-        return rounded.intValue();
+        double rounded = Math.ceil(i / v) * v;
+        return (int) rounded;
     }
 
     /**

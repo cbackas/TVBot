@@ -55,8 +55,8 @@ public class TVBot extends ListenerAdapter {
     public static final String COMMAND_PREFIX = "!";
     private static final Pattern COMMAND_PATTERN = Pattern.compile("(?s)^" + COMMAND_PREFIX + "([^\\s]+) ?(.*)", Pattern.CASE_INSENSITIVE);
 
-    public static final long CBACK_USR_ID = 73416411443113984l;
-    public static final long HOMESERVER_GLD_ID = 192441520178200577l;
+    public static final long CBACK_USR_ID = 73416411443113984L;
+    public static final long HOMESERVER_GLD_ID = 192441520178200577L;
 
     public static final long UNSORTED_CAT_ID = 358043583355289600L;
     public static final long CLOSED_CAT_ID = 355904962200469504L;
@@ -219,7 +219,7 @@ public class TVBot extends ListenerAdapter {
                 String content = message.getContentDisplay().toLowerCase();
 
                 String word = "";
-                Boolean tripped = false;
+                boolean tripped = false;
                 for (String w : bannedWords) {
                     if (content.matches("\\n?.*\\b\\n?" + w + "\\n?\\b.*\\n?.*") || content.matches("\\n?.*\\b\\n?" + w + "s\\n?\\b.*\\n?.*")) {
                         tripped = true;

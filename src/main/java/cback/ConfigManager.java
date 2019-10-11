@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.net.URISyntaxException;
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class ConfigManager {
 
     private TVBot bot;
@@ -18,6 +19,7 @@ public class ConfigManager {
     private JSONObject configJson;
 
     private static Map<String, Object> defaultConfig = new HashMap<>();
+
     static {
         //Insert all default config values here. They will be added on startup if they do not exist.
         defaultConfig.put("botToken", "TOKEN");
