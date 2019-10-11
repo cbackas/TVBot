@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.requests.restaction.order.ChannelOrderAction;
 
 import java.util.Comparator;
 import java.util.List;
@@ -33,8 +34,8 @@ public class CommandSort extends Command {
     protected void execute(CommandEvent commandEvent) {
         Util.simpleEmbed(commandEvent.getTextChannel(), "Lets get sorting!");
 
-        net.dv8tion.jda.core.entities.Category unsorted = commandEvent.getGuild().getCategoryById(358043583355289600L);
-        int count = unsorted.getChannels().size();
+        var unsortedCat = commandEvent.getGuild().getCategoryById(358043583355289600L);
+        int unsortedCount = unsortedCat.getChannels().size();
 
         List<Channel> permChannels = Util.getPermChannels(commandEvent.getGuild());
 
@@ -52,24 +53,43 @@ public class CommandSort extends Command {
 
         //put all the incorrectly sorted channels into their categories
         for (Channel c : showChannelsSorted) {
-                String channelName = getSortName(c.getName());
-                char firstLetter = channelName.toLowerCase().charAt(0);
-                int index = ALPHABET.indexOf(firstLetter) + 1;
-                if (index <= 6) {
-                    changeCategory(c, af); // A-F
-                } else if (index > 6 && index <= 12) {
-                    changeCategory(c, gl); // G-L
-                } else if (index > 12 && index <= 18) {
-                    changeCategory(c, mr); // M-R
-                } else if (index > 18 && index <= 26) {
-                    changeCategory(c, sz); // S-Z
-                }
+
+            //do not move channels from the closed category!
+            if (c.getParent() != null && c.getParent().getIdLong() == TVBot.CLOSED_CAT_ID) continue;
+
+            String channelName = getSortName(c.getName());
+            char firstLetter = channelName.toLowerCase().charAt(0);
+            int index = ALPHABET.indexOf(firstLetter) + 1;
+            if (index <= 6) {
+                changeCategory(c, af); // A-F
+            } else if (index > 6 && index <= 12) {
+                changeCategory(c, gl); // G-L
+            } else if (index > 12 && index <= 18) {
+                changeCategory(c, mr); // M-R
+            } else if (index > 18 && index <= 26) {
+                changeCategory(c, sz); // S-Z
+            }
         }
 
-        //apply new positions
-        batchSortChannels(commandEvent.getGuild(), showChannelsSorted);
+        //create order action and apply new positions
+        var orderAction = batchSortChannels(commandEvent.getGuild(), showChannelsSorted);
+        //queue up the sort action
+        if (orderAction != null) {
 
-        Util.simpleEmbed(commandEvent.getTextChannel(), "All done!" + count + " channe;(s) sorted.");
+            orderAction.queue(successReturn -> {
+                Util.simpleEmbed(commandEvent.getTextChannel(), "All done!" + unsortedCount + " channels moved, " + showChannelsSorted.size() + " channels sorted.");
+                System.out.println("Successfully sorted channels");
+            }, failureReturn -> {
+                Util.simpleEmbed(commandEvent.getTextChannel(), "Something went wrong...error during sort action");
+                System.out.println("Failed to sort channels");
+                failureReturn.printStackTrace();
+            });
+
+        } else {
+            Util.simpleEmbed(commandEvent.getTextChannel(), "Something went wrong...error during sort action");
+        }
+
+
     }
 
     public static String getSortName(String channelName) {
@@ -87,7 +107,7 @@ public class CommandSort extends Command {
         }
     }
 
-    public void batchSortChannels(Guild guild, List<Channel> sortedChannels) {
+    public ChannelOrderAction<TextChannel> batchSortChannels(Guild guild, List<Channel> sortedChannels) {
         try {
 
             //ChannelOrderAction instance to bulk sort channels
@@ -105,18 +125,13 @@ public class CommandSort extends Command {
                 }
             }
 
-            //queue up the sort
-            channelOrderAction.queue(successReturn -> {
-                //TODO on success - send message?
-                System.out.println("Successfully sorted channels");
-            }, failureReturn -> {
-                //TODO on failure - send message?
-                System.out.println("Failed to sort channels");
-                failureReturn.printStackTrace();
-            });
+            return channelOrderAction;
+
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 }

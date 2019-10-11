@@ -4,11 +4,11 @@ public class Airing {
 
     private String episodeID;
     private String showID;
-    private long airingTime;
+    private int airingTime;
     private String episodeInfo;
     private boolean sentStatus;
 
-    public Airing(String episodeID, String showID, long airingTime, String episodeInfo, boolean sentStatus) {
+    public Airing(String episodeID, String showID, int airingTime, String episodeInfo, boolean sentStatus) {
         this.episodeID = episodeID;
         this.showID = showID;
         this.airingTime = airingTime;
@@ -24,7 +24,7 @@ public class Airing {
         return showID;
     }
 
-    public long getAiringTime() {
+    public int getAiringTime() {
         return airingTime;
     }
 
@@ -38,5 +38,21 @@ public class Airing {
 
     public void setSentStatus(boolean sentStatus) {
         this.sentStatus = sentStatus;
+    }
+
+    public void setEpisodeID(String episodeID) {
+        this.episodeID = episodeID;
+    }
+
+    public void setShowID(String showID) {
+        this.showID = showID;
+    }
+
+    public void setAiringTime(int airingTime) {
+        this.airingTime = airingTime;
+    }
+
+    public void setEpisodeInfo(String episodeInfo) {
+        this.episodeInfo = episodeInfo;
     }
 }

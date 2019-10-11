@@ -4,8 +4,11 @@ package cback;
 
 import cback.database.DatabaseManager;
 import cback.eventFunctions.ChannelChange;
+import cback.eventFunctions.CommandListenerImpl;
 import cback.eventFunctions.MemberChange;
 import cback.eventFunctions.MessageChange;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
@@ -20,6 +23,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import org.nibor.autolink.LinkExtractor;
 import org.nibor.autolink.LinkSpan;
 import org.reflections.Reflections;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
@@ -55,17 +59,20 @@ public class TVBot extends ListenerAdapter {
     public static final long HOMESERVER_GLD_ID = 192441520178200577l;
 
     public static final long UNSORTED_CAT_ID = 358043583355289600L;
+    public static final long CLOSED_CAT_ID = 355904962200469504L;
     public static final long STAFF_CAT_ID = 355901035597922304L;
     public static final long INFO_CAT_ID = 355910636464504832L;
     public static final long DISCUSSION_CAT_ID = 355910667812995084L;
     public static final long FUN_CAT_ID = 358679449451102210L;
-    public static final long CLOSED_CAT_ID = 355904962200469504L;
     public static final long AF_CAT_ID = 358038418208587785L;
     public static final long GL_CAT_ID = 358038474894606346L;
     public static final long MR_CAT_ID = 358038505244327937L;
     public static final long SZ_CAT_ID = 358038532780195840L;
 
     public static void main(String[] args) throws LoginException, InterruptedException {
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.INFO);
+
         new TVBot();
     }
 
@@ -102,7 +109,8 @@ public class TVBot extends ListenerAdapter {
                 .setOwnerId(String.valueOf(CBACK_USR_ID))
                 .setPrefix(COMMAND_PREFIX)
                 .setGame(Game.watching("all of your messages. Type " + COMMAND_PREFIX + "help"))
-                .useHelpBuilder(false);
+                .useHelpBuilder(false)
+                .setListener(new CommandListenerImpl());
 
         new Reflections("cback.commands").getSubTypesOf(Command.class).forEach(commandImpl -> {
             try {
@@ -126,14 +134,14 @@ public class TVBot extends ListenerAdapter {
                 .addEventListener(new MemberChange(this))
                 .addEventListener(new MessageChange(this));
 
-        this.jda = builder.build();
+        this.jda = builder.build().awaitReady();
 
         startTime = System.currentTimeMillis();
     }
 
     @Override
     public void onReady(ReadyEvent event) {
-        System.out.println(event.getJDA().asBot().getInviteUrl());
+        System.out.println("======READY======");
     }
 
     @Override

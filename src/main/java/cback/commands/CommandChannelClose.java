@@ -5,10 +5,10 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.IMentionable;
 import net.dv8tion.jda.core.entities.TextChannel;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -21,23 +21,23 @@ public class CommandChannelClose extends Command {
         this.name = "closechannel";
         this.aliases = new String[]{"close"};
         this.arguments = "closechannel #channel";
-        this.help = "Closes a TV show channel and makes it all secret. If you don't specify a channel, it will just close";
+        this.help = "Closes a TV show channel and makes it all secret.\nUse !closechannel here to close the current channel.";
         this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String[] args = commandEvent.getArgs().split("\\s+", 1);
+        String[] args = Util.splitArgs(commandEvent.getArgs());
 
         List<TextChannel> channels = commandEvent.getMessage().getMentionedChannels();
-        if(channels.size() == 0 && args[0].equalsIgnoreCase("here")) {
+        if (channels.size() == 0 && args.length >= 1 && args[0].equalsIgnoreCase("here")) {
             channels.add(commandEvent.getTextChannel());
         }
 
         if(channels.size() >= 1) {
-            String mentions = closeChannels(commandEvent.getGuild(), channels);
+            closeChannels(commandEvent.getGuild(), channels);
 
-            String text = "Closed " + channels.size() + " channel(s).\n" + mentions;
+            String text = "Closed channels:\n" + StringUtils.join(channels.stream().map(IMentionable::getAsMention).toArray(), " ");
             Util.simpleEmbed(commandEvent.getTextChannel(), text);
             Util.sendLog(commandEvent.getMessage(), text);
         } else {
@@ -45,20 +45,12 @@ public class CommandChannelClose extends Command {
         }
     }
 
-    private String closeChannels(Guild guild, List<TextChannel> channels) {
-        StringBuilder mentions = new StringBuilder();
-        for (Channel c : channels) {
-            if (Util.getPermChannels(guild).contains(c)) continue;
-            net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(355904962200469504L);
-            c.getManager().setParent(closed).queue();
-
-            try {
-                c.createPermissionOverride(guild.getPublicRole()).setDeny(Permission.MESSAGE_READ).queue();
-                mentions.append("#").append(c.getName()).append(" ");
-            } catch (Exception e) {
-                Util.reportHome(e);
-            }
+    private void closeChannels(Guild guild, List<TextChannel> channels) {
+        var permChannels = Util.getPermChannels(guild);
+        for (TextChannel c : channels) {
+            if (permChannels.contains(c)) continue;
+            var closedCategory = guild.getCategoryById(TVBot.CLOSED_CAT_ID);
+            c.getManager().setParent(closedCategory).queue();
         }
-        return mentions.toString();
     }
 }

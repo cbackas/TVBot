@@ -1,6 +1,7 @@
 package cback;
 
 //import cback.commands.CommandSort;
+
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -37,13 +38,15 @@ public class Scheduler {
 
     private TVBot bot;
 
+    private ScheduledExecutorService exec;
+
     public Scheduler(TVBot bot) {
         this.bot = bot;
+        exec = Executors.newSingleThreadScheduledExecutor();
         onInit();
     }
 
     private void onInit() {
-        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
 
         int time = Util.getCurrentTime(); //current epoch time in seconds
 
@@ -88,7 +91,7 @@ public class Scheduler {
         //winter - 18000s
         //summer - 14400s
 
-        boolean inSavingsTime = TimeZone.getTimeZone( "US/Eastern").inDaylightTime( new Date() );
+        boolean inSavingsTime = TimeZone.getTimeZone("US/Eastern").inDaylightTime(new Date());
         if (inSavingsTime) {
             return 14400;
         } else {
@@ -103,16 +106,7 @@ public class Scheduler {
         //get next 30 shows airing
         List<Airing> nextAirings = bot.getDatabaseManager().getTV().getNewAirings();
 
-        ///Debugging stuff so the bot never breaks again
-//        System.out.println(("----------------------"));
-//        System.out.println("Checking through " + nextAirings.size() + " airings...");
-//        System.out.println(("----------------------"));
-//        nextAirings.forEach(airing -> {
-//            Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
-//            System.out.println(show.getShowName() + " " + airing.getEpisodeInfo() + " is " + (airing.getAiringTime() - currentTime)/60 + "m away");
-//        });
-//        System.out.println("-----------------------");
-        ///////////////////////////////////////////////////////
+        System.out.println("Checking " + nextAirings.size() + " airings... " + nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).count() + " ready to announce");
 
         //if it airs in next 11 minutes, send message and update in database
         nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
@@ -158,26 +152,6 @@ public class Scheduler {
 
                 String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
-//                if (!network.equalsIgnoreCase("null") && (network.equalsIgnoreCase("netflix") || network.equalsIgnoreCase("amazon"))) {
-//                    //TODO we're actually gonna hold off on this for now.. some Netflix shows don't air weekly now
-//                    System.out.println("skipped netflix/amazon show");
-//                    return;
-////                    if (bulkShowIDs.contains(show.getShowID())) {
-////                        bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
-////                        return;
-////                    } else {
-////                        Pattern pattern = Pattern.compile("^S([0-9]+).+");
-////                        Matcher matcher = pattern.matcher(airing.getEpisodeInfo());
-////                        if (matcher.matches()) {
-////                            String season = matcher.group(1);
-////                            message = "**" + show.getShowName() + " Season " + season + "** is about to be released on " + network + ". Go to " + showChannel.mention() + " to see not so live episode discussion!";
-////                            bulkShowIDs.add(show.getShowID());
-////                        }
-////                    }
-//                }
-
-//                System.out.println("Message: " + message);
-
                 Util.sendBufferedMessage(announceChannel, message);
                 Util.sendBufferedMessage(globalChannel, message);
                 Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
@@ -199,9 +173,9 @@ public class Scheduler {
      * Delete airing entries from the database if episode aired over a week ago
      */
     public void pruneDeletedAirings() {
-        //delete week old airings whose announcements were deleted
-        List<Airing> deletedAirings = bot.getDatabaseManager().getTV().getOldAirings();
-        deletedAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
+        //delete old airings
+        List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
+        oldAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
             bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
         });
     }

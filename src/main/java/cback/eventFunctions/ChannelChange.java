@@ -4,7 +4,6 @@ import cback.TVBot;
 import cback.TraktManager;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent;
@@ -55,11 +54,12 @@ public class ChannelChange extends ListenerAdapter {
             Guild guild = event.getJDA().getGuildById(192441520178200577L);
             Role muted = guild.getRoleById(231269949635559424L);
 
-            try {
-                event.getChannel().createPermissionOverride(muted).setDeny(Permission.MESSAGE_WRITE).queue();
-            } catch (Exception e) {
-                Util.reportHome(e);
-            }
+            //TODO seems like another bot does this already?
+//            try {
+//                event.getChannel().createPermissionOverride(muted).setDeny(Permission.MESSAGE_WRITE).queue();
+//            } catch (Exception e) {
+//                Util.reportHome(e);
+//            }
 
             //Check for tv show
             TraktManager trakt = bot.getTraktManager();

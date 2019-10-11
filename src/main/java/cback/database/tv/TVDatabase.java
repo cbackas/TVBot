@@ -138,6 +138,24 @@ public class TVDatabase {
     }
 
     /**
+     * Writes airing's new data to database
+     *
+     * @param airing
+     */
+    public void updateAiringInfo(Airing airing) {
+        try {
+            PreparedStatement statement = dbManager.getConnection().prepareStatement("UPDATE airing SET time=?,episode_info=? WHERE episode_id= ?;");
+            statement.setInt(1, airing.getAiringTime());
+            statement.setString(2, airing.getEpisodeInfo());
+            statement.setString(3, airing.getEpisodeID()); //where episode id
+
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Writes airing's new sent status to database
      * @param airing
      */

@@ -1,5 +1,6 @@
 package cback;
 
+import cback.database.tv.Airing;
 import com.uwetrottmann.tmdb2.Tmdb;
 import com.uwetrottmann.tmdb2.entities.Movie;
 import com.uwetrottmann.tmdb2.entities.TvShowResultsPage;
@@ -67,15 +68,36 @@ public class TraktManager {
                         int airTime = Math.toIntExact(entry.first_aired.toInstant().toEpochMilli() / 1000);
                         int currentTime = Util.getCurrentTime();
                         String episodeID = String.valueOf(entry.episode.ids.trakt);
-                        //don't add if already aired or if airing already in database
-                        if ((bot.getDatabaseManager().getTV().getAiring(episodeID) == null) && (airTime > currentTime)) {
+                        //don't add if already aired
+                        if (airTime > currentTime) {
+
                             String episodeInfo = "S" + entry.episode.season + "E" + entry.episode.number + " - " + entry.episode.title;
-                            bot.getDatabaseManager().getTV().insertAiring(episodeID, id, airTime, episodeInfo, false);
-                            System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - in " + ((airTime - Util.getCurrentTime()) / 3600) + "h");
+
+                            Airing existingAiring = bot.getDatabaseManager().getTV().getAiring(episodeID);
+                            if (existingAiring != null) { //if airing already in database, check for updates
+                                if (existingAiring.getAiringTime() != airTime) {
+                                    System.out.println("Updating air time for " + entry.show.title + " - " + episodeInfo);
+                                    System.out.println("Old " + existingAiring.getAiringTime());
+                                    System.out.println("New " + airTime);
+
+                                    existingAiring.setAiringTime(airTime);
+                                    bot.getDatabaseManager().getTV().updateAiringInfo(existingAiring);
+                                }
+                                if (!existingAiring.getEpisodeInfo().equalsIgnoreCase(episodeInfo)) {
+                                    System.out.println("Updating episode name for " + entry.show.title + " - " + episodeInfo);
+                                    System.out.println("Old " + existingAiring.getEpisodeInfo());
+                                    System.out.println("New " + episodeInfo);
+
+                                    existingAiring.setEpisodeInfo(episodeInfo);
+                                    bot.getDatabaseManager().getTV().updateAiringInfo(existingAiring);
+                                }
+                            } else { //otherwise write new airing
+                                bot.getDatabaseManager().getTV().insertAiring(episodeID, id, airTime, episodeInfo, false);
+                                System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - in " + ((airTime - Util.getCurrentTime()) / 3600) + "h");
+                            }
                         }
                     }
                 }
-                System.out.println("-------------------------");
             }
         } catch (Exception e) {
             Util.reportHome(e);

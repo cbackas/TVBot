@@ -437,14 +437,12 @@ public class Util {
         net.dv8tion.jda.core.entities.Category info = guild.getCategoryById(TVBot.INFO_CAT_ID);
         net.dv8tion.jda.core.entities.Category disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
         net.dv8tion.jda.core.entities.Category fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
-        net.dv8tion.jda.core.entities.Category closed = guild.getCategoryById(TVBot.CLOSED_CAT_ID);
 
         List<Channel> permChannels = new ArrayList<>();
         permChannels.addAll(staff.getChannels());
         permChannels.addAll(info.getChannels());
         permChannels.addAll(disc.getChannels());
         permChannels.addAll(fun.getChannels());
-        permChannels.addAll(closed.getChannels());
 
         return permChannels;
     }
