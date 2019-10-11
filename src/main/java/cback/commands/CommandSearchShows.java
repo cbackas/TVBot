@@ -33,7 +33,7 @@ public class CommandSearchShows extends Command {
         Show showData = bot.getTraktManager().showSummaryFromName(showArg);
         if(showData != null) {
 
-            String title = showData.title + " (" + Integer.toString(showData.year) + ") ";
+            String title = showData.title + " (" + showData.year + ") ";
             String overview = showData.overview;
             String airs = (showData.status == Status.RETURNING || showData.status == Status.IN_PRODUCTION)
                     ? showData.airs.day + " at " + Util.to12Hour(showData.airs.time) + " EST on " + showData.network : "Ended";

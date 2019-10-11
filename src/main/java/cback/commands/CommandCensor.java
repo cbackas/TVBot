@@ -19,7 +19,6 @@ public class CommandCensor extends Command {
         this.name = "censor";
         this.arguments = "censor add|remove|list [word]";
         this.help = "Adds or removes a word to be censored from the server";
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 

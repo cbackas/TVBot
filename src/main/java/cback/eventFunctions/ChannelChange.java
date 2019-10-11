@@ -50,11 +50,11 @@ public class ChannelChange extends ListenerAdapter {
     @Override
     public void onTextChannelCreate(TextChannelCreateEvent event) {
         if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
-            //Set muted role
-            Guild guild = event.getJDA().getGuildById(192441520178200577L);
-            Role muted = guild.getRoleById(231269949635559424L);
-
             //TODO seems like another bot does this already?
+
+            //Set muted role
+//            Guild guild = event.getJDA().getGuildById(192441520178200577L);
+//            Role muted = guild.getRoleById(231269949635559424L);
 //            try {
 //                event.getChannel().createPermissionOverride(muted).setDeny(Permission.MESSAGE_WRITE).queue();
 //            } catch (Exception e) {

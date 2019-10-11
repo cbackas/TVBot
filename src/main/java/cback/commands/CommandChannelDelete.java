@@ -20,7 +20,6 @@ public class CommandChannelDelete extends Command {
         this.aliases = new String[]{"removechannel"};
         this.arguments = "deletechannel #channel";
         this.help = "Deletes any and all mentioned channels you provide. Use 'here' to delete the current channel";
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 

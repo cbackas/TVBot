@@ -22,7 +22,7 @@ public class CommandHelp extends Command {
         this.name = "help";
         this.aliases = new String[]{"commands"};
         this.arguments = "help <command>";
-        this.help = "Returns a list of commands (you're looking at it right now)";
+        this.help = "Returns a list of commands or the syntax for a given command.";
         this.guildOnly = false;
     }
 

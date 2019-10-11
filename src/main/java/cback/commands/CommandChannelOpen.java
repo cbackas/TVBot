@@ -22,7 +22,6 @@ public class CommandChannelOpen extends Command {
         this.aliases = new String[]{"open"};
         this.arguments = "openchannel #channel";
         this.help = "Moves desired channels from the closed category and opens them up to the world.\nUse !openchannel here to open the current channel.";
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 

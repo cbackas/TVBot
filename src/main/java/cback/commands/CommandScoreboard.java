@@ -28,11 +28,7 @@ public class CommandScoreboard extends Command {
 
         int defaultCount = 5;
         if(args.length == 1 && Integer.parseInt(args[0]) > 5) {
-            if(Integer.parseInt(args[0]) <= 30) {
-                defaultCount = Integer.parseInt(args[0]);
-            } else {
-                defaultCount = 30;
-            }
+            defaultCount = Math.min(Integer.parseInt(args[0]), 30);
         }
 
         List<UserXP> topUsers = bot.getDatabaseManager().getXP().getTopUsers(defaultCount);

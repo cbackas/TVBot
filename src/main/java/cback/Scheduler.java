@@ -175,9 +175,9 @@ public class Scheduler {
     public void pruneDeletedAirings() {
         //delete old airings
         List<Airing> oldAirings = bot.getDatabaseManager().getTV().getOldAirings();
-        oldAirings.stream().filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= DELETE_THRESHOLD).forEach(airing -> {
-            bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
-        });
+        oldAirings.stream()
+                .filter(airing -> Util.getCurrentTime() - airing.getAiringTime() >= DELETE_THRESHOLD)
+                .forEach(airing -> bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID()));
     }
 
     /**

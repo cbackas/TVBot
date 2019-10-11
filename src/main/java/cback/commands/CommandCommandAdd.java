@@ -15,7 +15,6 @@ public class CommandCommandAdd extends Command {
         this.name = "addcommand";
         this.arguments = "addcommand commandname \"custom response\"";
         this.help = "Creates a simple custom command";
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 

@@ -161,10 +161,7 @@ public class TVBot extends ListenerAdapter {
             if (customCommandManager.getCommandValue(baseCommand) != null) {
                 String response = customCommandManager.getCommandValue(baseCommand);
 
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("``" + message.getAuthor().getName() + "``\n").append(response);
-
-                Util.sendMessage(message.getTextChannel(), stringBuilder.toString());
+                Util.sendMessage(message.getTextChannel(), "``" + message.getAuthor().getName() + "``\n" + response);
 
                 Util.deleteMessage(message);
             }
@@ -184,7 +181,7 @@ public class TVBot extends ListenerAdapter {
                 int mentionCount = message.getMentions(Message.MentionType.USER, Message.MentionType.EVERYONE, Message.MentionType.HERE).size();
                 if (mentionCount > 10) {
                     try {
-                        guild.getController().ban(message.getAuthor(), 0, "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/");
+                        guild.getController().ban(message.getAuthor(), 0, "Mentioned more than 10 users in a message. Appeal at https://www.reddit.com/r/LoungeBan/").queue();
                         Util.simpleEmbed(message.getTextChannel(), message.getAuthor().getName() + " was just banned for mentioning more than 10 users.");
                         Util.sendLog(message, "Banned " + message.getAuthor().getName() + "\n**Reason:** Doing too many @ mentions", Color.red);
                     } catch (Exception e) {
@@ -339,10 +336,6 @@ public class TVBot extends ListenerAdapter {
     public Guild getHomeGuild() {
         return jda.getGuildById(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")));
     }
-
-//    public Guild getGuild() {
-//        return jda.getGuildById("247394948331077632"); // todo CHANGE THIS
-//    }
 
     public String getUptime() {
         long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;

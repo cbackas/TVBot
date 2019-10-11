@@ -22,7 +22,6 @@ public class CommandChannelClose extends Command {
         this.aliases = new String[]{"close"};
         this.arguments = "closechannel #channel";
         this.help = "Closes a TV show channel and makes it all secret.\nUse !closechannel here to close the current channel.";
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
     @Override

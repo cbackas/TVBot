@@ -153,8 +153,7 @@ public class TraktManager {
                 var fullMovieSearch = tmdb.moviesService().summary(baseResult.id, null).execute();
 
                 if (fullMovieSearch.isSuccessful()) {
-                    var fullResult = fullMovieSearch.body();
-                    return fullResult;
+                    return fullMovieSearch.body();
                 }
             }
         } catch (Exception e) {

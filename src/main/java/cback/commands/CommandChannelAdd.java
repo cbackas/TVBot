@@ -24,18 +24,14 @@ public class CommandChannelAdd extends Command {
         this.aliases = new String[]{"newchannel, createchannel"};
         this.arguments = "addchannel [channelname]";
         this.help = "Creates channels with the provided names. Tip: use \"|\" between multiple names to create multiple channels";
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
 
-        List<String> channelNames = Arrays.asList(commandEvent.getArgs().split("\\|"))
-                .stream()
-                .map(arg -> {
-                    return StringUtils.trim(arg).replaceAll("\\s+", "-");
-                })
+        List<String> channelNames = Arrays.stream(commandEvent.getArgs().split("\\|"))
+                .map(arg -> StringUtils.trim(arg).replaceAll("\\s+", "-"))
                 .collect(Collectors.toList());
 
         if (channelNames.size() >= 1 && !StringUtils.isWhitespace(channelNames.get(0))) {

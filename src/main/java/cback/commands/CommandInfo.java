@@ -25,7 +25,7 @@ public class CommandInfo extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         int userCount = commandEvent.getGuild().getMembers().size();
-        int oldUserCount = Integer.valueOf(bot.getConfigManager().getConfigValue("userCount"));
+        int oldUserCount = Integer.parseInt(bot.getConfigManager().getConfigValue("userCount"));
         int channelCount = commandEvent.getGuild().getChannels().size();
         int closedChannels = commandEvent.getGuild().getCategoryById(TVBot.CLOSED_CAT_ID).getChannels().size();
 

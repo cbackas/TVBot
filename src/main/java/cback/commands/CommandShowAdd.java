@@ -18,8 +18,6 @@ public class CommandShowAdd extends Command {
         this.name = "addshow";
         this.arguments = "addshow [imdbID] [here|channelID]";
         this.help = "Associates a channel and a show in the spooky bot database :o";
-        //TODO this is set twice
-        this.requiredRole = TVRoles.ADMIN.name;
         this.requiredRole = TVRoles.NETWORKMOD.name;
     }
 
