@@ -59,7 +59,7 @@ public class ConfigManager {
     }
 
     private void writeDefaultConfig() {
-        System.out.println("Config file does not exist, writing default config.");
+        Util.getLogger().info("Config file does not exist, writing default config.");
         configJson = new JSONObject();
         configJson.putAll(defaultConfig);
 
@@ -75,7 +75,7 @@ public class ConfigManager {
             }
         }
         if (addedDefaults) {
-            System.out.println("Default config value(s) not found in file, adding them...");
+            Util.getLogger().info("Default config value(s) not found in file, adding them...");
             writeConfig();
         }
     }

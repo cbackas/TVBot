@@ -31,10 +31,10 @@ public class TraktManager {
 
         Optional<String> traktToken = bot.getConfigManager().getTokenValue("traktToken");
         if (traktToken.isEmpty()) {
-            System.out.println("-------------------------------------");
-            System.out.println("Insert your Trakt token in the config.");
-            System.out.println("Exiting......");
-            System.out.println("-------------------------------------");
+            Util.getLogger().error("-------------------------------------");
+            Util.getLogger().error("Insert your Trakt token in the config.");
+            Util.getLogger().error("Exiting......");
+            Util.getLogger().error("-------------------------------------");
             System.exit(0);
             return;
         }
@@ -42,10 +42,10 @@ public class TraktManager {
 
         Optional<String> tmdbToken = bot.getConfigManager().getTokenValue("tmdbToken");
         if (tmdbToken.isEmpty()) {
-            System.out.println("-------------------------------------");
-            System.out.println("Insert your tmdb token in the config.");
-            System.out.println("Exiting......");
-            System.out.println("-------------------------------------");
+            Util.getLogger().error("-------------------------------------");
+            Util.getLogger().error("Insert your tmdb token in the config.");
+            Util.getLogger().error("Exiting......");
+            Util.getLogger().error("-------------------------------------");
             System.exit(0);
             return;
         }
@@ -54,7 +54,7 @@ public class TraktManager {
 
     public void updateAiringData() {
         try {
-            System.out.println("Grabbing new airings from Trakt...");
+            Util.getLogger().info("Grabbing new airings from Trakt...");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
             Response<List<CalendarShowEntry>> response = trakt.calendars().shows(dateFormat.format(date), 10).execute();
@@ -76,24 +76,24 @@ public class TraktManager {
                             Airing existingAiring = bot.getDatabaseManager().getTV().getAiring(episodeID);
                             if (existingAiring != null) { //if airing already in database, check for updates
                                 if (existingAiring.getAiringTime() != airTime) {
-                                    System.out.println("Updating air time for " + entry.show.title + " - " + episodeInfo);
-                                    System.out.println("Old " + existingAiring.getAiringTime());
-                                    System.out.println("New " + airTime);
+                                    Util.getLogger().info("Updating air time for " + entry.show.title + " - " + episodeInfo);
+                                    Util.getLogger().info("Old " + existingAiring.getAiringTime());
+                                    Util.getLogger().info("New " + airTime);
 
                                     existingAiring.setAiringTime(airTime);
                                     bot.getDatabaseManager().getTV().updateAiringInfo(existingAiring);
                                 }
                                 if (!existingAiring.getEpisodeInfo().equalsIgnoreCase(episodeInfo)) {
-                                    System.out.println("Updating episode name for " + entry.show.title + " - " + episodeInfo);
-                                    System.out.println("Old " + existingAiring.getEpisodeInfo());
-                                    System.out.println("New " + episodeInfo);
+                                    Util.getLogger().info("Updating episode name for " + entry.show.title + " - " + episodeInfo);
+                                    Util.getLogger().info("Old " + existingAiring.getEpisodeInfo());
+                                    Util.getLogger().info("New " + episodeInfo);
 
                                     existingAiring.setEpisodeInfo(episodeInfo);
                                     bot.getDatabaseManager().getTV().updateAiringInfo(existingAiring);
                                 }
                             } else { //otherwise write new airing
                                 bot.getDatabaseManager().getTV().insertAiring(episodeID, id, airTime, episodeInfo, false);
-                                System.out.println("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - in " + ((airTime - Util.getCurrentTime()) / 3600) + "h");
+                                Util.getLogger().info("Found Show Airing: " + entry.show.title + ": " + episodeInfo + " - in " + ((airTime - Util.getCurrentTime()) / 3600) + "h");
                             }
                         }
                     }

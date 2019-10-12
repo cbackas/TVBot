@@ -52,7 +52,7 @@ public class Scheduler {
 
         //Checks periodically for upcoming airings to announce them
         int airingCheckWaitTime = roundUp(time, CHECK_AIRING_INTERVAL) - time; //seconds until next 5 minute interval
-        System.out.println(airingCheckWaitTime + " seconds until first 5min check");
+        Util.getLogger().info(airingCheckWaitTime + " seconds until first 5min check");
         exec.scheduleAtFixedRate(() -> {
 
             //establish current time (will be 5 min interval)
@@ -77,7 +77,7 @@ public class Scheduler {
         int midnightWaitTime = roundUp(currentTimeEST, DAILY_INTERVAL) - currentTimeEST + 45; //seconds until midnight
         exec.scheduleAtFixedRate(() -> {
 
-            System.out.println("Midnight processed.");
+            Util.getLogger().info("Midnight processed.");
             updateUserCount();
             resetUserChange();
             sendDailyMessage();
@@ -106,25 +106,25 @@ public class Scheduler {
         //get next 30 shows airing
         List<Airing> nextAirings = bot.getDatabaseManager().getTV().getNewAirings();
 
-        System.out.println("Checking " + nextAirings.size() + " airings... " + nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).count() + " ready to announce");
+        Util.getLogger().info("Checking " + nextAirings.size() + " airings... " + nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).count() + " ready to announce");
 
         //if it airs in next 11 minutes, send message and update in database
         nextAirings.stream().filter(airing -> airing.getAiringTime() - currentTime <= ALERT_TIME_THRESHOLD).forEach(airing -> {
             try {
-                System.out.println("Starting announce for airing " + airing.getShowID() + " " + airing.getEpisodeInfo() + " " + airing.getAiringTime());
+                Util.getLogger().info("Starting announce for airing " + airing.getShowID() + " " + airing.getEpisodeInfo() + " " + airing.getAiringTime());
                 Show show = bot.getDatabaseManager().getTV().getShow(airing.getShowID());
 
                 if (show == null) { //only announce if show is still in database
-                    System.out.println("Tried to announce airing for unsaved show, deleting airing...");
+                    Util.getLogger().info("Tried to announce airing for unsaved show, deleting airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
                 } else if (bot.getClient().getTextChannelById(Long.parseLong(show.getChannelID())) == null) { //only announce if channel hasnt been deleted
-                    System.out.println("Tried to announce airing for show with no channel, deleting show and airing...");
+                    Util.getLogger().info("Tried to announce airing for show with no channel, deleting show and airing...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     bot.getDatabaseManager().getTV().deleteShow(show.getShowID());
                     return;
                 } else if (airing.getAiringTime() - currentTime < -ALERT_TIME_THRESHOLD) { //only announce if it hasnt already aired in the past
-                    System.out.println("Tried to announce old airing, deleting...");
+                    Util.getLogger().info("Tried to announce old airing, deleting...");
                     bot.getDatabaseManager().getTV().deleteAiring(airing.getEpisodeID());
                     return;
                 }
@@ -135,7 +135,7 @@ public class Scheduler {
                     try {
                         TraktManager tm = bot.getTraktManager();
                         network = tm.showSummary(show.getShowID()).network;
-                        System.out.println("new network " + network);
+                        Util.getLogger().info("new network " + network);
                         show.setNetwork(network);
                         bot.getDatabaseManager().getTV().updateShowNetwork(show);
                     } catch (Exception e) {
@@ -160,7 +160,7 @@ public class Scheduler {
                 airing.setSentStatus(true);
                 bot.getDatabaseManager().getTV().updateAiringSentStatus(airing);
 
-                System.out.println("Sent announcement for " + show.getShowName() + " - " + airing.getEpisodeInfo());
+                Util.getLogger().info("Sent announcement for " + show.getShowName() + " - " + airing.getEpisodeInfo());
 
             } catch (Exception e) {
                 Util.reportHome(e);

@@ -6,6 +6,7 @@ import com.jagrosh.jdautilities.command.Command;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -20,8 +21,8 @@ import java.util.regex.Pattern;
 public class Util {
 
     private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@!?(\\d+)>$");
-
     private static Color BOT_COLOR = Color.decode("#" + TVBot.getInstance().getConfigManager().getConfigValue("bot_color"));
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger("TVBot");
 
     /**
      * Returns the bot's color as a Color object
@@ -175,7 +176,7 @@ public class Util {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
             return channel.sendMessage(embed).complete();
         } catch (Exception ex) {
-            System.out.println("Failed to send Embed!");
+            Util.getLogger().error("Failed to send Embed!");
             ex.printStackTrace();
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
         }
@@ -191,7 +192,7 @@ public class Util {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
             channel.sendMessage(embed).queue();
         } catch (Exception ex) {
-            System.out.println("Failed to send Embed!");
+            Util.getLogger().error("Failed to send Embed!");
             ex.printStackTrace();
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
         }
@@ -202,7 +203,7 @@ public class Util {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(color).build();
             channel.sendMessage(embed).queue();
         } catch (Exception ex) {
-            System.out.println("Failed to send Embed");
+            Util.getLogger().error("Failed to send Embed");
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
         }
     }
@@ -211,7 +212,7 @@ public class Util {
         try {
             channel.sendMessage(embed).queue();
         } catch (Exception ex) {
-            System.out.println("Failed to send Embed");
+            Util.getLogger().error("Failed to send Embed");
             ex.printStackTrace();
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
         }
@@ -445,5 +446,9 @@ public class Util {
         permChannels.addAll(fun.getChannels());
 
         return permChannels;
+    }
+
+    public static org.slf4j.Logger getLogger() {
+        return logger;
     }
 }

@@ -55,7 +55,7 @@ public class ToggleManager {
     }
 
     private void writedefaultCommands() {
-        System.out.println("Config file does not exist, writing default config.");
+        Util.getLogger().info("Config file does not exist, writing default config.");
         toggleJson = new JSONObject();
         toggleJson.putAll(defaultToggles);
 
@@ -71,7 +71,7 @@ public class ToggleManager {
             }
         }
         if (addedDefaults) {
-            System.out.println("Default config value(s) not found in file, adding them...");
+            Util.getLogger().info("Default config value(s) not found in file, adding them...");
             writeConfig();
         }
     }

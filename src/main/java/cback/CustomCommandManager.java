@@ -49,7 +49,7 @@ public class CustomCommandManager {
     }
 
     private void writedefaultCommands() {
-        System.out.println("Config file does not exist, writing default config.");
+        Util.getLogger().info("Config file does not exist, writing default config.");
         commandJson = new JSONObject();
         commandJson.putAll(defaultCommands);
 
@@ -65,7 +65,7 @@ public class CustomCommandManager {
             }
         }
         if (addedDefaults) {
-            System.out.println("Default config value(s) not found in file, adding them...");
+            Util.getLogger().info("Default config value(s) not found in file, adding them...");
             writeConfig();
         }
     }

@@ -84,7 +84,7 @@ public class ChannelChange extends ListenerAdapter {
                 shows.forEach(show -> {
                     if (bot.getDatabaseManager().getTV().deleteShow(show.getShowID()) > 0) {
                         String message = "Channel Deleted: Removed show " + show.getShowName() + " from database automatically.";
-                        System.out.println(message);
+                        Util.getLogger().info(message);
                     }
                 });
             }

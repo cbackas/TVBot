@@ -1,5 +1,6 @@
 package cback.database.tv;
 
+import cback.Util;
 import cback.database.DatabaseManager;
 
 import java.sql.PreparedStatement;
@@ -24,7 +25,7 @@ public class TVDatabase {
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS airing (episode_id TEXT PRIMARY KEY, show_id TEXT, time INT, episode_info TEXT, sent_status INT);");
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS showdata (show_id TEXT PRIMARY KEY, show_name TEXT, network TEXT, channel_id TEXT);");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            Util.getLogger().error(e.getMessage());
         }
     }
 

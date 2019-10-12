@@ -31,7 +31,7 @@ public class CommandShowRemove extends Command {
             int entriesDeleted = bot.getDatabaseManager().getTV().deleteShow(showID);
             if(show != null && entriesDeleted > 0) {
                 Util.sendMessage(commandEvent.getTextChannel(), "Removed show: " + show.getShowName() + ".");
-                System.out.println("@" + commandEvent.getAuthor().getName() + " removed show " + show.getShowName());
+                Util.getLogger().info("@" + commandEvent.getAuthor().getName() + " removed show " + show.getShowName());
                 Util.simpleEmbed(Channels.BOTLOG_CH_ID.getChannel(), show.getShowName() + " removed from the database.");
             } else {
                 Util.simpleEmbed(commandEvent.getTextChannel(), "No saved show found by this IMDB ID.");

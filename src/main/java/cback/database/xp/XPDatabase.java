@@ -1,5 +1,6 @@
 package cback.database.xp;
 
+import cback.Util;
 import cback.database.DatabaseManager;
 
 import java.sql.PreparedStatement;
@@ -23,7 +24,7 @@ public class XPDatabase {
 
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS xpdata (user_id TEXT PRIMARY KEY, message_count INT);");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            Util.getLogger().error(e.getMessage());
         }
     }
 

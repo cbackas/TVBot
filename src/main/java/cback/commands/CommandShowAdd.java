@@ -46,11 +46,11 @@ public class CommandShowAdd extends Command {
 
             bot.getDatabaseManager().getTV().insertShowData(imdbID, showName, network, channelID);
             Util.simpleEmbed(commandEvent.getTextChannel(), "Set channel " + channel.getAsMention() + " for " + showName + ".");
-            System.out.println("@" + commandEvent.getAuthor().getName() + " added show " + showName);
+            Util.getLogger().info("@" + commandEvent.getAuthor().getName() + " added show " + showName);
             Util.simpleEmbed(Channels.BOTLOG_CH_ID.getChannel(), showName + " assigned to " + channel.getName());
 
             //Update airing data after new show added
-            System.out.println("UPDATING AIRING DATA"); //TODO remove
+            Util.getLogger().info("UPDATING AIRING DATA"); //TODO remove
             bot.getTraktManager().updateAiringData();
 
             //Builds a show embed ting
