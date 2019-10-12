@@ -5,8 +5,8 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 
 import java.awt.*;
 import java.util.List;
@@ -42,7 +42,7 @@ public class CommandMuteRemove extends Command {
                         Util.sendMessage(commandEvent.getTextChannel(), "Not sure how you typed this command... but you can't unmute yourself");
                     } else {
                         try {
-                            commandEvent.getGuild().getController().removeSingleRoleFromMember(userInput, muteRole).queue();
+                            commandEvent.getGuild().removeRoleFromMember(userInput, muteRole).queue();
 
                             Util.simpleEmbed(commandEvent.getTextChannel(), userInput.getEffectiveName() + " has been unmuted");
 

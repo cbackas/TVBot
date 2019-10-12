@@ -4,10 +4,10 @@ import cback.TVBot;
 import cback.TraktManager;
 import cback.Util;
 import com.uwetrottmann.trakt5.entities.Show;
-import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent;
-import net.dv8tion.jda.core.events.channel.text.TextChannelDeleteEvent;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
+import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.List;
 
@@ -19,6 +19,7 @@ public class ChannelChange extends ListenerAdapter {
     }
 
     //Set all
+    @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         //TODO idk wtf
 //        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {

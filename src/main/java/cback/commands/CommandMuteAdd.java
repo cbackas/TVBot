@@ -6,8 +6,8 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 
 import java.awt.*;
 import java.util.List;
@@ -69,7 +69,7 @@ public class CommandMuteAdd extends Command {
                         Util.simpleEmbed(commandEvent.getTextChannel(), "You probably shouldn't mute yourself");
                     } else {
                         try {
-                            commandEvent.getGuild().getController().addSingleRoleToMember(userInput, muteRole).queue();
+                            commandEvent.getGuild().addRoleToMember(userInput, muteRole).queue();
                             Util.simpleEmbed(commandEvent.getTextChannel(), userInput.getEffectiveName() + " has been muted. Check " + commandEvent.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.");
                             if (!mutedUsers.contains(u)) {
                                 mutedUsers.add(u);

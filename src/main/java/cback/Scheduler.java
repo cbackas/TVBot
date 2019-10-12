@@ -1,13 +1,11 @@
 package cback;
 
-//import cback.commands.CommandSort;
-
 import cback.database.tv.Airing;
 import cback.database.tv.Show;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -82,7 +80,7 @@ public class Scheduler {
             resetUserChange();
             sendDailyMessage();
             //Set status
-            bot.getClient().getPresence().setGame(Game.watching("all of your messages. Type " + TVBot.COMMAND_PREFIX + "help"));
+            bot.getClient().getPresence().setActivity(Activity.watching("all of your messages. Type " + TVBot.COMMAND_PREFIX + "help"));
 
         }, midnightWaitTime, DAILY_INTERVAL, TimeUnit.SECONDS);
     }

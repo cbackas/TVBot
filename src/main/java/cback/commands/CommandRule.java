@@ -6,8 +6,7 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.EmbedBuilder;
-
+import net.dv8tion.jda.api.EmbedBuilder;
 
 public class CommandRule extends Command {
 

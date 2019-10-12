@@ -1,7 +1,7 @@
 package cback.database.xp;
 
 import cback.TVBot;
-import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.api.entities.Member;
 
 public class UserXP {
 

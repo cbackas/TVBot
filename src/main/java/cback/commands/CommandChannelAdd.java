@@ -5,9 +5,9 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -52,12 +52,12 @@ public class CommandChannelAdd extends Command {
 
     private String createChannels(Guild guild, List<String> names) {
 
-        net.dv8tion.jda.core.entities.Category unsorted = guild.getCategoryById(TVBot.UNSORTED_CAT_ID);
+        var unsorted = guild.getCategoryById(TVBot.UNSORTED_CAT_ID);
 
         StringBuilder mentions = new StringBuilder();
         for (String s : names) {
             try {
-                TextChannel newChannel = (TextChannel) unsorted.createTextChannel(s).complete();
+                TextChannel newChannel = unsorted.createTextChannel(s).complete();
                 mentions.append(newChannel.getAsMention()).append("\n");
             } catch (Exception e) {
                 Util.reportHome(e);

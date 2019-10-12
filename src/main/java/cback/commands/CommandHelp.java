@@ -4,8 +4,8 @@ import cback.TVBot;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.ISnowflake;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.ISnowflake;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

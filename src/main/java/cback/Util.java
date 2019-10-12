@@ -3,8 +3,8 @@ package cback;
 //import cback.commands.Command;
 
 import com.jagrosh.jdautilities.command.Command;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -350,8 +350,9 @@ public class Util {
      * returns the string content of a rule, given the message ID of where it's found
      */
     public static String getRule(Long ruleID) {
+        //TODO does this even work? need to test !rule or whatever
         try {
-            return TVBot.getInstance().getClient().getTextChannelById(263184364811059200L).getMessageById(ruleID).toString();
+            return TVBot.getInstance().getClient().getTextChannelById(263184364811059200L).retrieveMessageById(ruleID).complete().toString();
         } catch (Exception e) {
             reportHome(e);
         }
@@ -433,13 +434,13 @@ public class Util {
         }
     }
 
-    public static List<Channel> getPermChannels(Guild guild) {
-        net.dv8tion.jda.core.entities.Category staff = guild.getCategoryById(TVBot.STAFF_CAT_ID);
-        net.dv8tion.jda.core.entities.Category info = guild.getCategoryById(TVBot.INFO_CAT_ID);
-        net.dv8tion.jda.core.entities.Category disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
-        net.dv8tion.jda.core.entities.Category fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
+    public static List<GuildChannel> getPermChannels(Guild guild) {
+        var staff = guild.getCategoryById(TVBot.STAFF_CAT_ID);
+        var info = guild.getCategoryById(TVBot.INFO_CAT_ID);
+        var disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
+        var fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
 
-        List<Channel> permChannels = new ArrayList<>();
+        List<GuildChannel> permChannels = new ArrayList<>();
         permChannels.addAll(staff.getChannels());
         permChannels.addAll(info.getChannels());
         permChannels.addAll(disc.getChannels());

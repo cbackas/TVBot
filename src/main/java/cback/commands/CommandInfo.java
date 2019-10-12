@@ -5,8 +5,7 @@ import cback.Util;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-
-import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.api.EmbedBuilder;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -38,7 +37,7 @@ public class CommandInfo extends Command {
 
         EmbedBuilder embed = Util.getEmbed(commandEvent.getAuthor()).setThumbnail(Util.getAvatar(bot.getClient().getSelfUser()));
         embed.setTitle(commandEvent.getGuild().getName());
-        embed.addField("Created: ", commandEvent.getGuild().getJDA().asBot().getApplicationInfo().complete().getCreationTime().format(formatter), true);
+        embed.addField("Created: ", commandEvent.getGuild().getJDA().retrieveApplicationInfo().complete().getTimeCreated().format(formatter), true);
         embed.addField("Users: ", Integer.toString(userCount), true);
         embed.addField("New Users: ", userChange, true);
         embed.addField("Text Channels: ", String.valueOf(channelCount), true);

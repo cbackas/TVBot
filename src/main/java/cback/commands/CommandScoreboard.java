@@ -5,7 +5,7 @@ import cback.Util;
 import cback.database.xp.UserXP;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.api.entities.Member;
 
 import java.util.Iterator;
 import java.util.List;

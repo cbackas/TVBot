@@ -5,11 +5,8 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Channel;
-import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.requests.restaction.order.ChannelOrderAction;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.requests.restaction.order.ChannelOrderAction;
 
 import java.util.Comparator;
 import java.util.List;
@@ -37,22 +34,23 @@ public class CommandSort extends Command {
         var unsortedCat = commandEvent.getGuild().getCategoryById(358043583355289600L);
         int unsortedCount = unsortedCat.getChannels().size();
 
-        List<Channel> permChannels = Util.getPermChannels(commandEvent.getGuild());
+        List<GuildChannel> permChannels = Util.getPermChannels(commandEvent.getGuild());
 
         //sort non permanent channels
-        List<Channel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
+        List<GuildChannel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
                 .filter(chan -> !permChannels.contains(chan))
                 .filter(channel -> channel.getType() == ChannelType.TEXT)
                 .sorted(Comparator.comparing(chan -> getSortName(chan.getName())))
                 .collect(Collectors.toList());
 
-        net.dv8tion.jda.core.entities.Category af = commandEvent.getGuild().getCategoryById(TVBot.AF_CAT_ID);
-        net.dv8tion.jda.core.entities.Category gl = commandEvent.getGuild().getCategoryById(TVBot.GL_CAT_ID);
-        net.dv8tion.jda.core.entities.Category mr = commandEvent.getGuild().getCategoryById(TVBot.MR_CAT_ID);
-        net.dv8tion.jda.core.entities.Category sz = commandEvent.getGuild().getCategoryById(TVBot.SZ_CAT_ID);
+        //alphabetic categories
+        var af = commandEvent.getGuild().getCategoryById(TVBot.AF_CAT_ID);
+        var gl = commandEvent.getGuild().getCategoryById(TVBot.GL_CAT_ID);
+        var mr = commandEvent.getGuild().getCategoryById(TVBot.MR_CAT_ID);
+        var sz = commandEvent.getGuild().getCategoryById(TVBot.SZ_CAT_ID);
 
         //put all the incorrectly sorted channels into their categories
-        for (Channel c : showChannelsSorted) {
+        for (GuildChannel c : showChannelsSorted) {
 
             //do not move channels from the closed category!
             if (c.getParent() != null && c.getParent().getIdLong() == TVBot.CLOSED_CAT_ID) continue;
@@ -77,7 +75,7 @@ public class CommandSort extends Command {
         if (orderAction != null) {
 
             orderAction.queue(successReturn -> {
-                Util.simpleEmbed(commandEvent.getTextChannel(), "All done!" + unsortedCount + " channels moved, " + showChannelsSorted.size() + " channels sorted.");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "All done! " + unsortedCount + " channels moved, " + showChannelsSorted.size() + " channels sorted.");
                 Util.getLogger().info("Successfully sorted channels");
             }, failureReturn -> {
                 Util.simpleEmbed(commandEvent.getTextChannel(), "Something went wrong...error during sort action");
@@ -101,17 +99,17 @@ public class CommandSort extends Command {
         return newName;
     }
 
-    private void changeCategory(Channel channel, net.dv8tion.jda.core.entities.Category category) {
+    private void changeCategory(GuildChannel channel, net.dv8tion.jda.api.entities.Category category) {
         if (channel.getParent() == null || !channel.getParent().equals(category)) {
             channel.getManager().setParent(category).queue();
         }
     }
 
-    public ChannelOrderAction<TextChannel> batchSortChannels(Guild guild, List<Channel> sortedChannels) {
+    public ChannelOrderAction batchSortChannels(Guild guild, List<GuildChannel> sortedChannels) {
         try {
 
             //ChannelOrderAction instance to bulk sort channels
-            var channelOrderAction = guild.getController().modifyTextChannelPositions();
+            var channelOrderAction = guild.modifyTextChannelPositions();
 
             //iterate sorted channels and set their positions accordingly
             for (int i = 0; i < sortedChannels.size(); i++) {

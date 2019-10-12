@@ -6,8 +6,8 @@ import cback.Util;
 import cback.database.xp.UserXP;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.User;
-
+import net.dv8tion.jda.api.entities.User;
+import org.apache.commons.lang3.StringUtils;
 
 public class CommandXPAdd extends Command {
 
@@ -25,15 +25,19 @@ public class CommandXPAdd extends Command {
     protected void execute(CommandEvent commandEvent) {
         String[] args = Util.splitArgs(commandEvent.getArgs());
 
-        if(args.length >= 1) {
+        if(args.length >= 2) {
             User mentioned = Util.getUserFromMentionArg(args[0]);
             if(mentioned != null) {
                 UserXP xp = bot.getDatabaseManager().getXP().getUserXP(mentioned.getId());
                 if(xp != null) {
-                    int number = Integer.parseInt(args[1]);
+                    if(StringUtils.isNumeric(args[1])){
+                        int number = Integer.parseInt(args[1]);
+                        bot.getDatabaseManager().getXP().addXP(mentioned.getId(), number);
+                        Util.simpleEmbed(commandEvent.getTextChannel(), "Granted " + number + " xp to " + mentioned.getName());
+                    } else {
+                        Util.simpleEmbed(commandEvent.getTextChannel(), "Invalid number.");
+                    }
 
-                    bot.getDatabaseManager().getXP().addXP(mentioned.getId(), number);
-                    Util.simpleEmbed(commandEvent.getTextChannel(), "Granted " + number + " xp to " + mentioned.getName());
                 } else {
                     Util.simpleEmbed(commandEvent.getTextChannel(), "No xp data found for " + mentioned.getName());
                 }

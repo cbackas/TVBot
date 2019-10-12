@@ -12,13 +12,14 @@ import ch.qos.logback.classic.Logger;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.events.ReadyEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import com.jagrosh.jdautilities.command.impl.CommandClientImpl;
+import net.dv8tion.jda.api.AccountType;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.reflections.Reflections;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +100,7 @@ public class TVBot extends ListenerAdapter {
         var commandClientBuilder = new CommandClientBuilder()
                 .setOwnerId(String.valueOf(CBACK_USR_ID))
                 .setPrefix(COMMAND_PREFIX)
-                .setGame(Game.watching("all of your messages. Type " + COMMAND_PREFIX + "help"))
+                .setActivity(Activity.watching("all of your messages. Type " + COMMAND_PREFIX + "help"))
                 .useHelpBuilder(false)
                 .setListener(new CommandListenerImpl());
 
@@ -119,11 +120,11 @@ public class TVBot extends ListenerAdapter {
 
         JDABuilder builder = new JDABuilder(AccountType.BOT)
                 .setToken(token.get())
-                .addEventListener(commandClient)
-                .addEventListener(this)
-                .addEventListener(new ChannelChange(this))
-                .addEventListener(new MemberChange(this))
-                .addEventListener(new MessageChange(this));
+                .addEventListeners(commandClient)
+                .addEventListeners(this)
+                .addEventListeners(new ChannelChange(this))
+                .addEventListeners(new MemberChange(this))
+                .addEventListeners(new MessageChange(this));
 
         this.jda = builder.build().awaitReady();
 

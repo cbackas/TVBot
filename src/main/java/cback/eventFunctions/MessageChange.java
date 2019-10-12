@@ -1,9 +1,9 @@
 package cback.eventFunctions;
 
 import cback.TVBot;
-import net.dv8tion.jda.core.events.guild.member.GuildMemberNickChangeEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class MessageChange extends ListenerAdapter {
     private TVBot bot;
@@ -79,7 +79,7 @@ public class MessageChange extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMemberNickChange(GuildMemberNickChangeEvent event) {
+    public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
         //TODO idk
 //        if (event.getGuild().getId().equals(bot.getHomeGuild().getId())) {
 //            User user = event.getUser();

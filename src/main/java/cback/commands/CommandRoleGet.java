@@ -5,7 +5,7 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.api.entities.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +24,15 @@ public class CommandRoleGet extends Command {
     protected void execute(CommandEvent commandEvent) {
         String[] args = Util.splitArgs(commandEvent.getArgs());
 
-        if(args.length == 1) {
+        if(args.length >= 1) {
             String roleName = String.join(" ", args);
-            List<Role> serverRole = commandEvent.getGuild().getRoles();
+            List<Role> serverRoles = commandEvent.getGuild().getRoles();
 
-            if(roleName.equalsIgnoreCase("listall")) {
-                String roleList = serverRole.stream().map(role -> role.getName() + " " + role.getId()).reduce("", (a, b) -> a + b + "\n");
+            if(args[0].equalsIgnoreCase("listall")) {
+                String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getId()).reduce("", (a, b) -> a + b + "\n");
                 Util.sendBufferedMessage(commandEvent.getTextChannel(), roleList);
             } else {
-                Optional<Role> foundRole = serverRole.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
+                Optional<Role> foundRole = serverRoles.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
                 if(foundRole.isPresent()) {
                     Util.simpleEmbed(commandEvent.getTextChannel(), "Found id for **" + foundRole.get().getName() + "**: " + foundRole.get().getId());
                 } else {

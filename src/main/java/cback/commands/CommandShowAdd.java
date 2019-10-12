@@ -7,7 +7,7 @@ import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.uwetrottmann.trakt5.entities.Show;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 public class CommandShowAdd extends Command {
 
