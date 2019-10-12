@@ -5,12 +5,9 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.api.entities.MessageHistory;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class CommandPurge extends Command {
@@ -96,6 +93,6 @@ public class CommandPurge extends Command {
             return;
         }
 
-        Util.deleteBufferedMessage(commandEvent.getMessage());
+        Util.deleteMessage(commandEvent.getMessage());
     }
 }

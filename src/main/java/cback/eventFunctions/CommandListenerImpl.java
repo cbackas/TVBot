@@ -79,7 +79,7 @@ public class CommandListenerImpl implements CommandListener {
      */
     public void censorMentions(Message message) {
 
-        boolean staffMember = message.getAuthor().getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
+        boolean staffMember = message.getMember().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
         if (!staffMember && bot.getToggleState("limitmentions")) {
             int mentionCount = message.getMentions(Message.MentionType.USER, Message.MentionType.EVERYONE, Message.MentionType.HERE).size();
             if (mentionCount > 10) {
@@ -102,27 +102,36 @@ public class CommandListenerImpl implements CommandListener {
      */
     public void censorMessages(Message message) {
         if (bot.getToggleState("censorwords")) {
+
             User author = message.getAuthor();
 
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
             //TODO which categories are these
             boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
-            boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
+            boolean staffMember = message.getMember().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
 
             if (homeGuild && !staffChannel && !staffMember) {
+
                 var bannedWords = bot.getConfigManager().getConfigArray("bannedWords");
                 String content = message.getContentDisplay().toLowerCase();
 
                 String word = "";
                 boolean tripped = false;
                 for (String w : bannedWords) {
-                    if (content.matches("\\n?.*\\b\\n?" + w + "\\n?\\b.*\\n?.*") || content.matches("\\n?.*\\b\\n?" + w + "s\\n?\\b.*\\n?.*")) {
-                        tripped = true;
-                        word = w;
-                        break;
+                    try {
+                        Pattern pattern1 = Pattern.compile("(?i)\\n?.*\\b\\n?" + Pattern.quote(w) + "s?\\n?\\b.*\\n?.*", Pattern.CASE_INSENSITIVE);
+                        if (pattern1.matcher(content).matches()) {
+                            tripped = true;
+                            word = w;
+                            break;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
                 if (tripped) {
+
+                    Util.getLogger().info("Message from" + author.getName() + " tripped censor in " + message.getChannel().getName() + ": '" + message.getContentRaw() + "'");
 
                     EmbedBuilder bld = new EmbedBuilder();
                     bld.setAuthor(Util.getTag(author), author.getEffectiveAvatarUrl()).setDescription(message.getContentDisplay()).setTimestamp(Instant.now()).setFooter("Auto-deleted from #" + message.getChannel().getName(), null);
@@ -132,7 +141,7 @@ public class CommandListenerImpl implements CommandListener {
                     StringBuilder sBld =
                             new StringBuilder().append("Your message has been automatically removed for containing a banned word. If this is an error, message a staff member.");
                     if (!word.isEmpty()) {
-                        sBld.append("\n\n").append(word);
+                        sBld.append("\n\n").append("'").append(word).append("'");
                     }
 
                     Util.sendPrivateEmbed(author, sBld.toString());
@@ -152,7 +161,7 @@ public class CommandListenerImpl implements CommandListener {
             boolean homeGuild = message.getGuild().getIdLong() == TVBot.HOMESERVER_GLD_ID;
             //TODO what are these categories?
             boolean staffChannel = message.getCategory().getIdLong() == 355901035597922304L || message.getCategory().getIdLong() == 355910636464504832L;
-            boolean staffMember = author.getJDA().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
+            boolean staffMember = message.getMember().getRoles().contains(message.getGuild().getRoleById(TVRoles.STAFF.id));
 
 
             //trusted if you have a role of trusted or higher

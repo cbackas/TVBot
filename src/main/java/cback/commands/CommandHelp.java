@@ -5,13 +5,11 @@ import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ISnowflake;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommandHelp extends Command {
 
@@ -43,8 +41,6 @@ public class CommandHelp extends Command {
         } else {
             EmbedBuilder embed = Util.getEmbed();
             embed.setTitle("Commands:");
-
-            List<Long> roles = commandEvent.getMessage().getAuthor().getJDA().getRoles().stream().map(ISnowflake::getIdLong).collect(Collectors.toList());
 
             StringBuilder bld = new StringBuilder();
             List<Command> sortedCommands = new ArrayList<>(bot.getCommandClient().getCommands());

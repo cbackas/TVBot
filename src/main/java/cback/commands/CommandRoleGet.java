@@ -30,7 +30,7 @@ public class CommandRoleGet extends Command {
 
             if(args[0].equalsIgnoreCase("listall")) {
                 String roleList = serverRoles.stream().map(role -> role.getName() + " " + role.getId()).reduce("", (a, b) -> a + b + "\n");
-                Util.sendBufferedMessage(commandEvent.getTextChannel(), roleList);
+                Util.sendMessage(commandEvent.getTextChannel(), roleList);
             } else {
                 Optional<Role> foundRole = serverRoles.stream().filter(role -> role.getName().equalsIgnoreCase(roleName)).findAny();
                 if(foundRole.isPresent()) {

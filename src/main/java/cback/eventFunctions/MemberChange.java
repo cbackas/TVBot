@@ -25,6 +25,7 @@ public class MemberChange extends ListenerAdapter {
             //Mute Check
             if (bot.getConfigManager().getConfigArray("muted").contains(event.getUser().getId())) {
                 try {
+//                    event.getGuild().addRoleToMember(event.getMember(), )
                     event.getMember().getRoles().add(event.getGuild().getRoleById(231269949635559424L));
                 } catch (Exception e) {
                     e.printStackTrace();

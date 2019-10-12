@@ -12,7 +12,6 @@ import ch.qos.logback.classic.Logger;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
-import com.jagrosh.jdautilities.command.impl.CommandClientImpl;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -24,8 +23,6 @@ import org.reflections.Reflections;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 public class TVBot extends ListenerAdapter {
@@ -40,8 +37,6 @@ public class TVBot extends ListenerAdapter {
     private CommandClient commandClient;
     private ToggleManager toggleManager;
     private Scheduler scheduler;
-
-    private List<String> commandPrefixes = Arrays.asList("!", "t!", "!g", "--", ".", "?");
 
     private long startTime;
 
@@ -73,12 +68,12 @@ public class TVBot extends ListenerAdapter {
 
         //instantiate config manager first as connect() relies on tokens
         configManager = new ConfigManager(this);
+        databaseManager = new DatabaseManager(this);
         customCommandManager = new CustomCommandManager(this);
         toggleManager = new ToggleManager(this);
 
         connect();
 
-        databaseManager = new DatabaseManager(this);
         traktManager = new TraktManager(this);
         scheduler = new Scheduler(this);
     }

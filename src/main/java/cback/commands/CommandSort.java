@@ -5,7 +5,10 @@ import cback.TVRoles;
 import cback.Util;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.restaction.order.ChannelOrderAction;
 
 import java.util.Comparator;
@@ -31,7 +34,7 @@ public class CommandSort extends Command {
     protected void execute(CommandEvent commandEvent) {
         Util.simpleEmbed(commandEvent.getTextChannel(), "Lets get sorting!");
 
-        var unsortedCat = commandEvent.getGuild().getCategoryById(358043583355289600L);
+        var unsortedCat = commandEvent.getGuild().getCategoryById(TVBot.UNSORTED_CAT_ID);
         int unsortedCount = unsortedCat.getChannels().size();
 
         List<GuildChannel> permChannels = Util.getPermChannels(commandEvent.getGuild());
@@ -101,6 +104,7 @@ public class CommandSort extends Command {
 
     private void changeCategory(GuildChannel channel, net.dv8tion.jda.api.entities.Category category) {
         if (channel.getParent() == null || !channel.getParent().equals(category)) {
+            Util.getLogger().info("Moving channel " + channel.getName() + " from " + channel.getParent().getName() + " to " + category.getName());
             channel.getManager().setParent(category).queue();
         }
     }

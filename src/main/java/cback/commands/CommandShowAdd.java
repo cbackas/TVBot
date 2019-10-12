@@ -50,7 +50,7 @@ public class CommandShowAdd extends Command {
             Util.simpleEmbed(Channels.BOTLOG_CH_ID.getChannel(), showName + " assigned to " + channel.getName());
 
             //Update airing data after new show added
-            Util.getLogger().info("UPDATING AIRING DATA"); //TODO remove
+            Util.getLogger().info("UPDATING AIRING DATA");
             bot.getTraktManager().updateAiringData();
 
             //Builds a show embed ting

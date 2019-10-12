@@ -25,14 +25,14 @@ public class CommandCensor extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
 
-        String[] args = Util.splitArgs(commandEvent.getArgs());
+        String[] args = Util.splitArgs(commandEvent.getArgs(), 2);
 
         EmbedBuilder bld = new EmbedBuilder();
-        List<String> bannedWords = bot.getConfigManager().getConfigArray("bannedwords");
+        List<String> bannedWords = bot.getConfigManager().getConfigArray("bannedWords");
 
         if (args.length >= 2) {
             if (args[0].equalsIgnoreCase("add")) {
-                String word = commandEvent.getArgs().split("\\s+", 2)[1];
+                String word = args[1];
                 if(bannedWords.contains(word)) {
                     bld.setDescription(word + " is already a banned word!");
                 } else {
@@ -42,7 +42,7 @@ public class CommandCensor extends Command {
                     bld.setDescription(word + " has been added to the list of banned words.");
                 }
             } else if (args[0].equalsIgnoreCase("remove")) {
-                String word = commandEvent.getArgs().split("\\s+", 2)[1];
+                String word = args[1];
                 if(bannedWords.contains(word)) {
                     bannedWords.remove(word);
                     bot.getConfigManager().setConfigValue("bannedWords", bannedWords);
@@ -52,12 +52,12 @@ public class CommandCensor extends Command {
                     bld.setDescription(word + " is not a censored word... Removed failed.");
                 }
             } else {
-                bld.setDescription(getHelp());
+                bld.setDescription(getHelp() + "\n" + TVBot.COMMAND_PREFIX + arguments);
             }
         } else if (args.length >= 1 && args[0].equalsIgnoreCase("list")) {
             bld.setDescription(StringUtils.join(bannedWords, "\n"));
         } else {
-            bld.setDescription(getHelp());
+            bld.setDescription(getHelp() + "\n" + TVBot.COMMAND_PREFIX + arguments);
         }
 
         Util.sendEmbed(commandEvent.getChannel(), bld.setColor(Util.getBotColor()).build());

@@ -31,7 +31,7 @@ public class Util {
         return BOT_COLOR;
     }
 
-    public static void sendMessage(TextChannel channel, String message) {
+    public static void sendMessage(MessageChannel channel, String message) {
         try {
             channel.sendMessage(message).queue();
         } catch (Exception e) {
@@ -218,22 +218,6 @@ public class Util {
         }
     }
 
-    public static void sendBufferedMessage(TextChannel channel, String message) {
-        try {
-            channel.sendMessage(message).queue();
-        } catch (Exception e) {
-            reportHome(e);
-        }
-    }
-
-    public static void deleteBufferedMessage(Message message) {
-        try {
-            message.delete().queue();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Bulk deletes a list of messages
      */
@@ -357,25 +341,6 @@ public class Util {
             reportHome(e);
         }
         return null;
-    }
-
-    /**
-     * returns a count of mentions
-     */
-    public static int mentionsCount(String content) {
-        String[] args = content.split(" ");
-        if (args.length > 0) {
-            int count = 0;
-            for (String arg : args) {
-                Matcher matcher = USER_MENTION_PATTERN.matcher(arg);
-                if (matcher.matches()) {
-                    count++;
-                }
-            }
-            return count;
-        } else {
-            return 0;
-        }
     }
 
     /**

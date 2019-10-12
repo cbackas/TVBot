@@ -150,9 +150,9 @@ public class Scheduler {
 
                 String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
-                Util.sendBufferedMessage(announceChannel, message);
-                Util.sendBufferedMessage(globalChannel, message);
-                Util.sendBufferedMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
+                Util.sendMessage(announceChannel, message);
+                Util.sendMessage(globalChannel, message);
+                Util.sendMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
 
                 //sent message - set database values accordingly
                 airing.setSentStatus(true);
@@ -182,7 +182,7 @@ public class Scheduler {
      * Update the number of Lounge server members in the config
      */
     public void updateUserCount() {
-        Guild loungeGuild = bot.getClient().getGuildById(192441520178200577L);
+        Guild loungeGuild = bot.getHomeGuild();
 
         if (loungeGuild != null) {
             bot.getConfigManager().setConfigValue("userCount", String.valueOf(loungeGuild.getMembers().size()));
