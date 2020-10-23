@@ -32,7 +32,7 @@ public class CustomCommandManager {
 
     private void initConfig() {
         try {
-            commandFile = new File(botPath, "commands.json");
+            commandFile = new File(ConfigManager.botPath, "commands.json");
             if (commandFile.exists()) {
                 JSONParser parser = new JSONParser();
                 FileReader reader = new FileReader(commandFile);
@@ -114,18 +114,5 @@ public class CustomCommandManager {
             stringBuilder.append("\n").append(((String) key));
         }
         return stringBuilder.toString();
-    }
-
-    /**
-     * Bot path stuff
-     */
-    public static File botPath;
-
-    static {
-        try {
-            botPath = new File(TVBot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
     }
 }

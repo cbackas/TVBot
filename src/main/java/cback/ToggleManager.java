@@ -7,6 +7,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.ObjectInputFilter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class ToggleManager {
 
     private void initConfig() {
         try {
-            toggleFile = new File(botPath, "toggles.json");
+            toggleFile = new File(ConfigManager.botPath, "toggles.json");
             if (toggleFile.exists()) {
                 JSONParser parser = new JSONParser();
                 FileReader reader = new FileReader(toggleFile);
@@ -121,18 +122,5 @@ public class ToggleManager {
             toggles.add((String) key);
         }
         return toggles;
-    }
-
-    /**
-     * Bot path stuff
-     */
-    public static File botPath;
-
-    static {
-        try {
-            botPath = new File(TVBot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
     }
 }
