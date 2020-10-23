@@ -6,9 +6,15 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <repositories>
-        <repository> <!-- This repo fixes issues with transitive dependencies -->
-            <id>jcenter</id>
-            <url>http://jcenter.bintray.com</url>
+        <repository>
+            <id>central</id>
+            <name>bintray</name>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
+        <repository>
+            <id>bintray-sedmelluq-com.sedmelluq</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/sedmelluq/com.sedmelluq</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
