@@ -78,7 +78,7 @@ public class CommandSort extends Command {
         if (orderAction != null) {
 
             orderAction.queue(successReturn -> {
-                Util.simpleEmbed(commandEvent.getTextChannel(), "All done! " + unsortedCount + " channels moved, " + showChannelsSorted.size() + " channels sorted.");
+                Util.simpleEmbed(commandEvent.getTextChannel(), "All done! " + unsortedCount + " channels moved. " + showChannelsSorted.size() + " channels are now sorted.");
                 Util.getLogger().info("Successfully sorted channels");
             }, failureReturn -> {
                 Util.simpleEmbed(commandEvent.getTextChannel(), "Something went wrong...error during sort action");
