@@ -182,7 +182,7 @@ public class TraktManager {
     public String searchTmdbShow(String showName) {
         try {
             SearchService service = tmdb.searchService();
-            Response<TvShowResultsPage> search = service.tv(showName, 1, null, null).execute();
+            Response<TvShowResultsPage> search = service.tv(showName, 1, null, null, true).execute();
             if (search.isSuccessful() && !search.body().results.isEmpty()) {
                 Response<com.uwetrottmann.tmdb2.entities.TvExternalIds> show = tmdb.tvService().externalIds(search.body().results.get(0).id, null).execute();
                 if (show.isSuccessful()) {
