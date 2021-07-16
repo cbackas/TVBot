@@ -45,11 +45,18 @@ public class CommandHelp extends Command {
             StringBuilder bld = new StringBuilder();
             List<Command> sortedCommands = new ArrayList<>(bot.getCommandClient().getCommands());
             sortedCommands.sort(Comparator.comparing(Command::getName));
+
+            var member = bot.getHomeGuild().retrieveMember(commandEvent.getAuthor()).complete();
+
             for (Command c : bot.getCommandClient().getCommands()) {
                 if (c.getHelp() != null && !c.isOwnerCommand()) {
 
-                    boolean hasPerms =
-                            c.getRequiredRole() == null || bot.getHomeGuild().getMember(commandEvent.getAuthor()).getRoles().stream().anyMatch(role -> c.getRequiredRole().equalsIgnoreCase(role.getName()));
+                    boolean hasPerms = false;
+                    if (c.getRequiredRole() == null) {
+                        hasPerms = true;
+                    } else if (member != null) {
+                        hasPerms = member.getRoles().stream().anyMatch(role -> c.getRequiredRole().equalsIgnoreCase(role.getName()));
+                    }
 
                     if (hasPerms) {
                         if (c.getAliases().length == 0) {
