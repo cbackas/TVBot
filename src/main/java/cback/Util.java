@@ -404,12 +404,16 @@ public class Util {
         var info = guild.getCategoryById(TVBot.INFO_CAT_ID);
         var disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
         var fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
+        var cards = guild.getCategoryById(TVBot.CARDS_CAT_ID);
+        var newly = guild.getCategoryById(TVBot.NEW_CAT_ID);
 
         List<GuildChannel> permChannels = new ArrayList<>();
         permChannels.addAll(staff.getChannels());
         permChannels.addAll(info.getChannels());
         permChannels.addAll(disc.getChannels());
         permChannels.addAll(fun.getChannels());
+        permChannels.addAll(cards.getChannels());
+        permChannels.addAll(newly.getChannels());
 
         return permChannels;
     }
