@@ -76,7 +76,7 @@ public class Util {
         bld.appendDescription(text).addField("Exception:", e.toString(), false).addField("Stack:", stackString, false);
 
         try {
-            errorChannel.sendMessage(bld.build()).queue();
+            errorChannel.sendMessageEmbeds(bld.build()).queue();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -98,14 +98,13 @@ public class Util {
             stackString = stackString.substring(0, 800);
         }
 
-        Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld.setColor(BOT_COLOR).setTimestamp(Instant.now()).setAuthor(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator(), null, message.getAuthor().getAvatarUrl()).setDescription(message.getContentRaw()).addField("\u200B", "\u200B", false).addField("Exeption:", e.toString(), false).addField("Stack:", stackString, false).build()).queue();
+        Channels.ERRORLOG_CH_ID.getChannel().sendMessageEmbeds(bld.setColor(BOT_COLOR).setTimestamp(Instant.now()).setAuthor(message.getAuthor().getName() + '#' + message.getAuthor().getDiscriminator(), null, message.getAuthor().getAvatarUrl()).setDescription(message.getContentRaw()).addField("\u200B", "\u200B", false).addField("Exeption:", e.toString(), false).addField("Stack:", stackString, false).build()).queue();
     }
 
     public static void reportHome(Exception e) {
         e.printStackTrace();
         EmbedBuilder bld = new EmbedBuilder();
-
-        Channels.ERRORLOG_CH_ID.getChannel().sendMessage(bld.setColor(BOT_COLOR).setTimestamp(Instant.now()).addField("Exeption:", e.toString(), false).build()).queue();
+        Channels.ERRORLOG_CH_ID.getChannel().sendMessageEmbeds(bld.setColor(BOT_COLOR).setTimestamp(Instant.now()).addField("Exeption:", e.toString(), false).build()).queue();
     }
 
     /**
@@ -113,7 +112,7 @@ public class Util {
      */
     public static void botLog(Message message) {
         try {
-            Channels.BOTLOG_CH_ID.getChannel().sendMessage(new EmbedBuilder().setColor(BOT_COLOR).setAuthor(message.getAuthor().getName() + "#" + message.getAuthor().getDiscriminator(), null, null).setDescription(message.getContentDisplay()).setFooter(message.getGuild().getName() + "/#" + message.getChannel().getName(), null).setTimestamp(Instant.now()).build()).queue();
+            Channels.BOTLOG_CH_ID.getChannel().sendMessageEmbeds(new EmbedBuilder().setColor(BOT_COLOR).setAuthor(message.getAuthor().getName() + "#" + message.getAuthor().getDiscriminator(), null, null).setDescription(message.getContentDisplay()).setFooter(message.getGuild().getName() + "/#" + message.getChannel().getName(), null).setTimestamp(Instant.now()).build()).queue();
         } catch (Exception e) {
             reportHome(message, e);
         }
@@ -146,7 +145,7 @@ public class Util {
             EmbedBuilder embed =
                     new EmbedBuilder().setFooter("Action by @" + message.getAuthor().getName(), message.getAuthor().getEffectiveAvatarUrl()).setDescription(text).setColor(Color.GRAY).setTimestamp(Instant.now());
 
-            Channels.SERVERLOG_CH_ID.getChannel().sendMessage(embed.build()).queue();
+            Channels.SERVERLOG_CH_ID.getChannel().sendMessageEmbeds(embed.build()).queue();
         } catch (Exception e) {
             reportHome(e);
         }
@@ -157,7 +156,7 @@ public class Util {
             EmbedBuilder embed =
                     new EmbedBuilder().setFooter("Action by @" + message.getAuthor().getName(), message.getAuthor().getEffectiveAvatarUrl()).setDescription(text).setColor(color).setTimestamp(Instant.now());
 
-            Channels.SERVERLOG_CH_ID.getChannel().sendMessage(embed.build()).queue();
+            Channels.SERVERLOG_CH_ID.getChannel().sendMessageEmbeds(embed.build()).queue();
         } catch (Exception e) {
             reportHome(e);
         }
@@ -165,16 +164,12 @@ public class Util {
 
     /**
      * Synchronous simple embed
-     *
-     * @param channel
-     * @param message
-     * @return
      */
     public static Message simpleEmbedSync(TextChannel channel, String message) {
 
         try {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
-            return channel.sendMessage(embed).complete();
+            return channel.sendMessageEmbeds(embed).complete();
         } catch (Exception ex) {
             Util.getLogger().error("Failed to send Embed!");
             ex.printStackTrace();
@@ -190,7 +185,7 @@ public class Util {
 
         try {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(Color.ORANGE).build();
-            channel.sendMessage(embed).queue();
+            channel.sendMessageEmbeds(embed).queue();
         } catch (Exception ex) {
             Util.getLogger().error("Failed to send Embed!");
             ex.printStackTrace();
@@ -201,7 +196,7 @@ public class Util {
     public static void simpleEmbed(TextChannel channel, String message, Color color) {
         try {
             MessageEmbed embed = new EmbedBuilder().appendDescription(message).setColor(color).build();
-            channel.sendMessage(embed).queue();
+            channel.sendMessageEmbeds(embed).queue();
         } catch (Exception ex) {
             Util.getLogger().error("Failed to send Embed");
             reportHome("Embed failed to send in " + channel.getName(), ex, null);
@@ -210,7 +205,7 @@ public class Util {
 
     public static void sendEmbed(MessageChannel channel, MessageEmbed embed) {
         try {
-            channel.sendMessage(embed).queue();
+            channel.sendMessageEmbeds(embed).queue();
         } catch (Exception ex) {
             Util.getLogger().error("Failed to send Embed");
             ex.printStackTrace();
