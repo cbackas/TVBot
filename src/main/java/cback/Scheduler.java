@@ -145,13 +145,13 @@ public class Scheduler {
                 /////////////////////////////////////////////////////
 
                 TextChannel announceChannel = Channels.NEWEPISODE_CH_ID.getChannel();
-                TextChannel globalChannel = Channels.GENERAL_CH_ID.getChannel();
+                TextChannel televisionChannel = Channels.TELEVISION_CH_ID.getChannel();
                 TextChannel showChannel = bot.getClient().getTextChannelById(Long.parseLong(show.getChannelID()));
 
                 String message = "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start on " + network + ". Go to " + showChannel.getAsMention() + " for live episode discussion!";
 
                 Util.sendMessage(announceChannel, message);
-                Util.sendMessage(globalChannel, message);
+                Util.sendMessage(televisionChannel, message);
                 Util.sendMessage(showChannel, "**" + show.getShowName() + " " + airing.getEpisodeInfo() + "** is about to start.");
 
                 //sent message - set database values accordingly

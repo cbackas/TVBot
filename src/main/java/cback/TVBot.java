@@ -42,7 +42,6 @@ public class TVBot extends ListenerAdapter {
     public static final String COMMAND_PREFIX = "!";
 
     public static final long CBACK_USR_ID = 73416411443113984L;
-    public static final long HOMESERVER_GLD_ID = 192441520178200577L;
 
     public static final long UNSORTED_CAT_ID = 358043583355289600L;
     public static final long CLOSED_CAT_ID = 355904962200469504L;
