@@ -1,7 +1,5 @@
 package cback;
 
-//import cback.commands.*;
-
 import cback.database.DatabaseManager;
 import cback.eventFunctions.ChannelChange;
 import cback.eventFunctions.CommandListenerImpl;
