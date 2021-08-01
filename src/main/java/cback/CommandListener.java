@@ -17,14 +17,13 @@ public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
-        System.out.println(event.getName());
-        if (!event.getName().equals("ping")) return; // make sure we handle the right command
         Optional<Command> registeredCommand = registeredCommands.stream()
                 .filter(com -> com.getCommandData().getName().equals(event.getName()))
                 .findAny();
         if (registeredCommand.isPresent()) {
             Command command = registeredCommand.get();
             command.execute(event);
+            Util.getLogger().info("Executed " + command.getCommandData().getName());
         }
     }
 
