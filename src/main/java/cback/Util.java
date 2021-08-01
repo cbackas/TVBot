@@ -212,6 +212,16 @@ public class Util {
         }
     }
 
+    public static void sendEmbed(TextChannel channel, MessageEmbed embed) {
+        try {
+            channel.sendMessageEmbeds(embed).queue();
+        } catch (Exception ex) {
+            Util.getLogger().error("Failed to send Embed");
+            ex.printStackTrace();
+            reportHome("Embed failed to send in " + channel.getName(), ex, null);
+        }
+    }
+
     /**
      * Bulk deletes a list of messages
      */
