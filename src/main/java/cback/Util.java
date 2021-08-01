@@ -1,7 +1,5 @@
 package cback;
 
-//import cback.commands.Command;
-
 import com.jagrosh.jdautilities.command.Command;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -11,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 public class Util {
@@ -395,20 +394,12 @@ public class Util {
     }
 
     public static List<GuildChannel> getPermChannels(Guild guild) {
-        var staff = guild.getCategoryById(TVBot.STAFF_CAT_ID);
-        var info = guild.getCategoryById(TVBot.INFO_CAT_ID);
-        var disc = guild.getCategoryById(TVBot.DISCUSSION_CAT_ID);
-        var fun = guild.getCategoryById(TVBot.FUN_CAT_ID);
-        var cards = guild.getCategoryById(TVBot.CARDS_CAT_ID);
-        var newly = guild.getCategoryById(TVBot.NEW_CAT_ID);
-
-        List<GuildChannel> permChannels = new ArrayList<>();
-        permChannels.addAll(staff.getChannels());
-        permChannels.addAll(info.getChannels());
-        permChannels.addAll(disc.getChannels());
-        permChannels.addAll(fun.getChannels());
-        permChannels.addAll(cards.getChannels());
-        permChannels.addAll(newly.getChannels());
+        List<Long> permCategories = Arrays.asList(TVBot.STAFF_CAT_ID, TVBot.INFO_CAT_ID, TVBot.DISCUSSION_CAT_ID, TVBot.FUN_CAT_ID, TVBot.CARDS_CAT_ID, TVBot.NEW_CAT_ID);
+        List<GuildChannel> permChannels = permCategories.stream()
+                .map(catID -> guild.getCategoryById(catID))
+                .map(cat -> cat.getChannels())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
         return permChannels;
     }
