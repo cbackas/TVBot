@@ -27,13 +27,17 @@ public class CommandShow extends Command {
 
     @Override
     public void execute(SlashCommandEvent event) {
-        MessageEmbed basicEmbed = new EmbedBuilder()
-                .appendDescription("...")
-                .setColor(Util.getBotColor())
-                .build();
+        EmbedBuilder basicEmbedBuilder = new EmbedBuilder()
+                .setColor(Util.getBotColor());
+        if (event.getSubcommandName().equals("add")) {
+            basicEmbedBuilder.setDescription("Adding show to db ...");
+        } else if (event.getSubcommandName().equals("remove")) {
+            basicEmbedBuilder.setDescription("Removing show from db ...");
+        }
+        MessageEmbed basicEmbed = basicEmbedBuilder.build();
 
         event.replyEmbeds(basicEmbed)
-                .setEphemeral(true)
+                .setEphemeral(false)
                 .flatMap(v -> {
 
                     EmbedBuilder responseEmbed = new EmbedBuilder().setColor(Util.getBotColor());
@@ -47,12 +51,12 @@ public class CommandShow extends Command {
                         String network = showData.network;
 
                         if (showName == null) {
-                            responseEmbed.appendDescription("Error: Couldn't find a show associated with this IMDB ID");
+                            responseEmbed.setDescription("Error: Couldn't find a show associated with this IMDB ID");
                         } else {
                             // update database
                             bot.getDatabaseManager().getTV().insertShowData(imdbId, showName, network, channel.getId());
                             // update user
-                            responseEmbed.appendDescription("Assigned **" + showName + "** to " + channel.getAsMention());
+                            responseEmbed.setDescription("Assigned **" + showName + "** to " + channel.getAsMention());
                             // logging
                             Util.getLogger().info("Assigned " + imdbId + " to " + channel.getName());
                             Util.simpleEmbed(Channels.BOTLOG_CH_ID.getChannel(), "Assigned **" + showName + "** to " + channel.getAsMention());
@@ -67,12 +71,12 @@ public class CommandShow extends Command {
                         int entriesDeleted = bot.getDatabaseManager().getTV().deleteShow(imdbId);
                         if (show != null && entriesDeleted > 0) {
                             // update user
-                            responseEmbed.appendDescription("Removed **" + show.getShowName() + "** from the database");
+                            responseEmbed.setDescription("Removed **" + show.getShowName() + "** from the database");
                             // logging
                             Util.getLogger().info("Removed " + imdbId + "from the database");
                             Util.simpleEmbed(Channels.BOTLOG_CH_ID.getChannel(), "Removed **" + show.getShowName() + "** from the database");
                         } else {
-                            responseEmbed.appendDescription("There are no shows in the database with the imdb-id: **" + imdbId + "**");
+                            responseEmbed.setDescription("There are no shows in the database with the imdb-id: **" + imdbId + "**");
                         }
                     }
 
