@@ -45,3 +45,12 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+        
+      - name: slack-build-notifier
+        uses: hennejg/slack-build-notifier@v1.1
+        with:
+          type: ${{ job.status }}
+          username: Github Actions
+          icon_emoji: ':octocat:'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
