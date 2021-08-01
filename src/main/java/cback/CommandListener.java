@@ -36,7 +36,7 @@ public class CommandListener extends ListenerAdapter {
                 Optional<Command> existingCommand = registeredCommands.stream()
                         .filter(cmd -> commandName.equalsIgnoreCase(cmd.getCommandData().getName()))
                         .findAny();
-                if (!existingCommand.isPresent()) {
+                if (existingCommand.isEmpty()) {
                     registeredCommands.add(command);
                     Util.getLogger().info("Registered Slash Command: " + commandName);
                 } else {
