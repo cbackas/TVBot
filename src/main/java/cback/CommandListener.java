@@ -1,18 +1,50 @@
 package cback;
 
 import cback.commandsV2.Command;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class CommandListener extends ListenerAdapter {
-    public ArrayList<Command> registeredCommands = new ArrayList<>();
+    protected ArrayList<Command> registeredCommands = new ArrayList<>();
 
     public CommandListener() {
         registerAllCommands();
+    }
+
+    @Override
+    public void onReady(@NotNull ReadyEvent event) {
+        super.onReady(event);
+
+        Guild homeGuild = TVBot.getInstance().getHomeGuild();
+
+        // register the slash commands with discord
+        homeGuild.updateCommands()
+                .addCommands(
+                        registeredCommands.stream()
+                                .map(Command::getCommandData)
+                                .collect(Collectors.toList())
+                )
+                .queue();
+
+        Map<String, Collection<? extends CommandPrivilege>> privileges = new HashMap<>();
+        registeredCommands.forEach(cmd -> {
+            if (cmd.getCommandPrivileges() != null) {
+                privileges.putIfAbsent(cmd.getCommandData().getName(), cmd.getCommandPrivileges());
+            }
+        });
+        System.out.println(privileges);
+//        homeGuild.updateCommandPrivileges(privileges);
+
     }
 
     @Override

@@ -130,9 +130,6 @@ public class TVBot extends ListenerAdapter {
                 .addEventListeners(this.commandListener)
                 .build()
                 .awaitReady();
-        this.commandListener.registeredCommands.forEach(cmd -> {
-            this.jda.upsertCommand(cmd.getCommandData()).queue();
-        });
 
         startTime = System.currentTimeMillis();
     }
