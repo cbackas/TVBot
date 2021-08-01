@@ -1,6 +1,5 @@
 package cback.commandsV2;
 
-import cback.TVBot;
 import cback.Util;
 
 import net.dv8tion.jda.api.entities.Member;
@@ -22,28 +21,33 @@ public class CommandInfo extends Command {
 
     @Override
     public void execute(SlashCommandEvent event) {
-        int userCount = event.getGuild().getMemberCount();
-        List<Member> boostCount = event.getGuild().getBoosters();
-        int channelCount = event.getGuild().getChannels().size();
-        OffsetDateTime serverCreatedDateTime = event.getGuild().getTimeCreated();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(event.getGuild().getName());
-        embed.addField("Created: ", serverCreatedDateTime.format(formatter), true);
-        embed.addField("Members: ", Integer.toString(userCount), true);
-        embed.addField("Channels: ", String.valueOf(channelCount), true);
-        embed.addField("Server Boosters: ", boostCount.stream().map(Member::getNickname).collect(Collectors.joining("\n")), true);
-        embed.addBlankField(false);
-        embed.addField("Source Code: ", "[`GitHub`](https://github.com/cbackas/TVBot)", true);
-
-        MessageEmbed infoEmbed = embed.setColor(Util.getBotColor())
+        MessageEmbed loadingEmbed = new EmbedBuilder().setColor(Util.getBotColor())
+                .setDescription("...")
                 .build();
 
-        event.reply("Getting info...")
+        event.replyEmbeds(loadingEmbed)
                 .setEphemeral(true)
-                .flatMap(v -> event.getHook().editOriginalEmbeds(infoEmbed))
-                .flatMap(v -> event.getHook().editOriginal(""))
+                .flatMap(v -> {
+                    int userCount = event.getGuild().getMemberCount();
+                    List<Member> boostCount = event.getGuild().getBoosters();
+                    int channelCount = event.getGuild().getChannels().size();
+                    OffsetDateTime serverCreatedDateTime = event.getGuild().getTimeCreated();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setTitle(event.getGuild().getName());
+                    embed.addField("Created: ", serverCreatedDateTime.format(formatter), true);
+                    embed.addField("Members: ", Integer.toString(userCount), true);
+                    embed.addField("Channels: ", String.valueOf(channelCount), true);
+                    embed.addField("Server Boosters: ", boostCount.stream().map(Member::getNickname).collect(Collectors.joining("\n")), true);
+                    embed.addBlankField(false);
+                    embed.addField("Source Code: ", "[`GitHub`](https://github.com/cbackas/TVBot)", true);
+
+                    MessageEmbed infoEmbed = embed.setColor(Util.getBotColor())
+                            .build();
+
+                    return event.getHook().editOriginalEmbeds(infoEmbed);
+                })
                 .queue();
     }
 }
