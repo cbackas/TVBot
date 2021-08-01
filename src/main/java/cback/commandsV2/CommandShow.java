@@ -11,25 +11,28 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
+import java.util.Objects;
+
 public class CommandShow extends Command {
     public CommandShow() {
         super();
-        this.commandData = new CommandData("show", "Manage shows saved in the database");
 
+        // build command data to be sent to discord for slash commands
+        CommandData cmdData = new CommandData("show", "Manage shows saved in the database");
         SubcommandData subcommandAdd = new SubcommandData("add", "Add a show to the database");
         SubcommandData subcommandRemove = new SubcommandData("remove", "Removes a show from the database");
         subcommandAdd.addOption(OptionType.STRING, "imdb-id", "ID for the show on IMDB.com", true);
         subcommandRemove.addOption(OptionType.STRING, "imdb-id", "ID for the show on IMDB.com", true);
         subcommandAdd.addOption(OptionType.CHANNEL, "channel", "Text channel to assign the show to, leave blank for current channel", false);
-
-        this.commandData.addSubcommands(subcommandAdd, subcommandRemove);
+        this.commandData = cmdData.addSubcommands(subcommandAdd, subcommandRemove);
     }
 
     @Override
     public void execute(SlashCommandEvent event) {
+        // loading embed while bot loads and sends response
         EmbedBuilder basicEmbedBuilder = new EmbedBuilder()
                 .setColor(Util.getBotColor());
-        if (event.getSubcommandName().equals("add")) {
+        if (Objects.equals(event.getSubcommandName(), "add")) {
             basicEmbedBuilder.setDescription("Adding show to db ...");
         } else if (event.getSubcommandName().equals("remove")) {
             basicEmbedBuilder.setDescription("Removing show from db ...");
@@ -41,7 +44,7 @@ public class CommandShow extends Command {
                 .flatMap(v -> {
 
                     EmbedBuilder responseEmbed = new EmbedBuilder().setColor(Util.getBotColor());
-                    String imdbId = event.getOption("imdb-id").getAsString().strip();
+                    String imdbId = Objects.requireNonNull(event.getOption("imdb-id")).getAsString().strip();
 
                     if (event.getSubcommandName().equals("add")) {
                         // if channel option is null then use user's current text channel as the channel in the DB
