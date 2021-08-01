@@ -10,8 +10,8 @@ public abstract class Command {
     protected TVBot bot;
     protected CommandData commandData;
 
-    public Command(String name, String description) {
-        this.commandData = new CommandData(name, description);
+    public Command() {
+        this.bot = TVBot.getInstance();
     }
 
     public abstract void execute(SlashCommandEvent var1);

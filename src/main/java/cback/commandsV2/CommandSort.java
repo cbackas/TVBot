@@ -1,19 +1,21 @@
 package cback.commandsV2;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 public class CommandSort extends Command {
     public CommandSort() {
-        super("sort", "Gives you latency info duh");
+        super();
+        this.commandData = new CommandData("sort", "Sorts text channels into alphebetic categories");
     }
 
     @Override
     public void execute(SlashCommandEvent event) {
-        long time = System.currentTimeMillis();
-        event.reply("Pong!").setEphemeral(true) // reply or acknowledge
+        event.reply("Sort!")
+                .setEphemeral(true)
                 .flatMap(v ->
-                        event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time) // then edit original
-                ).queue(); // Queue both reply and edit
-        System.out.println("executed");
+                        event.getHook().editOriginal("We be sortin here")
+                )
+                .queue();
     }
 }
