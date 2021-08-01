@@ -16,6 +16,9 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.reflections.Reflections;
 import org.slf4j.LoggerFactory;
 
@@ -115,15 +118,18 @@ public class TVBot extends ListenerAdapter {
 
         this.commandListener = new CommandListener();
 
-        JDABuilder builder = JDABuilder.createDefault(token.get())
+        this.jda = JDABuilder.createDefault(token.get())
+                .setChunkingFilter(ChunkingFilter.include(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")))) // enable member chunking for the lounge
+                .setMemberCachePolicy(MemberCachePolicy.ALL) // ignored if chunking enabled
+                .enableIntents(GatewayIntent.GUILD_MEMBERS)
                 .addEventListeners(commandClient)
                 .addEventListeners(this)
                 .addEventListeners(new ChannelChange(this))
                 .addEventListeners(new MemberChange(this))
                 .addEventListeners(new MessageChange(this))
-                .addEventListeners(this.commandListener);
-
-        this.jda = builder.build().awaitReady();
+                .addEventListeners(this.commandListener)
+                .build()
+                .awaitReady();
         this.commandListener.registeredCommands.forEach(cmd -> {
             this.jda.upsertCommand(cmd.getCommandData()).queue();
         });
