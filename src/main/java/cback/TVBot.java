@@ -29,6 +29,8 @@ public class TVBot extends ListenerAdapter {
     private static TVBot instance;
     private JDA jda;
 
+    private CommandListener commandListener;
+
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
     private ConfigManager configManager;
@@ -104,7 +106,7 @@ public class TVBot extends ListenerAdapter {
 
                 Command command = commandImpl.getDeclaredConstructor().newInstance();
                 commandClientBuilder.addCommand(command);
-                Util.getLogger().info("Registered command: " + command.getName());
+                Util.getLogger().info("Registered Command: " + command.getName());
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -113,14 +115,20 @@ public class TVBot extends ListenerAdapter {
 
         this.commandClient = commandClientBuilder.build();
 
+        this.commandListener = new CommandListener();
+
         JDABuilder builder = JDABuilder.createDefault(token.get())
                 .addEventListeners(commandClient)
                 .addEventListeners(this)
                 .addEventListeners(new ChannelChange(this))
                 .addEventListeners(new MemberChange(this))
-                .addEventListeners(new MessageChange(this));
+                .addEventListeners(new MessageChange(this))
+                .addEventListeners(this.commandListener);
 
         this.jda = builder.build().awaitReady();
+        this.commandListener.registeredCommands.forEach(cmd -> {
+            this.jda.upsertCommand(cmd.getCommandData()).queue();
+        });
 
         startTime = System.currentTimeMillis();
     }
