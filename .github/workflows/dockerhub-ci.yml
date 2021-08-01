@@ -53,4 +53,5 @@ jobs:
           username: Github Actions
           icon_emoji: ':octocat:'
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # optional
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
