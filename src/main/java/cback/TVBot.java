@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -25,14 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TVBot extends ListenerAdapter {
 
     private static TVBot instance;
     private JDA jda;
-
-    private CommandListener commandListener;
 
     private DatabaseManager databaseManager;
     private TraktManager traktManager;
@@ -118,8 +114,6 @@ public class TVBot extends ListenerAdapter {
 
         this.commandClient = commandClientBuilder.build();
 
-        this.commandListener = new CommandListener();
-
         this.jda = JDABuilder.createDefault(token.get())
                 .setChunkingFilter(ChunkingFilter.include(Long.parseLong(configManager.getConfigValue("HOMESERVER_ID")))) // enable member chunking for the lounge
                 .setMemberCachePolicy(MemberCachePolicy.ALL) // ignored if chunking enabled
@@ -129,45 +123,9 @@ public class TVBot extends ListenerAdapter {
                 .addEventListeners(new ChannelChange(this))
                 .addEventListeners(new MemberChange(this))
                 .addEventListeners(new MessageChange(this))
-                .addEventListeners(this.commandListener)
+                .addEventListeners(new CommandListener())
                 .build()
                 .awaitReady();
-
-        Guild homeGuild = getHomeGuild();
-
-        // register the slash commands with discord
-        homeGuild.updateCommands()
-                .addCommands(
-                        // pull the commandDatas out of the commands
-                        this.commandListener.registeredCommands.stream()
-                                .map(cback.commandsV2.Command::getCommandData)
-                                .collect(Collectors.toList())
-                )
-                .submit()
-                .thenCompose(cmdList -> {
-                    // get commands back from discord
-                    // then build map connecting IDs to registeredCommand's privileges
-                    // send privileges off to discord
-                    Map<String, Collection<? extends CommandPrivilege>> privileges = new HashMap<>();
-
-                    var registeredCommands = this.commandListener.registeredCommands;
-                    cmdList.forEach(cmd -> {
-                        for (cback.commandsV2.Command registeredCommand : registeredCommands) {
-                            if (cmd.getName().equals(registeredCommand.getCommandData().getName())) {
-                                if (registeredCommand.getCommandPrivileges().isEmpty()) continue;
-
-                                privileges.putIfAbsent(cmd.getId(), registeredCommand.getCommandPrivileges());
-                                registeredCommands.remove(registeredCommand);
-
-                                break;
-                            }
-                        }
-                    });
-                    return homeGuild.updateCommandPrivileges(privileges).submit();
-                })
-                .whenComplete((v, error) -> {
-                    if (error != null) Util.getLogger().error("Failed to submit privileges", error);
-                });
 
         startTime = System.currentTimeMillis();
     }
