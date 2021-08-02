@@ -71,7 +71,6 @@ public class CommandListener extends ListenerAdapter {
                 })
                 .whenComplete((v, error) -> {
                     if (error != null) Util.getLogger().error("Failed to submit privileges", error);
-                    System.out.println(v.toString());
                 });
     }
 
