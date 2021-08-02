@@ -29,7 +29,6 @@ public class CommandShow extends Command {
         this.commandData.setDefaultEnabled(false)
                 .addSubcommands(subcommandAdd, subcommandRemove);
 
-        this.commandPrivileges = new ArrayList<>();
         this.commandPrivileges.add(new CommandPrivilege(CommandPrivilege.Type.ROLE, true, TVRoles.MOD.id));
     }
 
