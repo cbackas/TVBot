@@ -6,13 +6,13 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
-import java.util.List;
+import java.util.ArrayList;
 
 @Getter
 public abstract class Command {
     protected TVBot bot;
-    protected CommandData commandData;
-    protected List<CommandPrivilege> commandPrivileges;
+    public CommandData commandData;
+    public ArrayList<CommandPrivilege> commandPrivileges = new ArrayList<>();
 
     public Command() {
         this.bot = TVBot.getInstance();

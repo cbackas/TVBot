@@ -13,8 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
 
 public class CommandShow extends Command {
     public CommandShow() {
@@ -27,9 +26,11 @@ public class CommandShow extends Command {
         subcommandAdd.addOption(OptionType.STRING, "imdb-id", "ID for the show on IMDB.com", true);
         subcommandRemove.addOption(OptionType.STRING, "imdb-id", "ID for the show on IMDB.com", true);
         subcommandAdd.addOption(OptionType.CHANNEL, "channel", "Text channel to assign the show to, leave blank for current channel", false);
-        this.commandData.addSubcommands(subcommandAdd, subcommandRemove);
+        this.commandData.setDefaultEnabled(false)
+                .addSubcommands(subcommandAdd, subcommandRemove);
 
-        this.commandPrivileges = Arrays.asList(new CommandPrivilege(CommandPrivilege.Type.ROLE, true, TVRoles.MOD.id));
+        this.commandPrivileges = new ArrayList<>();
+        this.commandPrivileges.add(new CommandPrivilege(CommandPrivilege.Type.ROLE, true, TVRoles.MOD.id));
     }
 
     @Override

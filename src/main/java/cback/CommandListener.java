@@ -1,50 +1,18 @@
 package cback;
 
 import cback.commandsV2.Command;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
-import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class CommandListener extends ListenerAdapter {
     protected ArrayList<Command> registeredCommands = new ArrayList<>();
 
     public CommandListener() {
         registerAllCommands();
-    }
-
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        super.onReady(event);
-
-        Guild homeGuild = TVBot.getInstance().getHomeGuild();
-
-        // register the slash commands with discord
-        homeGuild.updateCommands()
-                .addCommands(
-                        registeredCommands.stream()
-                                .map(Command::getCommandData)
-                                .collect(Collectors.toList())
-                )
-                .queue();
-
-        Map<String, Collection<? extends CommandPrivilege>> privileges = new HashMap<>();
-        registeredCommands.forEach(cmd -> {
-            if (cmd.getCommandPrivileges() != null) {
-                privileges.putIfAbsent(cmd.getCommandData().getName(), cmd.getCommandPrivileges());
-            }
-        });
-        System.out.println(privileges);
-//        homeGuild.updateCommandPrivileges(privileges);
-
     }
 
     @Override
@@ -68,6 +36,16 @@ public class CommandListener extends ListenerAdapter {
                         .filter(cmd -> commandName.equalsIgnoreCase(cmd.getCommandData().getName()))
                         .findAny();
                 if (existingCommand.isEmpty()) {
+                    // give admin perms to all non default-open commands
+                    CommandPrivilege adminPriv = new CommandPrivilege(CommandPrivilege.Type.ROLE, true, TVRoles.ADMIN.id);
+                    if (
+                            !command.commandPrivileges.contains(adminPriv) &&
+                                    command.commandPrivileges.size() > 0 &&
+                                    command.commandPrivileges.size() <= 10
+                    ) {
+                        command.commandPrivileges.add(adminPriv);
+                    }
+
                     registeredCommands.add(command);
                     Util.getLogger().info("Registered Slash Command: " + commandName);
                 } else {
