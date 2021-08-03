@@ -4,7 +4,6 @@ import cback.Channels;
 import cback.TVRoles;
 import cback.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -42,7 +41,6 @@ public class CommandBan extends Command {
 
                     boolean argsNull = userToBan == null;
                     boolean selfBan = userToBan.getId().equals(event.getUser().getId());
-                    boolean banFailed = !this.banUser(event.getGuild(), userToBan, reason, 1);
 
                     EmbedBuilder responseEmbedBuilder = new EmbedBuilder();
 
@@ -56,41 +54,43 @@ public class CommandBan extends Command {
                                 .setDescription("Oops! You can't ban yourself.")
                                 .setColor(Color.red);
                         return event.getHook().editOriginalEmbeds(responseEmbedBuilder.build());
-                    } else if (banFailed) {
-                        // if banUser errors
-                        return event.getHook().editOriginalEmbeds(responseEmbedBuilder.build());
                     } else {
-                        // put log in server's bot log channel
-                        EmbedBuilder logEmbedBuilder = new EmbedBuilder().setTitle("Banned " + userToBan.getEffectiveName())
-                                .addField("Reason", reason, false)
-                                .setFooter("Action by @" + event.getMember().getEffectiveName(), event.getUser().getEffectiveAvatarUrl())
-                                .setTimestamp(Instant.now())
-                                .setColor(Color.RED);
+                        try {
+                            event.getGuild()
+                                    .ban(userToBan.getUser(), 1, reason + "\nappeal at https://www.reddit.com/r/LoungeBan/")
+                                    .queue();
 
-                        Channels.SERVERLOG_CH_ID.getChannel()
-                                .sendMessageEmbeds(logEmbedBuilder.build())
-                                .queue();
+                            // put log in server's bot log channel
+                            EmbedBuilder logEmbedBuilder = new EmbedBuilder().setTitle("Banned " + userToBan.getEffectiveName())
+                                    .addField("Reason", reason, false)
+                                    .setFooter("Action by @" + event.getMember().getEffectiveName(), event.getUser().getEffectiveAvatarUrl())
+                                    .setTimestamp(Instant.now())
+                                    .setColor(Color.RED);
 
-                        // respond publicly to user who did ban command
-                        responseEmbedBuilder.setTitle("Banned " + userToBan.getEffectiveName())
-                                .setDescription("Check " + event.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.")
-                                .setColor(Color.RED);
+                            Channels.SERVERLOG_CH_ID.getChannel()
+                                    .sendMessageEmbeds(logEmbedBuilder.build())
+                                    .queue();
 
-                        return event.getHook()
-                                .sendMessageEmbeds(responseEmbedBuilder.build())
-                                .setEphemeral(false);
+                            // respond publicly to user who did ban command
+                            responseEmbedBuilder.setTitle("Banned " + userToBan.getEffectiveName())
+                                    .setDescription("Check " + event.getGuild().getTextChannelById(Channels.SERVERLOG_CH_ID.getId()).getAsMention() + " for more info.")
+                                    .setColor(Color.RED);
+
+                            return event.getHook()
+                                    .sendMessageEmbeds(responseEmbedBuilder.build())
+                                    .setEphemeral(false);
+                        } catch (Exception ex) {
+                            Util.reportHome(ex);
+
+                            responseEmbedBuilder.setTitle("Error Banning")
+                                    .setDescription(ex.getMessage())
+                                    .setColor(Color.red);
+
+                            return event.getHook().editOriginalEmbeds(responseEmbedBuilder.build());
+
+                        }
                     }
                 })
                 .queue();
-    }
-
-    private boolean banUser(Guild guild, Member member, String reason, int delDays) {
-        try {
-            guild.ban(member.getUser(), delDays, reason + " Appeal at https://www.reddit.com/r/LoungeBan/").submit();
-            return true;
-        } catch (Exception e) {
-            Util.reportHome(e);
-            return false;
-        }
     }
 }
