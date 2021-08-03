@@ -1,4 +1,4 @@
-package cback.commands;
+package cback.commandsDepr;
 
 import cback.TVBot;
 import cback.TVRoles;
@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.restaction.order.ChannelOrderAction;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,7 +38,7 @@ public class CommandSort extends Command {
         var unsortedCat = commandEvent.getGuild().getCategoryById(TVBot.UNSORTED_CAT_ID);
         int unsortedCount = unsortedCat.getChannels().size();
 
-        List<GuildChannel> permChannels = Util.getPermChannels(commandEvent.getGuild());
+        List<GuildChannel> permChannels = getPermChannels(commandEvent.getGuild());
 
         //sort non permanent channels
         List<GuildChannel> showChannelsSorted = commandEvent.getGuild().getChannels().stream()
@@ -135,5 +136,16 @@ public class CommandSort extends Command {
         }
 
         return null;
+    }
+
+    public static List<GuildChannel> getPermChannels(Guild guild) {
+        List<Long> permCategories = Arrays.asList(TVBot.STAFF_CAT_ID, TVBot.INFO_CAT_ID, TVBot.DISCUSSION_CAT_ID, TVBot.FUN_CAT_ID, TVBot.CARDS_CAT_ID, TVBot.NEW_CAT_ID, TVBot.CLOSED_CAT_ID);
+        List<GuildChannel> permChannels = permCategories.stream()
+                .map(catID -> guild.getCategoryById(catID))
+                .map(cat -> cat.getChannels())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        return permChannels;
     }
 }

@@ -9,16 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 
 public class Util {
-
     private static final Pattern USER_MENTION_PATTERN = Pattern.compile("^<@!?(\\d+)>$");
     private static Color BOT_COLOR = Color.decode("#" + TVBot.getInstance().getConfigManager().getConfigValue("bot_color"));
     private static org.slf4j.Logger logger = LoggerFactory.getLogger("TVBot");
@@ -401,17 +397,6 @@ public class Util {
         } else {
             return args.split("\\s+");
         }
-    }
-
-    public static List<GuildChannel> getPermChannels(Guild guild) {
-        List<Long> permCategories = Arrays.asList(TVBot.STAFF_CAT_ID, TVBot.INFO_CAT_ID, TVBot.DISCUSSION_CAT_ID, TVBot.FUN_CAT_ID, TVBot.CARDS_CAT_ID, TVBot.NEW_CAT_ID);
-        List<GuildChannel> permChannels = permCategories.stream()
-                .map(catID -> guild.getCategoryById(catID))
-                .map(cat -> cat.getChannels())
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-
-        return permChannels;
     }
 
     public static org.slf4j.Logger getLogger() {

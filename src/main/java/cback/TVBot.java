@@ -45,13 +45,13 @@ public class TVBot extends ListenerAdapter {
     public static final long CBACK_USR_ID = 73416411443113984L;
 
     public static final long UNSORTED_CAT_ID = 358043583355289600L;
-    public static final long CLOSED_CAT_ID = 355904962200469504L;
     public static final long STAFF_CAT_ID = 355901035597922304L;
     public static final long INFO_CAT_ID = 355910636464504832L;
     public static final long DISCUSSION_CAT_ID = 355910667812995084L;
     public static final long FUN_CAT_ID = 358679449451102210L;
     public static final long CARDS_CAT_ID = 821587214026407966L;
     public static final long NEW_CAT_ID = 358043583355289600L;
+    public static final long CLOSED_CAT_ID = 355904962200469504L;
     public static final long AF_CAT_ID = 358038418208587785L;
     public static final long GL_CAT_ID = 358038474894606346L;
     public static final long MR_CAT_ID = 358038505244327937L;
