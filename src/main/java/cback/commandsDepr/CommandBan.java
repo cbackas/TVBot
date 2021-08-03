@@ -1,4 +1,4 @@
-package cback.commands;
+package cback.commandsDepr;
 
 import cback.Channels;
 import cback.TVBot;
