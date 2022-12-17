@@ -1,7 +1,13 @@
 {
+  "scripts": {
+    "build": "node esbuild.js",
+    "dev": "npm run build && node dist/bundle.mjs"
+  },
   "dependencies": {
     "bufferutil": "^4.0.7",
     "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "esbuild": "^0.16.8",
     "utf-8-validate": "^5.0.10"
   },
   "devDependencies": {

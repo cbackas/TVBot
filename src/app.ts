@@ -1,21 +1,34 @@
 import { Client, GatewayIntentBits } from 'discord.js'
+import { registerCommands } from './command'
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] })
+import * as dotenv from 'dotenv'
+dotenv.config()
 
-client.on('ready', () => {
-  if (client.user !== null) console.log(`Logged in as ${client.user.tag}!`)
-})
+const start = (): void => {
+  const client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return
+  client.on('ready', () => {
+    if (client.user !== null) console.log(`Logged in as ${client.user.tag}!`)
+  })
 
-  if (interaction.commandName === 'ping') {
-    await interaction.reply('Pong!')
-  }
-})
+  client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isChatInputCommand()) return
 
-const token = process.env.DISCORD_TOKEN
+    const { commandName } = interaction
 
-if (token === undefined) throw new Error('DISCORD_TOKEN is not defined')
+    console.log(`Command: ${commandName}`)
 
-void client.login(token)
+    if (commandName === 'ping') {
+      await interaction.reply('Pong!')
+    }
+  })
+
+  const token = process.env.DISCORD_TOKEN
+
+  if (token === undefined) throw new Error('DISCORD_TOKEN is not defined')
+
+  void client.login(token)
+}
+
+await registerCommands() // sends all the slash commands over to Discord so users can see them
+start() // start the bot
