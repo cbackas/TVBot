@@ -16,7 +16,7 @@ const start = (): void => {
 
     const { commandName } = interaction
 
-    console.log(`Command: ${commandName}`)
+    console.log(`Recieved Command: ${commandName}`)
 
     if (commandName === 'ping') {
       await interaction.reply('Pong!')
