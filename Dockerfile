@@ -1,10 +1,13 @@
-FROM maven:3.6.3-adoptopenjdk-14 AS MAVEN_TOOL_CHAIN
-COPY pom.xml /tmp/
-COPY src /tmp/src/
-WORKDIR /tmp/
-RUN mvn package
+FROM node:18-alpine as build
+WORKDIR /build
+COPY . .
+RUN npm ci
+RUN npm run build
 
-FROM adoptopenjdk/openjdk13:alpine
-COPY --from=MAVEN_TOOL_CHAIN /tmp/target/TVBot-0.0.1-SNAPSHOT-jar-with-dependencies.jar /app/TVBot.jar
+FROM node:18-alpine as prod
+RUN npm install -g pm2
 WORKDIR /app
-CMD ["java", "-jar", "TVBot.jar"]
+COPY --from=build /build/dist .
+# runs 'node bundle.mjs' wrapped in pm2
+# pm2 keeps the process alive if it crashed for some reason or something
+ENTRYPOINT ["npx", "pm2", "start", "node", "--no-daemon", "--max-memory-restart", "1G", "--restart-delay", "1000", "--", "bundle.mjs"]
