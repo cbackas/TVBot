@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "discord.js": "^14.7.1"
+    "bufferutil": "^4.0.7",
+    "discord.js": "^14.7.1",
+    "utf-8-validate": "^5.0.10"
   },
   "devDependencies": {
     "ts-standard": "^12.0.1"
