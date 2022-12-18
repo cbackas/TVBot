@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import schedule from 'node-schedule'
-import { ActivityType, ApplicationCommandType, Client, Collection, ContextMenuCommandBuilder, Events, GatewayIntentBits, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes } from 'discord.js'
+import { ActivityType, Client, Collection, Events, GatewayIntentBits, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes } from 'discord.js'
 import { Command } from './interfaces/command'
 
 dotenv.config()
@@ -38,7 +38,7 @@ class App {
    * Async init function for app
    */
   private init = async (): Promise<void> => {
-      await this.registerCommands()
+    await this.registerCommands()
     this.startBot()
   }
 
@@ -52,7 +52,7 @@ class App {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
 
-      this.randomWatchingActivity()
+      this.startScheduler()
     })
 
     this.startEventListeners()
@@ -60,6 +60,9 @@ class App {
     void this.client.login(this.token)
   }
 
+  /**
+   * Starts event listeners for commands and interactions
+   */
   private startEventListeners = (): void => {
     this.client.on(Events.InteractionCreate, async (interaction) => {
       // if (interaction.isCommand()) console.log('cmd')
@@ -71,7 +74,7 @@ class App {
       if (command === undefined) return
 
       console.log(`Recieved Command: ${command.data.name}`)
-      
+
       try {
         await command.execute(interaction)
       } catch (error) {
@@ -92,7 +95,6 @@ class App {
   private registerCommands = async (): Promise<void> => {
     type SlashCommandData = RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody
     const slashCommandData: SlashCommandData[] = []
-    // const slashCommandData = []
 
     // loop through command modules
     // build command collection and slash command object used for discord command registration
@@ -102,14 +104,9 @@ class App {
       slashCommandData.push(command.data.toJSON())
     }
 
-    slashCommandData.push(new ContextMenuCommandBuilder()
-      .setName('Test Command')
-      .setType(ApplicationCommandType.User)
-    )
-
     // when testing locally you dont always need to register commands
     if (process.env.REGISTER_COMMANDS === 'false') return
-    
+
     try {
       console.log('Starting to register slash commands')
       const rest = new REST({ version: '10' }).setToken(this.token)
@@ -120,7 +117,13 @@ class App {
     }
   }
 
+  /**
+   * Start all the various scheduled activities
+   */
   private startScheduler = (): void => {
+    // run initial scheduled activities
+    this.randomWatchingActivity()
+    
     schedule.scheduleJob('* 15 * * *', () => {
       this.randomWatchingActivity()
     })
