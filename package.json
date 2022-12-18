@@ -1,12 +1,15 @@
 {
   "scripts": {
     "build": "node esbuild.mjs",
-    "dev": "export NODE_ENV=development; node esbuild.mjs"
+    "dev": "export NODE_ENV=development; node esbuild.mjs",
+    "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@prisma/client": "^4.7.1",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
-    "node-schedule": "^2.1.0"
+    "node-schedule": "^2.1.0",
+    "sqlite": "^4.1.2"
   },
   "devDependencies": {
     "@es-exec/esbuild-plugin-start": "^0.0.4",
@@ -18,6 +21,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.6.0",
     "eslint-plugin-promise": "^6.1.1",
+    "prisma": "^4.7.1",
     "typescript": "^4.9.4"
   }
 }
