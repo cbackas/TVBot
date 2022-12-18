@@ -1,4 +1,6 @@
 {
-    "standard.enable": true,
-    "standard.autoFixOnSave": true
+    "eslint.enable": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
 }

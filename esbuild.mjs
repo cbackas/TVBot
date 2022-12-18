@@ -20,9 +20,8 @@ const startOptions = {
 
 if (process.env.NODE_ENV === 'development') {
   config.watch = true
-  config.plugins = [
-    start(startOptions)
-  ]
+  config.plugins = [start(startOptions)]
 }
 
 build(config).catch(() => process.exit(1))
+
