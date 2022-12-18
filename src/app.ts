@@ -4,6 +4,12 @@ import { Command } from './interfaces/command'
 
 dotenv.config()
 
+type Getter<TInput> = { default: TInput }
+
+const commandModules: Getter<Command>[] = [
+  require('./commands/ping')
+]
+
 class App {
   private client: Client
   private commands = new Collection<string, Command>()
@@ -60,11 +66,6 @@ class App {
   }
 
   private registerCommands = async (): Promise<void> => {
-    type Getter<TInput> = { default: TInput }
-
-    const commandModules: Getter<Command>[] = [
-      require('./commands/ping')
-    ]
 
     const slashCommandData: RESTPostAPIChatInputApplicationCommandsJSONBody[] = []
 
