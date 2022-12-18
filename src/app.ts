@@ -38,7 +38,7 @@ class App {
   private start = (): void => {
     this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
-    this.client.on('ready', () => {
+    this.client.on(Events.ClientReady, () => {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
     })
@@ -52,7 +52,6 @@ class App {
       if (command === undefined) return
 
       console.log(`Recieved Command: ${command.data.name}`)
-
 
       try {
         await command.execute(interaction)
