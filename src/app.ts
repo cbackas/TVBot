@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv'
-import { Client, Collection, Events, GatewayIntentBits, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from 'discord.js'
+import schedule from 'node-schedule'
+import { ActivityType, ApplicationCommandType, Client, Collection, ContextMenuCommandBuilder, Events, GatewayIntentBits, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes } from 'discord.js'
 import { Command } from './interfaces/command'
 
 dotenv.config()
@@ -37,25 +38,31 @@ class App {
    * Async init function for app
    */
   private init = async (): Promise<void> => {
-    if (process.env.REGISTER_COMMANDS !== 'false') {
       await this.registerCommands()
-    }
-
-    this.start()
+    this.startBot()
   }
 
   /**
    * Start the bot and register listeners
    */
-  private start = (): void => {
+  private startBot = (): void => {
     this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
     this.client.on(Events.ClientReady, () => {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
+
+      this.randomWatchingActivity()
     })
 
+    this.startEventListeners()
+
+    void this.client.login(this.token)
+  }
+
+  private startEventListeners = (): void => {
     this.client.on(Events.InteractionCreate, async (interaction) => {
+      // if (interaction.isCommand()) console.log('cmd')
       if (!interaction.isChatInputCommand()) return
 
       const { commandName } = interaction
@@ -73,14 +80,19 @@ class App {
       }
     })
 
-    void this.client.login(this.token)
+    this.client.on(Events.InteractionCreate, interaction => {
+      if (!interaction.isUserContextMenuCommand()) return;
+      console.log(interaction);
+    })
   }
 
   /**
    * Register all commands with Discord
    */
   private registerCommands = async (): Promise<void> => {
-    const slashCommandData: RESTPostAPIChatInputApplicationCommandsJSONBody[] = []
+    type SlashCommandData = RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody
+    const slashCommandData: SlashCommandData[] = []
+    // const slashCommandData = []
 
     // loop through command modules
     // build command collection and slash command object used for discord command registration
@@ -90,6 +102,13 @@ class App {
       slashCommandData.push(command.data.toJSON())
     }
 
+    slashCommandData.push(new ContextMenuCommandBuilder()
+      .setName('Test Command')
+      .setType(ApplicationCommandType.User)
+    )
+
+    // when testing locally you dont always need to register commands
+    if (process.env.REGISTER_COMMANDS === 'false') return
     
     try {
       console.log('Starting to register slash commands')
@@ -99,6 +118,18 @@ class App {
     } catch (error) {
       console.error(error)
     }
+  }
+
+  private startScheduler = (): void => {
+    schedule.scheduleJob('* 15 * * *', () => {
+      this.randomWatchingActivity()
+    })
+  }
+
+  private randomWatchingActivity = (): void => {
+    const showList: { shows: string[] } = require('../assets/shows.json')
+    const randomIndex = Math.floor(Math.random() * (showList.shows.length - 0 + 1) + 0)
+    this.client.user?.setActivity(showList.shows[randomIndex], { type: ActivityType.Watching })
   }
 
   public getClient = (): Client => {
