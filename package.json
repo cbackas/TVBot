@@ -5,12 +5,14 @@
   },
   "dependencies": {
     "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "node-schedule": "^2.1.0"
   },
   "devDependencies": {
-    "esbuild": "^0.16.8",
     "@es-exec/esbuild-plugin-start": "^0.0.4",
+    "@types/node-schedule": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "esbuild": "^0.16.8",
     "eslint": "^8.30.0",
     "eslint-config-standard-with-typescript": "SecurityESys/esbuild-plugin-import-glob",
     "eslint-plugin-import": "^2.26.0",

@@ -8,6 +8,7 @@ const config = {
   format: 'esm',
   target: 'es2022',
   outfile: 'dist/bundle.mjs',
+  sourcemap: 'inline',
   banner: {
     js: "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
   }
@@ -15,7 +16,7 @@ const config = {
 
 /** @type import('@es-exec/esbuild-plugin-start').ESLintPluginOptions */
 const startOptions = {
-  script: 'node dist/bundle.mjs'
+  script: 'node --enable-source-maps dist/bundle.mjs'
 }
 
 if (process.env.NODE_ENV === 'development') {
