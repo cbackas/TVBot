@@ -6,10 +6,16 @@ dotenv.config()
 
 type Getter<TInput> = { default: TInput }
 
+/**
+ * all commands required here will be registered on app startup
+ */
 const commandModules: Getter<Command>[] = [
   require('./commands/ping')
 ]
 
+/**
+ * The main bot application
+ */
 class App {
   private client: Client
   private commands = new Collection<string, Command>()
@@ -27,6 +33,9 @@ class App {
     this.init()
   }
 
+  /**
+   * Async init function for app
+   */
   private init = async (): Promise<void> => {
     if (process.env.REGISTER_COMMANDS !== 'false') {
       await this.registerCommands()
@@ -35,6 +44,9 @@ class App {
     this.start()
   }
 
+  /**
+   * Start the bot and register listeners
+   */
   private start = (): void => {
     this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
@@ -47,12 +59,12 @@ class App {
       if (!interaction.isChatInputCommand()) return
 
       const { commandName } = interaction
-      
+
       const command = this.commands.get(commandName)
       if (command === undefined) return
 
       console.log(`Recieved Command: ${command.data.name}`)
-
+      
       try {
         await command.execute(interaction)
       } catch (error) {
@@ -64,20 +76,24 @@ class App {
     void this.client.login(this.token)
   }
 
+  /**
+   * Register all commands with Discord
+   */
   private registerCommands = async (): Promise<void> => {
-
     const slashCommandData: RESTPostAPIChatInputApplicationCommandsJSONBody[] = []
 
+    // loop through command modules
+    // build command collection and slash command object used for discord command registration
     for (const module of commandModules) {
       const command = module.default
       this.commands.set(command.data.name, command)
       slashCommandData.push(command.data.toJSON())
     }
 
-    const rest = new REST({ version: '10' }).setToken(this.token)
-
+    
     try {
       console.log('Starting to register slash commands')
+      const rest = new REST({ version: '10' }).setToken(this.token)
       await rest.put(Routes.applicationCommands(this.clientId), { body: slashCommandData })
       console.log('Slash commands registered: ' + this.commands.map((cmd) => cmd.data.name))
     } catch (error) {
