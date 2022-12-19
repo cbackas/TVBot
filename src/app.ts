@@ -13,7 +13,9 @@ type Getter<TInput> = { default: TInput }
  * all commands required here will be registered on app startup
  */
 const commandModules: Getter<Command>[] = [
-  require('./commands/ping')
+  require('./commands/ping'),
+  require('./commands/show'),
+  require('./commands/settings')
 ]
 
 /**
@@ -143,7 +145,7 @@ export class App {
   private startScheduler = (): void => {
     // run initial scheduled activities
     this.randomWatchingActivity()
-    
+
     schedule.scheduleJob('* 15 * * *', () => {
       this.randomWatchingActivity()
     })
