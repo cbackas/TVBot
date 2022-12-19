@@ -2,6 +2,8 @@ import * as dotenv from 'dotenv'
 import schedule from 'node-schedule'
 import { ActivityType, Client, Collection, Events, GatewayIntentBits, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes } from 'discord.js'
 import { Command } from './interfaces/command'
+import client from './lib/prisma'
+import { Settings } from '@prisma/client'
 
 dotenv.config()
 
@@ -17,19 +19,25 @@ const commandModules: Getter<Command>[] = [
 /**
  * The main bot application
  */
-class App {
+export class App {
   private client: Client
   private commands = new Collection<string, Command>()
+  private settings: Settings[] = []
 
-  private token
-  private clientId
+  private token: string
+  private clientId: string
+  private guildId: string
 
   constructor() {
     if (process.env.DISCORD_TOKEN === undefined) throw new Error('DISCORD_TOKEN is not defined')
     if (process.env.DISCORD_CLIENT_ID === undefined) throw new Error('DISCORD_CLIENT_ID is not defined')
+    if (process.env.DISCORD_GUILD_ID === undefined) throw new Error('DISCORD_GUILD_ID is not defined')
 
     this.token = process.env.DISCORD_TOKEN
     this.clientId = process.env.DISCORD_CLIENT_ID
+    this.guildId = process.env.DISCORD_GUILD_ID
+
+    this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
     this.init()
   }
@@ -38,16 +46,26 @@ class App {
    * Async init function for app
    */
   private init = async (): Promise<void> => {
+    await this.loadSettings()
     await this.registerCommands()
     this.startBot()
+  }
+
+  public loadSettings = async (): Promise<void> => {
+    const settings = await client.settings.findMany({
+      select: {
+        key: true,
+        value: true
+      }
+    })
+
+    this.settings = settings
   }
 
   /**
    * Start the bot and register listeners
    */
   private startBot = (): void => {
-    this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
-
     this.client.on(Events.ClientReady, () => {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
@@ -75,11 +93,13 @@ class App {
 
       console.log(`Recieved Command: ${command.data.name}`)
 
+      await interaction.deferReply({ ephemeral: true })
+
       try {
-        await command.execute(interaction)
+        await command.execute(this, interaction)
       } catch (error) {
         console.error(error)
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
+        await interaction.editReply('There was an error while executing this command!')
       }
     })
 
@@ -110,7 +130,7 @@ class App {
     try {
       console.log('Starting to register slash commands')
       const rest = new REST({ version: '10' }).setToken(this.token)
-      await rest.put(Routes.applicationCommands(this.clientId), { body: slashCommandData })
+      await rest.put(Routes.applicationGuildCommands(this.clientId, this.guildId), { body: slashCommandData })
       console.log('Slash commands registered: ' + this.commands.map((cmd) => cmd.data.name))
     } catch (error) {
       console.error(error)
@@ -135,9 +155,8 @@ class App {
     this.client.user?.setActivity(showList.shows[randomIndex], { type: ActivityType.Watching })
   }
 
-  public getClient = (): Client => {
-    return this.client
-  }
+  public getClient = (): Client => this.client
+  public getSettings = (): Settings[] => this.settings
 }
 
 // make an instance of the application class
