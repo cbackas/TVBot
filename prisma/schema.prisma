@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -10,11 +10,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Show {
-  id      String    @id @default(cuid())
-  name    String
-  imdbId  String
-  Episode Episode[]
+model Settings {
+  key   String @id
+  value String
 }
 
 model Episode {
@@ -22,4 +20,30 @@ model Episode {
   name   String
   showId String
   show   Show   @relation(fields: [showId], references: [id])
+}
+
+model Show {
+  id       String     @id @default(cuid())
+  name     String
+  imdbId   String     @unique
+  tmdbId   Int        @unique
+  tvdbId   Int        @unique
+  Episode  Episode[]
+  ShowPost ShowPost[]
+}
+
+model ForumPost {
+  id       String     @id @default(cuid())
+  postId   String
+  forumId  String
+  ShowPost ShowPost[]
+}
+
+model ShowPost {
+  show        Show      @relation(fields: [showId], references: [id])
+  showId      String
+  forumPost   ForumPost @relation(fields: [forumPostId], references: [id])
+  forumPostId String
+
+  @@id([showId, forumPostId])
 }
