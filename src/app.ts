@@ -4,6 +4,7 @@ import { ActivityType, Client, Collection, Events, GatewayIntentBits, REST, REST
 import { Command } from './interfaces/command'
 import client from './lib/prisma'
 import { Settings } from '@prisma/client'
+import { checkForAiringEpisodes, scheduleAiringMessages } from './lib/episodeNotifier'
 
 dotenv.config()
 
@@ -68,11 +69,23 @@ export class App {
    * Start the bot and register listeners
    */
   private startBot = (): void => {
-    this.client.on(Events.ClientReady, () => {
+    this.client.on(Events.ClientReady, async () => {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
 
-      this.startScheduler()
+      // run initial scheduled activities
+      this.randomWatchingActivity()
+      await checkForAiringEpisodes()
+      scheduleAiringMessages(this)
+
+      schedule.scheduleJob('lifecycle:1hour:updateBotActivity', '15 * * * *', () => {
+        this.randomWatchingActivity()
+      })
+
+      schedule.scheduleJob('lifecycle:4hours:fetchEpisoded', '0 */4 * * *', async () => {
+        await checkForAiringEpisodes()
+        scheduleAiringMessages(this)
+      })
     })
 
     this.startEventListeners()
@@ -85,7 +98,6 @@ export class App {
    */
   private startEventListeners = (): void => {
     this.client.on(Events.InteractionCreate, async (interaction) => {
-      // if (interaction.isCommand()) console.log('cmd')
       if (!interaction.isChatInputCommand()) return
 
       const { commandName } = interaction
@@ -137,18 +149,6 @@ export class App {
     } catch (error) {
       console.error(error)
     }
-  }
-
-  /**
-   * Start all the various scheduled activities
-   */
-  private startScheduler = (): void => {
-    // run initial scheduled activities
-    this.randomWatchingActivity()
-
-    schedule.scheduleJob('* 15 * * *', () => {
-      this.randomWatchingActivity()
-    })
   }
 
   private randomWatchingActivity = (): void => {

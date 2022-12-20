@@ -1,10 +1,11 @@
-import { CacheType, Channel, ChannelType, ChatInputCommandInteraction, ForumChannel, GuildForumThreadManager, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder } from 'discord.js'
+import { CacheType, Channel, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder } from 'discord.js'
 import client from '../lib/prisma'
 import { Command } from '../interfaces/command'
 import { Prisma } from '@prisma/client'
-import { findByExternalId, getAiringSoon, getExternalIds } from '../lib/dataFetching'
-import { ProgressMessageBuilder, StepStatus } from '../lib/progressMessages'
+import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
+import { getSeriesByImdbId } from '../lib/tvdb'
+import { updateDBEpisodes } from '../lib/dbManager'
 
 const imdbOption = (option: SlashCommandStringOption) => {
   return option.setName('imdb_id')
@@ -50,49 +51,30 @@ export default command
 const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheType>, imdbId: string) => {
   const progressMessage = new ProgressMessageBuilder()
     .addStep(`Searching for show with IMDB ID ${imdbId}`)
-    .addStep('Fetching related data')
     .addStep('Creating forum post')
     .addStep('Saving to database')
+    .addStep('Save upcoming episodes to database')
 
   // start step 1
   await interaction.followUp(progressMessage.nextStep())
 
-  const find = await findByExternalId(imdbId, 'imdb_id')
+  // const find = await findByExternalId(imdbId, 'imdb_id')
 
-  if (!find.tv_results || find.tv_results.length !== 1) {
+  const tvdbSeries = await getSeriesByImdbId(imdbId)
+
+  if (!tvdbSeries) {
     return await interaction.editReply(progressMessage.toString() + '\n\nNo show found with that imdb id')
   }
-
-  const show = find.tv_results[0]
 
   // start step 2
   await interaction.editReply(progressMessage.nextStep())
 
-  const externalIds = await getExternalIds(show.id)
-
-  if (!externalIds) {
-    return await interaction.editReply(progressMessage.toString() + '\n\nNo external ids found for this show')
-  }
-
-  const tvdbId = externalIds.tvdb_id
-
-  if (!tvdbId) {
-    return await interaction.editReply(progressMessage.toString() + '\n\nError: No tvdb id found for this show')
-  }
-
-  // start step 3
-  await interaction.editReply(progressMessage.nextStep())
-
   const settings = app.getSettings()
-
   const tvForum = settings.find(s => s.key === 'tv_forum')?.value
 
   if (!tvForum) {
-    return await interaction.editReply(progressMessage.toString() + '\n\nError: No tv forum found')
+    return await interaction.editReply(progressMessage.toString() + '\n\nError: No tv forum configured, use /settings tv_forum <channel> to set one')
   }
-
-
-  // const manager = new GuildForumThreadManager()
 
   const forumChannel = await interaction.client.channels.fetch(tvForum)
   if (forumChannel == null || !isForumChannel(forumChannel)) {
@@ -100,38 +82,37 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
   }
 
   const newPost = await forumChannel.threads.create({
-    name: show.name,
-    autoArchiveDuration: 1440,
+    name: tvdbSeries.name,
+    autoArchiveDuration: 10080,
     message: {
-      content: `https://image.tmdb.org/t/p/w300_and_h450_bestv2${show.poster_path}`
+      content: `${tvdbSeries.image}`
     }
   })
 
+  // start step 4
   await interaction.editReply(progressMessage.nextStep())
 
   try {
     const data = Prisma.validator<Prisma.ShowCreateInput>()({
-      name: show.name,
+      name: tvdbSeries.name,
       imdbId: imdbId,
-      tmdbId: show.id,
-      tvdbId: tvdbId,
-      ShowPost: {
-        create: [
-          {
-            forumPost: {
-              create: {
-                forumId: tvForum,
-                postId: newPost.id
-              }
-            }
-          }
-        ]
+      tvdbId: tvdbSeries.id,
+      ShowDestination: {
+        create: {
+          channelId: newPost.id,
+          forumId: tvForum,
+          channelType: 'FORUM',
+        }
       }
     })
 
-    await client.show.create({
+    const newShow = await client.show.create({
       data
     })
+
+    await interaction.editReply(progressMessage.nextStep())
+
+    await updateDBEpisodes(newShow)
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return await interaction.editReply(progressMessage.toString() + '\n\nError: Show already exists')
@@ -140,7 +121,9 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     return await interaction.editReply(progressMessage.toString() + '\n\nError: Something went wrong')
   }
 
-  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated thread <#${newPost.id}>`)
+  // finish step 4
+  console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
+  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post [${tvdbSeries.name}](${newPost.url})`)
 }
 
 const isForumChannel = (channel: Channel): channel is ForumChannel => {
