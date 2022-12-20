@@ -30,8 +30,10 @@ const command: Command = {
         }
 
         await setTVForum(interaction, channel)
+        break
       default:
         await interaction.editReply('Invalid subcommand')
+        break
     }
 
     await app.loadSettings()
