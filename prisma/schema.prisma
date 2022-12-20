@@ -16,34 +16,32 @@ model Settings {
 }
 
 model Episode {
-  id     String @id @default(cuid())
-  name   String
-  showId String
-  show   Show   @relation(fields: [showId], references: [id])
+  show        Show     @relation(fields: [showId], references: [id])
+  showId      String
+  season      Int
+  number      Int
+  title       String
+  airDate     DateTime
+  messageSent Boolean  @default(false)
+
+  @@id([showId, season, number])
 }
 
 model Show {
-  id       String     @id @default(cuid())
-  name     String
-  imdbId   String     @unique
-  tmdbId   Int        @unique
-  tvdbId   Int        @unique
-  Episode  Episode[]
-  ShowPost ShowPost[]
+  id              String            @id @default(cuid())
+  name            String
+  imdbId          String            @unique
+  tvdbId          Int               @unique
+  Episode         Episode[]
+  ShowDestination ShowDestination[]
 }
 
-model ForumPost {
-  id       String     @id @default(cuid())
-  postId   String
-  forumId  String
-  ShowPost ShowPost[]
-}
-
-model ShowPost {
-  show        Show      @relation(fields: [showId], references: [id])
+model ShowDestination {
+  show        Show    @relation(fields: [showId], references: [id])
   showId      String
-  forumPost   ForumPost @relation(fields: [forumPostId], references: [id])
-  forumPostId String
+  channelId   String
+  forumId     String?
+  channelType String
 
-  @@id([showId, forumPostId])
+  @@id([showId, channelId])
 }
