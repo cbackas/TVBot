@@ -8,3 +8,5 @@ services:
     container_name: tvbot
     env_file:
       - .env
+    volumes:
+      - ./data:/app/data/

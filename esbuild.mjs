@@ -28,5 +28,9 @@ if (process.env.NODE_ENV === 'development') {
   config.plugins = [start(startOptions)]
 }
 
-build(config).catch(() => process.exit(1))
+build(config).catch((error) => {
+  console.error(error)
+  process.exit(1)
+})
+
 

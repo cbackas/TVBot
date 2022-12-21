@@ -1,0 +1,9 @@
+*.db
+.vscode
+.github/workflows
+dist
+.env
+Dockerfile
+docker-compose.yml
+README.md
+data/
