@@ -35,6 +35,7 @@ export class App {
     if (process.env.DISCORD_TOKEN === undefined) throw new Error('DISCORD_TOKEN is not defined')
     if (process.env.DISCORD_CLIENT_ID === undefined) throw new Error('DISCORD_CLIENT_ID is not defined')
     if (process.env.DISCORD_GUILD_ID === undefined) throw new Error('DISCORD_GUILD_ID is not defined')
+    if (process.env.TZ === undefined) throw new Error('TZ is not defined')
 
     this.token = process.env.DISCORD_TOKEN
     this.clientId = process.env.DISCORD_CLIENT_ID

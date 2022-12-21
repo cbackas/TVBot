@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client"
 import { AnyThreadChannel, Channel, ChannelType, Collection, TextChannel } from "discord.js"
+import moment from "moment-timezone"
 import schedule from 'node-schedule'
 import { App } from "../app"
 import { markMessageSent, updateDBEpisodes } from "./dbManager"
@@ -64,12 +65,13 @@ export const checkForAiringEpisodes = async (): Promise<void> => {
 }
 
 export const scheduleAiringMessages = async (app: App): Promise<void> => {
+  const momentUTC = moment.utc(new Date())
   // get all episodes in the DB that are airing in the next 24 hours
   const episodes = await client.episode.findMany({
     where: {
       airDate: {
-        gte: new Date(),
-        lte: new Date(Date.now() + 1000 * 60 * 60 * 24)
+        gte: momentUTC.toDate(),
+        lte: momentUTC.add(1, 'day').toDate()
       },
       messageSent: false
     },
@@ -93,21 +95,22 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
   // schedule jobs for each episode group
   for (const [showId, showEpisodes] of shows) {
     for (const [airDateString, airDateEpisodes] of showEpisodes) {
+      const airDateUTC = moment.utc(airDateString)
+      const airDateLocal = airDateUTC.tz(process.env.TZ ?? 'America/Chicago')
       for (const [season, seasonEpisodes] of airDateEpisodes) {
         // create a unique key for the job
         const key = `announceEpisodes:${airDateString}:${showId}:S${addLeadingZeros(season, 2)}`
-        const airDate = seasonEpisodes[0].airDate
 
-        const job = schedule.scheduledJobs[key]
-        if (!job) {
-          await scheduleJob(key, airDate, seasonEpisodes, app)
-          console.info(`Scheduled Job: ${key} at ${airDateString}`)
+        const existingJob = schedule.scheduledJobs[key]
+        if (!existingJob) {
+          const newJob = await scheduleJob(key, airDateLocal.toDate(), seasonEpisodes, app)
+          console.info(`Scheduled Job: ${key} (${seasonEpisodes[0].show.name}) at ${newJob.nextInvocation()}}`)
           continue
         }
 
-        if (job.nextInvocation() != airDate) {
-          console.info(`Rescheduled Job: ${key} at ${airDateString}`)
-          schedule.rescheduleJob(key, airDate)
+        if (existingJob.nextInvocation() != airDateLocal.toDate()) {
+          const job = schedule.rescheduleJob(key, airDateLocal.toDate())
+          console.info(`Rescheduled Job: ${key} at ${job.nextInvocation()}`)
         }
       }
     }
@@ -134,7 +137,7 @@ const scheduleJob = async (key: string, airDate: Date, episodes: Episode[], app:
   message = `${show.name} S${addLeadingZeros(season, 2)}E${episodeRange} is streaming somewhere now!`
 
   // create a scheduled event to send a message
-  schedule.scheduleJob(key, airDate, async () => {
+  return schedule.scheduleJob(key, airDate, async () => {
     const discord = app.getClient()
 
     // send a message to each channel the show is being tracked in
