@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:${{ env.GITHUB_REF_NAME }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:${{ github.ref_name }}
 
       - name: slack-build-notifier
         uses: hennejg/slack-build-notifier@v1.1
