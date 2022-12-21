@@ -99,7 +99,7 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
       const airDateLocal = airDateUTC.tz(process.env.TZ ?? 'America/Chicago')
       for (const [season, seasonEpisodes] of airDateEpisodes) {
         // create a unique key for the job
-        const key = `announceEpisodes:${airDateString}:${showId}:S${addLeadingZeros(season, 2)}`
+        const key = `announceEpisodes:${showId}:S${addLeadingZeros(season, 2)}`
 
         const existingJob = schedule.scheduledJobs[key]
         if (!existingJob) {
@@ -108,7 +108,9 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
           continue
         }
 
-        if (existingJob.nextInvocation() != airDateLocal.toDate()) {
+        const nextInvocation: Date = (existingJob.nextInvocation() as any).toDate()
+        const airDate = airDateLocal.toDate()
+        if (nextInvocation.toDateString() != airDate.toDateString()) {
           const job = schedule.rescheduleJob(key, airDateLocal.toDate())
           console.info(`Rescheduled Job: ${key} at ${job.nextInvocation()}`)
         }
