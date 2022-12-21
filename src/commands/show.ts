@@ -6,6 +6,7 @@ import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
 import { updateDBEpisodes } from '../lib/dbManager'
+import { scheduleAiringMessages } from '../lib/episodeNotifier'
 
 const imdbOption = (option: SlashCommandStringOption) => {
   return option.setName('imdb_id')
@@ -113,6 +114,7 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     await interaction.editReply(progressMessage.nextStep())
 
     await updateDBEpisodes(newShow)
+    await scheduleAiringMessages(app)
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return await interaction.editReply(progressMessage.toString() + '\n\nError: Show already exists')
