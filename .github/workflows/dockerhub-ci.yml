@@ -38,7 +38,7 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:${{ GITHUB_REF_NAME }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:${{ env.GITHUB_REF_NAME }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
