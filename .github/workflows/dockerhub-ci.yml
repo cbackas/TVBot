@@ -2,13 +2,12 @@ name: CI to Docker Hub
 
 on:
   push:
-    branches: [ master ]
+    branches: [master, v2]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -17,8 +16,8 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
-    
-      - name: Check Out Repo 
+
+      - name: Check Out Repo
         uses: actions/checkout@v2
 
       - name: Login to Docker Hub
@@ -39,19 +38,19 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags:  ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:latest
+          image: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-        
+
       - name: slack-build-notifier
         uses: hennejg/slack-build-notifier@v1.1
         with:
           type: ${{ job.status }}
           username: Github Actions
-          icon_emoji: ':octocat:'
+          icon_emoji: ":octocat:"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # optional
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
