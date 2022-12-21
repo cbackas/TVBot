@@ -5,7 +5,7 @@ on:
     branches: [master, v2]
 
 jobs:
-  docker:
+  docker_build:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -25,13 +25,12 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:${{ github.ref_name }}
-
-      - name: slack-build-notifier
-        uses: hennejg/slack-build-notifier@v1.1
-        with:
-          type: ${{ job.status }}
-          username: Github Actions
-          icon_emoji: ":octocat:"
+  slackNotification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # optional
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
