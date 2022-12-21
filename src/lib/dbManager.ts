@@ -1,5 +1,7 @@
-import { Episode, Prisma, PrismaPromise, Show } from "@prisma/client"
+import { Show } from "@prisma/client"
+import moment from "moment-timezone"
 import client from "./prisma"
+import { getTimezone } from "./timezones"
 import { getSeries } from "./tvdb"
 
 export const updateDBEpisodes = async (show: Show): Promise<void> => {
@@ -15,15 +17,26 @@ export const updateDBEpisodes = async (show: Show): Promise<void> => {
     }
   })
 
-  if (series.airsTime === null) return
+  const country = series.latestNetwork.country
+  const timezone = getTimezone(country)
+
+  const today = new Date()
+  const getAirDate = (dateStr: string, timeStr: string | null) => {
+    try {
+      return moment.tz(`${dateStr} ${timeStr !== null ? timeStr : '00:00'}`, timezone)
+    } catch (error) {
+      throw new Error(`Could not parse air date`)
+    }
+  }
 
   const statements = series.episodes
     .filter((episode) => {
-      const airDate = new Date(episode.aired + 'T' + series.airsTime + ':00Z')
-      return airDate > new Date()
+      if (episode.aired === null) return false
+      return getAirDate(episode.aired, series.airsTime).toDate() > today
     })
     .map((episode) => {
-      const airDate = new Date(episode.aired + 'T' + series.airsTime + ':00Z')
+      const airDate = getAirDate(episode.aired, series.airsTime)
+      const airDateUTC = airDate.utc().toDate()
 
       return client.episode.upsert({
         where: {
@@ -35,14 +48,14 @@ export const updateDBEpisodes = async (show: Show): Promise<void> => {
         },
         update: {
           title: episode.name,
-          airDate: airDate
+          airDate: airDateUTC
         },
         create: {
           showId: show.id,
           season: episode.seasonNumber,
           number: episode.number,
           title: episode.name,
-          airDate: airDate
+          airDate: airDateUTC
         }
       })
     })
