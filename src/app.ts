@@ -14,8 +14,7 @@ type Getter<TInput> = { default: TInput }
  * all commands required here will be registered on app startup
  */
 const commandModules: Getter<Command>[] = [
-  require('./commands/ping'),
-  require('./commands/show'),
+  require('./commands/post'),
   require('./commands/settings')
 ]
 
