@@ -10,7 +10,7 @@ import { scheduleAiringMessages } from '../lib/episodeNotifier'
 
 const slashCommand = new SlashCommandBuilder()
   .setName('post')
-  .setDescription('Create a forum post for a show. Required "Manage Channels" permission.')
+  .setDescription('Create a forum post for a show. Require "Manage Channels" permission.')
   .setDMPermission(false)
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
   .addStringOption(option => option.setName('imdb_id')
