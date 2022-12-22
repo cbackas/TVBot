@@ -2,7 +2,7 @@ export const addLeadingZeros = (num: number, totalLength: number): string => {
   return String(num).padStart(totalLength, '0');
 }
 
-export function toRanges(values: number[], separator = '\u2013', totalLength = 2): string[] {
+export function toRanges(values: number[], separator = '-', totalLength = 2): string[] {
   return values
     .slice()
     .sort((p, q) => p - q)
