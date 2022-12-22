@@ -21,7 +21,9 @@ const EpisodeValidator = Prisma.validator<Prisma.EpisodeArgs>()({
         name: true,
         ShowDestination: {
           select: {
-            channelId: true
+            channelId: true,
+            forumId: true,
+            channelType: true
           }
         }
       }

@@ -37,9 +37,11 @@ model Show {
 }
 
 model ShowDestination {
-  show      Show   @relation(fields: [showId], references: [id])
-  showId    String
-  channelId String
+  show        Show    @relation(fields: [showId], references: [id])
+  showId      String
+  channelId   String
+  forumId     String?
+  channelType String
 
   @@id([showId, channelId])
 }

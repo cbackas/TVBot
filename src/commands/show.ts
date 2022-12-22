@@ -100,7 +100,9 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
       tvdbId: tvdbSeries.id,
       ShowDestination: {
         create: {
-          channelId: newPost.id
+          channelId: newPost.id,
+          forumId: tvForum,
+          channelType: 'FORUM',
         }
       }
     })
