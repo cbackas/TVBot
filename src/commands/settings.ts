@@ -18,29 +18,29 @@ const slashCommand = new SlashCommandBuilder()
     )
   )
 
-const command: Command = {
-  data: slashCommand,
-  async execute(app: App, interaction: ChatInputCommandInteraction<CacheType>) {
-    switch (interaction.options.getSubcommand()) {
-      case 'tv_forum':
-        const channel = interaction.options.getChannel('channel', true)
+const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
+  switch (interaction.options.getSubcommand()) {
+    case 'tv_forum':
+      const channel = interaction.options.getChannel('channel', true)
 
-        if (channel.type != ChannelType.GuildForum) {
-          return await interaction.editReply('Invalid channel type')
-        }
+      if (channel.type != ChannelType.GuildForum) {
+        return await interaction.editReply('Invalid channel type')
+      }
 
-        await setTVForum(interaction, channel)
-        break
-      default:
-        await interaction.editReply('Invalid subcommand')
-        break
-    }
-
-    await app.loadSettings()
+      await setTVForum(interaction, channel)
+      break
+    default:
+      await interaction.editReply('Invalid subcommand')
+      break
   }
+
+  await app.loadSettings()
 }
 
-export default command
+export const command: Command = {
+  data: slashCommand,
+  execute
+}
 
 const setTVForum = async (interaction: ChatInputCommandInteraction<CacheType>, channel: ForumChannel | APIInteractionDataResolvedChannel) => {
   const progressMessage = new ProgressMessageBuilder()

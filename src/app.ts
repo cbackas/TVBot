@@ -8,7 +8,7 @@ import { checkForAiringEpisodes, scheduleAiringMessages } from './lib/episodeNot
 
 dotenv.config()
 
-type Getter<TInput> = { default: TInput }
+type Getter<TInput> = { command: TInput }
 
 /**
  * all commands required here will be registered on app startup
@@ -133,7 +133,7 @@ export class App {
     // loop through command modules
     // build command collection and slash command object used for discord command registration
     for (const module of commandModules) {
-      const command = module.default
+      const command = module.command
       this.commands.set(command.data.name, command)
       slashCommandData.push(command.data.toJSON())
     }

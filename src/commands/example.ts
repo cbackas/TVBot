@@ -2,16 +2,19 @@ import { CacheType, ChatInputCommandInteraction, SlashCommandBuilder } from 'dis
 import { App } from '../app'
 import { Command } from '../interfaces/command'
 
+const slashCommand = new SlashCommandBuilder()
+  .setName('ping')
+  .setDescription('Replies with Pong!')
+
+const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
+  await interaction.reply('Pong!')
+}
+
 /**
  * Basic command example, not actually sent to Discord
  */
-const command: Command = {
-  data: new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('Replies with Pong!'),
-  async execute(_app: App, interaction: ChatInputCommandInteraction<CacheType>) {
-    await interaction.reply('Pong!')
-  }
+export const command: Command = {
+  data: slashCommand,
+  execute
 }
 
-export default command 
