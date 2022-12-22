@@ -15,6 +15,7 @@ type Getter<TInput> = { command: TInput }
  */
 const commandModules: Getter<Command>[] = [
   require('./commands/post'),
+  require('./commands/link'),
   require('./commands/settings')
 ]
 

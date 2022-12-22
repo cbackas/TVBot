@@ -6,7 +6,7 @@ declare global {
 
 export const DBChannelType = {
   FORUM: "FORUM",
-  TEXL: "TEXT"
+  TEXT: "TEXT"
 } as const
 
 const client = globalThis.prisma || new PrismaClient()

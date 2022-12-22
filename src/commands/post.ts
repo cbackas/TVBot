@@ -9,6 +9,8 @@ import { updateDBEpisodes } from '../lib/dbManager'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
+import { isThreadChannel } from '../interfaces/discord'
+import { isForumChannel } from '../interfaces/discord'
 
 const slashCommand = new SlashCommandBuilder()
   .setName('post')
@@ -86,16 +88,7 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
 
   // finish step 5
   console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post [${tvdbSeries.name}](${newPost.url})`)
-}
-
-const isForumChannel = (channel: Channel): channel is ForumChannel => {
-  return channel.type == ChannelType.GuildForum
-}
-
-
-const isThreadChannel = (channel: Channel): channel is AnyThreadChannel => {
-  return channel.type == ChannelType.PublicThread || channel.type == ChannelType.PrivateThread
+  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post <#${newPost.id}>`)
 }
 
 const getDefaultTVForumId = async (app: App) => {
