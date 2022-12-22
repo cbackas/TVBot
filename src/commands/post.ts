@@ -1,4 +1,4 @@
-import { CacheType, Channel, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import { AnyThreadChannel, CacheType, Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
 import client, { DBChannelType } from '../lib/prisma'
 import { Command } from '../interfaces/command'
 import { Prisma } from '@prisma/client'
@@ -7,6 +7,8 @@ import { App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
 import { updateDBEpisodes } from '../lib/dbManager'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
+import { ProgressError } from '../interfaces/error'
+import { Series } from '../interfaces/tvdb'
 
 const slashCommand = new SlashCommandBuilder()
   .setName('post')
@@ -19,23 +21,9 @@ const slashCommand = new SlashCommandBuilder()
     .setRequired(true)
   )
 
-const command: Command = {
-  data: slashCommand,
-  async execute(app: App, interaction: ChatInputCommandInteraction<CacheType>) {
-    const imdbId = interaction.options.getString('imdb_id', true)
+const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
+  const imdbId = interaction.options.getString('imdb_id', true)
 
-    switch (interaction.options.getSubcommand()) {
-      case 'add':
-        return await addShow(app, interaction, imdbId)
-      default:
-        return await interaction.editReply('Invalid subcommand')
-    }
-  }
-}
-
-export default command
-
-const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheType>, imdbId: string) => {
   const progressMessage = new ProgressMessageBuilder()
     .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
     .addStep(`Fetching show data`)
@@ -43,20 +31,88 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     .addStep('Saving show to DB')
     .addStep('Fetching upcoming episodes')
 
+  try {
+    return await addShow(app, interaction, progressMessage, imdbId)
+  } catch (error) {
+    // catch our custom error and display it for the user
+    if (error instanceof ProgressError) {
+      const message = `${progressMessage.toString()}\n\nError: ${error.message}`
+      return await interaction.editReply(message)
+    }
+
+    throw error
+  }
+}
+
+export const command: Command = {
+  data: slashCommand,
+  execute
+}
+
+const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheType>, progressMessage: ProgressMessageBuilder, imdbId: string) => {
+  const channels: ChannelManager = interaction.client.channels
+
   // start step 1
   await interaction.followUp(progressMessage.nextStep())
 
-  const settings = app.getSettings()
-  const tvForum = settings.find(s => s.key === 'tv_forum')?.value
+  const tvForum = await getDefaultTVForumId(app)
 
-  if (!tvForum) {
-    return await interaction.editReply(progressMessage.toString() + '\n\nError: No TV forum configured, use /settings tv_forum <channel> to set the default TV forum')
+  await checkForExistingPosts(channels, imdbId, tvForum)
+
+  // start step 2
+  await interaction.editReply(progressMessage.nextStep())
+
+  const tvdbSeries = await getSeriesByImdbId(imdbId)
+
+  if (!tvdbSeries) {
+    throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
   }
 
+  // start step 3
+  await interaction.editReply(progressMessage.nextStep())
+
+  const newPost = await createForumPost(channels, tvdbSeries, tvForum)
+
+  // start step 4
+  await interaction.editReply(progressMessage.nextStep())
+
+  const newShow = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
+
+  // start step 5
+  await interaction.editReply(progressMessage.nextStep())
+
+  await updateDBEpisodes(newShow)
+  await scheduleAiringMessages(app)
+
+  // finish step 5
+  console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
+  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post [${tvdbSeries.name}](${newPost.url})`)
+}
+
+const isForumChannel = (channel: Channel): channel is ForumChannel => {
+  return channel.type == ChannelType.GuildForum
+}
+
+
+const isThreadChannel = (channel: Channel): channel is AnyThreadChannel => {
+  return channel.type == ChannelType.PublicThread || channel.type == ChannelType.PrivateThread
+}
+
+const getDefaultTVForumId = async (app: App) => {
+  const forumId = app.getSettings().find(s => s.key === 'tv_forum')?.value
+
+  if (!forumId) {
+    throw new ProgressError('No TV forum configured, use /settings tv_forum <channel> to set the default TV forum')
+  }
+
+  return forumId
+}
+
+const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, tvForum: string) => {
   const existingShowDestinations = await client.showDestination.findMany({
     where: {
+      forumId: tvForum,
       channelType: DBChannelType.FORUM,
-      channelId: tvForum,
       show: {
         imdbId: imdbId
       },
@@ -76,43 +132,34 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
   })
 
   if (existingShowDestinations.length > 0) {
-    const channel = await interaction.client.channels.fetch(existingShowDestinations[0].channelId)
+    const channel = await channels.fetch(existingShowDestinations[0].channelId)
 
-    if (channel == null || !isForumChannel(channel)) {
-      return await interaction.editReply(`${progressMessage.toString()}\n\nError: A forum post already exists for that show, but the channel could not be found. cback should fix this.`)
+    if (channel == null || !isThreadChannel(channel)) {
+      // todo run show cleanup function?
+      throw new ProgressError('A forum post already exists for that show, but the channel could not be found. This error shouldn\'t ever really happen. Probably.')
     }
 
-    return await interaction.editReply(`${progressMessage.toString()}\n\nA forum post already exists for that show <#${channel.id}>`)
+    throw new ProgressError(`A forum post already exists for that show <#${channel.id}>`)
   }
+}
 
-  // start step 2
-  await interaction.followUp(progressMessage.nextStep())
+const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvForum: string): Promise<ThreadChannel<boolean>> => {
+  const forumChannel = await channels.fetch(tvForum)
 
-  const tvdbSeries = await getSeriesByImdbId(imdbId)
-
-  if (!tvdbSeries) {
-    return await interaction.editReply(`${progressMessage.toString()}\n\nNo show found with that IMDB ID`)
-  }
-
-  // start step 3
-  await interaction.editReply(progressMessage.nextStep())
-
-  const forumChannel = await interaction.client.channels.fetch(tvForum)
   if (forumChannel == null || !isForumChannel(forumChannel)) {
-    return await interaction.editReply(`${progressMessage.toString()}\n\nError: No tv forum found`)
+    throw new ProgressError('No tv forum found')
   }
 
-  const newPost = await forumChannel.threads.create({
+  return await forumChannel.threads.create({
     name: tvdbSeries.name,
     autoArchiveDuration: 10080,
     message: {
       content: `${tvdbSeries.image}`
     }
   })
+}
 
-  // start step 4
-  await interaction.editReply(progressMessage.nextStep())
-
+const saveShowToDB = async (tvdbSeries: Series, imdbId: string, newPostId: string, forumId: string) => {
   try {
     const data = Prisma.validator<Prisma.ShowCreateInput>()({
       name: tvdbSeries.name,
@@ -120,35 +167,22 @@ const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheT
       tvdbId: tvdbSeries.id,
       ShowDestination: {
         create: {
-          channelId: newPost.id,
-          forumId: tvForum,
+          channelId: newPostId,
+          forumId: forumId,
           channelType: DBChannelType.FORUM,
         }
       }
     })
 
-    const newShow = await client.show.create({
+    return await client.show.create({
       data
     })
-
-    // start step 5
-    await interaction.editReply(progressMessage.nextStep())
-
-    await updateDBEpisodes(newShow)
-    await scheduleAiringMessages(app)
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return await interaction.editReply(progressMessage.toString() + '\n\nError: Show already exists')
+      throw new ProgressError('Show already exists')
     }
-    console.log(error)
-    return await interaction.editReply(progressMessage.toString() + '\n\nError: Something went wrong')
+
+    console.error(error)
+    throw new ProgressError('Something went wrong saving the show to the DB')
   }
-
-  // finish step 5
-  console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post [${tvdbSeries.name}](${newPost.url})`)
-}
-
-const isForumChannel = (channel: Channel): channel is ForumChannel => {
-  return channel.type == ChannelType.GuildForum
-}
+} 
