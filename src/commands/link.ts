@@ -9,8 +9,6 @@ import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { isThreadChannel } from '../interfaces/discord'
 
-type NextStep = (message?: string) => Promise<Message>
-
 /**
  * Standardized slash command option for getting IMDB ID
  * @param option string option callback parameter
@@ -61,7 +59,7 @@ const slashCommand = new SlashCommandBuilder()
 const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
   const imdbId = interaction.options.getString('imdb_id', true)
 
-  const progressMessage = new ProgressMessageBuilder()
+  const progress = new ProgressMessageBuilder()
     .addStep('Check for existing show subscription')
     .addStep(`Searching for show with IMDB ID \`${imdbId}\``)
     .addStep('Linking show to channel in database')
@@ -86,15 +84,15 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     return await interaction.editReply('Invalid channel')
   }
 
-  /**
-   * Wrapper function that updates the ProgressMessage object and sends it to the user
-   * @param message optional message to append to the progress message
-   * @returns the sent discord message
-   */
-  const nextStep: NextStep = async (message) => await interaction.editReply(progressMessage.nextStep() + message ?? '')
+  // /**
+  //  * Wrapper function that updates the ProgressMessage object and sends it to the user
+  //  * @param message optional message to append to the progress message
+  //  * @returns the sent discord message
+  //  */
+  const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
 
   try {
-    await nextStep() // start step 1
+    const step1 = await nextStep() // start step 1
 
     const tvdbSeries = await getSeriesByImdbId(imdbId)
 
@@ -116,12 +114,11 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     await scheduleAiringMessages(app)
 
     console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-    // return the final message
     return await nextStep(`Linked show \`${tvdbSeries.name}\` to <#${channel.id}>`)
   } catch (error) {
     // catch our custom error and display it for the user
     if (error instanceof ProgressError) {
-      const message = `${progressMessage.toString()}\n\nError: ${error.message}`
+      const message = `${progress.toString()}\n\nError: ${error.message}`
       return await interaction.editReply(message)
     }
 
