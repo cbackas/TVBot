@@ -3,6 +3,7 @@ import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
+import { Settings } from '@prisma/client'
 
 /**
  * The main execution method for the `/setting` command
@@ -13,13 +14,12 @@ import { App } from '../app'
 const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
   const subCommand = interaction.options.getSubcommand()
   const subcommandGroup = interaction.options.getSubcommandGroup()
+  const channel = interaction.options.getChannel('channel', true)
 
   /**
    * Handle the TV forum setting
    */
   if (subcommandGroup === null && subCommand === 'tv_forum') {
-    const channel = interaction.options.getChannel('channel', true)
-
     if (channel.type != ChannelType.GuildForum) {
       return await interaction.editReply('Invalid channel type')
     }
@@ -32,13 +32,43 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
    * Handle adding channels to the all_episodes list
    */
   if (subcommandGroup === 'all_episodes' && subCommand === 'add') {
+    if (channel.type != ChannelType.GuildText) {
+      return await interaction.editReply('Invalid channel type')
+    }
+
+    const currentChannelList = await getCurrentGlobalChannels()
+
+    if (currentChannelList.includes(channel.id)) {
+      return await interaction.editReply('Channel already in list')
+    }
+
+    currentChannelList.push(channel.id)
+
+    await updateGlobalChannels(currentChannelList)
+
+    return await interaction.editReply(`${currentChannelList.map(id => `<#${id}>`).join('\n')}`)
   }
 
   /**
    * Handle removing channels from the all_episodes list
    */
   if (subcommandGroup === 'all_episodes' && subCommand === 'remove') {
+    if (channel.type != ChannelType.GuildText) {
+      return await interaction.editReply('Invalid channel type')
+    }
 
+    const currentChannelList = await getCurrentGlobalChannels()
+
+    if (!currentChannelList.includes(channel.id)) {
+      return await interaction.editReply('Channel not in list')
+    }
+
+    const index = currentChannelList.indexOf(channel.id)
+    currentChannelList.splice(index, 1)
+
+    await updateGlobalChannels(currentChannelList)
+
+    return await interaction.editReply(`${currentChannelList.map(id => `<#${id}>`).join('\n')}`)
   }
 }
 
@@ -110,4 +140,28 @@ const setTVForum = async (interaction: ChatInputCommandInteraction, channel: For
   })
 
   await interaction.editReply(progressMessage.nextStep())
+}
+
+const getCurrentGlobalChannels = async () => {
+  const currentChannels: Settings = await client.settings.findUnique({
+    where: {
+      key: 'all_episodes'
+    }
+  }) ?? { key: 'all_episodes', value: JSON.stringify([]) }
+  return JSON.parse(currentChannels.value) as string[]
+}
+
+const updateGlobalChannels = async (newList: string[]) => {
+  await client.settings.upsert({
+    where: {
+      key: 'all_episodes'
+    },
+    update: {
+      value: JSON.stringify(newList)
+    },
+    create: {
+      key: 'all_episodes',
+      value: JSON.stringify(newList)
+    }
+  })
 }
