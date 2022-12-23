@@ -57,6 +57,10 @@ export class CommandManager {
     }
   }
 
+  /**
+   * Handles all interactions from discord
+   * @param interaction discord interaction
+   */
   public interactionHandler = async (interaction: Interaction) => {
     if (!interaction.isChatInputCommand()) return
 

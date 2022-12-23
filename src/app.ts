@@ -79,21 +79,9 @@ export class App {
       })
     })
 
-    this.startEventListeners()
-
-    void this.client.login(this.token)
-  }
-
-  /**
-   * Starts event listeners for commands and interactions
-   */
-  private startEventListeners = (): void => {
     this.client.on(Events.InteractionCreate, this.commands.interactionHandler)
 
-    this.client.on(Events.InteractionCreate, interaction => {
-      if (!interaction.isUserContextMenuCommand()) return;
-      console.log(interaction);
-    })
+    void this.client.login(this.token)
   }
 
   private randomWatchingActivity = (): void => {
