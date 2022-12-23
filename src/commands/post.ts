@@ -1,4 +1,4 @@
-import { AnyThreadChannel, CacheType, Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
+import { CacheType, ChannelManager, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
 import client, { DBChannelType } from '../lib/prisma'
 import { Command } from '../interfaces/command'
 import { Prisma } from '@prisma/client'
@@ -35,23 +35,28 @@ const slashCommand = new SlashCommandBuilder()
 const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
   const imdbId = interaction.options.getString('imdb_id', true)
 
-  const progressMessage = new ProgressMessageBuilder()
+  const progress = new ProgressMessageBuilder()
     .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
     .addStep(`Fetching show data`)
     .addStep('Creating forum post')
     .addStep('Saving show to DB')
     .addStep('Fetching upcoming episodes')
 
+  // /**
+  //  * Wrapper function that updates the ProgressMessage object and sends it to the user
+  //  * @param message optional message to append to the progress message
+  //  * @returns the sent discord message
+  //  */
+  const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
+
   try {
-    // start step 1
-    await interaction.followUp(progressMessage.nextStep())
+    await nextStep() // start step 1
 
     const tvForum = await getDefaultTVForumId(app)
 
     await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
 
-    // start step 2
-    await interaction.editReply(progressMessage.nextStep())
+    await nextStep() // start step 2
 
     const tvdbSeries = await getSeriesByImdbId(imdbId)
 
@@ -59,26 +64,26 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
       throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
     }
 
-    await interaction.editReply(progressMessage.nextStep())
+    await nextStep() // start step 3
 
     const newPost = await createForumPost(interaction.client.channels, tvdbSeries, tvForum)
 
-    await interaction.editReply(progressMessage.nextStep())
+    await nextStep() // start step 4
 
     const newShow = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
 
-    await interaction.editReply(progressMessage.nextStep())
+    await nextStep() // start step 5
 
     await updateDBEpisodes(newShow)
     await scheduleAiringMessages(app)
 
     console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
     // finish step 5
-    return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post <#${newPost.id}>`)
+    return await nextStep(`Created post <#${newPost.id}>`)
   } catch (error) {
     // catch our custom error and display it for the user
     if (error instanceof ProgressError) {
-      const message = `${progressMessage.toString()}\n\nError: ${error.message}`
+      const message = `${progress.toString()}\n\nError: ${error.message}`
       return await interaction.editReply(message)
     }
 
@@ -91,6 +96,11 @@ export const command: Command = {
   execute
 }
 
+/**
+ * Fetch the default TV forum channel ID from the database or throw a ProgressError if it's not set
+ * @param app main application object instance
+ * @returns ID of the default TV forum
+ */
 const getDefaultTVForumId = async (app: App) => {
   const forumId = app.getSettings().find(s => s.key === 'tv_forum')?.value
 
@@ -101,6 +111,12 @@ const getDefaultTVForumId = async (app: App) => {
   return forumId
 }
 
+/**
+ * Checks the database for ShowDestinations with the given IMDB ID and forumId and throws a ProgressError if one is found
+ * @param channels discordjs ChannelManager to fetch channels from
+ * @param imdbId imdb id to search for
+ * @param tvForum id of the discord forum to check for existing posts 
+ */
 const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, tvForum: string) => {
   const existingShowDestinations = await client.showDestination.findMany({
     where: {
@@ -124,6 +140,7 @@ const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, t
     }
   })
 
+  // if we found a show destination, fetch the channel and throw an error
   if (existingShowDestinations.length > 0) {
     const channel = await channels.fetch(existingShowDestinations[0].channelId)
 
@@ -136,13 +153,21 @@ const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, t
   }
 }
 
-const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvForum: string): Promise<ThreadChannel<boolean>> => {
-  const forumChannel = await channels.fetch(tvForum)
+/**
+ * Creates a discord forum post in the given forum for the given tvdb series
+ * @param channels discordjs ChannelManager to fetch channels from
+ * @param tvdbSeries series to create the post for
+ * @param tvForumId discord forum to create a post in
+ * @returns 
+ */
+const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvForumId: string): Promise<ThreadChannel<boolean>> => {
+  const forumChannel = await channels.fetch(tvForumId)
 
   if (forumChannel == null || !isForumChannel(forumChannel)) {
     throw new ProgressError('No tv forum found')
   }
 
+  // create the forum post
   return await forumChannel.threads.create({
     name: tvdbSeries.name,
     autoArchiveDuration: 10080,
@@ -152,6 +177,14 @@ const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvF
   })
 }
 
+/**
+ * Saves a show to the database and creates a ShowDestination, associating the show with a discord channel
+ * @param tvdbSeries series to save
+ * @param imdbId imdb id of the show
+ * @param newPostId id of the discord post to save
+ * @param forumId id of the discord forum the post is in
+ * @returns 
+ */
 const saveShowToDB = async (tvdbSeries: Series, imdbId: string, newPostId: string, forumId: string) => {
   try {
     const data = Prisma.validator<Prisma.ShowCreateInput>()({
@@ -167,10 +200,9 @@ const saveShowToDB = async (tvdbSeries: Series, imdbId: string, newPostId: strin
       }
     })
 
-    return await client.show.create({
-      data
-    })
+    return await client.show.create({ data })
   } catch (error) {
+    // if the show already exists, throw a custom error
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ProgressError('Show already exists')
     }
