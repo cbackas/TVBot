@@ -1,6 +1,6 @@
 import { CacheType, ChannelManager, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
 import client, { DBChannelType } from '../lib/prisma'
-import { Command } from '../interfaces/command'
+import { CommandV2 } from '../interfaces/command'
 import { Prisma } from '@prisma/client'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
@@ -91,8 +91,10 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
   }
 }
 
-export const command: Command = {
-  data: slashCommand,
+export const command: CommandV2 = {
+  slashCommand: {
+    main: slashCommand
+  },
   execute
 }
 

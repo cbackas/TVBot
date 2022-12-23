@@ -1,6 +1,6 @@
-import { CacheType, ChannelType, ChatInputCommandInteraction, Message, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
+import { CacheType, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
 import client, { DBChannelType } from '../lib/prisma'
-import { Command } from '../interfaces/command'
+import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
@@ -47,8 +47,6 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription('Link a show to a channel for notifications.')
   .setDMPermission(false)
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
-  .addSubcommand(hereSubCommand)
-  .addSubcommand(channelSubCommand)
 
 /**
  * The main execution method for the `/link` command
@@ -127,8 +125,11 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
   }
 }
 
-export const command: Command = {
-  data: slashCommand,
+export const command: CommandV2 = {
+  slashCommand: {
+    main: slashCommand,
+    subCommands: [hereSubCommand, channelSubCommand]
+  },
   execute
 }
 

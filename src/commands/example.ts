@@ -1,6 +1,6 @@
 import { CacheType, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { App } from '../app'
-import { Command } from '../interfaces/command'
+import { CommandV2 } from '../interfaces/command'
 
 const slashCommand = new SlashCommandBuilder()
   .setName('ping')
@@ -13,8 +13,10 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
 /**
  * Basic command example, not actually sent to Discord
  */
-export const command: Command = {
-  data: slashCommand,
+export const command: CommandV2 = {
+  slashCommand: {
+    main: slashCommand
+  },
   execute
 }
 

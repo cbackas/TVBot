@@ -1,41 +1,8 @@
-import { APIInteractionDataResolvedChannel, CacheType, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js'
+import { APIInteractionDataResolvedChannel, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js'
 import client from '../lib/prisma'
-import { Command } from '../interfaces/command'
+import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
-
-/**
- * The `/setting` command definition
- */
-const slashCommand = new SlashCommandBuilder()
-  .setName('setting')
-  .setDescription('Configure various bot settings')
-  .setDMPermission(false)
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-  .addSubcommand(new SlashCommandSubcommandBuilder()
-    .setName('tv_forum')
-    .setDescription('Set the forum ID for TV shows')
-    .addChannelOption(option => option.setName('channel')
-      .setDescription('The channel to set as the TV forum')
-      .addChannelTypes(ChannelType.GuildForum)
-      .setRequired(true)))
-  .addSubcommandGroup(new SlashCommandSubcommandGroupBuilder()
-    .setName('all_episodes')
-    .setDescription('Add or remove a channel from the list that receive all episode notifications')
-    .addSubcommand(new SlashCommandSubcommandBuilder()
-      .setName('add')
-      .setDescription('Add a channel from the list that receive all episode notifications')
-      .addChannelOption(option => option.setName('channel')
-        .setDescription('Channel to add to the list that recieves all episode notifications')
-        .addChannelTypes(ChannelType.GuildText)
-        .setRequired(true)))
-    .addSubcommand(new SlashCommandSubcommandBuilder()
-      .setName('remove')
-      .setDescription('Remove a channel from the list that receive all episode notifications')
-      .addChannelOption(option => option.setName('channel')
-        .setDescription('Channel to remove from the list that recieves all episode notifications')
-        .addChannelTypes(ChannelType.GuildText)
-        .setRequired(true))))
 
 /**
  * The main execution method for the `/setting` command
@@ -65,7 +32,6 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
    * Handle adding channels to the all_episodes list
    */
   if (subcommandGroup === 'all_episodes' && subCommand === 'add') {
-
   }
 
   /**
@@ -74,12 +40,48 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
   if (subcommandGroup === 'all_episodes' && subCommand === 'remove') {
 
   }
-
-  return await interaction.editReply('Invalid subcommand')
 }
 
-export const command: Command = {
-  data: slashCommand,
+export const command: CommandV2 = {
+  slashCommand: {
+    main: new SlashCommandBuilder()
+      .setName('setting')
+      .setDescription('Configure various bot settings')
+      .setDMPermission(false)
+      .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    subCommands: [
+      new SlashCommandSubcommandBuilder()
+        .setName('tv_forum')
+        .setDescription('Set the forum ID for TV shows')
+        .addChannelOption(option => option.setName('channel')
+          .setDescription('The channel to set as the TV forum')
+          .addChannelTypes(ChannelType.GuildForum)
+          .setRequired(true))
+    ],
+    subGroups: [
+      {
+        main: new SlashCommandSubcommandGroupBuilder()
+          .setName('all_episodes')
+          .setDescription('Add or remove a channel from the list that receive all episode notifications'),
+        subCommands: [
+          new SlashCommandSubcommandBuilder()
+            .setName('add')
+            .setDescription('Add a channel from the list that receive all episode notifications')
+            .addChannelOption(option => option.setName('channel')
+              .setDescription('Channel to add to the list that recieves all episode notifications')
+              .addChannelTypes(ChannelType.GuildText)
+              .setRequired(true)),
+          new SlashCommandSubcommandBuilder()
+            .setName('remove')
+            .setDescription('Remove a channel from the list that receive all episode notifications')
+            .addChannelOption(option => option.setName('channel')
+              .setDescription('Channel to remove from the list that recieves all episode notifications')
+              .addChannelTypes(ChannelType.GuildText)
+              .setRequired(true))
+        ]
+      }
+    ]
+  },
   execute
 }
 
