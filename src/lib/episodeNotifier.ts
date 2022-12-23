@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client"
+import { Prisma, ShowDestination } from "@prisma/client"
 import { AnyThreadChannel, Channel, ChannelType, Collection, TextChannel } from "discord.js"
 import moment from "moment-timezone"
 import schedule from 'node-schedule'
@@ -143,7 +143,12 @@ const scheduleJob = async (key: string, airDate: Date, episodes: Episode[], app:
     const discord = app.getClient()
 
     // send a message to each channel the show is being tracked in
-    for (const destination of show.ShowDestination) {
+    const destinations = show.ShowDestination
+
+    // add global destinations
+    destinations.concat(await getGlobalDestinations(app))
+
+    for (const destination of destinations) {
       const channel = await discord.channels.fetch(destination.channelId)
 
       if (!channel) throw new Error('Channel not found')
@@ -156,6 +161,23 @@ const scheduleJob = async (key: string, airDate: Date, episodes: Episode[], app:
       await markMessageSent(showId, season, episodeNumbers)
 
       console.info(`Message Sent: ${message} `)
+    }
+  })
+}
+
+/**
+ * Get global destinations (channels that get notifications for all shows)
+ * @param app instance of bot app
+ * @returns list of ShowDestinations for all global destinations 
+ */
+const getGlobalDestinations = async (app: App): Promise<Omit<ShowDestination, 'showId'>[]> => {
+  const globalDestinationsString = app.getSettings().find(s => s.key === 'all_episodes')?.value
+  const globalDestinations: string[] = JSON.parse(globalDestinationsString ?? '[]')
+  return globalDestinations.map(d => {
+    return {
+      channelId: d,
+      forumId: null,
+      channelType: 'TEXT'
     }
   })
 }
