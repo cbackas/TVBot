@@ -72,9 +72,9 @@ export class CommandManager {
     // checks if the recieved has exactly the same subcommand and/or subcommand group as the command
     const subcommands = command.slashCommand.subCommands
     const subgroups = command.slashCommand.subGroups
-    const hasSubCommands = subcommands !== undefined && subcommands?.some((subcommand) => subcommand.name === interaction.options.getSubcommand())
-    const hasSubGroups = subgroups !== undefined && subgroups?.some((subgroup) => subgroup.main.name === interaction.options.getSubcommandGroup())
-    const hasSubgroupSubCommands = hasSubGroups && subgroups?.some((subgroup) => subgroup.subCommands.some((subcommand) => subcommand.name === interaction.options.getSubcommand()))
+    const hasSubCommands = subcommands === undefined || subcommands?.some((subcommand) => subcommand.name === interaction.options.getSubcommand())
+    const hasSubGroups = subgroups == undefined || subgroups?.some((subgroup) => subgroup.main.name === interaction.options.getSubcommandGroup())
+    const hasSubgroupSubCommands = hasSubGroups || subgroups?.some((subgroup) => subgroup.subCommands.some((subcommand) => subcommand.name === interaction.options.getSubcommand()))
     if (!hasSubCommands && !hasSubGroups && !hasSubgroupSubCommands) return
 
     console.log(`Recieved Command: ${command.slashCommand.main.name}`)
