@@ -12,6 +12,9 @@ import { Series } from '../interfaces/tvdb'
 import { isThreadChannel } from '../interfaces/discord'
 import { isForumChannel } from '../interfaces/discord'
 
+/**
+ * Slash command definition for `/post`
+ */
 const slashCommand = new SlashCommandBuilder()
   .setName('post')
   .setDescription('Create a forum post for a show. Require "Manage Channels" permission.')
@@ -23,6 +26,12 @@ const slashCommand = new SlashCommandBuilder()
     .setRequired(true)
   )
 
+/**
+ * The main execution method for the `/post` command
+ * @param app main application object instance
+ * @param interaction the discord interaction that triggered the command
+ * @returns nothing important
+ */
 const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
   const imdbId = interaction.options.getString('imdb_id', true)
 
@@ -34,7 +43,38 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     .addStep('Fetching upcoming episodes')
 
   try {
-    return await addShow(app, interaction, progressMessage, imdbId)
+    // start step 1
+    await interaction.followUp(progressMessage.nextStep())
+
+    const tvForum = await getDefaultTVForumId(app)
+
+    await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
+
+    // start step 2
+    await interaction.editReply(progressMessage.nextStep())
+
+    const tvdbSeries = await getSeriesByImdbId(imdbId)
+
+    if (!tvdbSeries) {
+      throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
+    }
+
+    await interaction.editReply(progressMessage.nextStep())
+
+    const newPost = await createForumPost(interaction.client.channels, tvdbSeries, tvForum)
+
+    await interaction.editReply(progressMessage.nextStep())
+
+    const newShow = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
+
+    await interaction.editReply(progressMessage.nextStep())
+
+    await updateDBEpisodes(newShow)
+    await scheduleAiringMessages(app)
+
+    console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
+    // finish step 5
+    return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post <#${newPost.id}>`)
   } catch (error) {
     // catch our custom error and display it for the user
     if (error instanceof ProgressError) {
@@ -49,46 +89,6 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
 export const command: Command = {
   data: slashCommand,
   execute
-}
-
-const addShow = async (app: App, interaction: ChatInputCommandInteraction<CacheType>, progressMessage: ProgressMessageBuilder, imdbId: string) => {
-  const channels: ChannelManager = interaction.client.channels
-
-  // start step 1
-  await interaction.followUp(progressMessage.nextStep())
-
-  const tvForum = await getDefaultTVForumId(app)
-
-  await checkForExistingPosts(channels, imdbId, tvForum)
-
-  // start step 2
-  await interaction.editReply(progressMessage.nextStep())
-
-  const tvdbSeries = await getSeriesByImdbId(imdbId)
-
-  if (!tvdbSeries) {
-    throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
-  }
-
-  // start step 3
-  await interaction.editReply(progressMessage.nextStep())
-
-  const newPost = await createForumPost(channels, tvdbSeries, tvForum)
-
-  // start step 4
-  await interaction.editReply(progressMessage.nextStep())
-
-  const newShow = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
-
-  // start step 5
-  await interaction.editReply(progressMessage.nextStep())
-
-  await updateDBEpisodes(newShow)
-  await scheduleAiringMessages(app)
-
-  // finish step 5
-  console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-  return await interaction.editReply(progressMessage.nextStep() + `\n\nCreated post <#${newPost.id}>`)
 }
 
 const getDefaultTVForumId = async (app: App) => {
