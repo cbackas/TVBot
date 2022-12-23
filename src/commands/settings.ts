@@ -1,4 +1,4 @@
-import { APIInteractionDataResolvedChannel, CacheType, ChannelType, ChatInputCommandInteraction, ForumChannel, ModalBuilder, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder } from 'discord.js'
+import { APIInteractionDataResolvedChannel, CacheType, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
 import client from '../lib/prisma'
 import { Command } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
@@ -19,22 +19,20 @@ const slashCommand = new SlashCommandBuilder()
   )
 
 const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
-  switch (interaction.options.getSubcommand()) {
-    case 'tv_forum':
-      const channel = interaction.options.getChannel('channel', true)
+  const subCommand = interaction.options.getSubcommand()
+  if (!subCommand) return await interaction.editReply('Invalid subcommand')
 
-      if (channel.type != ChannelType.GuildForum) {
-        return await interaction.editReply('Invalid channel type')
-      }
+  if (subCommand === 'tv_forum') {
+    const channel = interaction.options.getChannel('channel', true)
 
-      await setTVForum(interaction, channel)
-      break
-    default:
-      await interaction.editReply('Invalid subcommand')
-      break
+    if (channel.type != ChannelType.GuildForum) {
+      return await interaction.editReply('Invalid channel type')
+    }
+
+    await setTVForum(interaction, channel)
   }
 
-  await app.loadSettings()
+  return await app.loadSettings()
 }
 
 export const command: Command = {

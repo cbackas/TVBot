@@ -59,13 +59,14 @@ const slashCommand = new SlashCommandBuilder()
 const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
   const imdbId = interaction.options.getString('imdb_id', true)
 
+  const subCommand = interaction.options.getSubcommand()
+  if (!subCommand) return await interaction.editReply('Invalid subcommand')
+
   const progress = new ProgressMessageBuilder()
     .addStep('Check for existing show subscription')
     .addStep(`Searching for show with IMDB ID \`${imdbId}\``)
     .addStep('Linking show to channel in database')
     .addStep('Fetching upcoming episodes')
-
-  const subCommand = interaction.options.getSubcommand()
 
   let channel: TextBasedChannel | undefined
 
@@ -92,7 +93,7 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
   const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
 
   try {
-    const step1 = await nextStep() // start step 1
+    await nextStep() // start step 1
 
     const tvdbSeries = await getSeriesByImdbId(imdbId)
 
