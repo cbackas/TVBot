@@ -1,4 +1,4 @@
-import { CacheType, ChatInputCommandInteraction, InteractionResponse, Message, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js"
+import { CacheType, ChatInputCommandInteraction, InteractionResponse, Message, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js"
 import { App } from "../app"
 
 type ExecuteFunction = Promise<void | Message<boolean> | InteractionResponse<boolean>>
