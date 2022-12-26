@@ -1,4 +1,4 @@
-import { CacheType, ChannelManager, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
+import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
 import client, { DBChannelType } from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { Prisma } from '@prisma/client'
@@ -25,6 +25,10 @@ const slashCommand = new SlashCommandBuilder()
     .setMinLength(9)
     .setRequired(true)
   )
+  .addChannelOption(option => option.setName("forum")
+    .setDescription('Destination Discord forum for show post (defaults to value defined in `/setting tv_forum`)')
+    .addChannelTypes(ChannelType.GuildForum)
+    .setRequired(false))
 
 /**
  * The main execution method for the `/post` command
@@ -32,8 +36,13 @@ const slashCommand = new SlashCommandBuilder()
  * @param interaction the discord interaction that triggered the command
  * @returns nothing important
  */
-const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheType>) => {
+const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
   const imdbId = interaction.options.getString('imdb_id', true)
+  const forumInput = interaction.options.getChannel('forum', false)
+
+  // if the user passed in a forum then send the post to that forum
+  const useInputForum = forumInput !== null && isForumChannel(forumInput as Channel)
+  const tvForum = useInputForum ? forumInput.id : await getDefaultTVForumId(app)
 
   const progress = new ProgressMessageBuilder()
     .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
@@ -51,8 +60,6 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
 
   try {
     await nextStep() // start step 1
-
-    const tvForum = await getDefaultTVForumId(app)
 
     await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
 
