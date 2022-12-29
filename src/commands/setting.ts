@@ -1,36 +1,9 @@
-import { Channel, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js'
-import client from '../lib/prisma'
+import { Channel, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, TextBasedChannel } from 'discord.js'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
-import { Settings } from '@prisma/client'
-
-/**
- * The main execution method for the `/setting` command
- * @param app main application object instance
- * @param interaction the discord interaction that triggered the command
- * @returns nothing important
- */
-const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
-  const subCommand = interaction.options.getSubcommand()
-  const subcommandGroup = interaction.options.getSubcommandGroup()
-  const channel = interaction.options.getChannel('channel', true) as Channel
-
-  /**
-   * Handle the TV forum setting
-   */
-  if (subcommandGroup === null && subCommand === 'tv_forum') {
-    await setTVForum(interaction, channel)
-    return await app.loadSettings()
-  }
-
-  /**
-   * Handle adding channels to the all_episodes list
-   */
-  if (subcommandGroup === 'all_episodes') {
-    return await updateGlobalChannels(interaction, channel, subCommand)
-  }
-}
+import { Destination } from '@prisma/client'
+import { SettingsManager } from '../lib/settingsManager'
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -72,7 +45,28 @@ export const command: CommandV2 = {
       }
     ]
   },
-  execute
+  async execute(app: App, interaction: ChatInputCommandInteraction) {
+    const subCommand = interaction.options.getSubcommand()
+    const subcommandGroup = interaction.options.getSubcommandGroup()
+    const channel = interaction.options.getChannel('channel', true) as Channel
+
+    const settingsManager = app.getSettingsManager()
+
+    /**
+     * Handle the TV forum setting
+     */
+    if (subcommandGroup === null && subCommand === 'tv_forum') {
+      await setTVForum(settingsManager, interaction, channel)
+      return
+    }
+
+    /**
+     * Handle adding channels to the all_episodes list
+     */
+    if (subcommandGroup === 'all_episodes') {
+      return await updateGlobalChannels(settingsManager, interaction, channel, subCommand)
+    }
+  }
 }
 
 /**
@@ -80,7 +74,7 @@ export const command: CommandV2 = {
  * @param interaction discord command interaction
  * @param channel channel to set as the TV forum
  */
-const setTVForum = async (interaction: ChatInputCommandInteraction, channel: Channel) => {
+const setTVForum = async (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction, channel: Channel) => {
   if (channel.type != ChannelType.GuildForum) {
     return await interaction.editReply('Invalid channel type')
   }
@@ -90,18 +84,9 @@ const setTVForum = async (interaction: ChatInputCommandInteraction, channel: Cha
 
   await interaction.editReply(progressMessage.nextStep())
 
-  // update the Settings table with the new tv_forum value
-  await client.settings.upsert({
-    where: {
-      key: 'tv_forum',
-    },
-    update: {
-      value: channel.id,
-    },
-    create: {
-      key: 'tv_forum',
-      value: channel.id,
-    }
+  // update the db with the new value
+  await settingsManager.update({
+    defaultForum: channel.id
   })
 
   await interaction.editReply(progressMessage.nextStep())
@@ -113,7 +98,7 @@ const setTVForum = async (interaction: ChatInputCommandInteraction, channel: Cha
  * @param channel channel to add/remove from the list
  * @param mode `add` or `remove`
  */
-const updateGlobalChannels = async (interaction: ChatInputCommandInteraction, channel: Channel, mode: string) => {
+const updateGlobalChannels = async (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction, channel: Channel, mode: string) => {
   // validate the mode
   if (mode !== 'add' && mode !== 'remove') {
     return await interaction.editReply('Invalid mode')
@@ -129,45 +114,27 @@ const updateGlobalChannels = async (interaction: ChatInputCommandInteraction, ch
 
   await interaction.editReply(progress.nextStep())
 
-  const channelList = await getCurrentGlobalChannels()
+  const destination: Destination = {
+    channelId: channel.id,
+    forumId: null
+  }
+
+  const channelList = settingsManager.fetch()?.allEpisodes ?? []
   // index of the channel in the existing list
-  const existingIndex = channelList.indexOf(channel.id)
+  const existingIndex = channelList.indexOf(destination)
 
   // add or remove the channel from the list
   if (mode === 'add') {
     if (existingIndex !== -1) return await interaction.editReply('Channel already in list')
-    channelList.push(channel.id)
+    channelList.push(destination)
   } else if (mode === 'remove') {
     if (existingIndex == -1) return await interaction.editReply('Channel not in all_episodes list')
     channelList.splice(existingIndex, 1)
   }
 
-  // update the list in the DB
-  await client.settings.upsert({
-    where: {
-      key: 'all_episodes'
-    },
-    update: {
-      value: JSON.stringify(channelList)
-    },
-    create: {
-      key: 'all_episodes',
-      value: JSON.stringify(channelList)
-    }
+  await settingsManager.update({
+    allEpisodes: channelList
   })
 
   return await interaction.editReply(progress.nextStep() + `\n\n__New List__:\n${channelList.map(id => `<#${id}>`).join('\n')}`)
-}
-
-/**
- * Get the list of channels that receive all episode notifications
- * @returns list of channel IDs
- */
-const getCurrentGlobalChannels = async () => {
-  const currentChannels: Settings = await client.settings.findUnique({
-    where: {
-      key: 'all_episodes'
-    }
-  }) ?? { key: 'all_episodes', value: JSON.stringify([]) }
-  return JSON.parse(currentChannels.value) as string[]
 }

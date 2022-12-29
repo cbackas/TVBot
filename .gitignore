@@ -8,3 +8,5 @@ data/
 
 # Mac
 .DS_Store
+
+mongodata

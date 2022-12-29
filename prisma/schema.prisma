@@ -6,42 +6,34 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Settings {
-  key   String @id
-  value String
+  id           Int           @id @default(0) @map("_id")
+  allEpisodes  Destination[] // channels that get all episode notifications
+  defaultForum String? // default forum to post episode notifications to
 }
 
-model Episode {
-  show        Show     @relation(fields: [showId], references: [id])
-  showId      String
+model Show {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  imdbId       String        @unique
+  tvdbId       Int           @unique
+  episodes     Episode[]
+  destinations Destination[]
+}
+
+type Episode {
   season      Int
   number      Int
   title       String
   airDate     DateTime
   messageSent Boolean  @default(false)
-
-  @@id([showId, season, number])
 }
 
-model Show {
-  id              String            @id @default(cuid())
-  name            String
-  imdbId          String            @unique
-  tvdbId          Int               @unique
-  Episode         Episode[]
-  ShowDestination ShowDestination[]
-}
-
-model ShowDestination {
-  show        Show    @relation(fields: [showId], references: [id])
-  showId      String
-  channelId   String
-  forumId     String?
-  channelType String
-
-  @@id([showId, channelId])
+type Destination {
+  channelId String
+  forumId   String?
 }

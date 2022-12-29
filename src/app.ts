@@ -1,10 +1,10 @@
 import * as dotenv from 'dotenv'
 import schedule from 'node-schedule'
 import { ActivityType, Client, Events, GatewayIntentBits } from 'discord.js'
-import client from './lib/prisma'
-import { Settings } from '@prisma/client'
-import { checkForAiringEpisodes, scheduleAiringMessages } from './lib/episodeNotifier'
+import { scheduleAiringMessages } from './lib/episodeNotifier'
 import { CommandManager } from './lib/commandManager'
+import { checkForAiringEpisodes } from './lib/database/shows'
+import { SettingsManager } from './lib/settingsManager'
 
 dotenv.config()
 
@@ -14,7 +14,7 @@ dotenv.config()
 export class App {
   private client: Client
   private commands: CommandManager
-  private settings: Settings[] = []
+  private settings: SettingsManager
 
   private token: string
   private clientId: string
@@ -32,6 +32,7 @@ export class App {
 
     this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
     this.commands = new CommandManager(this, this.clientId, this.token, this.guildId)
+    this.settings = new SettingsManager()
 
     this.init()
   }
@@ -40,20 +41,9 @@ export class App {
    * Async init function for app
    */
   private init = async (): Promise<void> => {
-    await this.loadSettings()
+    await this.settings.refresh()
     await this.commands.registerCommands()
     this.startBot()
-  }
-
-  public loadSettings = async (): Promise<void> => {
-    const settings = await client.settings.findMany({
-      select: {
-        key: true,
-        value: true
-      }
-    })
-
-    this.settings = settings
   }
 
   /**
@@ -77,6 +67,9 @@ export class App {
         await checkForAiringEpisodes()
         scheduleAiringMessages(this)
       })
+      schedule.scheduleJob('lifecycle:5sec:fetchEpisoded', '*/5 * * * * *', async () => {
+        scheduleAiringMessages(this)
+      })
     })
 
     this.client.on(Events.InteractionCreate, this.commands.interactionHandler)
@@ -90,8 +83,9 @@ export class App {
     this.client.user?.setActivity(showList.shows[randomIndex], { type: ActivityType.Watching })
   }
 
-  public getClient = (): Client => this.client
-  public getSettings = (): Settings[] => this.settings
+  public getClient = () => this.client
+  public getSettings = () => this.settings.fetch()
+  public getSettingsManager = () => this.settings
 }
 
 // make an instance of the application class

@@ -1,10 +1,10 @@
-import { CacheType, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
+import { CacheType, ChannelManager, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
 import client, { DBChannelType } from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
-import { updateDBEpisodes } from '../lib/dbManager'
+import { createNewSubscription, updateEpisodes } from '../lib/database/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { isThreadChannel } from '../interfaces/discord'
@@ -83,11 +83,11 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
     return await interaction.editReply('Invalid channel')
   }
 
-  // /**
-  //  * Wrapper function that updates the ProgressMessage object and sends it to the user
-  //  * @param message optional message to append to the progress message
-  //  * @returns the sent discord message
-  //  */
+  /**
+   * Wrapper function that updates the ProgressMessage object and sends it to the user
+   * @param message optional message to append to the progress message
+   * @returns the sent discord message
+   */
   const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
 
   try {
@@ -101,15 +101,15 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction<CacheT
 
     await nextStep() // start step 2
 
-    await checkForExistingSubscription(imdbId, channel.id, tvdbSeries.name)
+    await checkForExistingSubscription(imdbId, channel.id)
 
     await nextStep() // start step 3
 
-    const newDestination = await createNewSubscription(imdbId, channel, tvdbSeries.name, tvdbSeries.id)
+    const show = await createNewSubscription(imdbId, tvdbSeries.id, tvdbSeries.name, channel)
 
     await nextStep() // start step 4
 
-    await updateDBEpisodes(newDestination.show)
+    await updateEpisodes(show.imdbId, show.tvdbId)
     await scheduleAiringMessages(app)
 
     console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
@@ -137,56 +137,31 @@ export const command: CommandV2 = {
  * Check for existing show-channel subscriptions in the DB and throws a ProgressError if one is found
  * @param imdbId imdb id to check for
  * @param channelId discord channel id to check for
- * @param seriesName seriesName to use for response message if the show is already linked
  */
-const checkForExistingSubscription = async (imdbId: string, channelId: string, seriesName: string): Promise<void> => {
-  const existingDestination = await client.showDestination.findFirst({
+const checkForExistingSubscription = async (imdbId: string, channelId: string): Promise<void> => {
+  const show = await client.show.findUnique({
     where: {
-      show: {
-        imdbId
-      },
-      channelId: channelId
-    }
-  })
-
-  if (existingDestination !== null) {
-    throw new ProgressError(`Show \`${seriesName}\` is already linked to ${channelId}`)
-  }
-}
-
-/**
- * 
- * @param imdbId imdbID for the show to subscribe to
- * @param channel discord channel to send notifications to
- * @param seriesName name of the tv show
- * @param tvdbSeriesId tvdb id for the show
- * @returns 
- */
-const createNewSubscription = async (imdbId: string, channel: TextBasedChannel, seriesName: string, tvdbSeriesId: number) => {
-  const channelId = channel.id
-  const channelType = isThreadChannel(channel) ? DBChannelType.FORUM : DBChannelType.TEXT
-
-  // create a ShowDestination in the DB
-  // also creates a Show in the DB if a matching show doesnt exist
-  return await client.showDestination.create({
-    data: {
-      channelId: channelId,
-      channelType: channelType,
-      show: {
-        connectOrCreate: {
-          where: {
-            imdbId: imdbId,
-          },
-          create: {
-            imdbId: imdbId,
-            tvdbId: tvdbSeriesId,
-            name: seriesName,
-          }
-        }
-      }
+      imdbId
     },
-    include: {
-      show: true,
+    select: {
+      name: true,
+      destinations: true
     }
   })
+
+  // if the show isnt in the DB then we can just return
+  if (show === null) return
+
+  const { name, destinations } = show
+
+  // if the show is in the DB but has no destinations then we can just return
+  if (destinations.length <= 0) return
+
+  // check if the show is already linked to the channel
+  const existingDestination = destinations.find(d => d.channelId === channelId)
+
+  if (existingDestination === undefined) return
+
+  // if the show is already linked to the channel then throw an error
+  throw new ProgressError(`Show \`${name}\` is already linked to <#${channelId}>`)
 }

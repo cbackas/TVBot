@@ -1,11 +1,11 @@
-import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, ForumChannel, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
-import client, { DBChannelType } from '../lib/prisma'
+import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
+import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { Prisma } from '@prisma/client'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
-import { updateDBEpisodes } from '../lib/dbManager'
+import { updateEpisodes } from '../lib/database/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
@@ -77,11 +77,11 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
 
     await nextStep() // start step 4
 
-    const newShow = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
+    const show = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
 
     await nextStep() // start step 5
 
-    await updateDBEpisodes(newShow)
+    await updateEpisodes(show.imdbId, show.tvdbId)
     await scheduleAiringMessages(app)
 
     console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
@@ -111,7 +111,7 @@ export const command: CommandV2 = {
  * @returns ID of the default TV forum
  */
 const getDefaultTVForumId = async (app: App) => {
-  const forumId = app.getSettings().find(s => s.key === 'tv_forum')?.value
+  const forumId = app.getSettings()?.defaultForum
 
   if (!forumId) {
     throw new ProgressError('No TV forum configured, use /settings tv_forum <channel> to set the default TV forum')
@@ -127,39 +127,36 @@ const getDefaultTVForumId = async (app: App) => {
  * @param tvForum id of the discord forum to check for existing posts 
  */
 const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, tvForum: string) => {
-  const existingShowDestinations = await client.showDestination.findMany({
+  const show = await client.show.findUnique({
     where: {
-      forumId: tvForum,
-      channelType: DBChannelType.FORUM,
-      show: {
-        imdbId: imdbId
-      },
+      imdbId
     },
     select: {
-      showId: true,
-      channelId: true,
-      show: {
-        select: {
-          id: true,
-          name: true,
-          imdbId: true,
-          tvdbId: true
-        }
-      }
+      name: true,
+      destinations: true
     }
   })
 
-  // if we found a show destination, fetch the channel and throw an error
-  if (existingShowDestinations.length > 0) {
-    const channel = await channels.fetch(existingShowDestinations[0].channelId)
+  // if the show isnt in the DB then we can just return
+  if (show === null) return
 
-    if (channel == null || !isThreadChannel(channel)) {
-      // todo run show cleanup function?
-      throw new ProgressError('A forum post already exists for that show, but the channel could not be found. This error shouldn\'t ever really happen. Probably.')
-    }
+  const { name, destinations } = show
 
-    throw new ProgressError(`A forum post already exists for that show <#${channel.id}>`)
+  // if the show is in the DB but has no destinations then we can just return
+  if (destinations.length <= 0) return
+
+  const destinationsForForum = destinations.find(d => d.forumId === tvForum)
+  // if the show is in the DB and has destinations but none of them are in the given forum then we can just return
+  if (destinationsForForum === undefined) return
+
+  const channel = await channels.fetch(destinationsForForum.channelId)
+
+  if (channel == null || !isThreadChannel(channel)) {
+    // todo run show cleanup function?
+    throw new ProgressError('A forum post already exists for that show, but the channel could not be found. This error shouldn\'t ever really happen. Probably.')
   }
+
+  throw new ProgressError(`A post for \`${name}\` already exists in the target forum: <#${channel.id}>`)
 }
 
 /**
@@ -200,22 +197,33 @@ const saveShowToDB = async (tvdbSeries: Series, imdbId: string, newPostId: strin
       name: tvdbSeries.name,
       imdbId: imdbId,
       tvdbId: tvdbSeries.id,
-      ShowDestination: {
-        create: {
+      destinations: {
+        set: [{
           channelId: newPostId,
           forumId: forumId,
-          channelType: DBChannelType.FORUM,
+        }]
+      },
+      episodes: {
+        set: []
+      }
+    })
+
+    return await client.show.upsert({
+      where: {
+        imdbId: imdbId
+      },
+      create: data,
+      update: {
+        destinations: {
+          push: {
+            channelId: newPostId,
+            forumId: forumId,
+          }
         }
       }
     })
 
-    return await client.show.create({ data })
   } catch (error) {
-    // if the show already exists, throw a custom error
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      throw new ProgressError('Show already exists')
-    }
-
     console.error(error)
     throw new ProgressError('Something went wrong saving the show to the DB')
   }
