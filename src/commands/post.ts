@@ -1,11 +1,10 @@
-import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, ThreadChannel } from 'discord.js'
+import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, TextBasedChannel, ThreadChannel } from 'discord.js'
 import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
-import { Prisma } from '@prisma/client'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
-import { updateEpisodes } from '../lib/database/shows'
+import { createNewSubscription, updateEpisodes } from '../lib/database/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
@@ -77,7 +76,7 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
 
     await nextStep() // start step 4
 
-    const show = await saveShowToDB(tvdbSeries, imdbId, newPost.id, tvForum)
+    const show = await saveShowToDB(imdbId, tvdbSeries.id, tvdbSeries.name, newPost as TextBasedChannel)
 
     await nextStep() // start step 5
 
@@ -164,7 +163,7 @@ const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, t
  * @param channels discordjs ChannelManager to fetch channels from
  * @param tvdbSeries series to create the post for
  * @param tvForumId discord forum to create a post in
- * @returns 
+ * @returns the created forum thread
  */
 const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvForumId: string): Promise<ThreadChannel<boolean>> => {
   const forumChannel = await channels.fetch(tvForumId)
@@ -184,45 +183,15 @@ const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvF
 }
 
 /**
- * Saves a show to the database and creates a ShowDestination, associating the show with a discord channel
- * @param tvdbSeries series to save
- * @param imdbId imdb id of the show
- * @param newPostId id of the discord post to save
- * @param forumId id of the discord forum the post is in
- * @returns 
+ * wrapper function to save a show to the database
+ * @param imdbId imdb id of the show to save
+ * @param tvdbSeriesId tvdb id of the show to save
+ * @param seriesName name of the show
+ * @param channel channel to save as the destination
  */
-const saveShowToDB = async (tvdbSeries: Series, imdbId: string, newPostId: string, forumId: string) => {
+const saveShowToDB = async (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel) => {
   try {
-    const data = Prisma.validator<Prisma.ShowCreateInput>()({
-      name: tvdbSeries.name,
-      imdbId: imdbId,
-      tvdbId: tvdbSeries.id,
-      destinations: {
-        set: [{
-          channelId: newPostId,
-          forumId: forumId,
-        }]
-      },
-      episodes: {
-        set: []
-      }
-    })
-
-    return await client.show.upsert({
-      where: {
-        imdbId: imdbId
-      },
-      create: data,
-      update: {
-        destinations: {
-          push: {
-            channelId: newPostId,
-            forumId: forumId,
-          }
-        }
-      }
-    })
-
+    return await createNewSubscription(imdbId, tvdbSeriesId, seriesName, channel)
   } catch (error) {
     console.error(error)
     throw new ProgressError('Something went wrong saving the show to the DB')
