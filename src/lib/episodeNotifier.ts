@@ -18,7 +18,6 @@ type NotificationPayload = {
   showName: string
   season: number
   episodeNumbers: number[]
-  destinations: Destination[]
 }
 
 /**
@@ -78,7 +77,6 @@ const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show
       showName: show.name,
       season: e.season,
       episodeNumbers: [], // it has an emtpy array of episode numbers because it will be filled in later
-      destinations: show.destinations
     }
 
     // grab the payload from the collection or create a new one
@@ -98,7 +96,7 @@ const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show
  * @param globalDestinations additional destinations to send the message to
  */
 const scheduleJob = async (payload: NotificationPayload, discord: Client, globalDestinations: Destination[]) => {
-  const { key, airDate, showId, showName, season, episodeNumbers, destinations } = payload
+  const { key, airDate, showId, showName, season, episodeNumbers } = payload
 
   // handle timezones
   const airDateUTC = moment.utc(airDate)
@@ -123,6 +121,16 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, global
   // create a scheduled event to send a message
   const newJob = schedule.scheduleJob(key, airDateLocal.toDate(), async () => {
     // add the default destination to the list of destinations
+    const show = await client.show.findUnique({
+      where: {
+        imdbId: showId
+      },
+      select: {
+        destinations: true
+      }
+    })
+
+    const destinations = show?.destinations ?? []
     destinations.concat(globalDestinations)
 
     for (const destination of destinations) {
