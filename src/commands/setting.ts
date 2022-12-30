@@ -114,27 +114,24 @@ const updateGlobalChannels = async (settingsManager: SettingsManager, interactio
 
   await interaction.editReply(progress.nextStep())
 
-  const destination: Destination = {
-    channelId: channel.id,
-    forumId: null
-  }
-
-  const channelList = settingsManager.fetch()?.allEpisodes ?? []
-  // index of the channel in the existing list
-  const existingIndex = channelList.indexOf(destination)
+  let channelList = settingsManager.fetch()?.allEpisodes ?? []
+  const hasChannel = channelList.some(d => d.channelId === channel.id)
 
   // add or remove the channel from the list
   if (mode === 'add') {
-    if (existingIndex !== -1) return await interaction.editReply('Channel already in list')
-    channelList.push(destination)
+    if (hasChannel) return await interaction.editReply('Channel already in list')
+    channelList.push({
+      channelId: channel.id,
+      forumId: null
+    })
   } else if (mode === 'remove') {
-    if (existingIndex == -1) return await interaction.editReply('Channel not in all_episodes list')
-    channelList.splice(existingIndex, 1)
+    if (!hasChannel) return await interaction.editReply('Channel not in all_episodes list')
+    channelList = channelList.filter(d => d.channelId !== channel.id)
   }
 
   await settingsManager.update({
     allEpisodes: channelList
   })
 
-  return await interaction.editReply(progress.nextStep() + `\n\n__New List__:\n${channelList.map(id => `<#${id}>`).join('\n')}`)
+  return await interaction.editReply(progress.nextStep() + `\n\n__New List__:\n${channelList.map(d => `<#${d.channelId}>`).join('\n')}`)
 }

@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv'
 import schedule from 'node-schedule'
-import { ActivityType, Client, Events, GatewayIntentBits } from 'discord.js'
+import { ActivityType, ChannelType, Client, Events, GatewayIntentBits } from 'discord.js'
 import { scheduleAiringMessages } from './lib/episodeNotifier'
 import { CommandManager } from './lib/commandManager'
-import { checkForAiringEpisodes } from './lib/database/shows'
+import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions } from './lib/database/shows'
 import { SettingsManager } from './lib/settingsManager'
 
 dotenv.config()
@@ -70,6 +70,30 @@ export class App {
     })
 
     this.client.on(Events.InteractionCreate, this.commands.interactionHandler)
+
+    /**
+     * When a thread (forum post) is deleted, remove all subscriptions for that post
+     */
+    this.client.on(Events.ThreadDelete, async (thread) => {
+      await removeAllSubscriptions(thread.id, 'channelId')
+      await pruneUnsubscribedShows()
+    })
+
+    /**
+     * When a forum is deleted, remove all subscriptions for post in that forum
+     */
+    this.client.on(Events.ChannelDelete, async (channel) => {
+      if (channel.type === ChannelType.GuildForum) {
+        await removeAllSubscriptions(channel.id, 'forumId')
+        await pruneUnsubscribedShows()
+      }
+
+      if (channel.type === ChannelType.GuildText) {
+        await removeAllSubscriptions(channel.id, 'channelId')
+        await pruneUnsubscribedShows()
+        await this.settings.removeGlobalDestination(channel.id)
+      }
+    })
 
     void this.client.login(this.token)
   }

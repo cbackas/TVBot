@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client"
+import { Destination, Prisma } from "@prisma/client"
 import { TextBasedChannel } from "discord.js"
 import moment from "moment-timezone"
 import { Episode } from "../../interfaces/tvdb"
@@ -199,22 +199,24 @@ export const removeSubscription = async (imdbId: string, channelId: string) => {
 
 /**
  * unsubscribes a channel from all notifications
- * @param channelId channel to remove all subscriptions from
+ * @param id id to use in the where clause
+ * @param idType whether to use the channel id or forum id in the where clause, defaults to channel id
  */
-export const removeAllSubscriptions = async (channelId: string) => {
+export async function removeAllSubscriptions(id: string, idType: keyof Destination = 'channelId'): Promise<void> {
+
   await client.show.updateMany({
     data: {
       destinations: {
         deleteMany: {
           where: {
-            channelId
+            [idType]: id
           }
         }
       }
     }
   })
 
-  console.log('Deleted all show destinations for channel ' + channelId)
+  console.log('Deleted all show destinations for channel ' + id)
 }
 
 /**

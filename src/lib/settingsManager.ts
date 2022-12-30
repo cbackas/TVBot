@@ -33,11 +33,13 @@ export class SettingsManager {
   refresh = async () => {
     try {
       // fetch the settings from the DB
-      this.settings = await client.settings.findUniqueOrThrow({
+      const settings = await client.settings.findUniqueOrThrow({
         where: {
           id: 0
         }
       })
+      this.settings = settings
+      return settings
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError)) throw error
       if (error.code === 'P2025') await this.initData()
@@ -59,6 +61,75 @@ export class SettingsManager {
     })
 
     await this.refresh()
+  }
+
+  /**
+   * check if a channel is already in settings 'allEpisodes' list global destiations list
+   * @param channelId channel to check
+   * @returns true if channel is in list, false if not
+   */
+  private channelIsAlreadyGlobal = async (channelId: string) => {
+    const matchingChannels = await client.settings.count({
+      where: {
+        id: 0,
+        allEpisodes: {
+          some: {
+            channelId
+          }
+        }
+      }
+    })
+
+    return matchingChannels > 0
+  }
+
+  addGlobalDestination = async (channelId: string) => {
+    if (await this.channelIsAlreadyGlobal(channelId)) return
+
+    const settings = await client.settings.update({
+      where: {
+        id: 0
+      },
+      data: {
+        allEpisodes: {
+          push: {
+            channelId
+          }
+        }
+      },
+      select: {
+        allEpisodes: true
+      }
+    })
+
+    console.info(`Added ${channelId} to global destinations`)
+
+    await this.refresh()
+    return settings.allEpisodes
+  }
+
+  removeGlobalDestination = async (channelId: string) => {
+    if (!await this.channelIsAlreadyGlobal(channelId)) return
+
+    const settings = await client.settings.update({
+      where: {
+        id: 0
+      },
+      data: {
+        allEpisodes: {
+          deleteMany: {
+            where: {
+              channelId
+            }
+          }
+        }
+      }
+    })
+
+    console.info(`Removed ${channelId} from global destinations`)
+
+    await this.refresh()
+    return settings.allEpisodes
   }
 
   fetch = (): SettingsNoId | undefined => this.settings
