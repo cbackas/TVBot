@@ -1,5 +1,15 @@
 version: '3'
 services:
+  tvbot:
+    image: tvbot:dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tvbot
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data/
   mongo:
     image: bitnami/mongodb:4.4
     environment:
