@@ -67,9 +67,6 @@ export class App {
         await checkForAiringEpisodes()
         scheduleAiringMessages(this)
       })
-      schedule.scheduleJob('lifecycle:5sec:fetchEpisoded', '*/5 * * * * *', async () => {
-        scheduleAiringMessages(this)
-      })
     })
 
     this.client.on(Events.InteractionCreate, this.commands.interactionHandler)

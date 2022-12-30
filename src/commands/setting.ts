@@ -1,4 +1,4 @@
-import { Channel, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, TextBasedChannel } from 'discord.js'
+import { Channel, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'

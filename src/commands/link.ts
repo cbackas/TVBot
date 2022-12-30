@@ -1,5 +1,5 @@
-import { CacheType, ChannelManager, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
-import client, { DBChannelType } from '../lib/prisma'
+import { CacheType, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
+import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
@@ -7,7 +7,6 @@ import { getSeriesByImdbId } from '../lib/tvdb'
 import { createNewSubscription, updateEpisodes } from '../lib/database/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
-import { isThreadChannel } from '../interfaces/discord'
 
 /**
  * Standardized slash command option for getting IMDB ID
