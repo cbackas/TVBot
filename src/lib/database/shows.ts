@@ -1,4 +1,4 @@
-import { Prisma, Show } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import { TextBasedChannel } from "discord.js"
 import moment from "moment-timezone"
 import { Episode } from "../../interfaces/tvdb"
