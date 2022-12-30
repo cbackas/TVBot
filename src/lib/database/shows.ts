@@ -173,3 +173,61 @@ export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number
     }
   })
 }
+
+/**
+ * unsubscribe a channel from notifications for a show
+ * @param imdbId imdbID for the show to remove the subscription from
+ * @param channelId channel to unsubscribe the show from
+ * @returns the show that was unsubscribed from
+ */
+export const removeSubscription = async (imdbId: string, channelId: string) => {
+  return await client.show.update({
+    where: {
+      imdbId
+    },
+    data: {
+      destinations: {
+        deleteMany: {
+          where: {
+            channelId
+          }
+        }
+      }
+    }
+  })
+}
+
+/**
+ * unsubscribes a channel from all notifications
+ * @param channelId channel to remove all subscriptions from
+ */
+export const removeAllSubscriptions = async (channelId: string) => {
+  await client.show.updateMany({
+    data: {
+      destinations: {
+        deleteMany: {
+          where: {
+            channelId
+          }
+        }
+      }
+    }
+  })
+
+  console.log('Deleted all show destinations for channel ' + channelId)
+}
+
+/**
+ * removes all shows that have no destinations
+ */
+export const pruneUnsubscribedShows = async () => {
+  await client.show.deleteMany({
+    where: {
+      destinations: {
+        isEmpty: true
+      }
+    }
+  })
+
+  console.info('Pruned shows with no destinations')
+}
