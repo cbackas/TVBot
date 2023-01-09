@@ -1,15 +1,15 @@
 import * as cityTimeZones from "city-timezones"
-const wcc = require('world-countries-capitals')
 
 /**
  * Returns the offset range for the given city or region
  * @param location
  */
 export function getTimezone(countryAlpha3: string): string {
-  const capitalCity = wcc.getCountryDetailsByISO('alpha_3', countryAlpha3)[0].capital
-  const timezone = cityTimeZones.findFromCityStateProvince(capitalCity)
+  const t = cityTimeZones.cityMapping.filter((city) => city.iso3 === countryAlpha3.toUpperCase()).reduce((prev, current) => {
+    return (prev.pop > current.pop) ? prev : current
+  })
 
-  if (timezone.length !== 1) throw new Error(`Could not find timezone for ${capitalCity}`)
+  if (t === undefined) throw new Error(`Could not find timezone for ${countryAlpha3}`)
 
-  return timezone[0].timezone
+  return t.timezone
 }

@@ -13,8 +13,7 @@
     "dotenv": "^16.0.3",
     "moment-timezone": "^0.5.40",
     "node-schedule": "^2.1.0",
-    "sqlite": "^4.1.2",
-    "world-countries-capitals": "^3.4.0"
+    "sqlite": "^4.1.2"
   },
   "devDependencies": {
     "@es-exec/esbuild-plugin-start": "^0.0.4",
