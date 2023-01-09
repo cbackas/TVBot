@@ -11,9 +11,10 @@ datasource db {
 }
 
 model Settings {
-  id           Int           @id @default(0) @map("_id")
-  allEpisodes  Destination[] // channels that get all episode notifications
-  defaultForum String? // default forum to post episode notifications to
+  id                         Int           @id @default(0) @map("_id")
+  allEpisodes                Destination[] // channels that get all episode notifications
+  defaultForum               String? // default forum to post episode notifications to
+  morningSummaryDestinations Destination[] // channels that get morning summary notifications
 }
 
 model Show {

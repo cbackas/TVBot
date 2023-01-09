@@ -2,7 +2,6 @@ import { Channel, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits,
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
-import { Destination } from '@prisma/client'
 import { SettingsManager } from '../lib/settingsManager'
 
 export const command: CommandV2 = {
@@ -42,6 +41,27 @@ export const command: CommandV2 = {
               .addChannelTypes(ChannelType.GuildText)
               .setRequired(true))
         ]
+      },
+      {
+        main: new SlashCommandSubcommandGroupBuilder()
+          .setName('morning_summary')
+          .setDescription('Settings related to the daily morning summary message'),
+        subCommands: [
+          new SlashCommandSubcommandBuilder()
+            .setName('add_channel')
+            .setDescription('Add a channel to the list that recieves the morning summary message')
+            .addChannelOption(option => option.setName('channel')
+              .setDescription('Channel to add to the list that recieves the morning summary message')
+              .addChannelTypes(ChannelType.GuildText)
+              .setRequired(true)),
+          new SlashCommandSubcommandBuilder()
+            .setName('remove_channel')
+            .setDescription('Remove a channel from the list that recieves the morning summary message')
+            .addChannelOption(option => option.setName('channel')
+              .setDescription('Channel to remove from the list that recieves the morning summary message')
+              .addChannelTypes(ChannelType.GuildText)
+              .setRequired(true))
+        ]
       }
     ]
   },
@@ -56,8 +76,7 @@ export const command: CommandV2 = {
      * Handle the TV forum setting
      */
     if (subcommandGroup === null && subCommand === 'tv_forum') {
-      await setTVForum(settingsManager, interaction, channel)
-      return
+      return await setTVForum(settingsManager, interaction, channel)
     }
 
     /**
@@ -65,6 +84,13 @@ export const command: CommandV2 = {
      */
     if (subcommandGroup === 'all_episodes') {
       return await updateGlobalChannels(settingsManager, interaction, channel, subCommand)
+    }
+
+    /**
+     * Handle all the morning summary settings
+     */
+    if (subcommandGroup === 'morning_summary') {
+      return await updateMorningSummaryChannels(settingsManager, interaction)
     }
   }
 }
@@ -109,10 +135,10 @@ const updateGlobalChannels = async (settingsManager: SettingsManager, interactio
     return await interaction.editReply('Invalid channel type')
   }
 
-  const progress = new ProgressMessageBuilder()
+  const progress = new ProgressMessageBuilder(interaction)
     .addStep('Updating `All Episodes` channel list')
 
-  await interaction.editReply(progress.nextStep())
+  await progress.sendNextStep()
 
   let channelList = settingsManager.fetch()?.allEpisodes ?? []
   const hasChannel = channelList.some(d => d.channelId === channel.id)
@@ -133,5 +159,54 @@ const updateGlobalChannels = async (settingsManager: SettingsManager, interactio
     allEpisodes: channelList
   })
 
-  return await interaction.editReply(progress.nextStep() + `\n\n__New List__:\n${channelList.map(d => `<#${d.channelId}>`).join('\n')}`)
+  return await progress.sendNextStep(`__New List__:\n${channelList.map(d => `<#${d.channelId}>`).join('\n')}`)
+}
+
+/**
+ * handle the morning_sumarry commands
+ * allows adding and removing channels from the list of channels that receive the morning summary message
+ * todo allow setting the time of the morning summary
+ * @param settingsManager pass the settingsManager to avoid having to fetch it multiple times
+ * @param interaction the chat interaction that got us here
+ * @returns nothin
+ */
+const updateMorningSummaryChannels = async (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction) => {
+  const subCommand = interaction.options.getSubcommand() // add_channel or remove_channel
+
+
+  if (subCommand !== 'add_channel' && subCommand !== 'remove_channel') {
+    return await interaction.editReply('Invalid subcommand')
+  }
+
+  const channel = interaction.options.getChannel('channel', true) as Channel
+  // validate the channel type
+  if (channel.type != ChannelType.GuildText) {
+    return await interaction.editReply('Invalid channel type')
+  }
+
+  const progress = new ProgressMessageBuilder(interaction)
+    .addStep('Updating `Morning Summary` channel list')
+
+  await progress.sendNextStep()
+
+  let channelList = settingsManager.fetch()?.morningSummaryDestinations ?? []
+  const hasChannel = channelList.some(d => d.channelId === channel.id)
+
+  // add or remove the channel from the list
+  if (subCommand === 'add_channel') {
+    if (hasChannel) return await interaction.editReply('Channel already in list')
+    channelList.push({
+      channelId: channel.id,
+      forumId: null
+    })
+  } else if (subCommand === 'remove_channel') {
+    if (!hasChannel) return await interaction.editReply('Channel not in morning_summary list')
+    channelList = channelList.filter(d => d.channelId !== channel.id)
+  }
+
+  await settingsManager.update({
+    morningSummaryDestinations: channelList
+  })
+
+  return await progress.sendNextStep(`__New List__:\n${channelList.map(d => `<#${d.channelId}>`).join('\n')}`)
 }
