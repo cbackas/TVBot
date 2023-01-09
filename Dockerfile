@@ -12,5 +12,4 @@ COPY --from=build /build/prisma ./prisma
 COPY --from=build /build/dist .
 COPY --from=build /build/entrypoint.sh .
 ENV TZ="America/Chicago"
-ENV DATABASE_URL="file:/app/data/tvdb.db"
 ENTRYPOINT ["sh", "entrypoint.sh"]
