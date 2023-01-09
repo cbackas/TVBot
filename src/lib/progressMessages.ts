@@ -80,11 +80,16 @@ export class ProgressMessageBuilder {
    * only works if the ProgressMessageBuilder was initialized with a chat interaction
    * @returns the sent discord message
    */
-  sendNextStep = async () => {
+  sendNextStep = async (additionalMessage?: string) => {
     if (!this.interaction) throw new Error('ProgressMessageBuilder was not initialized with an interaction')
 
     // get the next step message
-    const message = this.nextStep()
+    let message = this.nextStep()
+
+    // if there is an additional message, append it to the message
+    if (additionalMessage) {
+      message += '\n\n' + additionalMessage
+    }
 
     // send the message to the user
     return await this.interaction.editReply(message)
