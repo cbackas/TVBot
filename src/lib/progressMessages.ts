@@ -1,4 +1,4 @@
-import { Collection } from "discord.js"
+import { ChatInputCommandInteraction, Collection, Interaction } from "discord.js"
 
 type Step = {
   status: typeof StepStatus[keyof typeof StepStatus]
@@ -12,14 +12,23 @@ export const StepStatus = {
 } as const
 
 export class ProgressMessageBuilder {
+  // a discord interaction can optionally be passed in, this is useful for updating the message in place
+  private interaction?: ChatInputCommandInteraction
+
   private steps: Collection<number, Step>
   private currentStep = 0
   private totalSteps = 0
 
-  constructor() {
+  constructor(interaction?: ChatInputCommandInteraction) {
     this.steps = new Collection<number, Step>()
+    this.interaction = interaction
   }
 
+  /**
+   * add a new step to the progress message
+   * @param message the message to display for the step
+   * @returns ProgressMessageBuilder object
+   */
   public addStep = (message: string): ProgressMessageBuilder => {
     this.totalSteps += 1
 
@@ -31,6 +40,12 @@ export class ProgressMessageBuilder {
     return this
   }
 
+  /**
+   * set the status of a step
+   * @param stepNumber index of step to manipulate the status of 
+   * @param status desired status
+   * @returns ProgressMessageBuilder object
+   */
   setStatus = (stepNumber: number, status: Step['status']): ProgressMessageBuilder => {
     const step = this.steps.get(stepNumber)
 
@@ -41,6 +56,10 @@ export class ProgressMessageBuilder {
     return this
   }
 
+  /**
+   * updates the current step and returns the updated progress message
+   * @returns the updated progress message
+   */
   nextStep = (): string => {
     const isFirstStep = this.currentStep === 0
     if (!isFirstStep) {
@@ -54,6 +73,21 @@ export class ProgressMessageBuilder {
     this.currentStep += 1
 
     return this.toString()
+  }
+
+  /**
+   * wrapper function that updates the ProgressMessage object and sends it to the user
+   * only works if the ProgressMessageBuilder was initialized with a chat interaction
+   * @returns the sent discord message
+   */
+  sendNextStep = async () => {
+    if (!this.interaction) throw new Error('ProgressMessageBuilder was not initialized with an interaction')
+
+    // get the next step message
+    const message = this.nextStep()
+
+    // send the message to the user
+    return await this.interaction.editReply(message)
   }
 
   public toString = (): string => {
