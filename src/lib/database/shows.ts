@@ -44,7 +44,7 @@ export async function updateEpisodes(imdbId: string, tvdbId: number): Promise<vo
       return Prisma.validator<Prisma.ShowCreateInput['episodes']>()({
         season: e.seasonNumber,
         number: e.number,
-        title: e.name,
+        title: e.name ?? '',
         airDate: airDateUTC
       })
     })

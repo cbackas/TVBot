@@ -260,7 +260,7 @@ export interface Status {
 export interface Episode {
   id: number
   seriesId: number
-  name: string
+  name: string | null
   aired: string
   runtime: number
   nameTranslations: any
