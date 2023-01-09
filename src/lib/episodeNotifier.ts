@@ -14,7 +14,7 @@ const isTextChannel = (channel: Channel): channel is AnyThreadChannel<boolean> |
 type NotificationPayload = {
   key: string
   airDate: Date
-  showId: string
+  imdbId: string
   showName: string
   season: number
   episodeNumbers: number[]
@@ -73,7 +73,7 @@ const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show
     const defaultPayload: NotificationPayload = {
       key,
       airDate: e.airDate,
-      showId: show.imdbId,
+      imdbId: show.imdbId,
       showName: show.name,
       season: e.season,
       episodeNumbers: [], // it has an emtpy array of episode numbers because it will be filled in later
@@ -96,7 +96,7 @@ const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show
  * @param globalDestinations additional destinations to send the message to
  */
 const scheduleJob = async (payload: NotificationPayload, discord: Client, globalDestinations: Destination[]) => {
-  const { key, airDate, showId, showName, season, episodeNumbers } = payload
+  const { key, airDate, imdbId: showId, showName, season, episodeNumbers } = payload
 
   // handle timezones
   const airDateUTC = moment.utc(airDate)

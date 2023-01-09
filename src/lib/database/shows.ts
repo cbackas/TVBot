@@ -95,7 +95,7 @@ export const checkForAiringEpisodes = async (): Promise<void> => {
  * @param seasonNumber season to mark episodes sent in
  * @param episodeNumbers array of episode numbers to mark as sent
  */
-export async function markMessageSent(showId: string, seasonNumber: number, episodeNumbers: number[]): Promise<void>
+export async function markMessageSent(imdbId: string, seasonNumber: number, episodeNumbers: number[]): Promise<void>
 
 /**
  * Mark episodes as sent in the DB, just to avoid sending the same message twice
@@ -103,21 +103,21 @@ export async function markMessageSent(showId: string, seasonNumber: number, epis
  * @param seasonNumber season to mark episodes sent in
  * @param episodeNumber episode number(s) to mark as sent
  */
-export async function markMessageSent(showId: string, seasonNumber: number, episodeNumber: number): Promise<void>
+export async function markMessageSent(imdbId: string, seasonNumber: number, episodeNumber: number): Promise<void>
 
 /**
  * Mark episodes as sent in the DB, just to avoid sending the same message twice
- * @param showId show to mark episodes as sent for
+ * @param imdbId show to mark episodes as sent for
  * @param seasonNumber season to mark episodes as sent for
  * @param episodeNumber episode number(s) to mark as sent
  */
-export async function markMessageSent(showId: string, seasonNumber: number, episodeNumber: number | number[]): Promise<void> {
+export async function markMessageSent(imdbId: string, seasonNumber: number, episodeNumber: number | number[]): Promise<void> {
   // handle overloaded function to turn params into an array
   let episodeNumbers: number[] = (Array.isArray(episodeNumber) ? episodeNumber : [episodeNumber])
 
   await client.show.update({
     where: {
-      id: showId
+      imdbId
     },
     data: {
       episodes: {
