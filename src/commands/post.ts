@@ -39,10 +39,6 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
   const imdbId = interaction.options.getString('imdb_id', true)
   const forumInput = interaction.options.getChannel('forum', false)
 
-  // if the user passed in a forum then send the post to that forum
-  const useInputForum = forumInput !== null && isForumChannel(forumInput as Channel)
-  const tvForum = useInputForum ? forumInput.id : await getDefaultTVForumId(app)
-
   const progress = new ProgressMessageBuilder()
     .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
     .addStep(`Fetching show data`)
@@ -58,6 +54,10 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
   const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
 
   try {
+    // if the user passed in a forum then send the post to that forum
+    const useInputForum = forumInput !== null && isForumChannel(forumInput as Channel)
+    const tvForum = useInputForum ? forumInput.id : await getDefaultTVForumId(app)
+
     await nextStep() // start step 1
 
     await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
