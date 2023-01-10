@@ -11,7 +11,7 @@ const isTextChannel = (channel: Channel): channel is AnyThreadChannel<boolean> |
   return channel.isTextBased() && !channel.isDMBased() && ![ChannelType.GuildAnnouncement, ChannelType.GuildVoice].includes(channel.type)
 }
 
-type NotificationPayload = {
+export type NotificationPayload = {
   key: string
   airDate: Date
   imdbId: string
@@ -53,16 +53,15 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
  * @param show current show to process
  * @returns collection of notification payloads
  */
-const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show) => {
+export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show) => {
   const momentUTC = moment.utc(new Date())
 
-  const episodes = show.episodes.filter(e => {
+  for (const e of show.episodes) {
     const airDate = moment.utc(e.airDate)
-    return airDate.isSameOrAfter(momentUTC) && airDate.isSameOrBefore(momentUTC.clone().add('1', 'day'))
-  })
+    const inTimeWindow = airDate.isSameOrAfter(momentUTC) && airDate.isSameOrBefore(momentUTC.clone().add('1', 'day'))
 
-  // for each episode, update the payload collection and ensure that episode notifications are grouped
-  episodes.forEach(e => {
+    if (!inTimeWindow) continue
+
     const airDateString = moment.utc(e.airDate)
       .tz(process.env.TZ ?? 'America/Chicago')
       .format('YYYY-MM-DD@HH:mm')
@@ -84,7 +83,7 @@ const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show
 
     // add the episode number to the payload
     payload.episodeNumbers.push(e.number)
-  })
+  }
 
   return acc
 }
