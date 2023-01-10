@@ -5,6 +5,7 @@ import { scheduleAiringMessages } from './lib/episodeNotifier'
 import { CommandManager } from './lib/commandManager'
 import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions } from './lib/database/shows'
 import { SettingsManager } from './lib/settingsManager'
+import { sendMorningSummary } from './lib/morningSummary'
 
 dotenv.config()
 
@@ -66,6 +67,13 @@ export class App {
       schedule.scheduleJob('lifecycle:4hours:fetchEpisoded', '0 */4 * * *', async () => {
         await checkForAiringEpisodes()
         scheduleAiringMessages(this)
+      })
+
+      schedule.scheduleJob('lifecycle:morningSummary', '0 8 * * *', async () => {
+        const settings = this.getSettings()
+        if (!settings) throw new Error('Settings not found')
+
+        await sendMorningSummary(settings, this.client)
       })
     })
 

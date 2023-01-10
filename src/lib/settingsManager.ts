@@ -1,14 +1,14 @@
 import client from "./prisma"
-import { Prisma, Settings } from "@prisma/client"
+import { Prisma, Settings as DBSettings } from "@prisma/client"
 
-type SettingsNoId = Omit<Settings, 'id'>
+export type Settings = Omit<DBSettings, 'id'>
 
 /**
  * Manager to handle fetching and saving settings in the DB
  */
 export class SettingsManager {
   // set the defaults for the settings
-  private settings?: SettingsNoId
+  private settings?: Settings
 
   /**
    * Save initial settings data to the DB
@@ -50,7 +50,7 @@ export class SettingsManager {
    * Update settings in the DB
    * @param inputData settings data to update
    */
-  update = async (inputData: Partial<SettingsNoId>) => {
+  update = async (inputData: Partial<Settings>) => {
     const data = Prisma.validator<Prisma.SettingsUpdateInput>()(inputData)
 
     await client.settings.update({
@@ -132,5 +132,5 @@ export class SettingsManager {
     return settings.allEpisodes
   }
 
-  fetch = (): SettingsNoId | undefined => this.settings
+  fetch = (): Settings | undefined => this.settings
 }
