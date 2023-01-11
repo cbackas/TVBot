@@ -3,6 +3,7 @@ import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 import { App } from '../app'
 import { SettingsManager } from '../lib/settingsManager'
+import { Destination } from '@prisma/client'
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -140,26 +141,17 @@ const updateGlobalChannels = async (settingsManager: SettingsManager, interactio
 
   await progress.sendNextStep()
 
-  let channelList = settingsManager.fetch()?.allEpisodes ?? []
-  const hasChannel = channelList.some(d => d.channelId === channel.id)
+  let destinations: Destination[] = []
 
   // add or remove the channel from the list
   if (mode === 'add') {
-    if (hasChannel) return await interaction.editReply('Channel already in list')
-    channelList.push({
-      channelId: channel.id,
-      forumId: null
-    })
+    destinations = await settingsManager.addGlobalDestination(channel.id)
   } else if (mode === 'remove') {
-    if (!hasChannel) return await interaction.editReply('Channel not in all_episodes list')
-    channelList = channelList.filter(d => d.channelId !== channel.id)
+    destinations = await settingsManager.removeGlobalDestination(channel.id)
   }
 
-  await settingsManager.update({
-    allEpisodes: channelList
-  })
-
-  return await progress.sendNextStep(`__New List__:\n${channelList.map(d => `<#${d.channelId}>`).join('\n')}`)
+  const destinationsString = destinations.map(d => `<#${d.channelId}>`).join('\n')
+  return await progress.sendNextStep(`__Global Destinations__:\nThese channels recieve notifications for all new episodes\n\n${destinationsString}`)
 }
 
 /**
