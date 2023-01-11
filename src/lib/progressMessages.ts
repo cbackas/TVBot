@@ -83,16 +83,8 @@ export class ProgressMessageBuilder {
   sendNextStep = async (additionalMessage?: string) => {
     if (!this.interaction) throw new Error('ProgressMessageBuilder was not initialized with an interaction')
 
-    // get the next step message
-    let message = this.nextStep()
-
-    // if there is an additional message, append it to the message
-    if (additionalMessage) {
-      message += '\n\n' + additionalMessage
-    }
-
     // send the message to the user
-    return await this.interaction.editReply(message)
+    return await this.interaction.editReply(this.nextStep() + (additionalMessage !== undefined ? `\n\n${additionalMessage}` : ''))
   }
 
   public toString = (): string => {

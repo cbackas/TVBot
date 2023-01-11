@@ -1,4 +1,4 @@
-import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, TextBasedChannel, ThreadChannel } from 'discord.js'
+import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, DiscordAPIError, PermissionFlagsBits, SlashCommandBuilder, TextBasedChannel, ThreadChannel } from 'discord.js'
 import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
@@ -39,30 +39,23 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
   const imdbId = interaction.options.getString('imdb_id', true)
   const forumInput = interaction.options.getChannel('forum', false)
 
-  const progress = new ProgressMessageBuilder()
+  const progress = new ProgressMessageBuilder(interaction)
     .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
     .addStep(`Fetching show data`)
     .addStep('Creating forum post')
     .addStep('Saving show to DB')
     .addStep('Fetching upcoming episodes')
 
-  // /**
-  //  * Wrapper function that updates the ProgressMessage object and sends it to the user
-  //  * @param message optional message to append to the progress message
-  //  * @returns the sent discord message
-  //  */
-  const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
-
   try {
     // if the user passed in a forum then send the post to that forum
     const useInputForum = forumInput !== null && isForumChannel(forumInput as Channel)
     const tvForum = useInputForum ? forumInput.id : await getDefaultTVForumId(app)
 
-    await nextStep() // start step 1
+    await progress.sendNextStep() // start step 1
 
     await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
 
-    await nextStep() // start step 2
+    await progress.sendNextStep() // start step 2
 
     const tvdbSeries = await getSeriesByImdbId(imdbId)
 
@@ -70,22 +63,22 @@ const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
       throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
     }
 
-    await nextStep() // start step 3
+    await progress.sendNextStep() // start step 3
 
     const newPost = await createForumPost(interaction.client.channels, tvdbSeries, tvForum)
 
-    await nextStep() // start step 4
+    await progress.sendNextStep() // start step 4
 
     const show = await saveShowToDB(imdbId, tvdbSeries.id, tvdbSeries.name, newPost as TextBasedChannel)
 
-    await nextStep() // start step 5
+    await progress.sendNextStep() // start step 5
 
     await updateEpisodes(show.imdbId, show.tvdbId)
     await scheduleAiringMessages(app)
 
     console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-    // finish step 5
-    return await nextStep(`Created post <#${newPost.id}>`)
+
+    return await progress.sendNextStep(`Created post <#${newPost.id}>`) // finish step 5
   } catch (error) {
     // catch our custom error and display it for the user
     if (error instanceof ProgressError) {
@@ -148,14 +141,13 @@ const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, t
   // if the show is in the DB and has destinations but none of them are in the given forum then we can just return
   if (destinationsForForum === undefined) return
 
-  const channel = await channels.fetch(destinationsForForum.channelId)
-
-  if (channel == null || !isThreadChannel(channel)) {
-    // todo run show cleanup function?
-    throw new ProgressError('A forum post already exists for that show, but the channel could not be found. This error shouldn\'t ever really happen. Probably.')
+  try {
+    const channel = await channels.fetch(destinationsForForum.channelId)
+    throw new ProgressError(`A post for \`${name}\` already exists in the target forum: <#${channel?.id}>`)
+  } catch (error) {
+    // if we can't fetch the channel then it's probably been deleted so we can just return
+    if (error instanceof DiscordAPIError && error.code === 10003) return
   }
-
-  throw new ProgressError(`A post for \`${name}\` already exists in the target forum: <#${channel.id}>`)
 }
 
 /**
