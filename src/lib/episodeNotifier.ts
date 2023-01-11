@@ -5,6 +5,7 @@ import schedule from 'node-schedule'
 import { App } from "../app"
 import { markMessageSent } from "./database/shows"
 import client from "./prisma"
+import { SettingsManager } from "./settingsManager"
 import { addLeadingZeros, toRanges } from "./util"
 
 const isTextChannel = (channel: Channel): channel is AnyThreadChannel<boolean> | TextChannel => {
@@ -40,10 +41,11 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
 
   // grab the discord client and global destinations for the schedule jobs to use
   const discord = app.getClient()
-  const globalDestinations = app.getSettings()?.allEpisodes ?? []
+  const settingsManager = app.getSettingsManager()
+  // const globalDestinations = app.getSettings()?.allEpisodes ?? []
 
   for (const payload of payloadCollection.values()) {
-    await scheduleJob(payload, discord, globalDestinations)
+    await scheduleJob(payload, discord, settingsManager)
   }
 }
 
@@ -94,7 +96,7 @@ export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, sho
  * @param discord client needed to send the messages
  * @param globalDestinations additional destinations to send the message to
  */
-const scheduleJob = async (payload: NotificationPayload, discord: Client, globalDestinations: Destination[]) => {
+const scheduleJob = async (payload: NotificationPayload, discord: Client, settingsManager: SettingsManager) => {
   const { key, airDate, imdbId: showId, showName, season, episodeNumbers } = payload
 
   // handle timezones
@@ -119,7 +121,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, global
 
   // create a scheduled event to send a message
   const newJob = schedule.scheduleJob(key, airDateLocal.toDate(), async () => {
-    // add the default destination to the list of destinations
+    // grab the show destinations from the db
     const show = await client.show.findUnique({
       where: {
         imdbId: showId
@@ -129,8 +131,10 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, global
       }
     })
 
+    // pull the destinations from the db or use an empty array
     const destinations = show?.destinations ?? []
-    destinations.concat(globalDestinations)
+    // add global destinations to the list of destinations
+    destinations.concat(settingsManager.fetch()?.allEpisodes ?? [])
 
     for (const destination of destinations) {
       const channel = await discord.channels.fetch(destination.channelId)
