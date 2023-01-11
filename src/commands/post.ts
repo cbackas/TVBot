@@ -8,7 +8,6 @@ import { createNewSubscription, updateEpisodes } from '../lib/database/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
-import { isThreadChannel } from '../interfaces/discord'
 import { isForumChannel } from '../interfaces/discord'
 
 /**
