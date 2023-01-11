@@ -10,90 +10,78 @@ import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
 import { isForumChannel } from '../interfaces/discord'
 
-/**
- * Slash command definition for `/post`
- */
-const slashCommand = new SlashCommandBuilder()
-  .setName('post')
-  .setDescription('Create a forum post for a show. Require "Manage Channels" permission.')
-  .setDMPermission(false)
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
-  .addStringOption(option => option.setName('imdb_id')
-    .setDescription('The IMDB ID to search for')
-    .setMinLength(9)
-    .setRequired(true)
-  )
-  .addChannelOption(option => option.setName("forum")
-    .setDescription('Destination Discord forum for show post (defaults to value defined in `/setting tv_forum`)')
-    .addChannelTypes(ChannelType.GuildForum)
-    .setRequired(false))
-
-/**
- * The main execution method for the `/post` command
- * @param app main application object instance
- * @param interaction the discord interaction that triggered the command
- * @returns nothing important
- */
-const execute = async (app: App, interaction: ChatInputCommandInteraction) => {
-  const imdbId = interaction.options.getString('imdb_id', true)
-  const forumInput = interaction.options.getChannel('forum', false)
-
-  const progress = new ProgressMessageBuilder(interaction)
-    .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
-    .addStep(`Fetching show data`)
-    .addStep('Creating forum post')
-    .addStep('Saving show to DB')
-    .addStep('Fetching upcoming episodes')
-
-  try {
-    // if the user passed in a forum then send the post to that forum
-    const useInputForum = forumInput !== null && isForumChannel(forumInput as Channel)
-    const tvForum = useInputForum ? forumInput.id : await getDefaultTVForumId(app)
-
-    await progress.sendNextStep() // start step 1
-
-    await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
-
-    await progress.sendNextStep() // start step 2
-
-    const tvdbSeries = await getSeriesByImdbId(imdbId)
-
-    if (!tvdbSeries) {
-      throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
-    }
-
-    await progress.sendNextStep() // start step 3
-
-    const newPost = await createForumPost(interaction.client.channels, tvdbSeries, tvForum)
-
-    await progress.sendNextStep() // start step 4
-
-    const show = await saveShowToDB(imdbId, tvdbSeries.id, tvdbSeries.name, newPost as TextBasedChannel)
-
-    await progress.sendNextStep() // start step 5
-
-    await updateEpisodes(show.imdbId, show.tvdbId)
-    await scheduleAiringMessages(app)
-
-    console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-
-    return await progress.sendNextStep(`Created post <#${newPost.id}>`) // finish step 5
-  } catch (error) {
-    // catch our custom error and display it for the user
-    if (error instanceof ProgressError) {
-      const message = `${progress.toString()}\n\nError: ${error.message}`
-      return await interaction.editReply(message)
-    }
-
-    throw error
-  }
-}
-
 export const command: CommandV2 = {
   slashCommand: {
-    main: slashCommand
+    main: new SlashCommandBuilder()
+      .setName('post')
+      .setDescription('Create a forum post for a show. Require "Manage Channels" permission.')
+      .setDMPermission(false)
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+      .addStringOption(option => option.setName('imdb_id')
+        .setDescription('The IMDB ID to search for')
+        .setMinLength(9)
+        .setRequired(true)
+      )
+      .addChannelOption(option => option.setName("forum")
+        .setDescription('Destination Discord forum for show post (defaults to value defined in `/setting tv_forum`)')
+        .addChannelTypes(ChannelType.GuildForum)
+        .setRequired(false))
   },
-  execute
+
+  async execute(app: App, interaction: ChatInputCommandInteraction) {
+    const imdbId = interaction.options.getString('imdb_id', true)
+    const forumInput = interaction.options.getChannel('forum', false)
+
+    const progress = new ProgressMessageBuilder(interaction)
+      .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
+      .addStep(`Fetching show data`)
+      .addStep('Creating forum post')
+      .addStep('Saving show to DB')
+      .addStep('Fetching upcoming episodes')
+
+    try {
+      // if the user passed in a forum then send the post to that forum
+      const useInputForum = forumInput !== null && isForumChannel(forumInput as Channel)
+      const tvForum = useInputForum ? forumInput.id : await getDefaultTVForumId(app)
+
+      await progress.sendNextStep() // start step 1
+
+      await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
+
+      await progress.sendNextStep() // start step 2
+
+      const tvdbSeries = await getSeriesByImdbId(imdbId)
+
+      if (!tvdbSeries) {
+        throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
+      }
+
+      await progress.sendNextStep() // start step 3
+
+      const newPost = await createForumPost(interaction.client.channels, tvdbSeries, tvForum)
+
+      await progress.sendNextStep() // start step 4
+
+      const show = await saveShowToDB(imdbId, tvdbSeries.id, tvdbSeries.name, newPost as TextBasedChannel)
+
+      await progress.sendNextStep() // start step 5
+
+      await updateEpisodes(show.imdbId, show.tvdbId)
+      await scheduleAiringMessages(app)
+
+      console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
+
+      return await progress.sendNextStep(`Created post <#${newPost.id}>`) // finish step 5
+    } catch (error) {
+      // catch our custom error and display it for the user
+      if (error instanceof ProgressError) {
+        const message = `${progress.toString()}\n\nError: ${error.message}`
+        return await interaction.editReply(message)
+      }
+
+      throw error
+    }
+  }
 }
 
 /**
