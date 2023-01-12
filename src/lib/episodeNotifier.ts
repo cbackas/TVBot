@@ -77,7 +77,7 @@ export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, sho
       imdbId: show.imdbId,
       showName: show.name,
       season: e.season,
-      episodeNumbers: [], // it has an emtpy array of episode numbers because it will be filled in later
+      episodeNumbers: [] // it has an emtpy array of episode numbers because it will be filled in later
     }
 
     // grab the payload from the collection or create a new one
