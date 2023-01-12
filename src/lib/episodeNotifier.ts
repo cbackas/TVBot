@@ -189,8 +189,8 @@ const getEpisodeMessage = (showName: string, season: number, episodeNumbers: num
   }
 
   if (episodeNumbers.length === 1) {
-    return `${showName} S${addLeadingZeros(season, 2)}E${addLeadingZeros(episodeNumbers[0], 2)} is airing now!`
+    return `**${showName} S${addLeadingZeros(season, 2)}E${addLeadingZeros(episodeNumbers[0], 2)}** is airing now!`
   }
 
-  return `${showName} S${addLeadingZeros(season, 2)}E${toRanges(episodeNumbers)} is streaming somewhere now!`
+  return `**${showName} S${addLeadingZeros(season, 2)}E${toRanges(episodeNumbers)}** is streaming somewhere now!`
 }
