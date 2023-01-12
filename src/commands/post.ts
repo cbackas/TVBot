@@ -122,19 +122,20 @@ const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, t
   const { name, destinations } = show
 
   // if the show is in the DB but has no destinations then we can just return
-  if (destinations.length <= 0) return
+  if (destinations.length == 0) return
 
   const destinationsForForum = destinations.find(d => d.forumId === tvForum)
   // if the show is in the DB and has destinations but none of them are in the given forum then we can just return
   if (destinationsForForum === undefined) return
 
   try {
-    const channel = await channels.fetch(destinationsForForum.channelId)
-    throw new ProgressError(`A post for \`${name}\` already exists in the target forum: <#${channel?.id}>`)
+    await channels.fetch(destinationsForForum.channelId)
   } catch (error) {
     // if we can't fetch the channel then it's probably been deleted so we can just return
     if (error instanceof DiscordAPIError && error.code === 10003) return
   }
+
+  throw new ProgressError(`A post for \`${name}\` already exists in the target forum: <#${destinationsForForum.channelId}>`)
 }
 
 /**
