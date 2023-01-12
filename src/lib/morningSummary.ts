@@ -22,7 +22,7 @@ export async function sendMorningSummary(settings: Settings, c: Client) {
   const messages = payloadCollection.map((payload) => {
     const seasonNumber = addLeadingZeros(payload.season, 2)
     const episodeNumbers = toRanges(payload.episodeNumbers)
-    return `**${payload.showName}** S${seasonNumber}E${episodeNumbers}`
+    return `**${payload.showName}** S${seasonNumber}E${episodeNumbers} - <t:${moment.utc(payload.airDate).unix()}:R>`
   })
 
   for (const dest of settings.morningSummaryDestinations) {
