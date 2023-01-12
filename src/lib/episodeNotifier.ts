@@ -131,23 +131,35 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
       }
     })
 
-    // pull the destinations from the db or use an empty array
     const showDestinations = show?.destinations ?? []
-    // add global destinations to the list of destinations
-    const combinedDestinations = showDestinations.concat(settingsManager.fetch()?.allEpisodes ?? [])
 
-    for (const destination of combinedDestinations) {
+    // send the message to all the channels subscribed to the show
+    for (const destination of showDestinations) {
       const channel = await discord.channels.fetch(destination.channelId)
       if (!channel) throw new Error('Channel not found')
 
       // send message to discord
       await sendMessage(channel, message)
-      // mark message as sent in  the db
-      await markMessageSent(showId, season, episodeNumbers)
     }
+
+    // build the message that's sent to the global destinations
+    const channelsString = showDestinations.map(d => `<#${d.channelId}>`).join(' ')
+    const globalMessage = message + ` Check out the discussions here: ${channelsString}`
+
+    // send messages to all the global destinations
+    for (const destination of settingsManager.fetch()?.allEpisodes ?? []) {
+      const channel = await discord.channels.fetch(destination.channelId)
+      if (!channel) throw new Error('Channel not found')
+
+      // send message to discord
+      await sendMessage(channel, globalMessage)
+    }
+
+    // mark message as sent in  the db
+    await markMessageSent(showId, season, episodeNumbers)
   })
 
-  console.info(`Scheduled Job: ${key} (${showName}) at ${newJob.nextInvocation()}}`)
+  console.info(`Scheduled Job: ${key}(${showName}) at ${newJob.nextInvocation()}} `)
 }
 
 /**
@@ -180,7 +192,5 @@ const getEpisodeMessage = (showName: string, season: number, episodeNumbers: num
     return `${showName} S${addLeadingZeros(season, 2)}E${addLeadingZeros(episodeNumbers[0], 2)} is airing now!`
   }
 
-  const episodeRange = toRanges(episodeNumbers)
-
-  return `${showName} S${addLeadingZeros(season, 2)}E${episodeRange} is streaming somewhere now!`
+  return `${showName} S${addLeadingZeros(season, 2)}E${toRanges(episodeNumbers)} is streaming somewhere now!`
 }
