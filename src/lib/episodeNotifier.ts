@@ -132,16 +132,11 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
     })
 
     // pull the destinations from the db or use an empty array
-    const destinations = show?.destinations ?? []
-    console.log('show destinations: ', destinations)
-    const globalDestinations = settingsManager.fetch()?.allEpisodes ?? []
-    console.log('global destinations: ', globalDestinations)
+    const showDestinations = show?.destinations ?? []
     // add global destinations to the list of destinations
-    destinations.concat(globalDestinations)
+    const combinedDestinations = showDestinations.concat(settingsManager.fetch()?.allEpisodes ?? [])
 
-    console.info('combined destinations: : ', destinations)
-
-    for (const destination of destinations) {
+    for (const destination of combinedDestinations) {
       const channel = await discord.channels.fetch(destination.channelId)
       if (!channel) throw new Error('Channel not found')
 
