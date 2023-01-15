@@ -11,6 +11,7 @@ const commandModules: Getter<CommandV2>[] = [
   require('../commands/post'),
   require('../commands/link'),
   require('../commands/unlink'),
+  require('../commands/list'),
   require('../commands/setting')
 ]
 
