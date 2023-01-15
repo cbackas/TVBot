@@ -109,7 +109,7 @@ export class SettingsManager {
   }
 
   removeGlobalDestination = async (channelId: string) => {
-    if (await this.channelIsAlreadyGlobal(channelId)) return this.settings?.allEpisodes ?? []
+    if (!await this.channelIsAlreadyGlobal(channelId)) return this.settings?.allEpisodes ?? []
 
     const settings = await client.settings.update({
       where: {
