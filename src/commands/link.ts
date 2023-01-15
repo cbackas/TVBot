@@ -1,4 +1,4 @@
-import { CacheType, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
+import { CacheType, ChannelType, ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
 import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
@@ -7,6 +7,7 @@ import { getSeriesByImdbId } from '../lib/tvdb'
 import { createNewSubscription, updateEpisodes } from '../lib/database/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
+import { Series } from '../interfaces/tvdb'
 
 /**
  * Standardized slash command option for getting IMDB ID
@@ -41,14 +42,14 @@ export const command: CommandV2 = {
     ]
   },
   async execute(app: App, interaction: ChatInputCommandInteraction<CacheType>) {
-    const imdbId = interaction.options.getString('imdb_id', true)
+    const imdbIds = interaction.options.getString('imdb_id', true).split(',')
 
     const subCommand = interaction.options.getSubcommand()
     if (!subCommand) return await interaction.editReply('Invalid subcommand')
 
     const progress = new ProgressMessageBuilder(interaction)
       .addStep('Check for existing show subscription')
-      .addStep(`Searching for show with IMDB ID \`${imdbId}\``)
+      .addStep(`Searching for show with IMDB ID(s) \`${imdbIds}\``)
       .addStep('Linking show to channel in database')
       .addStep('Fetching upcoming episodes')
 
@@ -72,27 +73,48 @@ export const command: CommandV2 = {
     try {
       await progress.sendNextStep() // start step 1
 
-      const tvdbSeries = await getSeriesByImdbId(imdbId)
+      const seriesList = new Collection<string, Series>()
 
-      if (tvdbSeries === undefined) {
-        throw new ProgressError(`No show found with IMDB ID \`${imdbId}\``)
+      for (const imdbId of imdbIds) {
+        const series = await getSeriesByImdbId(imdbId)
+        if (series !== undefined) seriesList.set(imdbId, series)
+      }
+
+      if (seriesList.size == 0) {
+        throw new ProgressError(`No shows found with IMDB ID(s) \`${imdbIds}\``)
       }
 
       await progress.sendNextStep() // start step 2
 
-      await checkForExistingSubscription(imdbId, channel.id)
+      let messages: string[] = []
+
+      for (const [imdbId, tvdbSeries] of seriesList) {
+        const existingSubscription = await checkForExistingSubscription(imdbId, channel.id)
+        if (existingSubscription) {
+          messages.push(`Show \`${tvdbSeries.name}\` is already linked to <#${channel.id}>`)
+          seriesList.delete(imdbId)
+        }
+      }
 
       await progress.sendNextStep() // start step 3
 
-      const show = await createNewSubscription(imdbId, tvdbSeries.id, tvdbSeries.name, channel)
+      for (const [imdbId, tvdbSeries] of seriesList) {
+        try {
+          const show = await createNewSubscription(imdbId, tvdbSeries.id, tvdbSeries.name, channel)
+          await updateEpisodes(show.imdbId, show.tvdbId)
+          messages.push(`Linked show \`${tvdbSeries.name}\` (${imdbId})`)
+          console.info(`Added show ${tvdbSeries.name} (${imdbId})`)
+        } catch (error) {
+          messages.push(`Failed to link show \`${tvdbSeries.name}\` (${imdbId})`)
+          console.error(error)
+        }
+      }
 
       await progress.sendNextStep() // start step 4
 
-      await updateEpisodes(show.imdbId, show.tvdbId)
       await scheduleAiringMessages(app)
 
-      console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-      return await progress.sendNextStep(`Linked show \`${tvdbSeries.name}\` to <#${channel.id}>`)
+      return await progress.sendNextStep(`Linked show(s) to <#${channel.id}>:\n\n${messages.join('\n')}`)
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
@@ -110,7 +132,7 @@ export const command: CommandV2 = {
  * @param imdbId imdb id to check for
  * @param channelId discord channel id to check for
  */
-const checkForExistingSubscription = async (imdbId: string, channelId: string): Promise<void> => {
+const checkForExistingSubscription = async (imdbId: string, channelId: string): Promise<boolean> => {
   const show = await client.show.findUnique({
     where: {
       imdbId
@@ -122,18 +144,18 @@ const checkForExistingSubscription = async (imdbId: string, channelId: string): 
   })
 
   // if the show isnt in the DB then we can just return
-  if (show === null) return
+  if (show === null) return false
 
   const { name, destinations } = show
 
   // if the show is in the DB but has no destinations then we can just return
-  if (destinations.length <= 0) return
+  if (destinations.length <= 0) return false
 
   // check if the show is already linked to the channel
   const existingDestination = destinations.find(d => d.channelId === channelId)
 
-  if (existingDestination === undefined) return
+  if (existingDestination === undefined) return false
 
-  // if the show is already linked to the channel then throw an error
-  throw new ProgressError(`Show \`${name}\` is already linked to <#${channelId}>`)
+  // if the show is already linked to the channel
+  return true
 }
