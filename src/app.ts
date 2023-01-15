@@ -57,7 +57,7 @@ export class App {
 
       // run initial scheduled activities
       this.randomWatchingActivity()
-      await checkForAiringEpisodes()
+      if (process.env.UPDATE_SHOWS !== 'false') await checkForAiringEpisodes()
       scheduleAiringMessages(this)
 
       schedule.scheduleJob('lifecycle:1hour:updateBotActivity', '15 * * * *', () => {
