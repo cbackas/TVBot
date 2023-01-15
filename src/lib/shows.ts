@@ -1,11 +1,11 @@
 import { Destination, Prisma } from "@prisma/client"
 import { TextBasedChannel } from "discord.js"
 import moment from "moment-timezone"
-import { Episode } from "../../interfaces/tvdb"
-import { isThreadChannel } from "../../interfaces/discord"
-import client from "../prisma"
-import { getTimezone } from "../timezones"
-import { getSeries } from "../tvdb"
+import { Episode } from "../interfaces/tvdb"
+import { isThreadChannel } from "../interfaces/discord"
+import client from "./prisma"
+import { getTimezone } from "./timezones"
+import { getSeries } from "./tvdb"
 
 /**
  * Get a moment airdate with the specified date and time

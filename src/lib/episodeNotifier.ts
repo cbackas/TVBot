@@ -3,7 +3,7 @@ import { AnyThreadChannel, Channel, ChannelType, Client, Collection, TextChannel
 import moment from "moment-timezone"
 import schedule from 'node-schedule'
 import { App } from "../app"
-import { markMessageSent } from "./database/shows"
+import { markMessageSent } from "./shows"
 import client from "./prisma"
 import { SettingsManager } from "./settingsManager"
 import { addLeadingZeros, toRanges } from "./util"

@@ -3,7 +3,7 @@ import schedule from 'node-schedule'
 import { ActivityType, ChannelType, Client, Events, GatewayIntentBits } from 'discord.js'
 import { scheduleAiringMessages } from './lib/episodeNotifier'
 import { CommandManager } from './lib/commandManager'
-import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions } from './lib/database/shows'
+import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions } from './lib/shows'
 import { SettingsManager } from './lib/settingsManager'
 import { sendMorningSummary } from './lib/morningSummary'
 

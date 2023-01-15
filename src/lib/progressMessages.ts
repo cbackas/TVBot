@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Collection, Interaction } from "discord.js"
+import { ChatInputCommandInteraction, Collection } from "discord.js"
 
 type Step = {
   status: typeof StepStatus[keyof typeof StepStatus]
