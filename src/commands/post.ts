@@ -1,4 +1,4 @@
-import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, DiscordAPIError, PermissionFlagsBits, SlashCommandBuilder, TextBasedChannel, ThreadChannel } from 'discord.js'
+import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, TextBasedChannel, ThreadChannel } from 'discord.js'
 import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
@@ -9,6 +9,11 @@ import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
 import { isForumChannel } from '../interfaces/discord'
+
+type SeriesWrapper = {
+  series: Series
+  post?: ThreadChannel
+}
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -29,11 +34,11 @@ export const command: CommandV2 = {
   },
 
   async execute(app: App, interaction: ChatInputCommandInteraction) {
-    const imdbId = interaction.options.getString('imdb_id', true)
+    let imdbIds = interaction.options.getString('imdb_id', true).split(',')
     const forumInput = interaction.options.getChannel('forum', false)
 
     const progress = new ProgressMessageBuilder(interaction)
-      .addStep(`Checking for existing forum posts with ID \`${imdbId}\``)
+      .addStep(`Checking for existing forum posts with ID(s) \`${imdbIds}\``)
       .addStep(`Fetching show data`)
       .addStep('Creating forum post')
       .addStep('Saving show to DB')
@@ -46,32 +51,70 @@ export const command: CommandV2 = {
 
       await progress.sendNextStep() // start step 1
 
-      await checkForExistingPosts(interaction.client.channels, imdbId, tvForum)
+      let messages: string[] = []
+
+      for (const imdbId of imdbIds) {
+        const existingPosts = await checkForExistingPosts(imdbId, tvForum) ?? []
+        if (existingPosts.length > 0) {
+          messages.push(`A post for \`${imdbId}\` already exists `)
+          imdbIds = imdbIds.filter(id => id !== imdbId)
+        }
+      }
+
+      if (imdbIds.length == 0) {
+        throw new ProgressError(`All show(s) already have a post in <#${tvForum}>`)
+      }
 
       await progress.sendNextStep() // start step 2
 
-      const tvdbSeries = await getSeriesByImdbId(imdbId)
+      const seriesList = new Collection<string, SeriesWrapper>()
 
-      if (!tvdbSeries) {
-        throw new ProgressError(`No show found with IMDB ID ${imdbId}`)
+      for (const imdbId of imdbIds) {
+        const tvdbSeries = await getSeriesByImdbId(imdbId)
+        if (tvdbSeries) {
+          seriesList.set(imdbId, {
+            series: tvdbSeries,
+          })
+        }
+      }
+
+      if (seriesList.size == 0) {
+        throw new ProgressError(`No show found with IMDB ID(s) ${imdbIds}`)
       }
 
       await progress.sendNextStep() // start step 3
 
-      const newPost = await createForumPost(interaction.client.channels, tvdbSeries, tvForum)
+      for (const [imdbId, series] of seriesList) {
+        try {
+          const newPost = await createForumPost(interaction.client.channels, series.series, tvForum)
+          seriesList.set(imdbId, {
+            series: series.series,
+            post: newPost,
+          })
+        } catch (error) {
+          messages.push('Error creating post for ' + imdbId)
+          seriesList.delete(imdbId)
+        }
+      }
 
       await progress.sendNextStep() // start step 4
 
-      const show = await saveShowToDB(imdbId, tvdbSeries.id, tvdbSeries.name, newPost as TextBasedChannel)
+      for (const [imdbId, series] of seriesList) {
+        const { series: tvDBSeries, post } = series
+
+        if (!post) continue
+
+        const show = await saveShowToDB(imdbId, tvDBSeries.id, tvDBSeries.name, post as TextBasedChannel)
+        await updateEpisodes(show.imdbId, show.tvdbId)
+        messages.push(`Created post for \`${tvDBSeries.name}\` (${imdbId}) - <#${post.id}>`)
+        console.info(`Added show ${tvDBSeries.name} (${imdbId})`)
+      }
 
       await progress.sendNextStep() // start step 5
 
-      await updateEpisodes(show.imdbId, show.tvdbId)
       await scheduleAiringMessages(app)
 
-      console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-
-      return await progress.sendNextStep(`Created post <#${newPost.id}>`) // finish step 5
+      return await progress.sendNextStep(`Creating post(s) in <#${tvForum}>:\n\n${messages.join('\n')}`) // finish step 5
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
@@ -100,12 +143,11 @@ const getDefaultTVForumId = async (app: App) => {
 }
 
 /**
- * Checks the database for ShowDestinations with the given IMDB ID and forumId and throws a ProgressError if one is found
- * @param channels discordjs ChannelManager to fetch channels from
+ * Checks the database for ShowDestinations with the given IMDB ID and forumId and returns them if they exist
  * @param imdbId imdb id to search for
  * @param tvForum id of the discord forum to check for existing posts 
  */
-const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, tvForum: string) => {
+const checkForExistingPosts = async (imdbId: string, tvForum: string) => {
   const show = await client.show.findFirst({
     where: {
       imdbId,
@@ -122,13 +164,11 @@ const checkForExistingPosts = async (channels: ChannelManager, imdbId: string, t
   })
 
   // if the show isnt in the DB then we can just return
-  if (show === null) return
+  if (show === null) return undefined
   // if the show is in the DB but has no destinations then we can just return
-  if (show.destinations.length === 0) return
+  if (show.destinations.length === 0) return undefined
 
-  const channelId = show.destinations.find(d => d.forumId === tvForum)?.channelId
-
-  throw new ProgressError(`A post for \`${show.name}\` already exists in the target forum: <#${channelId}>`)
+  return show.destinations
 }
 
 /**
