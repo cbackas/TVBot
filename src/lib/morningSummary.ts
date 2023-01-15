@@ -21,7 +21,7 @@ export async function sendMorningSummary(settings: Settings, c: Client) {
 
   const messages = payloadCollection
     .sort((p1, p2) => {
-      return p1.airDate.getUTCMilliseconds() - p2.airDate.getUTCMilliseconds()
+      return moment.utc(p1.airDate).unix() - moment.utc(p2.airDate).unix()
     })
     .map((payload) => {
       const seasonNumber = addLeadingZeros(payload.season, 2)
