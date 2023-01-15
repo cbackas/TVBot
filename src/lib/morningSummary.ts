@@ -19,11 +19,15 @@ export async function sendMorningSummary(settings: Settings, c: Client) {
 
   const payloadCollection = showsWithEpisodes.reduce(reduceEpisodes, new Collection<string, NotificationPayload>())
 
-  const messages = payloadCollection.map((payload) => {
-    const seasonNumber = addLeadingZeros(payload.season, 2)
-    const episodeNumbers = toRanges(payload.episodeNumbers)
-    return `**${payload.showName}** S${seasonNumber}E${episodeNumbers} - <t:${moment.utc(payload.airDate).unix()}:R>`
-  })
+  const messages = payloadCollection
+    .sort((p1, p2) => {
+      return p1.airDate.getUTCMilliseconds() - p2.airDate.getUTCMilliseconds()
+    })
+    .map((payload) => {
+      const seasonNumber = addLeadingZeros(payload.season, 2)
+      const episodeNumbers = toRanges(payload.episodeNumbers)
+      return `**${payload.showName}** S${seasonNumber}E${episodeNumbers} - <t:${moment.utc(payload.airDate).unix()}:R>`
+    })
 
   for (const dest of settings.morningSummaryDestinations) {
     const channel = await c.channels.fetch(dest.channelId)
