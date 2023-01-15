@@ -159,7 +159,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
     await markMessageSent(showId, season, episodeNumbers)
   })
 
-  console.info(`Scheduled Job: ${key}(${showName}) at ${newJob.nextInvocation()}} `)
+  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation()} `)
 }
 
 /**
