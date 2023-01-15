@@ -46,7 +46,7 @@ export const command: CommandV2 = {
     const subCommand = interaction.options.getSubcommand()
     if (!subCommand) return await interaction.editReply('Invalid subcommand')
 
-    const progress = new ProgressMessageBuilder()
+    const progress = new ProgressMessageBuilder(interaction)
       .addStep('Check for existing show subscription')
       .addStep(`Searching for show with IMDB ID \`${imdbId}\``)
       .addStep('Linking show to channel in database')
@@ -69,15 +69,8 @@ export const command: CommandV2 = {
       return await interaction.editReply('Invalid channel')
     }
 
-    /**
-     * Wrapper function that updates the ProgressMessage object and sends it to the user
-     * @param message optional message to append to the progress message
-     * @returns the sent discord message
-     */
-    const nextStep = async (message?: string) => await interaction.editReply(progress.nextStep() + message ?? '')
-
     try {
-      await nextStep() // start step 1
+      await progress.sendNextStep() // start step 1
 
       const tvdbSeries = await getSeriesByImdbId(imdbId)
 
@@ -85,21 +78,21 @@ export const command: CommandV2 = {
         throw new ProgressError(`No show found with IMDB ID \`${imdbId}\``)
       }
 
-      await nextStep() // start step 2
+      await progress.sendNextStep() // start step 2
 
       await checkForExistingSubscription(imdbId, channel.id)
 
-      await nextStep() // start step 3
+      await progress.sendNextStep() // start step 3
 
       const show = await createNewSubscription(imdbId, tvdbSeries.id, tvdbSeries.name, channel)
 
-      await nextStep() // start step 4
+      await progress.sendNextStep() // start step 4
 
       await updateEpisodes(show.imdbId, show.tvdbId)
       await scheduleAiringMessages(app)
 
       console.log(`Added show ${tvdbSeries.name} (${imdbId})`)
-      return await nextStep(`Linked show \`${tvdbSeries.name}\` to <#${channel.id}>`)
+      return await progress.sendNextStep(`Linked show \`${tvdbSeries.name}\` to <#${channel.id}>`)
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
