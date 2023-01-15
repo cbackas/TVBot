@@ -1,4 +1,4 @@
-import { Collection, Interaction, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes, SlashCommandBuilder } from "discord.js"
+import { AnySelectMenuInteraction, Collection, Interaction, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes, SlashCommandBuilder } from "discord.js"
 import { App } from "../app"
 import { CommandV2 } from "../interfaces/command"
 
@@ -10,6 +10,7 @@ type Getter<TInput> = { command: TInput }
 const commandModules: Getter<CommandV2>[] = [
   require('../commands/post'),
   require('../commands/link'),
+  require('../commands/unlink'),
   require('../commands/setting')
 ]
 
@@ -62,6 +63,22 @@ export class CommandManager {
    * @param interaction discord interaction
    */
   public interactionHandler = async (interaction: Interaction) => {
+    if (interaction.isAnySelectMenu()) {
+      const command = this.commands.find(c => c.selectMenuIds?.includes(interaction.customId))
+      if (command !== undefined) {
+        await interaction.deferUpdate()
+
+        try {
+          command.execute(this.app, interaction as AnySelectMenuInteraction)
+        } catch (error) {
+          console.error(error)
+          await interaction.editReply('There was an error while executing this command!')
+        }
+
+        return
+      }
+    }
+
     if (!interaction.isChatInputCommand()) return
 
     const { commandName } = interaction
@@ -119,4 +136,3 @@ const buildSlashCommand = (slashCommand: CommandV2['slashCommand']): SlashComman
 
   return builtCommand
 }
-
