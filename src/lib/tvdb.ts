@@ -38,7 +38,7 @@ export const getSeriesByImdbId = async (imdbId: string): Promise<Series | undefi
   const series = data?.series
   if (!data || !series) return undefined
 
-  return series
+  return await getSeries(series.id)
 }
 
 export const getSeries = async (tvdbId: number): Promise<Series> => {
