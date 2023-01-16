@@ -1,7 +1,7 @@
 import { Destination, Prisma } from "@prisma/client"
 import { TextBasedChannel } from "discord.js"
 import moment from "moment-timezone"
-import { Episode } from "../interfaces/tvdb"
+import { Episode, Series } from "../interfaces/tvdb"
 import { isThreadChannel } from "../interfaces/discord"
 import client from "./prisma"
 import { getTimezone } from "./timezones"
@@ -26,9 +26,13 @@ const getAirDate = (dateStr: string, timeStr: string | null, timezone: string) =
  * Fetch new episodes for a show and save them in the DB
  * @param imdbId imdbid of the show to update
  * @param tvdbId tvdbId of the show to update
+ * @param providedSeries optional series data to use instead of fetching it
  */
-export async function updateEpisodes(imdbId: string, tvdbId: number): Promise<void> {
-  const series = await getSeries(tvdbId)
+export async function updateEpisodes(imdbId: string, tvdbId: number, providedSeries?: Series): Promise<void> {
+  // if the caller already has series data for whatever reason and provided it, just use that
+  let series: Series = providedSeries ?? (await getSeries(tvdbId))
+
+  // const series = await getSeries(tvdbId)
   const timezone = getTimezone(series.latestNetwork.country)
 
   // filter out episodes that have already aired

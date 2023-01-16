@@ -105,7 +105,7 @@ export const command: CommandV2 = {
         if (!post) continue
 
         const show = await saveShowToDB(imdbId, tvDBSeries.id, tvDBSeries.name, post as TextBasedChannel)
-        await updateEpisodes(show.imdbId, show.tvdbId)
+        await updateEpisodes(show.imdbId, show.tvdbId, series.series)
         messages.push(`Created post for \`${tvDBSeries.name}\` (${imdbId}) - <#${post.id}>`)
         console.info(`Added show ${tvDBSeries.name} (${imdbId})`)
       }
