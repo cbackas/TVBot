@@ -1,4 +1,4 @@
-import { CacheType, ChannelType, ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
+import { ChannelType, ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
 import client from '../lib/prisma'
 import { CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
@@ -41,7 +41,7 @@ export const command: CommandV2 = {
         .addStringOption(imdbOption)
     ]
   },
-  async execute(app: App, interaction: ChatInputCommandInteraction<CacheType>) {
+  async execute(app: App, interaction: ChatInputCommandInteraction) {
     const imdbIds = interaction.options.getString('imdb_id', true).split(',')
 
     const subCommand = interaction.options.getSubcommand()
