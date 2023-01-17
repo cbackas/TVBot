@@ -1,4 +1,4 @@
-import { Destination, Show } from "@prisma/client"
+import { Destination } from "@prisma/client"
 import { APIEmbed, APIEmbedField } from "discord.js"
 import { Series } from "../interfaces/tvdb"
 
