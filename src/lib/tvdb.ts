@@ -41,10 +41,10 @@ export const getSeriesByImdbId = async (imdbId: string): Promise<Series | undefi
   return await getSeries(series.id)
 }
 
-export const getSeries = async (tvdbId: number): Promise<Series> => {
+export const getSeries = async (tvdbId: number): Promise<Series | undefined> => {
   const options = await axiosOptions()
 
-  const series = await axios.get<RootSeries>(`/series/${tvdbId}/extended`, {
+  const response = await axios.get<RootSeries>(`/series/${tvdbId}/extended`, {
     ...options,
     headers: options.headers,
     params: {
@@ -53,5 +53,8 @@ export const getSeries = async (tvdbId: number): Promise<Series> => {
     }
   })
 
-  return series.data.data
+  const series = response.data?.data
+  if (!series) return undefined
+
+  return series
 }

@@ -30,20 +30,26 @@ const getAirDate = (dateStr: string, timeStr: string | null, timezone: string) =
  */
 export async function updateEpisodes(imdbId: string, tvdbId: number, providedSeries?: Series): Promise<void> {
   // if the caller already has series data for whatever reason and provided it, just use that
-  let series: Series = providedSeries ?? (await getSeries(tvdbId))
+  let series: Series | undefined = providedSeries ?? (await getSeries(tvdbId))
+
+  // if we still dont have series data, throw an error
+  if (!series) {
+    throw new Error(`Could not fetch series data for ${imdbId}`)
+  }
 
   // const series = await getSeries(tvdbId)
   const timezone = getTimezone(series.latestNetwork.country)
+  const airsTime = series.airsTime
 
   // filter out episodes that have already aired
   // map to the episode list of objects we want to store
   const upcomingEpisodes = series.episodes
     .filter((e: Episode) => {
       if (e.aired === null) return false
-      return getAirDate(e.aired, series.airsTime, timezone).toDate() > new Date()
+      return getAirDate(e.aired, airsTime, timezone).toDate() > new Date()
     })
     .map((e) => {
-      const airDate = getAirDate(e.aired, series.airsTime, timezone)
+      const airDate = getAirDate(e.aired, airsTime, timezone)
       const airDateUTC = airDate.utc().toDate()
       return Prisma.validator<Prisma.ShowCreateInput['episodes']>()({
         season: e.seasonNumber,
