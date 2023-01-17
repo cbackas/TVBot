@@ -9,6 +9,7 @@ import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
 import { isForumChannel } from '../interfaces/discord'
+import { buildShowEmbed } from '../lib/messages'
 
 type SeriesWrapper = {
   series: Series
@@ -92,9 +93,13 @@ export const command: CommandV2 = {
             post: newPost,
           })
         } catch (error) {
-          messages.push('Error creating post for ' + imdbId)
+          messages.push(`Error creating post for \`${imdbId}\``)
           seriesList.delete(imdbId)
         }
+      }
+
+      if (seriesList.size == 0) {
+        throw new ProgressError(`Error creating posts for \`${imdbIds}\``)
       }
 
       await progress.sendNextStep() // start step 4
@@ -105,7 +110,13 @@ export const command: CommandV2 = {
         if (!post) continue
 
         const show = await saveShowToDB(imdbId, tvDBSeries.id, tvDBSeries.name, post as TextBasedChannel)
+
+        await post.send({
+          embeds: [await buildShowEmbed(imdbId, tvDBSeries, show.destinations)],
+        })
+
         await updateEpisodes(show.imdbId, show.tvdbId, series.series)
+
         messages.push(`Created post for \`${tvDBSeries.name}\` (${imdbId}) - <#${post.id}>`)
         console.info(`Added show ${tvDBSeries.name} (${imdbId})`)
       }

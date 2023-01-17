@@ -8,6 +8,7 @@ import { createNewSubscription, updateEpisodes } from '../lib/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
+import { buildShowEmbed } from '../lib/messages'
 
 /**
  * Standardized slash command option for getting IMDB ID
@@ -102,6 +103,12 @@ export const command: CommandV2 = {
         try {
           const show = await createNewSubscription(imdbId, tvdbSeries.id, tvdbSeries.name, channel)
           await updateEpisodes(show.imdbId, show.tvdbId, tvdbSeries)
+
+          await channel.send({
+            content: `Linked \`${tvdbSeries.name}\` to <#${channel.id}>`,
+            embeds: [await buildShowEmbed(imdbId, tvdbSeries, show.destinations)]
+          })
+
           messages.push(`Linked show \`${tvdbSeries.name}\` (${imdbId})`)
           console.info(`Added show ${tvdbSeries.name} (${imdbId})`)
         } catch (error) {
