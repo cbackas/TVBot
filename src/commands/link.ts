@@ -9,6 +9,7 @@ import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
 import { buildShowEmbed } from '../lib/messages'
+import parseUrl from 'parse-url'
 
 /**
  * Standardized slash command option for getting IMDB ID
@@ -43,7 +44,22 @@ export const command: CommandV2 = {
     ]
   },
   async execute(app: App, interaction: ChatInputCommandInteraction) {
-    const imdbIds = interaction.options.getString('imdb_id', true).split(',')
+    const imdbIds = interaction.options
+      .getString('imdb_id', true)
+      .split(',')
+      // filter out invalid imdb ids and handle imdb urls
+      .reduce((acc, id) => {
+        if (id.startsWith('tt')) return [...acc, id]
+
+        try {
+          const parsedUrl = parseUrl(id, true)
+          if (parsedUrl.resource === 'imdb.com' && parsedUrl.pathname.startsWith('/title/')) {
+            return [...acc, parsedUrl.pathname.split('/title/')[1]]
+          }
+        } catch (e) { }
+
+        return acc
+      }, new Array<string>)
 
     const subCommand = interaction.options.getSubcommand()
     if (!subCommand) return await interaction.editReply('Invalid subcommand')

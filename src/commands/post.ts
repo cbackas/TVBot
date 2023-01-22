@@ -10,6 +10,7 @@ import { ProgressError } from '../interfaces/error'
 import { Series } from '../interfaces/tvdb'
 import { isForumChannel } from '../interfaces/discord'
 import { buildShowEmbed } from '../lib/messages'
+import parseUrl from 'parse-url'
 
 type SeriesWrapper = {
   series: Series
@@ -35,7 +36,23 @@ export const command: CommandV2 = {
   },
 
   async execute(app: App, interaction: ChatInputCommandInteraction) {
-    let imdbIds = interaction.options.getString('imdb_id', true).split(',')
+    let imdbIds = interaction.options
+      .getString('imdb_id', true)
+      .split(',')
+      // filter out invalid imdb ids and handle imdb urls
+      .reduce((acc, id) => {
+        if (id.startsWith('tt')) return [...acc, id]
+
+        try {
+          const parsedUrl = parseUrl(id, true)
+          if (parsedUrl.resource === 'imdb.com' && parsedUrl.pathname.startsWith('/title/')) {
+            return [...acc, parsedUrl.pathname.split('/title/')[1]]
+          }
+        } catch (e) { }
+
+        return acc
+      }, new Array<string>)
+
     const forumInput = interaction.options.getChannel('forum', false)
 
     const progress = new ProgressMessageBuilder(interaction)
