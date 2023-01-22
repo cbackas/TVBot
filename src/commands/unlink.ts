@@ -9,16 +9,16 @@ export const command: CommandV2 = {
   slashCommand: {
     main: new SlashCommandBuilder()
       .setName('unlink')
-      .setDescription('Unlink a show to a channel for notifications.')
+      .setDescription('Unlink shows from a channel for notifications.')
       .setDMPermission(false)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()
         .setName('here')
-        .setDescription('Unlink a show to the current channel for notifications.'),
+        .setDescription('Unlink shows from the current channel for notifications.'),
       new SlashCommandSubcommandBuilder()
         .setName('channel')
-        .setDescription('Unlink a show to a channel for notifications.')
+        .setDescription('Unlink shows from a channel for notifications.')
         .addChannelOption(option => option.setName('channel')
           .setDescription('The channel to unlink from announcements')
           .addChannelTypes(ChannelType.GuildText)
@@ -29,25 +29,30 @@ export const command: CommandV2 = {
   async execute(app: App, interaction: ChatInputCommandInteraction | AnySelectMenuInteraction) {
     // handle menu interactions
     if (interaction.isAnySelectMenu()) {
-      await client.show.updateMany({
+      const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
+
+      if (channelId === undefined) return await interaction.reply('Failed to find channel')
+
+      const values = interaction.values
+
+      const s = await client.show.updateMany({
         where: {
           imdbId: {
-            in: interaction.values
+            in: values
           }
         },
         data: {
           destinations: {
             deleteMany: {
               where: {
-                channelId: interaction.channelId
+                channelId
               }
             }
           }
         }
       })
 
-      const values = interaction.values
-      return await interaction.editReply({ content: `Unlinked ${values.length} shows from <#${interaction.channelId}>`, components: [] })
+      return await interaction.editReply({ content: `Unlinked ${s.count} shows from <#${channelId}>`, components: [] })
     }
 
     const subCommand = interaction.options.getSubcommand()
@@ -87,8 +92,7 @@ export const command: CommandV2 = {
         }
       })
 
-      if (showsInChannel === null) return await interaction.editReply('This channel has no shows linked to it.')
-
+      if (showsInChannel === null || showsInChannel.length === 0) return await interaction.editReply('This channel has no shows linked to it.')
 
       const row = new ActionRowBuilder<StringSelectMenuBuilder>()
         .addComponents(
@@ -102,7 +106,7 @@ export const command: CommandV2 = {
                 label: s.name,
                 value: s.imdbId
               }
-            }))
+            })),
         )
 
       await interaction.editReply({ content: `Select the shows that you'd like to unlink from <#${channel?.id}>`, components: [row] })
