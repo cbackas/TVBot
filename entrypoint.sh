@@ -2,7 +2,7 @@
 
 set -e
 # migrate the database and erorr if it fails
-npx prisma db push && npx prisma generate
+npx prisma db push
 set +e
 
 # runs 'node bundle.mjs' wrapped in pm2
