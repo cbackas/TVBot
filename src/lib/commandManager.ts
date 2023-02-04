@@ -12,6 +12,7 @@ const commandModules: Getter<CommandV2>[] = [
   require('../commands/link'),
   require('../commands/unlink'),
   require('../commands/list'),
+  require('../commands/search'),
   require('../commands/setting')
 ]
 
@@ -67,7 +68,7 @@ export class CommandManager {
     if (interaction.isChatInputCommand()) return await this.commandInteractionHandler(interaction)
     if (interaction.isAnySelectMenu()) return await this.selectMenuInteractionHandler(interaction)
     if (interaction.isAutocomplete()) return await this.autocompleteInteractionHandler(interaction)
-        }
+  }
 
   private commandInteractionHandler = async (interaction: ChatInputCommandInteraction) => {
     const command = this.commands.get(interaction.commandName)
