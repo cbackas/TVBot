@@ -5,6 +5,7 @@ import { App } from '../app'
 import { getSeriesByImdbId, getSeriesByName } from '../lib/tvdb'
 import { buildShowEmbed } from '../lib/messages'
 import { Prisma } from '@prisma/client'
+import { showSearchAutocomplete } from '../lib/autocomplete'
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -53,42 +54,6 @@ export const command: CommandV2 = {
     return await interaction.editReply({ embeds: [await buildShowEmbed(imdbId, series, [])] })
   },
   async autocomplete(app: App, interaction: AutocompleteInteraction) {
-    const focusedValue = interaction.options.getFocused()
-
-    if (focusedValue === undefined) return
-
-    const where: Prisma.ShowWhereInput = focusedValue.toLocaleLowerCase().startsWith('tt') ?
-      {
-        imdbId: {
-          startsWith: focusedValue,
-          mode: 'insensitive'
-        }
-      }
-      :
-      {
-        name: {
-          startsWith: focusedValue,
-          mode: 'insensitive'
-        }
-      }
-
-    const data = await client.show.findMany({
-      where,
-      orderBy: {
-        name: 'asc'
-      },
-      select: {
-        name: true,
-        imdbId: true
-      },
-      take: 25
-    })
-
-    const choices = data.map((item): ApplicationCommandOptionChoiceData<string | number> => {
-      const { name, imdbId } = item
-      return ({ name: `${name} - (${name})`, value: imdbId })
-    })
-
-    await interaction.respond(choices)
+    await showSearchAutocomplete(interaction)
   }
 }
