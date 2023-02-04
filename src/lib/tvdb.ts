@@ -18,7 +18,6 @@ const getToken = async (): Promise<string> => {
   return response.data.data.token
 }
 
-
 const axiosOptions = async (): Promise<AxiosRequestConfig<any>> => {
   const token = await getToken()
   return {
