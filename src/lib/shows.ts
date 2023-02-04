@@ -1,11 +1,11 @@
 import { Destination, Prisma } from "@prisma/client"
 import { TextBasedChannel } from "discord.js"
 import moment from "moment-timezone"
-import { Episode, Series } from "../interfaces/tvdb"
 import { isThreadChannel } from "../interfaces/discord"
 import client from "./prisma"
 import { getTimezone } from "./timezones"
 import { getSeries } from "./tvdb"
+import { EpisodeBaseRecord, SeriesExtendedRecord } from "../interfaces/tvdb.generated"
 
 /**
  * Get a moment airdate with the specified date and time
@@ -28,9 +28,9 @@ const getAirDate = (dateStr: string, timeStr: string | null, timezone: string) =
  * @param tvdbId tvdbId of the show to update
  * @param providedSeries optional series data to use instead of fetching it
  */
-export async function updateEpisodes(imdbId: string, tvdbId: number, providedSeries?: Series): Promise<void> {
+export async function updateEpisodes(imdbId: string, tvdbId: number, providedSeries?: SeriesExtendedRecord): Promise<void> {
   // if the caller already has series data for whatever reason and provided it, just use that
-  let series: Series | undefined = providedSeries ?? (await getSeries(tvdbId))
+  let series: SeriesExtendedRecord | undefined = providedSeries ?? (await getSeries(tvdbId))
 
   // if we still dont have series data, throw an error
   if (!series) {
@@ -44,12 +44,12 @@ export async function updateEpisodes(imdbId: string, tvdbId: number, providedSer
   // filter out episodes that have already aired
   // map to the episode list of objects we want to store
   const upcomingEpisodes = series.episodes
-    .filter((e: Episode) => {
-      if (e.aired === null) return false
+    .filter((e: EpisodeBaseRecord) => {
+      if (e.aired == null) return false
       return getAirDate(e.aired, airsTime, timezone).toDate() > new Date()
     })
     .map((e) => {
-      const airDate = getAirDate(e.aired, airsTime, timezone)
+      const airDate = getAirDate(e.aired!, airsTime, timezone)
       const airDateUTC = airDate.utc().toDate()
       return Prisma.validator<Prisma.ShowCreateInput['episodes']>()({
         season: e.seasonNumber,

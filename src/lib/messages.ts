@@ -1,8 +1,8 @@
 import { Destination } from "@prisma/client"
 import { APIEmbed, APIEmbedField } from "discord.js"
-import { Series } from "../interfaces/tvdb"
+import { SeriesExtendedRecord } from "../interfaces/tvdb.generated"
 
-export async function buildShowEmbed(imdbId: string, tvdbSeries: Series, destinations: Destination[] = []): Promise<APIEmbed> {
+export async function buildShowEmbed(imdbId: string, tvdbSeries: SeriesExtendedRecord, destinations: Destination[] = []): Promise<APIEmbed> {
   // put together some basic data fields
   const fields: APIEmbedField[] = [
     {
@@ -45,7 +45,7 @@ export async function buildShowEmbed(imdbId: string, tvdbSeries: Series, destina
 
   // build and return the final embed object
   return {
-    title: tvdbSeries.name.includes(`(${tvdbSeries.year})`) ? tvdbSeries.name : `${tvdbSeries.name} (${tvdbSeries.year})`,
+    title: tvdbSeries.name,
     url: `https://www.imdb.com/title/${imdbId}`,
     thumbnail: {
       url: tvdbSeries.image,
@@ -59,7 +59,7 @@ export async function buildShowEmbed(imdbId: string, tvdbSeries: Series, destina
   }
 }
 
-function getLinks(remoteIds: Series['remoteIds']) {
+function getLinks(remoteIds: SeriesExtendedRecord['remoteIds']) {
   const links: string[] = []
 
   for (const remote of remoteIds) {

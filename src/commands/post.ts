@@ -7,13 +7,13 @@ import { getSeriesByImdbId } from '../lib/tvdb'
 import { createNewSubscription, updateEpisodes } from '../lib/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
-import { Series } from '../interfaces/tvdb'
 import { isForumChannel } from '../interfaces/discord'
 import { buildShowEmbed } from '../lib/messages'
 import parseUrl from 'parse-url'
+import { SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 type SeriesWrapper = {
-  series: Series
+  series: SeriesExtendedRecord
   post?: ThreadChannel
 }
 
@@ -206,7 +206,7 @@ const checkForExistingPosts = async (imdbId: string, tvForum: string) => {
  * @param tvForumId discord forum to create a post in
  * @returns the created forum thread
  */
-const createForumPost = async (channels: ChannelManager, tvdbSeries: Series, tvForumId: string): Promise<ThreadChannel<boolean>> => {
+const createForumPost = async (channels: ChannelManager, tvdbSeries: SeriesExtendedRecord, tvForumId: string): Promise<ThreadChannel<boolean>> => {
   const forumChannel = await channels.fetch(tvForumId)
 
   if (forumChannel == null || !isForumChannel(forumChannel)) {

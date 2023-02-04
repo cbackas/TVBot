@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios"
-import { RootSearchRemoteID, RootSeries, Series } from "../interfaces/tvdb"
+import { SearchByRemoteIdResult, SearchResult, SeriesExtendedRecord } from "../interfaces/tvdb.generated"
 
 if (process.env.TVDB_API_KEY === undefined) throw new Error('TVDB_API_KEY is not defined')
 if (process.env.TVDB_USER_PIN === undefined) throw new Error('TVDB_USER_PIN is not defined')
@@ -29,22 +29,26 @@ const axiosOptions = async (): Promise<AxiosRequestConfig<any>> => {
   }
 }
 
-export const getSeriesByImdbId = async (imdbId: string): Promise<Series | undefined> => {
+export const getSeriesByImdbId = async (imdbId: string): Promise<SeriesExtendedRecord | undefined> => {
   const options = await axiosOptions()
 
-  const response = await axios.get<RootSearchRemoteID>(`/search/remoteid/${imdbId}`, options)
+  const response = await axios.get<{
+    data: SearchByRemoteIdResult[]
+  }>(`/search/remoteid/${imdbId}`, options)
 
   const data = response.data.data[0]
   const series = data?.series
-  if (!data || !series) return undefined
+  if (!data || !series || !series.id) return undefined
 
   return await getSeries(series.id)
 }
 
-export const getSeries = async (tvdbId: number): Promise<Series | undefined> => {
+export const getSeries = async (tvdbId: number): Promise<SeriesExtendedRecord | undefined> => {
   const options = await axiosOptions()
 
-  const response = await axios.get<RootSeries>(`/series/${tvdbId}/extended`, {
+  const response = await axios.get<{
+    data?: SeriesExtendedRecord
+  }>(`/series/${tvdbId}/extended`, {
     ...options,
     headers: options.headers,
     params: {
@@ -54,7 +58,21 @@ export const getSeries = async (tvdbId: number): Promise<Series | undefined> => 
   })
 
   const series = response.data?.data
-  if (!series) return undefined
+
+  return series
+}
+
+export const getSeriesByName = async (query: string): Promise<SeriesExtendedRecord | undefined> => {
+  const options = await axiosOptions()
+
+  const response = await axios.get<{
+    data: SearchResult[]
+  }>(`/search?type=series&limit=1&q=${query}`, options)
+
+  const searchResult = response.data?.data
+  if (!searchResult || !searchResult[0].tvdb_id) return undefined
+
+  const series = await getSeries(parseInt(searchResult[0].tvdb_id))
 
   return series
 }

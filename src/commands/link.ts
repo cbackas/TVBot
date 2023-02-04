@@ -7,9 +7,9 @@ import { getSeriesByImdbId } from '../lib/tvdb'
 import { createNewSubscription, updateEpisodes } from '../lib/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
-import { Series } from '../interfaces/tvdb'
 import { buildShowEmbed } from '../lib/messages'
 import parseUrl from 'parse-url'
+import { SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 /**
  * Standardized slash command option for getting IMDB ID
@@ -90,7 +90,7 @@ export const command: CommandV2 = {
     try {
       await progress.sendNextStep() // start step 1
 
-      const seriesList = new Collection<string, Series>()
+      const seriesList = new Collection<string, SeriesExtendedRecord>()
 
       for (const imdbId of imdbIds) {
         const series = await getSeriesByImdbId(imdbId)
