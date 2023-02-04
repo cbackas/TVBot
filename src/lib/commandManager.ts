@@ -1,4 +1,4 @@
-import { AnySelectMenuInteraction, Collection, Interaction, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes, SlashCommandBuilder } from "discord.js"
+import { AnySelectMenuInteraction, AutocompleteInteraction, ChatInputCommandInteraction, Collection, Interaction, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes, SlashCommandBuilder } from "discord.js"
 import { App } from "../app"
 import { CommandV2 } from "../interfaces/command"
 
@@ -60,31 +60,17 @@ export class CommandManager {
   }
 
   /**
-   * Handles all interactions from discord
+   * All discord interactions come through here, this function will route them to the correct handler
    * @param interaction discord interaction
    */
   public interactionHandler = async (interaction: Interaction) => {
-    if (interaction.isAnySelectMenu()) {
-      const command = this.commands.find(c => c.selectMenuIds?.includes(interaction.customId))
-      if (command !== undefined) {
-        await interaction.deferUpdate()
-
-        try {
-          command.execute(this.app, interaction as AnySelectMenuInteraction)
-        } catch (error) {
-          console.error(error)
-          await interaction.editReply('There was an error while executing this command!')
+    if (interaction.isChatInputCommand()) return await this.commandInteractionHandler(interaction)
+    if (interaction.isAnySelectMenu()) return await this.selectMenuInteractionHandler(interaction)
+    if (interaction.isAutocomplete()) return await this.autocompleteInteractionHandler(interaction)
         }
 
-        return
-      }
-    }
-
-    if (!interaction.isChatInputCommand()) return
-
-    const { commandName } = interaction
-
-    const command = this.commands.get(commandName)
+  private commandInteractionHandler = async (interaction: ChatInputCommandInteraction) => {
+    const command = this.commands.get(interaction.commandName)
     if (command === undefined) return
 
     // checks if the recieved has exactly the same subcommand and/or subcommand group as the command
@@ -104,6 +90,31 @@ export class CommandManager {
     } catch (error) {
       console.error(error)
       await interaction.editReply('There was an error while executing this command!')
+    }
+  }
+
+  private selectMenuInteractionHandler = async (interaction: AnySelectMenuInteraction) => {
+    const command = this.commands.find(c => c.selectMenuIds?.includes(interaction.customId))
+    if (command !== undefined) {
+      await interaction.deferUpdate()
+
+      try {
+        command.execute(this.app, interaction)
+      } catch (error) {
+        console.error(error)
+        await interaction.editReply('There was an error while executing this command!')
+      }
+    }
+  }
+
+  private autocompleteInteractionHandler = async (interaction: AutocompleteInteraction) => {
+    const command = this.commands.get(interaction.commandName)
+    if (command === undefined || command.autocomplete === undefined) return
+
+    try {
+      await command.autocomplete(this.app, interaction)
+    } catch (e) {
+      console.error(e)
     }
   }
 }
