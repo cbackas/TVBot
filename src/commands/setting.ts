@@ -11,7 +11,7 @@ export const command: CommandV2 = {
       .setName('setting')
       .setDescription('Configure various bot settings')
       .setDMPermission(false)
-      .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()
         .setName('tv_forum')

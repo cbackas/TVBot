@@ -13,7 +13,6 @@ export const command: CommandV2 = {
       .setName('search')
       .setDescription('Link a show to a channel for notifications.')
       .setDMPermission(false)
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
       .addStringOption(option => option.setName('query')
         .setDescription('Query to search for. Can be an IMDB ID or a show name')
         .setMinLength(1)
