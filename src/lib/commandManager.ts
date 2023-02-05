@@ -83,7 +83,7 @@ export class CommandManager {
     const hasSubgroupSubCommands = hasSubGroups || subgroups?.some((subgroup) => subgroup.subCommands.some((subcommand) => subcommand.name === interaction.options.getSubcommand()))
     if (!hasSubCommands && !hasSubGroups && !hasSubgroupSubCommands) return
 
-    console.log(`Recieved Command: ${command.slashCommand.main.name}`)
+    console.debug(`[Command Recieved] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`)
 
     await interaction.deferReply({ ephemeral: true })
 
