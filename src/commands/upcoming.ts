@@ -26,7 +26,7 @@ export const command: CommandV2 = {
           .setAutocomplete(true))
     ]
   },
-  async execute (_app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand (_app: App, interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     let s: Show | Show[] | undefined
@@ -81,7 +81,7 @@ export const command: CommandV2 = {
 
     return await interaction.editReply({ content: '', embeds: [embed] })
   },
-  async autocomplete (_app: App, interaction: AutocompleteInteraction) {
+  async executeAutoComplate (_app: App, interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   }
 }
@@ -133,7 +133,6 @@ function createEmbedFields (s: Show | Show[]): APIEmbedField[] {
         })
         // map episodes to strings
         .map(e => {
-          const airDate = moment(e.airDate)
           return `S${addLeadingZeros(e.season, 2)}E${addLeadingZeros(e.number, 2)} ${e.title} - <t:${moment.utc(e.airDate).unix()}:R>`
         })
         .join('\n')

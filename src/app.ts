@@ -4,7 +4,7 @@ import { ActivityType, ChannelType, Client, Events, GatewayIntentBits } from 'di
 import { scheduleAiringMessages } from './lib/episodeNotifier'
 import { CommandManager } from './lib/commandManager'
 import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions } from './lib/shows'
-import { SettingsManager } from './lib/settingsManager'
+import { type Settings, SettingsManager } from './lib/settingsManager'
 import { sendMorningSummary } from './lib/morningSummary'
 
 dotenv.config()
@@ -13,15 +13,15 @@ dotenv.config()
  * The main bot application
  */
 export class App {
-  private client: Client
-  private commands: CommandManager
-  private settings: SettingsManager
+  private readonly client: Client
+  private readonly commands: CommandManager
+  private readonly settings: SettingsManager
 
-  private token: string
-  private clientId: string
-  private guildId: string
+  private readonly token: string
+  private readonly clientId: string
+  private readonly guildId: string
 
-  constructor() {
+  constructor () {
     if (process.env.DISCORD_TOKEN === undefined) throw new Error('DISCORD_TOKEN is not defined')
     if (process.env.DISCORD_CLIENT_ID === undefined) throw new Error('DISCORD_CLIENT_ID is not defined')
     if (process.env.DISCORD_GUILD_ID === undefined) throw new Error('DISCORD_GUILD_ID is not defined')
@@ -35,13 +35,13 @@ export class App {
     this.commands = new CommandManager(this, this.clientId, this.token, this.guildId)
     this.settings = new SettingsManager()
 
-    this.init()
+    void this.init()
   }
 
   /**
    * Async init function for app
    */
-  private init = async (): Promise<void> => {
+  private readonly init = async (): Promise<void> => {
     await this.settings.refresh()
     await this.commands.registerCommands()
     this.startBot()
@@ -50,28 +50,28 @@ export class App {
   /**
    * Start the bot and register listeners
    */
-  private startBot = (): void => {
+  private readonly startBot = (): void => {
     this.client.on(Events.ClientReady, async () => {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
 
       // run initial scheduled activities
-      this.randomWatchingActivity()
+      void this.randomWatchingActivity()
       if (process.env.UPDATE_SHOWS !== 'false') await checkForAiringEpisodes()
-      scheduleAiringMessages(this)
+      void scheduleAiringMessages(this)
 
       schedule.scheduleJob('lifecycle:1hour:updateBotActivity', '15 * * * *', () => {
-        this.randomWatchingActivity()
+        void this.randomWatchingActivity()
       })
 
       schedule.scheduleJob('lifecycle:4hours:fetchEpisoded', '0 */4 * * *', async () => {
         await checkForAiringEpisodes()
-        scheduleAiringMessages(this)
+        void scheduleAiringMessages(this)
       })
 
       schedule.scheduleJob('lifecycle:morningSummary', '0 8 * * *', async () => {
         const settings = this.getSettings()
-        if (!settings) throw new Error('Settings not found')
+        if (settings == null) throw new Error('Settings not found')
 
         await sendMorningSummary(settings, this.client)
       })
@@ -106,16 +106,16 @@ export class App {
     void this.client.login(this.token)
   }
 
-  private randomWatchingActivity = (): void => {
-    const showList: { shows: string[] } = require('../assets/shows.json')
+  private readonly randomWatchingActivity = async (): Promise<void> => {
+    const showList: { shows: string[] } = await import('../assets/shows.json')
     const randomIndex = Math.floor(Math.random() * (showList.shows.length - 0 + 1) + 0)
     this.client.user?.setActivity(showList.shows[randomIndex], { type: ActivityType.Watching })
   }
 
-  public getClient = () => this.client
-  public getSettings = () => this.settings.fetch()
-  public getSettingsManager = () => this.settings
+  public getClient = (): Client<boolean> => this.client
+  public getSettings = (): Settings | undefined => this.settings.fetch()
+  public getSettingsManager = (): SettingsManager => this.settings
 }
 
 // make an instance of the application class
-new App()
+(() => new App())()

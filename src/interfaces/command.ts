@@ -1,18 +1,19 @@
-import { AnySelectMenuInteraction, AutocompleteInteraction, ChatInputCommandInteraction, InteractionResponse, Message, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js"
-import { App } from "../app"
+import { type AnySelectMenuInteraction, type AutocompleteInteraction, type ChatInputCommandInteraction, type InteractionResponse, type Message, type SlashCommandBuilder, type SlashCommandSubcommandBuilder, type SlashCommandSubcommandGroupBuilder, type SlashCommandSubcommandsOnlyBuilder } from 'discord.js'
+import { type App } from '../app'
 
-type ExecuteFunction = Promise<void | Message<boolean> | InteractionResponse<boolean>>
+type ExecuteFunction = void | Message<boolean> | InteractionResponse<boolean>
 
-export type CommandV2 = {
+export interface CommandV2 {
   slashCommand: {
-    main: SlashCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder
+    main: SlashCommandBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'> | SlashCommandSubcommandsOnlyBuilder
     subCommands?: SlashCommandSubcommandBuilder[]
-    subGroups?: {
+    subGroups?: Array<{
       main: SlashCommandSubcommandGroupBuilder
       subCommands: SlashCommandSubcommandBuilder[]
-    }[]
+    }>
   }
   selectMenuIds?: string[]
-  execute(app: App, interaction: ChatInputCommandInteraction | AnySelectMenuInteraction): ExecuteFunction
-  autocomplete?(app: App, interaction: AutocompleteInteraction): ExecuteFunction
+  executeCommand: (app: App, interaction: ChatInputCommandInteraction) => Promise<ExecuteFunction>
+  executeAutoComplate?: (app: App, interaction: AutocompleteInteraction) => Promise<ExecuteFunction>
+  executeSelectMenu?: (app: App, interaction: AnySelectMenuInteraction) => Promise<ExecuteFunction>
 }

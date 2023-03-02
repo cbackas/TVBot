@@ -1,11 +1,11 @@
-import { Destination, Prisma } from "@prisma/client"
-import { TextBasedChannel } from "discord.js"
-import moment from "moment-timezone"
-import { isThreadChannel } from "../interfaces/discord"
-import client from "./prisma"
-import { getTimezone } from "./timezones"
-import { getSeries } from "./tvdb"
-import { EpisodeBaseRecord, SeriesExtendedRecord } from "../interfaces/tvdb.generated"
+import { type Destination, Prisma, type Show } from '@prisma/client'
+import { type TextBasedChannel } from 'discord.js'
+import moment, { type Moment } from 'moment-timezone'
+import { isThreadChannel } from '../interfaces/discord'
+import client from './prisma'
+import { getTimezone } from './timezones'
+import { getSeries } from './tvdb'
+import { type EpisodeBaseRecord, type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 /**
  * Get a moment airdate with the specified date and time
@@ -14,11 +14,11 @@ import { EpisodeBaseRecord, SeriesExtendedRecord } from "../interfaces/tvdb.gene
  * @param timezone timezone to use for the airdate
  * @returns moment object representing the airdate
  */
-const getAirDate = (dateStr: string, timeStr: string | null, timezone: string) => {
+const getAirDate = (dateStr: string, timeStr: string | null, timezone: string): Moment => {
   try {
     return moment.tz(`${dateStr} ${timeStr !== null ? timeStr : '00:00'}`, timezone)
   } catch (error) {
-    throw new Error(`Could not parse air date`)
+    throw new Error('Could not parse air date')
   }
 }
 
@@ -28,12 +28,12 @@ const getAirDate = (dateStr: string, timeStr: string | null, timezone: string) =
  * @param tvdbId tvdbId of the show to update
  * @param providedSeries optional series data to use instead of fetching it
  */
-export async function updateEpisodes(imdbId: string, tvdbId: number, providedSeries?: SeriesExtendedRecord): Promise<void> {
+export async function updateEpisodes (imdbId: string, tvdbId: number, providedSeries?: SeriesExtendedRecord): Promise<void> {
   // if the caller already has series data for whatever reason and provided it, just use that
-  let series: SeriesExtendedRecord | undefined = providedSeries ?? (await getSeries(tvdbId))
+  const series: SeriesExtendedRecord | undefined = providedSeries ?? (await getSeries(tvdbId))
 
   // if we still dont have series data, throw an error
-  if (!series) {
+  if (series == null) {
     throw new Error(`Could not fetch series data for ${imdbId}`)
   }
 
@@ -49,7 +49,9 @@ export async function updateEpisodes(imdbId: string, tvdbId: number, providedSer
       return getAirDate(e.aired, airsTime, timezone).toDate() > new Date()
     })
     .map((e) => {
-      const airDate = getAirDate(e.aired!, airsTime, timezone)
+      if (e.aired == null) throw new Error('Episode has no air date')
+
+      const airDate = getAirDate(e.aired, airsTime, timezone)
       const airDateUTC = airDate.utc().toDate()
       return Prisma.validator<Prisma.ShowCreateInput['episodes']>()({
         season: e.seasonNumber,
@@ -62,7 +64,7 @@ export async function updateEpisodes(imdbId: string, tvdbId: number, providedSer
   // update the show with the new episodes (we can just replace all of them)
   await client.show.update({
     where: {
-      imdbId: imdbId
+      imdbId
     },
     data: {
       name: series.name,
@@ -105,7 +107,7 @@ export const checkForAiringEpisodes = async (): Promise<void> => {
  * @param seasonNumber season to mark episodes sent in
  * @param episodeNumbers array of episode numbers to mark as sent
  */
-export async function markMessageSent(imdbId: string, seasonNumber: number, episodeNumbers: number[]): Promise<void>
+export async function markMessageSent (imdbId: string, seasonNumber: number, episodeNumbers: number[]): Promise<void>
 
 /**
  * Mark episodes as sent in the DB, just to avoid sending the same message twice
@@ -113,7 +115,7 @@ export async function markMessageSent(imdbId: string, seasonNumber: number, epis
  * @param seasonNumber season to mark episodes sent in
  * @param episodeNumber episode number(s) to mark as sent
  */
-export async function markMessageSent(imdbId: string, seasonNumber: number, episodeNumber: number): Promise<void>
+export async function markMessageSent (imdbId: string, seasonNumber: number, episodeNumber: number): Promise<void>
 
 /**
  * Mark episodes as sent in the DB, just to avoid sending the same message twice
@@ -121,9 +123,9 @@ export async function markMessageSent(imdbId: string, seasonNumber: number, epis
  * @param seasonNumber season to mark episodes as sent for
  * @param episodeNumber episode number(s) to mark as sent
  */
-export async function markMessageSent(imdbId: string, seasonNumber: number, episodeNumber: number | number[]): Promise<void> {
+export async function markMessageSent (imdbId: string, seasonNumber: number, episodeNumber: number | number[]): Promise<void> {
   // handle overloaded function to turn params into an array
-  let episodeNumbers: number[] = (Array.isArray(episodeNumber) ? episodeNumber : [episodeNumber])
+  const episodeNumbers: number[] = (Array.isArray(episodeNumber) ? episodeNumber : [episodeNumber])
 
   await client.show.update({
     where: {
@@ -153,9 +155,9 @@ export async function markMessageSent(imdbId: string, seasonNumber: number, epis
  * @param tvdbSeriesId tvdb id for the show
  * @param seriesName name of the tv show
  * @param channel discord channel to send notifications to
- * @returns 
+ * @returns
  */
-export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel) => {
+export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel): Promise<Show> => {
   return await client.show.upsert({
     where: {
       imdbId
@@ -171,7 +173,7 @@ export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number
       }
     },
     create: {
-      imdbId: imdbId,
+      imdbId,
       tvdbId: tvdbSeriesId,
       name: seriesName,
       destinations: {
@@ -190,7 +192,7 @@ export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number
  * @param channelId channel to unsubscribe the show from
  * @returns the show that was unsubscribed from
  */
-export const removeSubscription = async (imdbId: string, channelId: string) => {
+export const removeSubscription = async (imdbId: string, channelId: string): Promise<Show> => {
   return await client.show.update({
     where: {
       imdbId
@@ -212,8 +214,7 @@ export const removeSubscription = async (imdbId: string, channelId: string) => {
  * @param id id to use in the where clause
  * @param idType whether to use the channel id or forum id in the where clause, defaults to channel id
  */
-export async function removeAllSubscriptions(id: string, idType: keyof Destination = 'channelId'): Promise<void> {
-
+export async function removeAllSubscriptions (id: string, idType: keyof Destination = 'channelId'): Promise<void> {
   await client.show.updateMany({
     data: {
       destinations: {
@@ -232,7 +233,7 @@ export async function removeAllSubscriptions(id: string, idType: keyof Destinati
 /**
  * removes all shows that have no destinations
  */
-export const pruneUnsubscribedShows = async () => {
+export const pruneUnsubscribedShows = async (): Promise<void> => {
   await client.show.deleteMany({
     where: {
       destinations: {

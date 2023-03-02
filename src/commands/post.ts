@@ -1,8 +1,8 @@
-import { Channel, ChannelManager, ChannelType, ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, TextBasedChannel, ThreadChannel } from 'discord.js'
+import { type Channel, type ChannelManager, ChannelType, type ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, type TextBasedChannel, type ThreadChannel } from 'discord.js'
 import client from '../lib/prisma'
-import { CommandV2 } from '../interfaces/command'
+import { type CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
-import { App } from '../app'
+import { type App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
 import { createNewSubscription, updateEpisodes } from '../lib/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
@@ -10,9 +10,10 @@ import { ProgressError } from '../interfaces/error'
 import { isForumChannel } from '../interfaces/discord'
 import { buildShowEmbed } from '../lib/messages'
 import parseUrl from 'parse-url'
-import { SeriesExtendedRecord } from '../interfaces/tvdb.generated'
+import { type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
+import { type Show, type Destination } from '@prisma/client'
 
-type SeriesWrapper = {
+interface SeriesWrapper {
   series: SeriesExtendedRecord
   post?: ThreadChannel
 }
@@ -29,13 +30,13 @@ export const command: CommandV2 = {
         .setMinLength(9)
         .setRequired(true)
       )
-      .addChannelOption(option => option.setName("forum")
+      .addChannelOption(option => option.setName('forum')
         .setDescription('Destination Discord forum for show post (defaults to value defined in `/setting tv_forum`)')
         .addChannelTypes(ChannelType.GuildForum)
         .setRequired(false))
   },
 
-  async execute(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
     let imdbIds = interaction.options
       .getString('imdb_id', true)
       .split(',')
@@ -51,13 +52,13 @@ export const command: CommandV2 = {
         } catch (e) { }
 
         return acc
-      }, new Array<string>)
+      }, new Array<string>())
 
     const forumInput = interaction.options.getChannel('forum', false)
 
     const progress = new ProgressMessageBuilder(interaction)
-      .addStep(`Checking for existing forum posts with ID(s) \`${imdbIds}\``)
-      .addStep(`Fetching show data`)
+      .addStep(`Checking for existing forum posts with ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
+      .addStep('Fetching show data')
       .addStep('Creating forum post')
       .addStep('Saving show to DB')
       .addStep('Fetching upcoming episodes')
@@ -69,7 +70,7 @@ export const command: CommandV2 = {
 
       await progress.sendNextStep() // start step 1
 
-      let messages: string[] = []
+      const messages: string[] = []
 
       for (const imdbId of imdbIds) {
         const existingPosts = await checkForExistingPosts(imdbId, tvForum) ?? []
@@ -79,7 +80,7 @@ export const command: CommandV2 = {
         }
       }
 
-      if (imdbIds.length == 0) {
+      if (imdbIds.length === 0) {
         throw new ProgressError(`All show(s) already have a post in <#${tvForum}>`)
       }
 
@@ -89,15 +90,15 @@ export const command: CommandV2 = {
 
       for (const imdbId of imdbIds) {
         const tvdbSeries = await getSeriesByImdbId(imdbId)
-        if (tvdbSeries) {
+        if (tvdbSeries != null) {
           seriesList.set(imdbId, {
-            series: tvdbSeries,
+            series: tvdbSeries
           })
         }
       }
 
-      if (seriesList.size == 0) {
-        throw new ProgressError(`No show found with IMDB ID(s) ${imdbIds}`)
+      if (seriesList.size === 0) {
+        throw new ProgressError(`No show found with IMDB ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
       }
 
       await progress.sendNextStep() // start step 3
@@ -107,7 +108,7 @@ export const command: CommandV2 = {
           const newPost = await createForumPost(interaction.client.channels, series.series, tvForum)
           seriesList.set(imdbId, {
             series: series.series,
-            post: newPost,
+            post: newPost
           })
         } catch (error) {
           messages.push(`Error creating post for \`${imdbId}\``)
@@ -115,8 +116,8 @@ export const command: CommandV2 = {
         }
       }
 
-      if (seriesList.size == 0) {
-        throw new ProgressError(`Error creating posts for \`${imdbIds}\``)
+      if (seriesList.size === 0) {
+        throw new ProgressError(`Error creating posts for ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
       }
 
       await progress.sendNextStep() // start step 4
@@ -124,12 +125,12 @@ export const command: CommandV2 = {
       for (const [imdbId, series] of seriesList) {
         const { series: tvDBSeries, post } = series
 
-        if (!post) continue
+        if (post == null) continue
 
         const show = await saveShowToDB(imdbId, tvDBSeries.id, tvDBSeries.name, post as TextBasedChannel)
 
         await post.send({
-          embeds: [await buildShowEmbed(imdbId, tvDBSeries, show.destinations)],
+          embeds: [await buildShowEmbed(imdbId, tvDBSeries, show.destinations)]
         })
 
         await updateEpisodes(show.imdbId, show.tvdbId, series.series)
@@ -160,10 +161,10 @@ export const command: CommandV2 = {
  * @param app main application object instance
  * @returns ID of the default TV forum
  */
-const getDefaultTVForumId = async (app: App) => {
+async function getDefaultTVForumId (app: App): Promise<string> {
   const forumId = app.getSettings()?.defaultForum
 
-  if (!forumId) {
+  if (forumId == null) {
     throw new ProgressError('No TV forum configured, use /settings tv_forum <channel> to set the default TV forum')
   }
 
@@ -173,9 +174,9 @@ const getDefaultTVForumId = async (app: App) => {
 /**
  * Checks the database for ShowDestinations with the given IMDB ID and forumId and returns them if they exist
  * @param imdbId imdb id to search for
- * @param tvForum id of the discord forum to check for existing posts 
+ * @param tvForum id of the discord forum to check for existing posts
  */
-const checkForExistingPosts = async (imdbId: string, tvForum: string) => {
+async function checkForExistingPosts (imdbId: string, tvForum: string): Promise<Destination[] | undefined> {
   const show = await client.show.findFirst({
     where: {
       imdbId,
@@ -206,7 +207,7 @@ const checkForExistingPosts = async (imdbId: string, tvForum: string) => {
  * @param tvForumId discord forum to create a post in
  * @returns the created forum thread
  */
-const createForumPost = async (channels: ChannelManager, tvdbSeries: SeriesExtendedRecord, tvForumId: string): Promise<ThreadChannel<boolean>> => {
+async function createForumPost (channels: ChannelManager, tvdbSeries: SeriesExtendedRecord, tvForumId: string): Promise<ThreadChannel<boolean>> {
   const forumChannel = await channels.fetch(tvForumId)
 
   if (forumChannel == null || !isForumChannel(forumChannel)) {
@@ -230,11 +231,11 @@ const createForumPost = async (channels: ChannelManager, tvdbSeries: SeriesExten
  * @param seriesName name of the show
  * @param channel channel to save as the destination
  */
-const saveShowToDB = async (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel) => {
+async function saveShowToDB (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel): Promise<Show> {
   try {
     return await createNewSubscription(imdbId, tvdbSeriesId, seriesName, channel)
   } catch (error) {
     console.error(error)
     throw new ProgressError('Something went wrong saving the show to the DB')
   }
-} 
+}

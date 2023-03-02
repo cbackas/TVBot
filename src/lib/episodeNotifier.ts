@@ -1,18 +1,18 @@
-import { Destination, Show } from "@prisma/client"
-import { AnyThreadChannel, Channel, ChannelType, Client, Collection, TextChannel } from "discord.js"
-import moment from "moment-timezone"
+import { type Show } from '@prisma/client'
+import { type AnyThreadChannel, type Channel, ChannelType, type Client, Collection, type TextChannel } from 'discord.js'
+import moment from 'moment-timezone'
 import schedule from 'node-schedule'
-import { App } from "../app"
-import { markMessageSent } from "./shows"
-import client from "./prisma"
-import { SettingsManager } from "./settingsManager"
-import { addLeadingZeros, toRanges } from "./util"
+import { type App } from '../app'
+import { markMessageSent } from './shows'
+import client from './prisma'
+import { type SettingsManager } from './settingsManager'
+import { addLeadingZeros, toRanges } from './util'
 
 const isTextChannel = (channel: Channel): channel is AnyThreadChannel<boolean> | TextChannel => {
   return channel.isTextBased() && !channel.isDMBased() && ![ChannelType.GuildAnnouncement, ChannelType.GuildVoice].includes(channel.type)
 }
 
-export type NotificationPayload = {
+export interface NotificationPayload {
   key: string
   airDate: Date
   imdbId: string
@@ -33,7 +33,7 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
           messageSent: false
         }
       }
-    },
+    }
   })
 
   // convert the shows into a collection of notification payloads
@@ -55,7 +55,7 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
  * @param show current show to process
  * @returns collection of notification payloads
  */
-export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show) => {
+export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show): Collection<string, NotificationPayload> => {
   const momentUTC = moment.utc(new Date())
 
   for (const e of show.episodes) {
@@ -96,7 +96,7 @@ export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, sho
  * @param discord client needed to send the messages
  * @param globalDestinations additional destinations to send the message to
  */
-const scheduleJob = async (payload: NotificationPayload, discord: Client, settingsManager: SettingsManager) => {
+const scheduleJob = async (payload: NotificationPayload, discord: Client, settingsManager: SettingsManager): Promise<void> => {
   const { key, airDate, imdbId: showId, showName, season, episodeNumbers } = payload
 
   // handle timezones
@@ -104,13 +104,13 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
   const airDateLocal = airDateUTC.tz(process.env.TZ ?? 'America/Chicago')
 
   const existingJob = schedule.scheduledJobs[key]
-  if (existingJob) {
+  if (existingJob != null) {
     const nextInvocation: Date = (existingJob.nextInvocation() as any).toDate()
 
     // if the next invocation is different than the air date, reschedule the job
-    if (nextInvocation.toISOString() != airDateLocal.toDate().toISOString()) {
+    if (nextInvocation.toISOString() !== airDateLocal.toDate().toISOString()) {
       const job = schedule.rescheduleJob(key, airDateLocal.toDate())
-      console.info(`Rescheduled Job: ${key} at ${job.nextInvocation()}`)
+      console.info(`Rescheduled Job: ${key} at ${job.nextInvocation().toDateString()}`)
     }
 
     // if the job already existed then dont do anything else
@@ -136,7 +136,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
     // send the message to all the channels subscribed to the show
     for (const destination of showDestinations) {
       const channel = await discord.channels.fetch(destination.channelId)
-      if (!channel) throw new Error('Channel not found')
+      if (channel == null) throw new Error('Channel not found')
 
       // send message to discord
       await sendMessage(channel, message)
@@ -149,7 +149,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
     // send messages to all the global destinations
     for (const destination of settingsManager.fetch()?.allEpisodes ?? []) {
       const channel = await discord.channels.fetch(destination.channelId)
-      if (!channel) throw new Error('Channel not found')
+      if (channel == null) throw new Error('Channel not found')
 
       // send message to discord
       await sendMessage(channel, globalMessage)
@@ -159,7 +159,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
     await markMessageSent(showId, season, episodeNumbers)
   })
 
-  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation()} `)
+  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation().toDateString()} `)
 }
 
 /**
@@ -167,7 +167,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
  * @param channel where to send the message
  * @param message what to send
  */
-const sendMessage = async (channel: Channel, message: string) => {
+const sendMessage = async (channel: Channel, message: string): Promise<void> => {
   if (!isTextChannel(channel)) throw new Error('Channel is not a text channel')
 
   // send discord message
@@ -183,7 +183,7 @@ const sendMessage = async (channel: Channel, message: string) => {
  * @param episodeNumbers episodes being announced in the message
  * @returns message to send to discord
  */
-const getEpisodeMessage = (showName: string, season: number, episodeNumbers: number[]) => {
+const getEpisodeMessage = (showName: string, season: number, episodeNumbers: number[]): string => {
   if (episodeNumbers.length <= 0) {
     throw new Error('No episodes to schedule')
   }
@@ -192,5 +192,5 @@ const getEpisodeMessage = (showName: string, season: number, episodeNumbers: num
     return `**${showName} S${addLeadingZeros(season, 2)}E${addLeadingZeros(episodeNumbers[0], 2)}** is airing now!`
   }
 
-  return `**${showName} S${addLeadingZeros(season, 2)}E${toRanges(episodeNumbers)}** is streaming somewhere now!`
+  return `**${showName} S${addLeadingZeros(season, 2)}E${toRanges(episodeNumbers).join(',')}** is streaming somewhere now!`
 }

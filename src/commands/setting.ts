@@ -1,9 +1,9 @@
-import { Channel, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js'
-import { CommandV2 } from '../interfaces/command'
+import { type Channel, ChannelType, type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, type Message } from 'discord.js'
+import { type CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
-import { App } from '../app'
-import { SettingsManager } from '../lib/settingsManager'
-import { Destination } from '@prisma/client'
+import { type App } from '../app'
+import { type SettingsManager } from '../lib/settingsManager'
+import { type Destination } from '@prisma/client'
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -66,7 +66,7 @@ export const command: CommandV2 = {
       }
     ]
   },
-  async execute(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
     const subcommandGroup = interaction.options.getSubcommandGroup()
     const channel = interaction.options.getChannel('channel', true) as Channel
@@ -77,7 +77,7 @@ export const command: CommandV2 = {
      * Handle the TV forum setting
      */
     if (subcommandGroup === null && subCommand === 'tv_forum') {
-      return await setTVForum(settingsManager, interaction, channel)
+      await setTVForum(settingsManager, interaction, channel); return
     }
 
     /**
@@ -101,8 +101,8 @@ export const command: CommandV2 = {
  * @param interaction discord command interaction
  * @param channel channel to set as the TV forum
  */
-const setTVForum = async (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction, channel: Channel) => {
-  if (channel.type != ChannelType.GuildForum) {
+async function setTVForum (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction, channel: Channel): Promise<Message<boolean> | void> {
+  if (channel.type !== ChannelType.GuildForum) {
     return await interaction.editReply('Invalid channel type')
   }
 
@@ -125,14 +125,14 @@ const setTVForum = async (settingsManager: SettingsManager, interaction: ChatInp
  * @param channel channel to add/remove from the list
  * @param mode `add` or `remove`
  */
-const updateGlobalChannels = async (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction, channel: Channel, mode: string) => {
+async function updateGlobalChannels (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction, channel: Channel, mode: string): Promise<Message<boolean>> {
   // validate the mode
   if (mode !== 'add' && mode !== 'remove') {
     return await interaction.editReply('Invalid mode')
   }
 
   // validate the channel type
-  if (channel.type != ChannelType.GuildText) {
+  if (channel.type !== ChannelType.GuildText) {
     return await interaction.editReply('Invalid channel type')
   }
 
@@ -162,9 +162,8 @@ const updateGlobalChannels = async (settingsManager: SettingsManager, interactio
  * @param interaction the chat interaction that got us here
  * @returns nothin
  */
-const updateMorningSummaryChannels = async (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction) => {
+async function updateMorningSummaryChannels (settingsManager: SettingsManager, interaction: ChatInputCommandInteraction): Promise<Message<boolean>> {
   const subCommand = interaction.options.getSubcommand() // add_channel or remove_channel
-
 
   if (subCommand !== 'add_channel' && subCommand !== 'remove_channel') {
     return await interaction.editReply('Invalid subcommand')
@@ -172,7 +171,7 @@ const updateMorningSummaryChannels = async (settingsManager: SettingsManager, in
 
   const channel = interaction.options.getChannel('channel', true) as Channel
   // validate the channel type
-  if (channel.type != ChannelType.GuildText) {
+  if (channel.type !== ChannelType.GuildText) {
     return await interaction.editReply('Invalid channel type')
   }
 

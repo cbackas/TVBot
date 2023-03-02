@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig } from "axios"
-import { SearchByRemoteIdResult, SearchResult, SeriesExtendedRecord } from "../interfaces/tvdb.generated"
+import axios, { type AxiosRequestConfig } from 'axios'
+import { type SearchByRemoteIdResult, type SearchResult, type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 if (process.env.TVDB_API_KEY === undefined) throw new Error('TVDB_API_KEY is not defined')
 if (process.env.TVDB_USER_PIN === undefined) throw new Error('TVDB_USER_PIN is not defined')
@@ -7,11 +7,11 @@ if (process.env.TVDB_USER_PIN === undefined) throw new Error('TVDB_USER_PIN is n
 let token: string | undefined
 
 const getToken = async (): Promise<string> => {
-  if (token) return token
+  if (token != null) return token
 
   const response = await axios.post('https://api4.thetvdb.com/v4/login', {
     apikey: process.env.TVDB_API_KEY,
-    pin: process.env.TVDB_USER_PIN,
+    pin: process.env.TVDB_USER_PIN
   })
 
   token = response.data.data.token
@@ -37,7 +37,7 @@ export const getSeriesByImdbId = async (imdbId: string): Promise<SeriesExtendedR
 
   const data = response.data.data[0]
   const series = data?.series
-  if (!data || !series || !series.id) return undefined
+  if (data == null || series == null || series.id == null) return undefined
 
   return await getSeries(series.id)
 }
@@ -69,7 +69,7 @@ export const getSeriesByName = async (query: string): Promise<SeriesExtendedReco
   }>(`/search?type=series&limit=1&q=${query}`, options)
 
   const searchResult = response.data?.data
-  if (!searchResult || !searchResult[0].tvdb_id) return undefined
+  if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
 
   const series = await getSeries(parseInt(searchResult[0].tvdb_id))
 

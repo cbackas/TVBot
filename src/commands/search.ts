@@ -1,10 +1,9 @@
-import { ApplicationCommandOptionChoiceData, AutocompleteInteraction, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import { type AutocompleteInteraction, type ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import client from '../lib/prisma'
-import { CommandV2 } from '../interfaces/command'
-import { App } from '../app'
+import { type CommandV2 } from '../interfaces/command'
+import { type App } from '../app'
 import { getSeriesByImdbId, getSeriesByName } from '../lib/tvdb'
 import { buildShowEmbed } from '../lib/messages'
-import { Prisma } from '@prisma/client'
 import { showSearchAutocomplete } from '../lib/autocomplete'
 
 export const command: CommandV2 = {
@@ -18,9 +17,9 @@ export const command: CommandV2 = {
         .setMinLength(1)
         .setAutocomplete(true)
         .setRequired(true)
-      ),
+      )
   },
-  async execute(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
     const query = interaction.options.getString('query', true)
 
     let imdbId = query.toLowerCase().startsWith('tt') ? query : undefined
@@ -46,13 +45,13 @@ export const command: CommandV2 = {
 
     if (series == null) return await interaction.editReply('Show not found')
 
-    imdbId = series.remoteIds.find(r => r.type == 2)?.id
+    imdbId = series.remoteIds.find(r => r.type === 2)?.id
 
     if (imdbId == null) return await interaction.editReply('Show not found')
 
     return await interaction.editReply({ embeds: [await buildShowEmbed(imdbId, series, [])] })
   },
-  async autocomplete(app: App, interaction: AutocompleteInteraction) {
+  async executeAutoComplate (app: App, interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   }
 }

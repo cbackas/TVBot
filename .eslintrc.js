@@ -11,6 +11,7 @@ module.exports = {
   },
   rules: {
     'interface-over-type-literal': 'off',
-    semi: 'error'
+    semi: 'error',
+    '@typescript-eslint/no-invalid-void-type': 'off'
   }
 }

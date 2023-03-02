@@ -1,7 +1,8 @@
-import { ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, TextBasedChannel } from 'discord.js'
+import { ChannelType, type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, type TextBasedChannel } from 'discord.js'
 import client from '../lib/prisma'
-import { CommandV2 } from '../interfaces/command'
-import { App } from '../app'
+import { type CommandV2 } from '../interfaces/command'
+import { type App } from '../app'
+import { type Show } from '@prisma/client'
 
 const subCommands = {
   ALL: 'all',
@@ -34,8 +35,7 @@ export const command: CommandV2 = {
       ]
     }]
   },
-  async execute(app: App, interaction: ChatInputCommandInteraction) {
-
+  async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
     if (interaction.options.getSubcommandGroup() !== 'shows') {
       return await interaction.editReply('Invalid subcommand group')
     }
@@ -45,12 +45,12 @@ export const command: CommandV2 = {
     let channel: TextBasedChannel | undefined
 
     // the `here` subcommand links the show to the current channel
-    if (subCommand == 'here' && interaction.channel !== null) {
+    if (subCommand === 'here' && interaction.channel !== null) {
       channel = interaction.channel
     }
 
     // the `channel` subcommand allows a user to specify a text channel
-    if (subCommand == 'channel') {
+    if (subCommand === 'channel') {
       channel = interaction.options.getChannel('channel', true) as TextBasedChannel
     }
 
@@ -65,11 +65,11 @@ export const command: CommandV2 = {
       return `**${show.name}** ${destinations}`
     }).join('\n')
 
-    await interaction.editReply(`Shows in channel ${channel.toString()}:\n\n${showMessages}`)
+    await interaction.editReply(`Shows in channel <#${channel.id}>:\n\n${showMessages}`)
   }
 }
 
-async function getShowsInChannel(channel?: TextBasedChannel) {
+async function getShowsInChannel (channel?: TextBasedChannel): Promise<Show[]> {
   if (channel === undefined) {
     return await client.show.findMany()
   }

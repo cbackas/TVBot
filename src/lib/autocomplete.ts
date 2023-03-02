@@ -1,26 +1,25 @@
-import { Prisma } from "@prisma/client"
-import { ApplicationCommandOptionChoiceData, AutocompleteInteraction } from "discord.js"
-import client from "./prisma"
+import { type Prisma } from '@prisma/client'
+import { type ApplicationCommandOptionChoiceData, type AutocompleteInteraction } from 'discord.js'
+import client from './prisma'
 
-export const showSearchAutocomplete = async (interaction: AutocompleteInteraction) => {
+export const showSearchAutocomplete = async (interaction: AutocompleteInteraction): Promise<void> => {
   const focusedValue = interaction.options.getFocused()
 
   if (focusedValue === undefined) return
 
-  const where: Prisma.ShowWhereInput = focusedValue.toLocaleLowerCase().startsWith('tt') ?
-    {
-      imdbId: {
-        startsWith: focusedValue,
-        mode: 'insensitive'
+  const where: Prisma.ShowWhereInput = focusedValue.toLocaleLowerCase().startsWith('tt')
+    ? {
+        imdbId: {
+          startsWith: focusedValue,
+          mode: 'insensitive'
+        }
       }
-    }
-    :
-    {
-      name: {
-        startsWith: focusedValue,
-        mode: 'insensitive'
+    : {
+        name: {
+          startsWith: focusedValue,
+          mode: 'insensitive'
+        }
       }
-    }
 
   const data = await client.show.findMany({
     where,

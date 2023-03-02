@@ -1,25 +1,27 @@
-import { ChannelType, ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, TextBasedChannel } from 'discord.js'
+import { ChannelType, type ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, type SlashCommandStringOption, SlashCommandSubcommandBuilder, type TextBasedChannel } from 'discord.js'
 import client from '../lib/prisma'
-import { CommandV2 } from '../interfaces/command'
+import { type CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
-import { App } from '../app'
+import { type App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
 import { createNewSubscription, updateEpisodes } from '../lib/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { buildShowEmbed } from '../lib/messages'
 import parseUrl from 'parse-url'
-import { SeriesExtendedRecord } from '../interfaces/tvdb.generated'
+import { type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 /**
  * Standardized slash command option for getting IMDB ID
  * @param option string option callback parameter
  * @returns string option with options set
  */
-const imdbOption = (option: SlashCommandStringOption) => option.setName('imdb_id')
-  .setDescription('The IMDB ID to search for')
-  .setMinLength(9)
-  .setRequired(true)
+const imdbOption = (option: SlashCommandStringOption): SlashCommandStringOption => {
+  return option.setName('imdb_id')
+    .setDescription('The IMDB ID to search for')
+    .setMinLength(9)
+    .setRequired(true)
+}
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -43,7 +45,7 @@ export const command: CommandV2 = {
         .addStringOption(imdbOption)
     ]
   },
-  async execute(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
     const imdbIds = interaction.options
       .getString('imdb_id', true)
       .split(',')
@@ -59,31 +61,31 @@ export const command: CommandV2 = {
         } catch (e) { }
 
         return acc
-      }, new Array<string>)
+      }, new Array<string>())
 
     const subCommand = interaction.options.getSubcommand()
-    if (!subCommand) return await interaction.editReply('Invalid subcommand')
+    if (subCommand === '') return await interaction.editReply('Invalid subcommand')
 
     const progress = new ProgressMessageBuilder(interaction)
       .addStep('Check for existing show subscription')
-      .addStep(`Searching for show with IMDB ID(s) \`${imdbIds}\``)
+      .addStep(`Searching for show with IMDB ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
       .addStep('Linking show to channel in database')
       .addStep('Fetching upcoming episodes')
 
     let channel: TextBasedChannel | undefined
 
     // the `here` subcommand links the show to the current channel
-    if (subCommand == 'here' && interaction.channel !== null) {
+    if (subCommand === 'here' && interaction.channel !== null) {
       channel = interaction.channel
     }
 
     // the `channel` subcommand allows a user to specify a text channel
-    if (subCommand == 'channel') {
+    if (subCommand === 'channel') {
       channel = interaction.options.getChannel('channel', true) as TextBasedChannel
     }
 
     // error if the channel didnt get set for some reason
-    if (channel === undefined) {
+    if (channel == null || channel.type === ChannelType.GuildStageVoice) {
       return await interaction.editReply('Invalid channel')
     }
 
@@ -97,13 +99,13 @@ export const command: CommandV2 = {
         if (series !== undefined) seriesList.set(imdbId, series)
       }
 
-      if (seriesList.size == 0) {
-        throw new ProgressError(`No shows found with IMDB ID(s) \`${imdbIds}\``)
+      if (seriesList.size === 0) {
+        throw new ProgressError(`No shows found with IMDB ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
       }
 
       await progress.sendNextStep() // start step 2
 
-      let messages: string[] = []
+      const messages: string[] = []
 
       for (const [imdbId, tvdbSeries] of seriesList) {
         const existingSubscription = await checkForExistingSubscription(imdbId, channel.id)
@@ -169,7 +171,7 @@ const checkForExistingSubscription = async (imdbId: string, channelId: string): 
   // if the show isnt in the DB then we can just return
   if (show === null) return false
 
-  const { name, destinations } = show
+  const { destinations } = show
 
   // if the show is in the DB but has no destinations then we can just return
   if (destinations.length <= 0) return false

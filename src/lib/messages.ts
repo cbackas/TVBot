@@ -1,8 +1,8 @@
-import { Destination } from "@prisma/client"
-import { APIEmbed, APIEmbedField } from "discord.js"
-import { SeriesExtendedRecord } from "../interfaces/tvdb.generated"
+import { type Destination } from '@prisma/client'
+import { type APIEmbed, type APIEmbedField } from 'discord.js'
+import { type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
-export async function buildShowEmbed(imdbId: string, tvdbSeries: SeriesExtendedRecord, destinations: Destination[] = []): Promise<APIEmbed> {
+export async function buildShowEmbed (imdbId: string, tvdbSeries: SeriesExtendedRecord, destinations: Destination[] = []): Promise<APIEmbed> {
   // put together some basic data fields
   const fields: APIEmbedField[] = [
     {
@@ -48,21 +48,23 @@ export async function buildShowEmbed(imdbId: string, tvdbSeries: SeriesExtendedR
     title: tvdbSeries.name,
     url: `https://www.imdb.com/title/${imdbId}`,
     thumbnail: {
-      url: tvdbSeries.image,
+      url: tvdbSeries.image
     },
     description: tvdbSeries.overview,
     fields,
     footer: {
       text: 'Powered by TVDB',
       icon_url: 'https://www.thetvdb.com/images/logo.png'
-    },
+    }
   }
 }
 
-function getLinks(remoteIds: SeriesExtendedRecord['remoteIds']) {
+function getLinks (remoteIds: SeriesExtendedRecord['remoteIds']): string[] {
   const links: string[] = []
 
   for (const remote of remoteIds) {
+    if (remote.id == null) continue
+
     if (remote.type === 2) links.push(`[IMDB](https://www.imdb.com/title/${remote.id})`)
     if (remote.type === 4) links.push(`[Official Site](${remote.id})`)
     if (remote.type === 24) links.push(`[Wikipedia](https://en.wikipedia.org/wiki/${remote.id})`)

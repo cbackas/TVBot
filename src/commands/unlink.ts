@@ -1,7 +1,7 @@
-import { ActionRowBuilder, AnySelectMenuInteraction, ChannelType, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, StringSelectMenuBuilder, TextBasedChannel } from 'discord.js'
+import { ActionRowBuilder, type AnySelectMenuInteraction, ChannelType, type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, StringSelectMenuBuilder, type TextBasedChannel } from 'discord.js'
 import client from '../lib/prisma'
-import { CommandV2 } from '../interfaces/command'
-import { App } from '../app'
+import { type CommandV2 } from '../interfaces/command'
+import { type App } from '../app'
 import { ProgressError } from '../interfaces/error'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
 
@@ -26,35 +26,7 @@ export const command: CommandV2 = {
     ]
   },
   selectMenuIds: ['unlink_shows_menu'],
-  async execute(app: App, interaction: ChatInputCommandInteraction | AnySelectMenuInteraction) {
-    // handle menu interactions
-    if (interaction.isAnySelectMenu()) {
-      const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
-
-      if (channelId === undefined) return await interaction.reply('Failed to find channel')
-
-      const values = interaction.values
-
-      const s = await client.show.updateMany({
-        where: {
-          imdbId: {
-            in: values
-          }
-        },
-        data: {
-          destinations: {
-            deleteMany: {
-              where: {
-                channelId
-              }
-            }
-          }
-        }
-      })
-
-      return await interaction.editReply({ content: `Unlinked ${s.count} shows from <#${channelId}>`, components: [] })
-    }
-
+  async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     const progress = new ProgressMessageBuilder()
@@ -64,12 +36,12 @@ export const command: CommandV2 = {
     let channel: TextBasedChannel | undefined
 
     // the `here` subcommand links the show to the current channel
-    if (subCommand == 'here' && interaction.channel !== null) {
+    if (subCommand === 'here' && interaction.channel !== null) {
       channel = interaction.channel
     }
 
     // the `channel` subcommand allows a user to specify a text channel
-    if (subCommand == 'channel') {
+    if (subCommand === 'channel') {
       channel = interaction.options.getChannel('channel', true) as TextBasedChannel
     }
 
@@ -106,11 +78,10 @@ export const command: CommandV2 = {
                 label: s.name,
                 value: s.imdbId
               }
-            })),
+            }))
         )
 
       await interaction.editReply({ content: `Select the shows that you'd like to unlink from <#${channel?.id}>`, components: [row] })
-
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
@@ -120,5 +91,31 @@ export const command: CommandV2 = {
 
       throw error
     }
+  },
+  async executeSelectMenu (app, interaction: AnySelectMenuInteraction) {
+    const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
+
+    if (channelId === undefined) return await interaction.reply('Failed to find channel')
+
+    const values = interaction.values
+
+    const s = await client.show.updateMany({
+      where: {
+        imdbId: {
+          in: values
+        }
+      },
+      data: {
+        destinations: {
+          deleteMany: {
+            where: {
+              channelId
+            }
+          }
+        }
+      }
+    })
+
+    return await interaction.editReply({ content: `Unlinked ${s.count} shows from <#${channelId}>`, components: [] })
   }
 }
