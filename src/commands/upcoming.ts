@@ -1,12 +1,12 @@
-import { APIEmbed, APIEmbedField, AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
+import { type APIEmbed, type APIEmbedField, type AutocompleteInteraction, type ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
 import client from '../lib/prisma'
-import { CommandV2 } from '../interfaces/command'
-import { App } from '../app'
+import { type CommandV2 } from '../interfaces/command'
+import { type App } from '../app'
 import { getSeriesByImdbId } from '../lib/tvdb'
 import { showSearchAutocomplete } from '../lib/autocomplete'
 import moment from 'moment'
 import { addLeadingZeros } from '../lib/util'
-import { Show } from '@prisma/client'
+import { type Show } from '@prisma/client'
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -26,7 +26,7 @@ export const command: CommandV2 = {
           .setAutocomplete(true))
     ]
   },
-  async execute(_app: App, interaction: ChatInputCommandInteraction) {
+  async execute (_app: App, interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     let s: Show | Show[] | undefined
@@ -55,7 +55,7 @@ export const command: CommandV2 = {
       const query = interaction.options.getString('query', true)
 
       // check that the query is an IMDB ID
-      let imdbId = query.toLowerCase().startsWith('tt') ? query : undefined
+      const imdbId = query.toLowerCase().startsWith('tt') ? query : undefined
       if (imdbId == null) return await interaction.editReply('Invalid query')
 
       // turn IMDB ID into a series
@@ -65,7 +65,7 @@ export const command: CommandV2 = {
       const show = await client.show.findUnique({
         where: {
           imdbId
-        },
+        }
       })
 
       if (show == null) return await interaction.editReply(`${series.name} is not linked to any channels. Use \`/link\` or \`/post\` to subscribe a channel to episode notifications.`)
@@ -81,7 +81,7 @@ export const command: CommandV2 = {
 
     return await interaction.editReply({ content: '', embeds: [embed] })
   },
-  async autocomplete(_app: App, interaction: AutocompleteInteraction) {
+  async autocomplete (_app: App, interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   }
 }
@@ -92,11 +92,11 @@ export const command: CommandV2 = {
  * @param s Show or array of shows
  * @returns Array of embed fields for shows
  */
-function createEmbedFields(s: Show | Show[]): APIEmbedField[] {
+function createEmbedFields (s: Show | Show[]): APIEmbedField[] {
   const shows = Array.isArray(s) ? s : [s]
 
   // sort the shows by the air date of the first episode
-  let showsSorted = shows.sort((a, b) => {
+  const showsSorted = shows.sort((a, b) => {
     // sort a show episodes by air date
     const aEpisodes = a.episodes.sort((a, b) => {
       const aDate = moment.utc(a.airDate)
