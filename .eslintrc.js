@@ -1,9 +1,16 @@
 module.exports = {
+  env: {
+    es2021: true,
+    node: true
+  },
   extends: 'standard-with-typescript',
   parserOptions: {
-    project: './tsconfig.json'
+    project: './tsconfig.json',
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   },
   rules: {
-    "interface-over-type-literal": false
+    'interface-over-type-literal': 'off',
+    semi: 'error'
   }
 }
