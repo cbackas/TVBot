@@ -110,7 +110,7 @@ async function scheduleJob (payload: NotificationPayload, discord: Client, setti
     // if the next invocation is different than the air date, reschedule the job
     if (nextInvocation.toISOString() !== airDateLocal.toDate().toISOString()) {
       const job = schedule.rescheduleJob(key, airDateLocal.toDate())
-      console.info(`Rescheduled Job: ${key} at ${job.nextInvocation().toDateString()}`)
+      console.info(`Rescheduled Job: ${key} at ${job.nextInvocation().toString()}`)
     }
 
     // if the job already existed then dont do anything else
@@ -159,7 +159,7 @@ async function scheduleJob (payload: NotificationPayload, discord: Client, setti
     await markMessageSent(showId, season, episodeNumbers)
   })
 
-  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation().toDateString()} `)
+  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation().toString()} `)
 }
 
 /**
