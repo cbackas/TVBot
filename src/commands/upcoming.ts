@@ -16,6 +16,9 @@ export const command: CommandV2 = {
       .setDMPermission(false),
     subCommands: [
       new SlashCommandSubcommandBuilder()
+        .setName('all')
+        .setDescription('Get upcoming episodes this week for all tracked shows'),
+      new SlashCommandSubcommandBuilder()
         .setName('here')
         .setDescription('Get upcoming episodes for this channel'),
       new SlashCommandSubcommandBuilder()

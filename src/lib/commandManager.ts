@@ -35,7 +35,7 @@ export class CommandManager {
   /**
    * Register all commands with Discord
    */
-  public async registerCommands (): Promise<void> {
+  public registerCommands = async (): Promise<void> => {
     type SlashCommandData = RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody
     const slashCommandData: SlashCommandData[] = []
 
@@ -61,17 +61,7 @@ export class CommandManager {
     }
   }
 
-  /**
-   * All discord interactions come through here, this function will route them to the correct handler
-   * @param interaction discord interaction
-   */
-  public async interactionHandler (interaction: Interaction): Promise<void> {
-    if (interaction.isChatInputCommand()) { await this.commandInteractionHandler(interaction); return }
-    if (interaction.isAnySelectMenu()) { await this.selectMenuInteractionHandler(interaction); return }
-    if (interaction.isAutocomplete()) { await this.autocompleteInteractionHandler(interaction) }
-  }
-
-  private async commandInteractionHandler (interaction: ChatInputCommandInteraction): Promise<void> {
+  public commandInteractionHandler = async (interaction: ChatInputCommandInteraction): Promise<void> => {
     const command = this.commands.get(interaction.commandName)
     if (command === undefined) return
 
@@ -95,7 +85,7 @@ export class CommandManager {
     }
   }
 
-  private async selectMenuInteractionHandler (interaction: AnySelectMenuInteraction): Promise<void> {
+  public selectMenuInteractionHandler = async (interaction: AnySelectMenuInteraction): Promise<void> => {
     const command = this.commands.find(c => c.selectMenuIds?.includes(interaction.customId))
     if (command == null || command.executeSelectMenu == null) return
 
@@ -109,7 +99,7 @@ export class CommandManager {
     }
   }
 
-  private async autocompleteInteractionHandler (interaction: AutocompleteInteraction): Promise<void> {
+  public autocompleteInteractionHandler = async (interaction: AutocompleteInteraction): Promise<void> => {
     const command = this.commands.get(interaction.commandName)
     if (command == null || command.executeAutoComplate == null) return
 
@@ -118,6 +108,16 @@ export class CommandManager {
     } catch (e) {
       console.error(e)
     }
+  }
+
+  /**
+   * All discord interactions come through here, this function will route them to the correct handler
+   * @param interaction discord interaction
+   */
+  public interactionHandler = async (interaction: Interaction): Promise<void> => {
+    if (interaction.isChatInputCommand()) { await this.commandInteractionHandler(interaction); return }
+    if (interaction.isAnySelectMenu()) { await this.selectMenuInteractionHandler(interaction); return }
+    if (interaction.isAutocomplete()) { await this.autocompleteInteractionHandler(interaction) }
   }
 }
 

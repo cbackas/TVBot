@@ -41,7 +41,7 @@ export class App {
   /**
    * Async init function for app
    */
-  private async init (): Promise<void> {
+  private readonly init = async (): Promise<void> => {
     await this.settings.refresh()
     await this.commands.registerCommands()
     this.startBot()
@@ -50,7 +50,7 @@ export class App {
   /**
    * Start the bot and register listeners
    */
-  private startBot (): void {
+  private readonly startBot = (): void => {
     this.client.on(Events.ClientReady, async () => {
       const { user } = this.client
       if (user !== null) console.log(`Logged in as ${user.tag}!`)
@@ -106,7 +106,7 @@ export class App {
     void this.client.login(this.token)
   }
 
-  private async randomWatchingActivity (): Promise<void> {
+  private readonly randomWatchingActivity = async (): Promise<void> => {
     const showList: { shows: string[] } = await import('../assets/shows.json')
     const randomIndex = Math.floor(Math.random() * (showList.shows.length - 0 + 1) + 0)
     this.client.user?.setActivity(showList.shows[randomIndex], { type: ActivityType.Watching })

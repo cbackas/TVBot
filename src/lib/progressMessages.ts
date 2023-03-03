@@ -29,7 +29,7 @@ export class ProgressMessageBuilder {
    * @param message the message to display for the step
    * @returns ProgressMessageBuilder object
    */
-  public addStep (message: string): ProgressMessageBuilder {
+  public addStep = (message: string): ProgressMessageBuilder => {
     this.totalSteps += 1
 
     this.steps.set(this.totalSteps, {
@@ -46,7 +46,7 @@ export class ProgressMessageBuilder {
    * @param status desired status
    * @returns ProgressMessageBuilder object
    */
-  setStatus (stepNumber: number, status: Step['status']): ProgressMessageBuilder {
+  setStatus = (stepNumber: number, status: Step['status']): ProgressMessageBuilder => {
     const step = this.steps.get(stepNumber)
 
     if (step === undefined) throw new Error(`Step ${stepNumber} does not exist`)
@@ -60,7 +60,7 @@ export class ProgressMessageBuilder {
    * updates the current step and returns the updated progress message
    * @returns the updated progress message
    */
-  nextStep (): string {
+  nextStep = (): string => {
     const isFirstStep = this.currentStep === 0
     if (!isFirstStep) {
       this.setStatus(this.currentStep, StepStatus.COMPLETE)
@@ -80,7 +80,7 @@ export class ProgressMessageBuilder {
    * only works if the ProgressMessageBuilder was initialized with a chat interaction
    * @returns the sent discord message
    */
-  async sendNextStep (additionalMessage?: string): Promise<Message<boolean>> {
+  sendNextStep = async (additionalMessage?: string): Promise<Message<boolean>> => {
     if (this.interaction == null) throw new Error('ProgressMessageBuilder was not initialized with an interaction')
 
     // send the message to the user
