@@ -35,7 +35,7 @@ export class CommandManager {
   /**
    * Register all commands with Discord
    */
-  public registerCommands = async (): Promise<void> => {
+  public async registerCommands (): Promise<void> {
     type SlashCommandData = RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody
     const slashCommandData: SlashCommandData[] = []
 
@@ -65,13 +65,13 @@ export class CommandManager {
    * All discord interactions come through here, this function will route them to the correct handler
    * @param interaction discord interaction
    */
-  public interactionHandler = async (interaction: Interaction): Promise<void> => {
+  public async interactionHandler (interaction: Interaction): Promise<void> {
     if (interaction.isChatInputCommand()) { await this.commandInteractionHandler(interaction); return }
     if (interaction.isAnySelectMenu()) { await this.selectMenuInteractionHandler(interaction); return }
     if (interaction.isAutocomplete()) { await this.autocompleteInteractionHandler(interaction) }
   }
 
-  private readonly commandInteractionHandler = async (interaction: ChatInputCommandInteraction): Promise<void> => {
+  private async commandInteractionHandler (interaction: ChatInputCommandInteraction): Promise<void> {
     const command = this.commands.get(interaction.commandName)
     if (command === undefined) return
 
@@ -95,7 +95,7 @@ export class CommandManager {
     }
   }
 
-  private readonly selectMenuInteractionHandler = async (interaction: AnySelectMenuInteraction): Promise<void> => {
+  private async selectMenuInteractionHandler (interaction: AnySelectMenuInteraction): Promise<void> {
     const command = this.commands.find(c => c.selectMenuIds?.includes(interaction.customId))
     if (command == null || command.executeSelectMenu == null) return
 
@@ -109,7 +109,7 @@ export class CommandManager {
     }
   }
 
-  private readonly autocompleteInteractionHandler = async (interaction: AutocompleteInteraction): Promise<void> => {
+  private async autocompleteInteractionHandler (interaction: AutocompleteInteraction): Promise<void> {
     const command = this.commands.get(interaction.commandName)
     if (command == null || command.executeAutoComplate == null) return
 
@@ -126,7 +126,7 @@ export class CommandManager {
  * @param slashCommand Custom command SlashCommand object that is used to build the discord.js SlashCommandBuilder
  * @returns regular SlashCommandBuilder
  */
-const buildSlashCommand = (slashCommand: CommandV2['slashCommand']): SlashCommandBuilder => {
+function buildSlashCommand (slashCommand: CommandV2['slashCommand']): SlashCommandBuilder {
   let builtCommand = slashCommand.main as SlashCommandBuilder
   // adds subGroups to the slash command
   const subGroups = slashCommand.subGroups

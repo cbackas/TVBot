@@ -6,7 +6,7 @@ if (process.env.TVDB_USER_PIN === undefined) throw new Error('TVDB_USER_PIN is n
 
 let token: string | undefined
 
-const getToken = async (): Promise<string> => {
+async function getToken (): Promise<string> {
   if (token != null) return token
 
   const response = await axios.post('https://api4.thetvdb.com/v4/login', {
@@ -18,7 +18,7 @@ const getToken = async (): Promise<string> => {
   return response.data.data.token
 }
 
-const axiosOptions = async (): Promise<AxiosRequestConfig<any>> => {
+async function axiosOptions (): Promise<AxiosRequestConfig<any>> {
   const token = await getToken()
   return {
     baseURL: 'https://api4.thetvdb.com/v4',
@@ -28,7 +28,7 @@ const axiosOptions = async (): Promise<AxiosRequestConfig<any>> => {
   }
 }
 
-export const getSeriesByImdbId = async (imdbId: string): Promise<SeriesExtendedRecord | undefined> => {
+export async function getSeriesByImdbId (imdbId: string): Promise<SeriesExtendedRecord | undefined> {
   const options = await axiosOptions()
 
   const response = await axios.get<{
@@ -42,7 +42,7 @@ export const getSeriesByImdbId = async (imdbId: string): Promise<SeriesExtendedR
   return await getSeries(series.id)
 }
 
-export const getSeries = async (tvdbId: number): Promise<SeriesExtendedRecord | undefined> => {
+export async function getSeries (tvdbId: number): Promise<SeriesExtendedRecord | undefined> {
   const options = await axiosOptions()
 
   const response = await axios.get<{
@@ -61,7 +61,7 @@ export const getSeries = async (tvdbId: number): Promise<SeriesExtendedRecord | 
   return series
 }
 
-export const getSeriesByName = async (query: string): Promise<SeriesExtendedRecord | undefined> => {
+export async function getSeriesByName (query: string): Promise<SeriesExtendedRecord | undefined> {
   const options = await axiosOptions()
 
   const response = await axios.get<{

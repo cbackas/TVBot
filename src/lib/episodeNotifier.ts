@@ -8,7 +8,7 @@ import client from './prisma'
 import { type SettingsManager } from './settingsManager'
 import { addLeadingZeros, toRanges } from './util'
 
-const isTextChannel = (channel: Channel): channel is AnyThreadChannel<boolean> | TextChannel => {
+function isTextChannel (channel: Channel): channel is AnyThreadChannel<boolean> | TextChannel {
   return channel.isTextBased() && !channel.isDMBased() && ![ChannelType.GuildAnnouncement, ChannelType.GuildVoice].includes(channel.type)
 }
 
@@ -25,7 +25,7 @@ export interface NotificationPayload {
  * look through episodes in the db and schedule notifications to the defined destinations
  * @param app instance of the main app
  */
-export const scheduleAiringMessages = async (app: App): Promise<void> => {
+export async function scheduleAiringMessages (app: App): Promise<void> {
   const showsWithEpisodes = await client.show.findMany({
     where: {
       episodes: {
@@ -55,7 +55,7 @@ export const scheduleAiringMessages = async (app: App): Promise<void> => {
  * @param show current show to process
  * @returns collection of notification payloads
  */
-export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, show: Show): Collection<string, NotificationPayload> => {
+export function reduceEpisodes (acc: Collection<string, NotificationPayload>, show: Show): Collection<string, NotificationPayload> {
   const momentUTC = moment.utc(new Date())
 
   for (const e of show.episodes) {
@@ -96,7 +96,7 @@ export const reduceEpisodes = (acc: Collection<string, NotificationPayload>, sho
  * @param discord client needed to send the messages
  * @param globalDestinations additional destinations to send the message to
  */
-const scheduleJob = async (payload: NotificationPayload, discord: Client, settingsManager: SettingsManager): Promise<void> => {
+async function scheduleJob (payload: NotificationPayload, discord: Client, settingsManager: SettingsManager): Promise<void> {
   const { key, airDate, imdbId: showId, showName, season, episodeNumbers } = payload
 
   // handle timezones
@@ -167,7 +167,7 @@ const scheduleJob = async (payload: NotificationPayload, discord: Client, settin
  * @param channel where to send the message
  * @param message what to send
  */
-const sendMessage = async (channel: Channel, message: string): Promise<void> => {
+async function sendMessage (channel: Channel, message: string): Promise<void> {
   if (!isTextChannel(channel)) throw new Error('Channel is not a text channel')
 
   // send discord message
@@ -183,7 +183,7 @@ const sendMessage = async (channel: Channel, message: string): Promise<void> => 
  * @param episodeNumbers episodes being announced in the message
  * @returns message to send to discord
  */
-const getEpisodeMessage = (showName: string, season: number, episodeNumbers: number[]): string => {
+function getEpisodeMessage (showName: string, season: number, episodeNumbers: number[]): string {
   if (episodeNumbers.length <= 0) {
     throw new Error('No episodes to schedule')
   }

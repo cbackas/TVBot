@@ -14,7 +14,7 @@ import { type EpisodeBaseRecord, type SeriesExtendedRecord } from '../interfaces
  * @param timezone timezone to use for the airdate
  * @returns moment object representing the airdate
  */
-const getAirDate = (dateStr: string, timeStr: string | null, timezone: string): Moment => {
+function getAirDate (dateStr: string, timeStr: string | null, timezone: string): Moment {
   try {
     return moment.tz(`${dateStr} ${timeStr !== null ? timeStr : '00:00'}`, timezone)
   } catch (error) {
@@ -81,7 +81,7 @@ export async function updateEpisodes (imdbId: string, tvdbId: number, providedSe
 /**
  * Updates all shows in the DB with new episodes
  */
-export const checkForAiringEpisodes = async (): Promise<void> => {
+export async function checkForAiringEpisodes (): Promise<void> {
   console.info('== Checking all shows for airing episodes ==')
   const shows = await client.show.findMany({
     select: {
@@ -157,7 +157,7 @@ export async function markMessageSent (imdbId: string, seasonNumber: number, epi
  * @param channel discord channel to send notifications to
  * @returns
  */
-export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel): Promise<Show> => {
+export async function createNewSubscription (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel): Promise<Show> {
   return await client.show.upsert({
     where: {
       imdbId
@@ -192,7 +192,7 @@ export const createNewSubscription = async (imdbId: string, tvdbSeriesId: number
  * @param channelId channel to unsubscribe the show from
  * @returns the show that was unsubscribed from
  */
-export const removeSubscription = async (imdbId: string, channelId: string): Promise<Show> => {
+export async function removeSubscription (imdbId: string, channelId: string): Promise<Show> {
   return await client.show.update({
     where: {
       imdbId
@@ -233,7 +233,7 @@ export async function removeAllSubscriptions (id: string, idType: keyof Destinat
 /**
  * removes all shows that have no destinations
  */
-export const pruneUnsubscribedShows = async (): Promise<void> => {
+export async function pruneUnsubscribedShows (): Promise<void> {
   await client.show.deleteMany({
     where: {
       destinations: {

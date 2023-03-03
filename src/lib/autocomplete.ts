@@ -2,7 +2,7 @@ import { type Prisma } from '@prisma/client'
 import { type ApplicationCommandOptionChoiceData, type AutocompleteInteraction } from 'discord.js'
 import client from './prisma'
 
-export const showSearchAutocomplete = async (interaction: AutocompleteInteraction): Promise<void> => {
+export async function showSearchAutocomplete (interaction: AutocompleteInteraction): Promise<void> {
   const focusedValue = interaction.options.getFocused()
 
   if (focusedValue === undefined) return

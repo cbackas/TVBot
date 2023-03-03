@@ -157,7 +157,7 @@ export const command: CommandV2 = {
  * @param imdbId imdb id to check for
  * @param channelId discord channel id to check for
  */
-const checkForExistingSubscription = async (imdbId: string, channelId: string): Promise<boolean> => {
+async function checkForExistingSubscription (imdbId: string, channelId: string): Promise<boolean> {
   const show = await client.show.findUnique({
     where: {
       imdbId
