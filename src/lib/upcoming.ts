@@ -11,6 +11,8 @@ import client from './prisma'
  * @returns a string message to send to Discord
  */
 export async function getUpcomingEpisodes (days: number = 1): Promise<string> {
+  if (days <= 0) throw new Error('days must be greater than 0')
+
   const shows = await client.show.findMany({
     where: {
       episodes: {
@@ -33,7 +35,10 @@ export async function getUpcomingEpisodes (days: number = 1): Promise<string> {
       return `**${payload.showName}** S${seasonNumber}E${episodeNumbers.join(',')} - <t:${moment.utc(payload.airDate).unix()}:R>`
     })
 
-  return messages.length >= 1 ? `Shows airing today:\n\n${messages.join('\n')}` : 'No shows airing today.'
+  const prefix = days === 1 ? 'Shows airing today' : `Shows airing in the next ${days} days`
+  const empty = days === 1 ? 'No shows airing today' : `No shows airing in the next ${days} days`
+
+  return messages.length >= 1 ? `${prefix}:\n\n${messages.join('\n')}` : empty
 }
 
 /**
