@@ -1,44 +1,76 @@
 import { type Show } from '@prisma/client'
-import { Collection } from 'discord.js'
+import { type APIEmbed, Collection, type APIEmbedField } from 'discord.js'
 import moment from 'moment'
 import { type NotificationPayload } from './episodeNotifier'
 import { addLeadingZeros, toRanges } from './util'
-import client from './prisma'
+
+interface UpcomingEpisodeMessages {
+  prefix: string
+  empty: string
+  messages: string[]
+  embedFields: APIEmbedField[]
+}
+
+async function getShowMessages (shows: Show[], days: number = 1): Promise<UpcomingEpisodeMessages> {
+  if (days <= 0) throw new Error('days must be greater than 0')
+
+  const payloadCollection = reduceEpisodes(shows, days)
+
+  const sortedPayloads = payloadCollection
+    .sort((p1, p2) => {
+      return moment.utc(p1.airDate).unix() - moment.utc(p2.airDate).unix()
+    })
+
+  const messages = sortedPayloads
+    .map(payload => {
+      const seasonNumber = addLeadingZeros(payload.season, 2)
+      const episodeNumbers = toRanges(payload.episodeNumbers)
+      const message = `**${payload.showName}** S${seasonNumber}E${episodeNumbers.join(',')} - <t:${moment.utc(payload.airDate).unix()}:R>`
+      return message
+    })
+
+  const embedFields = sortedPayloads
+    .reduce((acc, payload) => {
+      const seasonNumber = addLeadingZeros(payload.season, 2)
+      const episodeNumbers = toRanges(payload.episodeNumbers)
+      const message = `**${payload.showName}** S${seasonNumber}E${episodeNumbers.join(',')} - <t:${moment.utc(payload.airDate).unix()}:R>`
+      const airDate = moment.utc(payload.airDate).tz(process.env.TZ ?? 'America/Chicago')
+      acc.ensure(airDate.format('dddd - Do of MMMM'), () => []).push(message)
+      return acc
+    }, new Collection<string, string[]>())
+    .map((messages, airDate) => {
+      return {
+        name: airDate,
+        value: messages.join('\n')
+      }
+    })
+
+  return {
+    prefix: 'Shows airing ' + (days === 1 ? 'in the next day' : days === 7 ? 'this week' : `in the next ${days} days`),
+    empty: '`No shows airing ' + (days === 1 ? 'today' : days === 7 ? 'this week' : `in the next ${days} days`),
+    embedFields,
+    messages
+  }
+}
 
 /**
  * Gets upcoming episodes for the next X days and returns a string message to send to users
  * @param days number of days to look ahead
  * @returns a string message to send to Discord
  */
-export async function getUpcomingEpisodes (days: number = 1): Promise<string> {
-  if (days <= 0) throw new Error('days must be greater than 0')
+export async function getUpcomingEpisodesMessage (shows: Show[], days: number = 1): Promise<string> {
+  const messages = await getShowMessages(shows, days)
 
-  const shows = await client.show.findMany({
-    where: {
-      episodes: {
-        some: {
-          messageSent: false
-        }
-      }
-    }
-  })
+  return messages.messages.length >= 1 ? `${messages.prefix}:\n\n${messages.messages.join('\n')}` : messages.empty
+}
 
-  const payloadCollection = reduceEpisodes(shows, days)
+export async function getUpcomingEpisodesEmbed (shows: Show[], days: number = 1): Promise<APIEmbed> {
+  const messages = await getShowMessages(shows, days)
 
-  const messages = payloadCollection
-    .sort((p1, p2) => {
-      return moment.utc(p1.airDate).unix() - moment.utc(p2.airDate).unix()
-    })
-    .map((payload) => {
-      const seasonNumber = addLeadingZeros(payload.season, 2)
-      const episodeNumbers = toRanges(payload.episodeNumbers)
-      return `**${payload.showName}** S${seasonNumber}E${episodeNumbers.join(',')} - <t:${moment.utc(payload.airDate).unix()}:R>`
-    })
-
-  const prefix = days === 1 ? 'Shows airing today' : days === 7 ? 'Shows airing this week' : `Shows airing in the next ${days} days`
-  const empty = days === 1 ? 'No shows airing today' : days === 7 ? 'Shows airing this week' : `No shows airing in the next ${days} days`
-
-  return messages.length >= 1 ? `${prefix}:\n\n${messages.join('\n')}` : empty
+  return {
+    title: messages.prefix,
+    fields: messages.embedFields
+  }
 }
 
 /**
