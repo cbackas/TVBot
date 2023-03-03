@@ -1,11 +1,12 @@
 import * as dotenv from 'dotenv'
 import schedule from 'node-schedule'
-import { ActivityType, ChannelType, Client, Events, GatewayIntentBits } from 'discord.js'
+import { ChannelType, Client, Events, GatewayIntentBits } from 'discord.js'
 import { scheduleAiringMessages } from './lib/episodeNotifier'
 import { CommandManager } from './lib/commandManager'
 import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions } from './lib/shows'
 import { type Settings, SettingsManager } from './lib/settingsManager'
 import { sendMorningSummary } from './lib/morningSummary'
+import { setRandomShowActivity, setTVDBLoadingActivity } from './lib/discordActivities'
 
 dotenv.config()
 
@@ -53,23 +54,27 @@ export class App {
   private readonly startBot = (): void => {
     this.client.on(Events.ClientReady, async () => {
       const { user } = this.client
-      if (user !== null) console.log(`Logged in as ${user.tag}!`)
+      if (user == null) throw new Error('User is null')
+      console.log(`Logged in as ${user.tag}!`)
 
       // run initial scheduled activities
-      void this.randomWatchingActivity()
+      setTVDBLoadingActivity(user)
       if (process.env.UPDATE_SHOWS !== 'false') await checkForAiringEpisodes()
       void scheduleAiringMessages(this)
+      void setRandomShowActivity(user)
 
-      schedule.scheduleJob('lifecycle:1hour:updateBotActivity', '15 * * * *', () => {
-        void this.randomWatchingActivity()
+      schedule.scheduleJob('lifecycle:30min:updateBotActivity', '*/30 * * * *', () => {
+        void setRandomShowActivity(user)
       })
 
       schedule.scheduleJob('lifecycle:4hours:fetchEpisoded', '0 */4 * * *', async () => {
+        setTVDBLoadingActivity(user)
         await checkForAiringEpisodes()
-        void scheduleAiringMessages(this)
+        await scheduleAiringMessages(this)
+        void setRandomShowActivity(user)
       })
 
-      schedule.scheduleJob('lifecycle:morningSummary', '0 8 * * *', async () => {
+      schedule.scheduleJob('lifecycle:daily:morningSummary', '0 8 * * *', async () => {
         const settings = this.getSettings()
         if (settings == null) throw new Error('Settings not found')
 
@@ -104,12 +109,6 @@ export class App {
     })
 
     void this.client.login(this.token)
-  }
-
-  private readonly randomWatchingActivity = async (): Promise<void> => {
-    const showList: { shows: string[] } = await import('../assets/shows.json')
-    const randomIndex = Math.floor(Math.random() * (showList.shows.length - 0 + 1) + 0)
-    this.client.user?.setActivity(showList.shows[randomIndex], { type: ActivityType.Watching })
   }
 
   public getClient = (): Client<boolean> => this.client
