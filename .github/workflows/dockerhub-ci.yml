@@ -3,8 +3,7 @@ name: CI to Docker Hub
 on:
   push:
     branches: 
-      - master
-      - v2
+      - main
 
 jobs:
   docker_build:
@@ -26,7 +25,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/tvbot:${{ github.ref_name }}
+          tags: cbackas/tvbot:latest
 
       - uses: actions/checkout@v2
 
