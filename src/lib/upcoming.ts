@@ -35,8 +35,8 @@ export async function getUpcomingEpisodes (days: number = 1): Promise<string> {
       return `**${payload.showName}** S${seasonNumber}E${episodeNumbers.join(',')} - <t:${moment.utc(payload.airDate).unix()}:R>`
     })
 
-  const prefix = days === 1 ? 'Shows airing today' : `Shows airing in the next ${days} days`
-  const empty = days === 1 ? 'No shows airing today' : `No shows airing in the next ${days} days`
+  const prefix = days === 1 ? 'Shows airing today' : days === 7 ? 'Shows airing this week' : `Shows airing in the next ${days} days`
+  const empty = days === 1 ? 'No shows airing today' : days === 7 ? 'Shows airing this week' : `No shows airing in the next ${days} days`
 
   return messages.length >= 1 ? `${prefix}:\n\n${messages.join('\n')}` : empty
 }
