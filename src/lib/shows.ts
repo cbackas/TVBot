@@ -75,7 +75,7 @@ export async function updateEpisodes (imdbId: string, tvdbId: number, providedSe
     }
   })
 
-  console.info(`[SYNC] ${series.name} / Upcoming episodes: ${upcomingEpisodes.length}`)
+  console.info(`[Get Episode Data] ${series.name} / Upcoming episodes: ${upcomingEpisodes.length}`)
 }
 
 /**
