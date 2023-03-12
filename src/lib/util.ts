@@ -19,6 +19,12 @@ export function toRanges (values: number[], separator = '-', totalLength = 2): s
     .map(range => range.map(value => addLeadingZeros(value, totalLength)).join(separator))
 }
 
+/**
+ * Splits a string of imdb ids into an array of imdb ids
+ * Also handles imdb urls
+ * @param imdbIds string of one or more imdb ids separated by commas
+ * @returns array of imdb ids
+ */
 export function parseIMDBIds (imdbIds: string): string[] {
   return imdbIds.split(',')
     // filter out invalid imdb ids and handle imdb urls
