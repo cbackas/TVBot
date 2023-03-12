@@ -54,12 +54,14 @@ export const command: CommandV2 = {
       })
     }
 
+    const imdbIdString = imdbIds.map(s => `\`${s}\``).join(', ')
+
     const subCommand = interaction.options.getSubcommand()
     if (subCommand === '') return await interaction.editReply('Invalid subcommand')
 
     const progress = new ProgressMessageBuilder(interaction)
       .addStep('Check for existing show subscription')
-      .addStep(`Searching for show with IMDB ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
+      .addStep(`Searching for show with IMDB ID(s) ${imdbIdString}`)
       .addStep('Linking show to channel in database')
       .addStep('Fetching upcoming episodes')
 
@@ -91,7 +93,7 @@ export const command: CommandV2 = {
       }
 
       if (seriesList.size === 0) {
-        throw new ProgressError(`No shows found with IMDB ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
+        throw new ProgressError(`No shows found with IMDB ID(s) ${imdbIdString}`)
       }
 
       await progress.sendNextStep() // start step 2

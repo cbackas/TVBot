@@ -45,10 +45,12 @@ export const command: CommandV2 = {
       })
     }
 
+    const imdbIdString = imdbIds.map(s => `\`${s}\``).join(', ')
+
     const forumInput = interaction.options.getChannel('forum', false)
 
     const progress = new ProgressMessageBuilder(interaction)
-      .addStep(`Checking for existing forum posts with ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
+      .addStep(`Checking for existing forum posts with ID(s) ${imdbIdString}`)
       .addStep('Fetching show data')
       .addStep('Creating forum post')
       .addStep('Saving show to DB')
@@ -89,7 +91,7 @@ export const command: CommandV2 = {
       }
 
       if (seriesList.size === 0) {
-        throw new ProgressError(`No show found with IMDB ID(s) ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
+        throw new ProgressError(`No show found with IMDB ID(s) ${imdbIdString}`)
       }
 
       await progress.sendNextStep() // start step 3
@@ -108,7 +110,7 @@ export const command: CommandV2 = {
       }
 
       if (seriesList.size === 0) {
-        throw new ProgressError(`Error creating posts for ${imdbIds.map(s => `\`${s}\``).join(', ')}`)
+        throw new ProgressError(`Error creating posts for ${imdbIdString}`)
       }
 
       await progress.sendNextStep() // start step 4

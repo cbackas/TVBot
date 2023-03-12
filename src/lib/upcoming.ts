@@ -45,9 +45,23 @@ async function getShowMessages (shows: Show[], days: number = 1): Promise<Upcomi
       }
     })
 
+  let prefixString: string = 'Shows airing '
+  let emptyString: string = 'No shows airing '
+
+  if (days === 1) {
+    prefixString += 'in the next day'
+    emptyString += 'today'
+  } else if (days === 7) {
+    prefixString += 'this week'
+    emptyString += 'this week'
+  } else {
+    prefixString += `in the next ${days} days`
+    emptyString += `in the next ${days} days`
+  }
+
   return {
-    prefix: 'Shows airing ' + (days === 1 ? 'in the next day' : days === 7 ? 'this week' : `in the next ${days} days`),
-    empty: '`No shows airing ' + (days === 1 ? 'today' : days === 7 ? 'this week' : `in the next ${days} days`),
+    prefix: prefixString,
+    empty: emptyString,
     embedFields,
     messages
   }

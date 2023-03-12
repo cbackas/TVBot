@@ -1,7 +1,7 @@
 import { type Show } from '@prisma/client'
 import { type AnyThreadChannel, type Channel, ChannelType, type Client, Collection, type TextChannel } from 'discord.js'
 import moment from 'moment-timezone'
-import schedule from 'node-schedule'
+import schedule, { type Job } from 'node-schedule'
 import { type App } from '../app'
 import { markMessageSent } from './shows'
 import client from './prisma'
@@ -97,7 +97,7 @@ export function reduceEpisodes (acc: Collection<string, NotificationPayload>, sh
  * @param globalDestinations additional destinations to send the message to
  */
 async function scheduleJob (payload: NotificationPayload, discord: Client, settingsManager: SettingsManager): Promise<void> {
-  const { key, airDate, imdbId: showId, showName, season, episodeNumbers } = payload
+  const { key, airDate, showName, season, episodeNumbers } = payload
 
   // handle timezones
   const airDateUTC = moment.utc(airDate)
@@ -120,11 +120,26 @@ async function scheduleJob (payload: NotificationPayload, discord: Client, setti
   const message = getEpisodeMessage(showName, season, episodeNumbers)
 
   // create a scheduled event to send a message
-  const newJob = schedule.scheduleJob(key, airDateLocal.toDate(), async () => {
+  const newJob = await scheduleNotification(discord, settingsManager, payload, airDateLocal, message)
+
+  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation().toString()} `)
+}
+
+/**
+ * Schedule a notification to go out on discord at the given time
+ * @param discord discord client
+ * @param settingsManager SettingsManager object
+ * @param payload Notification payload (key, seeason, episodeNUmbers, etc)
+ * @param airDateLocal airdate converted to a local moment object
+ * @param message the message to send
+ * @returns the scheduled job
+ */
+async function scheduleNotification (discord: Client, settingsManager: SettingsManager, payload: NotificationPayload, airDateLocal: moment.Moment, message: string): Promise<Job> {
+  return schedule.scheduleJob(payload.key, airDateLocal.toDate(), async () => {
     // grab the show destinations from the db
     const show = await client.show.findUnique({
       where: {
-        imdbId: showId
+        imdbId: payload.imdbId
       },
       select: {
         destinations: true
@@ -156,10 +171,8 @@ async function scheduleJob (payload: NotificationPayload, discord: Client, setti
     }
 
     // mark message as sent in  the db
-    await markMessageSent(showId, season, episodeNumbers)
+    await markMessageSent(payload.imdbId, payload.season, payload.episodeNumbers)
   })
-
-  console.info(`Scheduled Job: ${showName} (${key}) at ${newJob.nextInvocation().toString()} `)
 }
 
 /**

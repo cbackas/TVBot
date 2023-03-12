@@ -108,7 +108,6 @@ async function getShowByImdbId (query: string): Promise<Show> {
 
   // turn IMDB ID into a series
   const series = await getSeriesByImdbId(imdbId)
-  // if (series == null) return await interaction.editReply(`No show found with IMDB ID \`${imdbId}\``)
   if (series == null) throw new ProgressError(`No show found with IMDB ID \`${imdbId}\``)
 
   const show = await client.show.findUnique({

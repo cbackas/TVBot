@@ -199,5 +199,6 @@ async function updateMorningSummaryChannels (settingsManager: SettingsManager, i
     morningSummaryDestinations: channelList
   })
 
-  return await progress.sendNextStep(`__New List__:\n${channelList.map(d => `<#${d.channelId}>`).join('\n')}`)
+  const channelsString = channelList.map(d => `<#${d.channelId}>`).join('\n')
+  return await progress.sendNextStep(`__New List__:\n${channelsString}`)
 }
