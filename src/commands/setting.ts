@@ -151,7 +151,7 @@ async function updateGlobalChannels (settingsManager: SettingsManager, interacti
   }
 
   const destinationsString = destinations.map(d => `<#${d.channelId}>`).join('\n')
-  return await progress.sendNextStep(`__Global Destinations__:\nThese channels recieve notifications for all new episodes\n\n${destinationsString}`)
+  return await progress.sendNextStep(`__New List__:\nn${destinationsString}`)
 }
 
 /**
