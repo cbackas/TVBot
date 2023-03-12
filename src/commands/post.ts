@@ -226,6 +226,7 @@ async function createForumPost (channels: ChannelManager, tvdbSeries: SeriesExte
  */
 async function saveShowToDB (imdbId: string, tvdbSeriesId: number, seriesName: string, channel: TextBasedChannel): Promise<Show> {
   try {
+    console.info(`[New Subscription] ${seriesName} (${imdbId}) [${channel.id}`)
     return await createNewSubscription(imdbId, tvdbSeriesId, seriesName, channel)
   } catch (error) {
     console.error(error)

@@ -112,6 +112,7 @@ export const command: CommandV2 = {
 
       for (const [imdbId, tvdbSeries] of seriesList) {
         try {
+          console.info(`[New Subscription] ${tvdbSeries.name} (${imdbId}) [${channel.id}`)
           const show = await createNewSubscription(imdbId, tvdbSeries.id, tvdbSeries.name, channel)
           await updateEpisodes(show.imdbId, show.tvdbId, tvdbSeries)
 
@@ -121,7 +122,6 @@ export const command: CommandV2 = {
           })
 
           messages.push(`Linked show \`${tvdbSeries.name}\` (${imdbId})`)
-          console.info(`Added show ${tvdbSeries.name} (${imdbId})`)
         } catch (error) {
           messages.push(`Failed to link show \`${tvdbSeries.name}\` (${imdbId})`)
           console.error(error)
