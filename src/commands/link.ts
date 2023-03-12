@@ -63,6 +63,12 @@ export const command: CommandV2 = {
         return acc
       }, new Array<string>())
 
+    if (imdbIds.length >= 10) {
+      return await interaction.editReply({
+        content: 'You can only create 10 posts at a time'
+      })
+    }
+
     const subCommand = interaction.options.getSubcommand()
     if (subCommand === '') return await interaction.editReply('Invalid subcommand')
 

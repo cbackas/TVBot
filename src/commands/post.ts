@@ -54,6 +54,12 @@ export const command: CommandV2 = {
         return acc
       }, new Array<string>())
 
+    if (imdbIds.length >= 10) {
+      return await interaction.editReply({
+        content: 'You can only create 10 posts at a time'
+      })
+    }
+
     const forumInput = interaction.options.getChannel('forum', false)
 
     const progress = new ProgressMessageBuilder(interaction)
