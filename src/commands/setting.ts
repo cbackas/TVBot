@@ -32,14 +32,14 @@ export const command: CommandV2 = {
             .setDescription('Add a channel from the list that receive all episode notifications')
             .addChannelOption(option => option.setName('channel')
               .setDescription('Channel to add to the list that recieves all episode notifications')
-              .addChannelTypes(ChannelType.GuildText)
+              .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
               .setRequired(true)),
           new SlashCommandSubcommandBuilder()
             .setName('remove')
             .setDescription('Remove a channel from the list that receive all episode notifications')
             .addChannelOption(option => option.setName('channel')
               .setDescription('Channel to remove from the list that recieves all episode notifications')
-              .addChannelTypes(ChannelType.GuildText)
+              .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
               .setRequired(true))
         ]
       },
@@ -53,14 +53,14 @@ export const command: CommandV2 = {
             .setDescription('Add a channel to the list that recieves the morning summary message')
             .addChannelOption(option => option.setName('channel')
               .setDescription('Channel to add to the list that recieves the morning summary message')
-              .addChannelTypes(ChannelType.GuildText)
+              .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
               .setRequired(true)),
           new SlashCommandSubcommandBuilder()
             .setName('remove_channel')
             .setDescription('Remove a channel from the list that recieves the morning summary message')
             .addChannelOption(option => option.setName('channel')
               .setDescription('Channel to remove from the list that recieves the morning summary message')
-              .addChannelTypes(ChannelType.GuildText)
+              .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
               .setRequired(true))
         ]
       }
@@ -132,7 +132,7 @@ async function updateGlobalChannels (settingsManager: SettingsManager, interacti
   }
 
   // validate the channel type
-  if (channel.type !== ChannelType.GuildText) {
+  if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(channel.type)) {
     return await interaction.editReply('Invalid channel type')
   }
 
@@ -171,7 +171,7 @@ async function updateMorningSummaryChannels (settingsManager: SettingsManager, i
 
   const channel = interaction.options.getChannel('channel', true) as Channel
   // validate the channel type
-  if (channel.type !== ChannelType.GuildText) {
+  if (![ChannelType.GuildText, ChannelType.GuildAnnouncement].includes(channel.type)) {
     return await interaction.editReply('Invalid channel type')
   }
 
