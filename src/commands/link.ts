@@ -8,8 +8,8 @@ import { createNewSubscription, updateEpisodes } from '../lib/shows'
 import { scheduleAiringMessages } from '../lib/episodeNotifier'
 import { ProgressError } from '../interfaces/error'
 import { buildShowEmbed } from '../lib/messages'
-import parseUrl from 'parse-url'
 import { type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
+import { parseIMDBIds } from '../lib/util'
 
 /**
  * Standardized slash command option for getting IMDB ID
@@ -46,22 +46,7 @@ export const command: CommandV2 = {
     ]
   },
   async executeCommand (app: App, interaction: ChatInputCommandInteraction) {
-    const imdbIds = interaction.options
-      .getString('imdb_id', true)
-      .split(',')
-      // filter out invalid imdb ids and handle imdb urls
-      .reduce((acc, id) => {
-        if (id.startsWith('tt')) return [...acc, id]
-
-        try {
-          const parsedUrl = parseUrl(id, true)
-          if (parsedUrl.resource === 'imdb.com' && parsedUrl.pathname.startsWith('/title/')) {
-            return [...acc, parsedUrl.pathname.split('/title/')[1]]
-          }
-        } catch (e) { }
-
-        return acc
-      }, new Array<string>())
+    const imdbIds = parseIMDBIds(interaction.options.getString('imdb_id', true))
 
     if (imdbIds.length >= 10) {
       return await interaction.editReply({
