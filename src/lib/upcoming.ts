@@ -83,7 +83,11 @@ export async function getUpcomingEpisodesEmbed (shows: Show[], days: number = 1)
 
   return {
     title: messages.prefix,
-    fields: messages.embedFields
+    fields: messages.embedFields,
+    footer: {
+      text: 'Powered by TVDB',
+      icon_url: 'https://www.thetvdb.com/images/logo.png'
+    }
   }
 }
 
