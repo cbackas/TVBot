@@ -33,7 +33,7 @@ export function parseIMDBIds (imdbIds: string): string[] {
 
       try {
         const parsedUrl = parseUrl(id, true)
-        if (parsedUrl.resource === 'imdb.com' && parsedUrl.pathname.startsWith('/title/')) {
+        if (['imdb.com', 'm.imdb.com'].includes(parsedUrl.resource) && parsedUrl.pathname.startsWith('/title/')) {
           return [...acc, parsedUrl.pathname.split('/title/')[1]]
         }
       } catch (e) { }
