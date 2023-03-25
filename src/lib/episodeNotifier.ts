@@ -8,8 +8,8 @@ import client from './prisma'
 import { type SettingsManager } from './settingsManager'
 import { addLeadingZeros, toRanges } from './util'
 
-function isTextChannel (channel: Channel): channel is AnyThreadChannel<boolean> | TextChannel {
-  return channel.isTextBased() && !channel.isDMBased() && ![ChannelType.GuildAnnouncement, ChannelType.GuildVoice].includes(channel.type)
+export function isTextChannel (channel: Channel): channel is AnyThreadChannel<boolean> | TextChannel {
+  return channel.isTextBased() && !channel.isDMBased() && ![ChannelType.GuildVoice].includes(channel.type)
 }
 
 export interface NotificationPayload {
