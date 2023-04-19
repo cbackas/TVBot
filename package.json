@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "node esbuild.mjs",
-    "dev": "export NODE_ENV=development; node esbuild.mjs",
+    "dev": "export NODE_ENV=development; node --enable-source-maps esbuild.mjs",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
