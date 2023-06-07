@@ -80,6 +80,14 @@ export class App {
 
         await sendMorningSummary(settings, this.client)
       })
+
+      const healthcheckUrl = process.env.HEALTHCHECK_URL
+      if (healthcheckUrl != null) {
+        schedule.scheduleJob('lifecycle:60sec:healthcheck', '* * * * *', async () => {
+          await fetch(healthcheckUrl)
+          console.debug('Healthcheck sent')
+        })
+      }
     })
 
     this.client.on(Events.InteractionCreate, this.commands.interactionHandler)
