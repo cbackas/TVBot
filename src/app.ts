@@ -85,7 +85,7 @@ export class App {
       if (healthcheckUrl != null) {
         schedule.scheduleJob('lifecycle:60sec:healthcheck', '* * * * *', async () => {
           await fetch(healthcheckUrl)
-          console.debug('Healthcheck sent')
+          console.debug('[Healthcheck] Healthcheck ping sent')
         })
       }
     })
