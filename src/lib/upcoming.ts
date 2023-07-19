@@ -81,13 +81,22 @@ export async function getUpcomingEpisodesMessage (shows: Show[], days: number = 
 export async function getUpcomingEpisodesEmbed (shows: Show[], days: number = 1): Promise<APIEmbed> {
   const messages = await getShowMessages(shows, days)
 
+  const footer: APIEmbed['footer'] = {
+    text: 'Powered by TVDB',
+    icon_url: 'https://www.thetvdb.com/images/logo.png'
+  }
+
+  if (messages.messages.length === 0) {
+    return {
+      title: messages.empty,
+      footer
+    }
+  }
+
   return {
     title: messages.prefix,
     fields: messages.embedFields,
-    footer: {
-      text: 'Powered by TVDB',
-      icon_url: 'https://www.thetvdb.com/images/logo.png'
-    }
+    footer
   }
 }
 
