@@ -1,6 +1,7 @@
 name: SemanticRelease
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
