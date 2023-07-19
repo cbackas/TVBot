@@ -1,0 +1,21 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # just check that it builds, dont push it anywhere cuz whatever
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: false
+          tags: cbackas/tvbot:pr

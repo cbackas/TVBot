@@ -1,0 +1,40 @@
+name: SemanticRelease
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      
+      - name: Install Semantic Release
+        run: npm install semantic-release @codedependant/semantic-release-docker conventional-changelog-eslint
+
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DOCKER_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
+        run: npx semantic-release
+
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_ICON: https://avatars.githubusercontent.com/u/9919?s=200&v=4
+          SLACK_USERNAME: GitHub Actions
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_FOOTER: ""
