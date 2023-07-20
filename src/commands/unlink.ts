@@ -58,9 +58,6 @@ export const command: CommandV2 = {
               channelId: channel?.id
             }
           }
-        },
-        include: {
-          destinations: true
         }
       })
 
@@ -92,7 +89,7 @@ export const command: CommandV2 = {
       throw error
     }
   },
-  async executeSelectMenu (app, interaction: AnySelectMenuInteraction) {
+  async executeSelectMenu (_app, interaction: AnySelectMenuInteraction) {
     const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
 
     if (channelId === undefined) return await interaction.reply('Failed to find channel')
