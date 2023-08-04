@@ -146,6 +146,11 @@ async function scheduleNotification (discord: Client, settingsManager: SettingsM
       }
     })
 
+    if (show == null) {
+      console.error(`Scheduled notification aborted: show not found (${payload.showName})[${payload.imdbId}]`)
+      return
+    }
+
     const showDestinations = show?.destinations ?? []
 
     // send the message to all the channels subscribed to the show
