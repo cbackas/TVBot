@@ -65,4 +65,3 @@ jobs:
         with:
           push: false
           tags: cbackas/tvbot:pr
-
