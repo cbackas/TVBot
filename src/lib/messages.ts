@@ -2,7 +2,7 @@ import { type Destination } from '@prisma/client'
 import { type APIEmbed, type APIEmbedField } from 'discord.js'
 import { type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
-export async function buildShowEmbed (imdbId: string, tvdbSeries: SeriesExtendedRecord, destinations: Destination[] = []): Promise<APIEmbed> {
+export function buildShowEmbed (imdbId: string, tvdbSeries: SeriesExtendedRecord, destinations: Destination[] = []): APIEmbed {
   // put together some basic data fields
   const fields: APIEmbedField[] = [
     {

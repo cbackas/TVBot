@@ -118,7 +118,7 @@ export const command: CommandV2 = {
 
           await channel.send({
             content: `Linked \`${tvdbSeries.name}\` to <#${channel.id}>`,
-            embeds: [await buildShowEmbed(imdbId, tvdbSeries, show.destinations)]
+            embeds: [buildShowEmbed(imdbId, tvdbSeries, show.destinations)]
           })
 
           messages.push(`Linked show \`${tvdbSeries.name}\` (${imdbId})`)

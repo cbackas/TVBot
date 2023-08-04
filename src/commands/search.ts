@@ -38,7 +38,7 @@ export const command: CommandV2 = {
         }
       })
 
-      return await interaction.editReply({ embeds: [await buildShowEmbed(imdbId, series, show?.destinations ?? [])] })
+      return await interaction.editReply({ embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])] })
     }
 
     const series = await getSeriesByName(query)
@@ -49,7 +49,7 @@ export const command: CommandV2 = {
 
     if (imdbId == null) return await interaction.editReply('Show not found')
 
-    return await interaction.editReply({ embeds: [await buildShowEmbed(imdbId, series, [])] })
+    return await interaction.editReply({ embeds: [buildShowEmbed(imdbId, series, [])] })
   },
   async executeAutoComplate (app: App, interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)

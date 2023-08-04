@@ -1,4 +1,4 @@
-import { type Channel, type ChannelManager, ChannelType, type ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, type TextBasedChannel, type ThreadChannel } from 'discord.js'
+import { type Channel, ChannelType, type ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, type TextBasedChannel, type ThreadChannel, type APIEmbed } from 'discord.js'
 import client from '../lib/prisma'
 import { type CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
@@ -97,8 +97,11 @@ export const command: CommandV2 = {
       await progress.sendNextStep() // start step 3
 
       for (const [imdbId, series] of seriesList) {
+        const embed = buildShowEmbed(imdbId, series.series)
+
         try {
-          const newPost = await createForumPost(interaction.client.channels, series.series, tvForum)
+          const forumChannel = await interaction.client.channels.fetch(tvForum)
+          const newPost = await createForumPost(forumChannel, embed, series.series.name)
           seriesList.set(imdbId, {
             series: series.series,
             post: newPost
@@ -121,10 +124,6 @@ export const command: CommandV2 = {
         if (post == null) continue
 
         const show = await saveShowToDB(imdbId, tvDBSeries.id, tvDBSeries.name, post as TextBasedChannel)
-
-        await post.send({
-          embeds: [await buildShowEmbed(imdbId, tvDBSeries, show.destinations)]
-        })
 
         await updateEpisodes(show.imdbId, show.tvdbId, series.series)
 
@@ -200,21 +199,23 @@ async function checkForExistingPosts (imdbId: string, tvForum: string): Promise<
  * @param tvForumId discord forum to create a post in
  * @returns the created forum thread
  */
-async function createForumPost (channels: ChannelManager, tvdbSeries: SeriesExtendedRecord, tvForumId: string): Promise<ThreadChannel<boolean>> {
-  const forumChannel = await channels.fetch(tvForumId)
-
-  if (forumChannel == null || !isForumChannel(forumChannel)) {
+async function createForumPost (channel: Channel | null, embed: APIEmbed, seriesName: string): Promise<ThreadChannel<boolean>> {
+  if (channel == null || !isForumChannel(channel)) {
     throw new ProgressError('No tv forum found')
   }
 
   // create the forum post
-  return await forumChannel.threads.create({
-    name: tvdbSeries.name,
+  const result = await channel.threads.create({
+    name: seriesName,
     autoArchiveDuration: 10080,
     message: {
-      content: `${tvdbSeries.image}`
+      embeds: [embed]
     }
   })
+
+  await result.lastMessage?.pin()
+
+  return result
 }
 
 /**
