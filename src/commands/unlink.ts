@@ -113,6 +113,23 @@ export const command: CommandV2 = {
       }
     })
 
+    const show = await client.show.findFirst({
+      where: {
+        imdbId: {
+          in: values
+        }
+      }
+    })
+
+    if (show != null && show.destinations.length === 0) {
+      console.debug(`Deleting show ${show.name} (${show.imdbId}) because it has no destinations`)
+      await client.show.delete({
+        where: {
+          imdbId: show.imdbId
+        }
+      })
+    }
+
     return await interaction.editReply({ content: `Unlinked ${s.count} shows from <#${channelId}>`, components: [] })
   }
 }
