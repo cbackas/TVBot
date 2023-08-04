@@ -97,6 +97,8 @@ export const command: CommandV2 = {
 
     const values = interaction.values
 
+    const yourmom: any = { dong: 'water' } as any
+
     const s = await client.show.updateMany({
       where: {
         imdbId: {
