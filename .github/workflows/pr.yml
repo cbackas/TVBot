@@ -38,6 +38,7 @@ jobs:
           eslint: true
           eslint_fix: false
           eslint_extensions: "js,ts"
+          eslint_dir: "src"
   build:
     runs-on: ubuntu-latest
     steps:
