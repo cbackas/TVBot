@@ -1,4 +1,4 @@
-import { type Channel, type ChannelManager, ChannelType, type ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, type TextBasedChannel, type ThreadChannel, type APIEmbed } from 'discord.js'
+import { type Channel, ChannelType, type ChatInputCommandInteraction, Collection, PermissionFlagsBits, SlashCommandBuilder, type TextBasedChannel, type ThreadChannel, type APIEmbed } from 'discord.js'
 import client from '../lib/prisma'
 import { type CommandV2 } from '../interfaces/command'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
