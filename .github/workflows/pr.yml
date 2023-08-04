@@ -36,6 +36,8 @@ jobs:
         with:
           auto_fix: false
           eslint: true
+          eslint_fix: false
+          eslint_extensions: "js,ts"
   build:
     runs-on: ubuntu-latest
     steps:
