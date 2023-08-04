@@ -234,7 +234,7 @@ export async function removeAllSubscriptions (id: string, idType: keyof Destinat
  * removes all shows that have no destinations
  */
 export async function pruneUnsubscribedShows (): Promise<void> {
-  await client.show.deleteMany({
+  const result = await client.show.deleteMany({
     where: {
       destinations: {
         isEmpty: true
@@ -242,5 +242,5 @@ export async function pruneUnsubscribedShows (): Promise<void> {
     }
   })
 
-  console.info('Pruned shows with no destinations')
+  console.info(`Pruned shows ${result.count} with no destinations`)
 }

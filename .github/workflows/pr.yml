@@ -1,18 +1,66 @@
 name: Pull Request
-
 on:
   pull_request:
     branches:
       - main
-
+    types:
+      - opened
+      - edited
+      - synchronize
 jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Title
+        uses: deepakputhraya/action-pr-title@master
+        with:
+          allowed_prefixes: 'Breaking:,Fix:,Update:,New:,Build:,Upgrade:,Chore:,NoBuild:'
+          prefix_case_sensitive: true
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # pull the repo
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      # setup node
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      # install dependencies
+      - name: Install Node.js dependencies
+        run: npm ci
+      # run eslint
+      - name: Run linters
+        uses: wearerequired/lint-action@master
+        with:
+          auto_fix: false
+          eslint: true
+          eslint_fix: false
+          eslint_extensions: "js,ts"
   build:
     runs-on: ubuntu-latest
-
     steps:
+      # pull the repo
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      # setup node
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      # install dependencies
+      - name: Install Node.js dependencies
+        run: npm ci
+      # build the app
+      - name: Build TVBot
+        run: npm run build
+  build_docker:
+    runs-on: ubuntu-latest
+    steps:
+      # pull the repo
       - name: Checkout
         uses: actions/checkout@v3
-
       # just check that it builds, dont push it anywhere cuz whatever
       - name: Build and push
         uses: docker/build-push-action@v3

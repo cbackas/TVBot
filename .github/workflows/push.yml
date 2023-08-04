@@ -1,41 +1,46 @@
-name: SemanticRelease
-
+name: Push
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-
+    tags:
+      - '*.*.*'
 jobs:
-  build:
+  release:
+    name: Semantic Release
     runs-on: ubuntu-latest
-
+    if: startsWith(github.ref, 'refs/heads/')
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
-
       - name: Setup Node.js 18
         uses: actions/setup-node@v2
         with:
           node-version: 18
-      
       - name: Install Semantic Release
         run: npm install semantic-release @codedependant/semantic-release-docker conventional-changelog-eslint
-
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           DOCKER_REGISTRY_USER: ${{ github.actor }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
         run: npx semantic-release
-
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
+  notify:
+    name: Discord Notify
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Extract tag name
+        id: tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Discord notification
+        uses: Ilshidur/action-discord@master
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_ICON: https://avatars.githubusercontent.com/u/9919?s=200&v=4
-          SLACK_USERNAME: GitHub Actions
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_FOOTER: ""
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: 'Version {{ TAG_NAME }} of {{ EVENT_PAYLOAD.repository.full_name }} has been released!'

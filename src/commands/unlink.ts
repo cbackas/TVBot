@@ -4,6 +4,7 @@ import { type CommandV2 } from '../interfaces/command'
 import { type App } from '../app'
 import { ProgressError } from '../interfaces/error'
 import { ProgressMessageBuilder } from '../lib/progressMessages'
+import { pruneUnsubscribedShows } from 'src/lib/shows'
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -112,6 +113,8 @@ export const command: CommandV2 = {
         }
       }
     })
+
+    await pruneUnsubscribedShows()
 
     return await interaction.editReply({ content: `Unlinked ${s.count} shows from <#${channelId}>`, components: [] })
   }

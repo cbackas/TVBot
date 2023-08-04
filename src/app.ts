@@ -60,6 +60,7 @@ export class App {
       // run initial scheduled activities
       setTVDBLoadingActivity(user)
       if (process.env.UPDATE_SHOWS !== 'false') await checkForAiringEpisodes()
+      await pruneUnsubscribedShows()
       void scheduleAiringMessages(this)
       void setRandomShowActivity(user)
 
@@ -70,6 +71,7 @@ export class App {
       schedule.scheduleJob('lifecycle:4hours:fetchEpisoded', '0 */4 * * *', async () => {
         setTVDBLoadingActivity(user)
         await checkForAiringEpisodes()
+        await pruneUnsubscribedShows()
         await scheduleAiringMessages(this)
         void setRandomShowActivity(user)
       })
