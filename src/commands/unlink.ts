@@ -95,9 +95,6 @@ export const command: CommandV2 = {
 
     if (channelId === undefined) return await interaction.reply('Failed to find channel')
 
-    const boolll = true
-    if (boolll === true) console.log('booba')
-
     const values = interaction.values
 
     const s = await client.show.updateMany({
