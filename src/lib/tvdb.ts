@@ -32,10 +32,15 @@ export async function getSeriesByImdbId (imdbId: string): Promise<SeriesExtended
   const options = await axiosOptions()
 
   const response = await axios.get<{
-    data: SearchByRemoteIdResult[]
+    data?: SearchByRemoteIdResult[]
   }>(`/search/remoteid/${imdbId}`, options)
 
-  const data = response.data.data[0]
+  if (response.status !== 200) {
+    console.error(JSON.stringify(response.data))
+    return undefined
+  }
+
+  const data = response.data.data?.at(0)
   const series = data?.series
   if (data == null || series == null || series.id == null) return undefined
 
