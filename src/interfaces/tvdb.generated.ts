@@ -625,6 +625,8 @@ export interface SearchByRemoteIdResult {
   episode?: EpisodeBaseRecord;
   /** A company record */
   company?: Company;
+  /** season base record */
+  season?: SeasonBaseRecord;
 }
 
 /** season genre record */
