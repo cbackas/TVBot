@@ -21,28 +21,34 @@ export interface NotificationPayload {
   episodeNumbers: number[]
 }
 
+type PayloadCollection = Collection<string, NotificationPayload>
+
 /**
  * look through episodes in the db and schedule notifications to the defined destinations
  * @param app instance of the main app
  */
 export async function scheduleAiringMessages (app: App): Promise<void> {
+  const nowUtc = moment.utc()
+  const tenMinutesFromNow = nowUtc.add(10, 'minutes')
+
   const showsWithEpisodes = await client.show.findMany({
     where: {
       episodes: {
         some: {
-          messageSent: false
+          messageSent: false,
+          airDate: {
+            lte: tenMinutesFromNow.toDate()
+          }
         }
       }
     }
   })
 
   // convert the shows into a collection of notification payloads
-  const payloadCollection = showsWithEpisodes.reduce(reduceEpisodes, new Collection<string, NotificationPayload>())
+  const payloadCollection: PayloadCollection = showsWithEpisodes.reduce(reduceEpisodes, new Collection<string, NotificationPayload>())
 
-  // grab the discord client and global destinations for the schedule jobs to use
   const discord = app.getClient()
   const settingsManager = app.getSettingsManager()
-  // const globalDestinations = app.getSettings()?.allEpisodes ?? []
 
   for (const payload of payloadCollection.values()) {
     await scheduleJob(payload, discord, settingsManager)
@@ -55,20 +61,20 @@ export async function scheduleAiringMessages (app: App): Promise<void> {
  * @param show current show to process
  * @returns collection of notification payloads
  */
-export function reduceEpisodes (acc: Collection<string, NotificationPayload>, show: Show): Collection<string, NotificationPayload> {
+function reduceEpisodes (
+  acc: Collection<string,
+  NotificationPayload>,
+  show: Show
+): Collection<string, NotificationPayload> {
   const momentUTC = moment.utc(new Date())
 
   for (const e of show.episodes) {
     const airDate = moment.utc(e.airDate)
-    const inTimeWindow = airDate.isSameOrAfter(momentUTC) && airDate.isSameOrBefore(momentUTC.clone().add('1', 'day'))
+    const inTimeWindow = airDate.isSameOrAfter(momentUTC) && airDate.isSameOrBefore(momentUTC.clone().add(10, 'minutes'))
 
     if (!inTimeWindow) continue
 
-    const airDateString = moment.utc(e.airDate)
-      .tz(process.env.TZ ?? 'America/Chicago')
-      .format('YYYY-MM-DD@HH:mm')
-
-    const key = `announceEpisodes:${airDateString}:${show.imdbId}:S${addLeadingZeros(e.season, 2)}`
+    const key = `announceEpisodes:${show.imdbId}:S${addLeadingZeros(e.season, 2)}`
 
     // define the default payload to use if one doesn't exist in the collection
     const defaultPayload: NotificationPayload = {
