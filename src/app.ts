@@ -64,19 +64,15 @@ export class App {
       void scheduleAiringMessages(this)
       void setRandomShowActivity(user)
 
-      schedule.scheduleJob('lifecycle:30min:updateBotActivity', '*/30 * * * *', () => {
-        void setRandomShowActivity(user)
-      })
-
       schedule.scheduleJob('lifecycle:10min:announceEpisodes', '5-55/10 * * * *', async () => {
         void scheduleAiringMessages(this)
+        void setRandomShowActivity(user)
       })
 
       schedule.scheduleJob('lifecycle:4hours:fetchEpisoded', '0 */4 * * *', async () => {
         setTVDBLoadingActivity(user)
         await pruneUnsubscribedShows()
         await checkForAiringEpisodes()
-        void setRandomShowActivity(user)
       })
 
       schedule.scheduleJob('lifecycle:daily:morningSummary', '0 8 * * *', async () => {
