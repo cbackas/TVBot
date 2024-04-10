@@ -1,4 +1,3 @@
-import * as dotenv from 'dotenv'
 import schedule from 'node-schedule'
 import { ChannelType, Client, Events, GatewayIntentBits } from 'discord.js'
 import { scheduleAiringMessages } from './lib/episodeNotifier'
@@ -7,8 +6,6 @@ import { checkForAiringEpisodes, pruneUnsubscribedShows, removeAllSubscriptions 
 import { type Settings, SettingsManager } from './lib/settingsManager'
 import { sendMorningSummary } from './lib/morningSummary'
 import { setRandomShowActivity, setTVDBLoadingActivity } from './lib/discordActivities'
-
-dotenv.config()
 
 /**
  * The main bot application
@@ -35,14 +32,12 @@ export class App {
     this.client = new Client({ intents: [GatewayIntentBits.Guilds] })
     this.commands = new CommandManager(this, this.clientId, this.token, this.guildId)
     this.settings = new SettingsManager()
-
-    void this.init()
   }
 
   /**
    * Async init function for app
    */
-  private readonly init = async (): Promise<void> => {
+  readonly init = async (): Promise<void> => {
     await this.settings.refresh()
     await this.commands.registerCommands()
     this.startBot()
@@ -126,4 +121,5 @@ export class App {
 }
 
 // make an instance of the application class
-(() => new App())()
+const app = new App()
+await app.init()
