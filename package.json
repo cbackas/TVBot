@@ -17,7 +17,7 @@
     "moment-timezone": "^0.5.43",
     "node-schedule": "^2.1.1",
     "parse-url": "^8.1.0",
-    "semantic-release": "^21.0.7",
+    "semantic-release": "^23.0.8",
     "sqlite": "^4.2.1"
   },
   "devDependencies": {
