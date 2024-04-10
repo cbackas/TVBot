@@ -198,7 +198,7 @@ export interface Character {
 }
 
 /** A company record */
-export type Company = Required<{
+export type Company = {
   activeDate?: string;
   aliases?: Alias[];
   country?: string;
@@ -214,7 +214,7 @@ export type Company = Required<{
   /** A parent company record */
   parentCompany?: ParentCompany;
   tagOptions?: TagOption[];
-}>
+}
 
 /** A parent company record */
 export interface ParentCompany {

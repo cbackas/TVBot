@@ -1,10 +1,10 @@
 import { ActionRowBuilder, type AnySelectMenuInteraction, ChannelType, type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, SlashCommandSubcommandBuilder, StringSelectMenuBuilder, type TextBasedChannel } from 'discord.js'
-import client from '../lib/prisma'
+import client from 'lib/prisma'
 import { type CommandV2 } from '../interfaces/command'
 import { type App } from '../app'
 import { ProgressError } from '../interfaces/error'
-import { ProgressMessageBuilder } from '../lib/progressMessages'
-import { pruneUnsubscribedShows } from 'src/lib/shows'
+import { ProgressMessageBuilder } from 'lib/progressMessages'
+import { pruneUnsubscribedShows } from 'lib/shows'
 
 export const command: CommandV2 = {
   slashCommand: {
