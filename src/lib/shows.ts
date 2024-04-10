@@ -37,7 +37,7 @@ export async function updateEpisodes (imdbId: string, tvdbId: number, providedSe
     throw new Error(`Could not fetch series data for ${imdbId}`)
   }
 
-  const timezone = getTimezone(series.latestNetwork.country ?? 'usa')
+  const timezone = getTimezone(series.latestNetwork?.country ?? 'usa')
   const airsTime = series.airsTime
 
   // filter out episodes that have already aired

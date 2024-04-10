@@ -723,11 +723,11 @@ export interface SeriesBaseRecord {
 }
 
 /** The extended record for a series. All series airs time like firstAired, lastAired, nextAired, etc. are in US EST for US series, and for all non-US series, the time of the show’s country capital or most populous city. For streaming services, is the official release time. See https://support.thetvdb.com/kb/faq.php?id=29. */
-export type SeriesExtendedRecord = Required<{
+export type SeriesExtendedRecord = {
   abbreviation?: string;
   /** A series airs day record */
   airsDays?: SeriesAirsDays;
-  airsTime?: string;
+  airsTime: string;
   aliases?: Alias[];
   artworks?: ArtworkExtendedRecord[];
   averageRuntime?: number;
@@ -736,16 +736,16 @@ export type SeriesExtendedRecord = Required<{
   country?: string;
   /** @format int64 */
   defaultSeasonType?: number;
-  episodes?: EpisodeBaseRecord[];
+  episodes: EpisodeBaseRecord[];
   firstAired?: string;
   lists?: ListBaseRecord[];
-  genres?: GenreBaseRecord[];
-  id?: number;
-  image?: string;
+  genres: GenreBaseRecord[];
+  id: number;
+  image: string;
   isOrderRandomized?: boolean;
   lastAired?: string;
   lastUpdated?: string;
-  name?: string;
+  name: string;
   nameTranslations?: string[];
   companies?: Company[];
   nextAired?: string;
@@ -757,20 +757,20 @@ export type SeriesExtendedRecord = Required<{
   /** A company record */
   latestNetwork?: Company;
   overviewTranslations?: string[];
-  remoteIds?: RemoteID[];
+  remoteIds: RemoteID[];
   /** @format double */
   score?: number;
-  seasons?: SeasonBaseRecord[];
+  seasons: SeasonBaseRecord[];
   seasonTypes?: SeasonType[];
   slug?: string;
   /** status record */
-  status?: Status;
+  status: Status;
   tags?: TagOption[];
   trailers?: Trailer[];
   /** translation extended record */
   translations?: TranslationExtended;
   year?: string;
-}>
+}
 
 /** source type record */
 export interface SourceType {

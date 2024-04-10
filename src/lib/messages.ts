@@ -3,13 +3,13 @@ import { type APIEmbed, type APIEmbedField } from 'discord.js'
 import { type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 export function buildShowEmbed (imdbId: string, tvdbSeries: SeriesExtendedRecord, destinations: Destination[] = []): APIEmbed {
-  const country = tvdbSeries.latestNetwork.country ?? 'usa'
+  const country = tvdbSeries.latestNetwork?.country ?? 'usa'
 
   // put together some basic data fields
   const fields: APIEmbedField[] = [
     {
       name: 'Network',
-      value: `${tvdbSeries.latestNetwork.name ?? 'unknown'} (${country.toUpperCase()})`,
+      value: `${tvdbSeries.latestNetwork?.name ?? 'unknown'} (${country.toUpperCase()})`,
       inline: true
     },
     {
