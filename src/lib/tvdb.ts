@@ -6,20 +6,26 @@ if (process.env.TVDB_USER_PIN === undefined) throw new Error('TVDB_USER_PIN is n
 
 let token: string | undefined
 
-async function getToken (): Promise<string> {
+async function getToken (): Promise<typeof token> {
   if (token != null) return token
 
-  const response = await axios.post('https://api4.thetvdb.com/v4/login', {
-    apikey: process.env.TVDB_API_KEY,
-    pin: process.env.TVDB_USER_PIN
-  })
+  try {
+    const response = await axios.post('https://api4.thetvdb.com/v4/login', {
+      apikey: process.env.TVDB_API_KEY,
+      pin: process.env.TVDB_USER_PIN
+    })
 
-  token = response.data.data.token
-  return response.data.data.token
+    token = response.data.data.token
+    return response.data.data.token
+  } catch (error) {
+    console.error('Error Getting TVDB Token:', error)
+  }
+  return undefined
 }
 
 async function axiosOptions (): Promise<AxiosRequestConfig<any>> {
   const token = await getToken()
+  if (token == null) throw new Error("Failed to get TVDB token, couldn't build axios options")
   return {
     baseURL: 'https://api4.thetvdb.com/v4',
     headers: {
@@ -29,18 +35,7 @@ async function axiosOptions (): Promise<AxiosRequestConfig<any>> {
 }
 
 export async function getSeriesByImdbId (imdbId: string): Promise<SeriesExtendedRecord | undefined> {
-  const options = await axiosOptions()
-
-  const response = await axios.get<{
-    data?: SearchByRemoteIdResult[]
-  }>(`/search/remoteid/${imdbId}`, options)
-
-  if (response.status !== 200) {
-    console.error(JSON.stringify(response.data))
-    return undefined
-  }
-
-  const data = response.data.data?.at(0)
+  const data = await searchSeriesByImdbId(imdbId)
   if (data == null) {
     return undefined
   } else if (data?.series?.id != null) {
@@ -51,35 +46,59 @@ export async function getSeriesByImdbId (imdbId: string): Promise<SeriesExtended
 }
 
 export async function getSeries (tvdbId: number): Promise<SeriesExtendedRecord | undefined> {
-  const options = await axiosOptions()
+  try {
+    const options = await axiosOptions()
+    const response = await axios.get<{
+      data?: SeriesExtendedRecord
+    }>(`/series/${tvdbId}/extended`, {
+      ...options,
+      headers: options.headers,
+      params: {
+        short: true,
+        meta: 'episodes'
+      }
+    })
 
-  const response = await axios.get<{
-    data?: SeriesExtendedRecord
-  }>(`/series/${tvdbId}/extended`, {
-    ...options,
-    headers: options.headers,
-    params: {
-      short: true,
-      meta: 'episodes'
-    }
-  })
+    return response.data?.data
+  } catch (error) {
+    console.error('Error Getting Extended Show Data:', error)
+  }
+  return undefined
+}
 
-  const series = response.data?.data
+async function searchSeriesByImdbId (imdbId: string): Promise<SearchByRemoteIdResult | undefined> {
+  try {
+    const options = await axiosOptions()
+    const response = await axios.get<{
+      data?: SearchByRemoteIdResult[]
+    }>(`/search/remoteid/${imdbId}`, options)
 
-  return series
+    return response.data.data?.at(0)
+  } catch (error) {
+    console.error('Error Searching Series by IMDB ID:', error)
+  }
+  return undefined
+}
+
+async function searchSeriesByName (query: string): Promise<SearchResult[] | undefined> {
+  try {
+    const options = await axiosOptions()
+    const response = await axios.get<{
+      data: SearchResult[]
+    }>(`/search?type=series&limit=10&q=${query}`, options)
+
+    const searchResult = response.data?.data
+    if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
+    return searchResult
+  } catch (error) {
+    console.error('Error Searching Series:', error)
+  }
+  return undefined
 }
 
 export async function getSeriesByName (query: string): Promise<SeriesExtendedRecord | undefined> {
-  const options = await axiosOptions()
-
-  const response = await axios.get<{
-    data: SearchResult[]
-  }>(`/search?type=series&limit=1&q=${query}`, options)
-
-  const searchResult = response.data?.data
+  const searchResult = await searchSeriesByName(query)
   if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
-
   const series = await getSeries(parseInt(searchResult[0].tvdb_id))
-
   return series
 }
