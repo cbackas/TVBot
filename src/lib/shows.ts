@@ -94,7 +94,11 @@ export async function checkForAiringEpisodes (): Promise<void> {
   })
 
   for (const show of shows) {
-    await updateEpisodes(show.imdbId, show.tvdbId)
+    try {
+      await updateEpisodes(show.imdbId, show.tvdbId)
+    } catch (error) {
+      console.error(`Error updating episodes for ${show.name} (${show.imdbId})`)
+    }
   }
 
   console.info('== Finished checking all shows for airing episodes ==')

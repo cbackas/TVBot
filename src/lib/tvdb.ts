@@ -1,4 +1,4 @@
-import axios, { type AxiosRequestConfig } from 'axios'
+import axios, { AxiosError, type AxiosRequestConfig } from 'axios'
 import { type SearchByRemoteIdResult, type SearchResult, type SeriesExtendedRecord } from '../interfaces/tvdb.generated'
 
 if (process.env.TVDB_API_KEY === undefined) throw new Error('TVDB_API_KEY is not defined')
@@ -18,9 +18,22 @@ async function getToken (): Promise<typeof token> {
     token = response.data.data.token
     return response.data.data.token
   } catch (error) {
-    console.error('Error Getting TVDB Token:', error)
+    logPossibleAxiosError(error, 'Getting TVDB Token')
   }
   return undefined
+}
+
+function logPossibleAxiosError (error: unknown, errorPrefix: string): void {
+  if (error instanceof AxiosError) {
+    console.error(`Error ${errorPrefix}:`, {
+      url: error.config?.url,
+      code: error.code,
+      data: error.response?.data,
+      status: error.response?.status
+    })
+  } else {
+    console.error(`Unexpected Error ${errorPrefix}:`, error)
+  }
 }
 
 async function axiosOptions (): Promise<AxiosRequestConfig<any>> {
@@ -61,7 +74,7 @@ export async function getSeries (tvdbId: number): Promise<SeriesExtendedRecord |
 
     return response.data?.data
   } catch (error) {
-    console.error('Error Getting Extended Show Data:', error)
+    logPossibleAxiosError(error, 'Getting Extended Show Data')
   }
   return undefined
 }
@@ -75,7 +88,7 @@ async function searchSeriesByImdbId (imdbId: string): Promise<SearchByRemoteIdRe
 
     return response.data.data?.at(0)
   } catch (error) {
-    console.error('Error Searching Series by IMDB ID:', error)
+    logPossibleAxiosError(error, 'Searching Series by IMDB ID')
   }
   return undefined
 }
@@ -91,7 +104,7 @@ async function searchSeriesByName (query: string): Promise<SearchResult[] | unde
     if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
     return searchResult
   } catch (error) {
-    console.error('Error Searching Series:', error)
+    logPossibleAxiosError(error, 'Searching Series')
   }
   return undefined
 }
