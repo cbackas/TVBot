@@ -1,10 +1,10 @@
-FROM node:18-slim as build
+FROM node:20-slim as build
 WORKDIR /build
 COPY . .
 RUN npm ci
 RUN npm run build
 
-FROM node:18-slim as prod
+FROM node:20-slim as prod
 WORKDIR /app
 RUN apt-get update && apt-get -y install openssl
 RUN npm install pm2 prisma --save-dev && npm install @prisma/client

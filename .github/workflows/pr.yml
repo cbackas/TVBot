@@ -21,12 +21,12 @@ jobs:
     steps:
       # pull the repo
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       # setup node
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       # install dependencies
       - name: Install Node.js dependencies
         run: npm ci
@@ -43,12 +43,12 @@ jobs:
     steps:
       # pull the repo
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       # setup node
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       # install dependencies
       - name: Install Node.js dependencies
         run: npm ci
@@ -60,7 +60,7 @@ jobs:
     steps:
       # pull the repo
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # just check that it builds, dont push it anywhere cuz whatever
       - name: Build and push
         uses: docker/build-push-action@v3
