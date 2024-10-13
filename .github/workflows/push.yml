@@ -20,6 +20,8 @@ jobs:
           node-version: 20
       - name: Install Semantic Release
         run: npm install semantic-release @codedependant/semantic-release-docker conventional-changelog-eslint
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
