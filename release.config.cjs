@@ -31,10 +31,6 @@ module.exports = {
         dockerImage: 'tvbot'
       }
     ]
-<<<<<<< Updated upstream
-  ]
-=======
   ],
   preset: 'eslint'
->>>>>>> Stashed changes
 }
