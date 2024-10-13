@@ -2,7 +2,7 @@
 /* eslint-disable no-template-curly-in-string */
 /**
  * @typedef {import('semantic-release').Options} Options
- */
+*/
 
 const releaseRules = [
   { tag: 'Breaking', release: 'major' },
@@ -48,15 +48,15 @@ module.exports = {
       }
     ],
     [
-        '@codedependant/semantic-release-docker',
-        {
-          dockerTags: ['{{version}}', 'latest'],
-          dockerFile: 'Dockerfile',
-          dockerPlatform: ['linux/amd64', 'linux/arm64'],
-          dockerRegistry: 'ghcr.io',
-          dockerProject: 'cbackas',
-          dockerImage: 'tvbot'
-        }
-      ]
+      '@codedependant/semantic-release-docker',
+      {
+        dockerTags: ['{{version}}', 'latest'],
+        dockerFile: 'Dockerfile',
+        dockerPlatform: ['linux/amd64', 'linux/arm64'],
+        dockerRegistry: 'ghcr.io',
+        dockerProject: 'cbackas',
+        dockerImage: 'tvbot'
+      }
+    ]
   ]
 }
