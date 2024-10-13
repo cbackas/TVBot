@@ -7,20 +7,20 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@codedependant/semantic-release-docker": "^5.0.3",
     "@prisma/client": "^5.0.0",
     "axios": "^1.4.0",
     "city-timezones": "^1.2.1",
-    "conventional-changelog-eslint": "^6.0.0",
     "discord.js": "^14.11.0",
     "dotenv": "^16.1.4",
     "moment-timezone": "^0.5.43",
     "node-schedule": "^2.1.1",
     "parse-url": "^8.1.0",
-    "semantic-release": "^23.1.1",
     "sqlite": "^4.2.1"
   },
   "devDependencies": {
+    "conventional-changelog-eslint": "^6.0.0",
+    "semantic-release": "^24.1.2",
+    "@codedependant/semantic-release-docker": "^5.0.3",
     "@es-exec/esbuild-plugin-start": "^0.0.4",
     "@types/node-schedule": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^5.59.9",
