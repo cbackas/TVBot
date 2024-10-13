@@ -52,6 +52,7 @@ module.exports = {
         {
           dockerTags: ['{{version}}', 'latest'],
           dockerFile: 'Dockerfile',
+          dockerPlatform: ['linux/amd64', 'linux/arm64'],
           dockerRegistry: 'ghcr.io',
           dockerProject: 'cbackas',
           dockerImage: 'tvbot'
