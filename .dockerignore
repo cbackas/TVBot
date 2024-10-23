@@ -8,3 +8,4 @@ docker-compose.yml
 README.md
 data/
 mongodata
+fly.toml
