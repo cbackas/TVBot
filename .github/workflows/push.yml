@@ -30,7 +30,7 @@ jobs:
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
         run: npx semantic-release
   notify:
-    name: Discord Notify
+    name: Deploy to Fly.io
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     concurrency: push-concurrency
@@ -40,7 +40,7 @@ jobs:
         id: tag
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: "flyctl deploy -image ghcr.io/cbackas/tvbot:${{ env.TAG_NAME }}"
+      - run: "flyctl deploy --image ghcr.io/cbackas/tvbot:${{ env.TAG_NAME }}"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - name: Discord notification
@@ -48,4 +48,4 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: 'Version {{ TAG_NAME }} of {{ EVENT_PAYLOAD.repository.full_name }} has been released!'
+          args: 'Version {{ TAG_NAME }} of {{ EVENT_PAYLOAD.repository.full_name }} has been released and deployed'
