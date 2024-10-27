@@ -1,20 +1,33 @@
-import { type AnySelectMenuInteraction, type AutocompleteInteraction, type ChatInputCommandInteraction, Collection, type Interaction, REST, type RESTPostAPIChatInputApplicationCommandsJSONBody, type RESTPostAPIContextMenuApplicationCommandsJSONBody, Routes, type SlashCommandBuilder } from 'discord.js'
-import { type App } from '../app'
-import { type CommandV2 } from '../interfaces/command'
+import {
+  type AnySelectMenuInteraction,
+  type AutocompleteInteraction,
+  type ChatInputCommandInteraction,
+  Collection,
+  type Interaction,
+  REST,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type RESTPostAPIContextMenuApplicationCommandsJSONBody,
+  Routes,
+  type SlashCommandBuilder,
+} from "discord.js"
+import { type App } from "app.ts"
+import { type CommandV2 } from "interfaces/command.ts"
 
-interface Getter<TInput> { command: TInput }
+interface Getter<TInput> {
+  command: TInput
+}
 
 /**
  * all commands required here will be registered on app startup
  */
 const commandModules: Array<Getter<CommandV2>> = [
-  require('../commands/post'),
-  require('../commands/link'),
-  require('../commands/unlink'),
-  require('../commands/list'),
-  require('../commands/search'),
-  require('../commands/upcoming'),
-  require('../commands/setting')
+  require("../commands/post"),
+  require("../commands/link"),
+  require("../commands/unlink"),
+  require("../commands/list"),
+  require("../commands/search"),
+  require("../commands/upcoming"),
+  require("../commands/setting"),
 ]
 
 export class CommandManager {
@@ -25,7 +38,7 @@ export class CommandManager {
   private readonly token: string
   private readonly guildId: string
 
-  constructor (app: App, clientId: string, token: string, guildId: string) {
+  constructor(app: App, clientId: string, token: string, guildId: string) {
     this.app = app
     this.clientId = clientId
     this.token = token
@@ -36,7 +49,9 @@ export class CommandManager {
    * Register all commands with Discord
    */
   public registerCommands = async (): Promise<void> => {
-    type SlashCommandData = RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody
+    type SlashCommandData =
+      | RESTPostAPIChatInputApplicationCommandsJSONBody
+      | RESTPostAPIContextMenuApplicationCommandsJSONBody
     const slashCommandData: SlashCommandData[] = []
 
     // loop through command modules
@@ -49,31 +64,52 @@ export class CommandManager {
     }
 
     // when testing locally you dont always need to register commands
-    if (process.env.REGISTER_COMMANDS === 'false') return
+    if (process.env.REGISTER_COMMANDS === "false") return
 
     try {
-      console.log('Starting to register slash commands')
-      const rest = new REST({ version: '10' }).setToken(this.token)
-      await rest.put(Routes.applicationGuildCommands(this.clientId, this.guildId), { body: slashCommandData })
-      console.log('Slash commands registered:\n' + this.commands.map((cmd) => cmd.slashCommand.main.name).join('\n'))
+      console.log("Starting to register slash commands")
+      const rest = new REST({ version: "10" }).setToken(this.token)
+      await rest.put(
+        Routes.applicationGuildCommands(this.clientId, this.guildId),
+        { body: slashCommandData },
+      )
+      console.log(
+        "Slash commands registered:\n" +
+          this.commands.map((cmd) => cmd.slashCommand.main.name).join("\n"),
+      )
     } catch (error) {
       console.error(error)
     }
   }
 
-  public commandInteractionHandler = async (interaction: ChatInputCommandInteraction): Promise<void> => {
+  public commandInteractionHandler = async (
+    interaction: ChatInputCommandInteraction,
+  ): Promise<void> => {
     const command = this.commands.get(interaction.commandName)
     if (command === undefined) return
 
     // checks if the recieved has exactly the same subcommand and/or subcommand group as the command
     const subcommands = command.slashCommand.subCommands
     const subgroups = command.slashCommand.subGroups
-    const hasSubCommands = subcommands === undefined || subcommands?.some((subcommand) => subcommand.name === interaction.options.getSubcommand())
-    const hasSubGroups = subgroups == null || subgroups?.some((subgroup) => subgroup.main.name === interaction.options.getSubcommandGroup())
-    const hasSubgroupSubCommands = hasSubGroups || subgroups?.some((subgroup) => subgroup.subCommands.some((subcommand) => subcommand.name === interaction.options.getSubcommand()))
+    const hasSubCommands = subcommands === undefined ||
+      subcommands?.some((subcommand) =>
+        subcommand.name === interaction.options.getSubcommand()
+      )
+    const hasSubGroups = subgroups == null ||
+      subgroups?.some((subgroup) =>
+        subgroup.main.name === interaction.options.getSubcommandGroup()
+      )
+    const hasSubgroupSubCommands = hasSubGroups ||
+      subgroups?.some((subgroup) =>
+        subgroup.subCommands.some((subcommand) =>
+          subcommand.name === interaction.options.getSubcommand()
+        )
+      )
     if (!hasSubCommands && !hasSubGroups && !hasSubgroupSubCommands) return
 
-    console.debug(`[Command Recieved] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`)
+    console.debug(
+      `[Command Recieved] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`,
+    )
 
     await interaction.deferReply({ ephemeral: true })
 
@@ -81,12 +117,18 @@ export class CommandManager {
       await command.executeCommand(this.app, interaction)
     } catch (error) {
       console.error(error)
-      await interaction.editReply('There was an error while executing this command!')
+      await interaction.editReply(
+        "There was an error while executing this command!",
+      )
     }
   }
 
-  public selectMenuInteractionHandler = async (interaction: AnySelectMenuInteraction): Promise<void> => {
-    const command = this.commands.find(c => c.selectMenuIds?.includes(interaction.customId))
+  public selectMenuInteractionHandler = async (
+    interaction: AnySelectMenuInteraction,
+  ): Promise<void> => {
+    const command = this.commands.find((c) =>
+      c.selectMenuIds?.includes(interaction.customId)
+    )
     if (command == null || command.executeSelectMenu == null) return
 
     await interaction.deferUpdate()
@@ -95,11 +137,15 @@ export class CommandManager {
       await command.executeSelectMenu(this.app, interaction)
     } catch (error) {
       console.error(error)
-      await interaction.editReply('There was an error while executing this command!')
+      await interaction.editReply(
+        "There was an error while executing this command!",
+      )
     }
   }
 
-  public autocompleteInteractionHandler = async (interaction: AutocompleteInteraction): Promise<void> => {
+  public autocompleteInteractionHandler = async (
+    interaction: AutocompleteInteraction,
+  ): Promise<void> => {
     const command = this.commands.get(interaction.commandName)
     if (command == null || command.executeAutoComplate == null) return
 
@@ -114,10 +160,20 @@ export class CommandManager {
    * All discord interactions come through here, this function will route them to the correct handler
    * @param interaction discord interaction
    */
-  public interactionHandler = async (interaction: Interaction): Promise<void> => {
-    if (interaction.isChatInputCommand()) { await this.commandInteractionHandler(interaction); return }
-    if (interaction.isAnySelectMenu()) { await this.selectMenuInteractionHandler(interaction); return }
-    if (interaction.isAutocomplete()) { await this.autocompleteInteractionHandler(interaction) }
+  public interactionHandler = async (
+    interaction: Interaction,
+  ): Promise<void> => {
+    if (interaction.isChatInputCommand()) {
+      await this.commandInteractionHandler(interaction)
+      return
+    }
+    if (interaction.isAnySelectMenu()) {
+      await this.selectMenuInteractionHandler(interaction)
+      return
+    }
+    if (interaction.isAutocomplete()) {
+      await this.autocompleteInteractionHandler(interaction)
+    }
   }
 }
 
@@ -126,16 +182,21 @@ export class CommandManager {
  * @param slashCommand Custom command SlashCommand object that is used to build the discord.js SlashCommandBuilder
  * @returns regular SlashCommandBuilder
  */
-function buildSlashCommand (slashCommand: CommandV2['slashCommand']): SlashCommandBuilder {
+function buildSlashCommand(
+  slashCommand: CommandV2["slashCommand"],
+): SlashCommandBuilder {
   let builtCommand = slashCommand.main as SlashCommandBuilder
   // adds subGroups to the slash command
   const subGroups = slashCommand.subGroups
   builtCommand = (subGroups ?? []).reduce((accSubGroups, currSubGroup) => {
     const subGroupCommands = currSubGroup.subCommands
-    const fullSubgroup = subGroupCommands.reduce((accSubGroupCommands, currSubCommand) => {
-      accSubGroupCommands.addSubcommand(currSubCommand)
-      return accSubGroupCommands
-    }, currSubGroup.main)
+    const fullSubgroup = subGroupCommands.reduce(
+      (accSubGroupCommands, currSubCommand) => {
+        accSubGroupCommands.addSubcommand(currSubCommand)
+        return accSubGroupCommands
+      },
+      currSubGroup.main,
+    )
 
     accSubGroups.addSubcommandGroup(fullSubgroup)
     return accSubGroups

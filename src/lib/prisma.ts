@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client"
 
 declare global {
   // eslint-disable-next-line no-var
@@ -6,11 +6,11 @@ declare global {
 }
 
 export const DBChannelType = {
-  FORUM: 'FORUM',
-  TEXT: 'TEXT'
+  FORUM: "FORUM",
+  TEXT: "TEXT",
 } as const
 
 const client = globalThis.prisma ?? new PrismaClient()
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = client
+if (process.env.NODE_ENV !== "production") globalThis.prisma = client
 
 export default client

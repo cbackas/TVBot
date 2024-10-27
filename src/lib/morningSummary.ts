@@ -1,19 +1,22 @@
-import { type APIEmbed, type Client } from 'discord.js'
-import { type Settings } from './settingsManager'
-import { getUpcomingEpisodesEmbed } from './upcoming'
-import client from './prisma'
-import { type Show } from '@prisma/client'
-import { isTextChannel } from './episodeNotifier'
+import { type APIEmbed, type Client } from "discord.js"
+import { type Settings } from "lib/settingsManager.ts"
+import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
+import client from "lib/prisma.ts"
+import { type Show } from "@prisma/client"
+import { isTextChannel } from "lib/episodeNotifier.ts"
 
-export async function sendMorningSummary (settings: Settings, c: Client): Promise<void> {
+export async function sendMorningSummary(
+  settings: Settings,
+  c: Client,
+): Promise<void> {
   const shows: Show[] = await client.show.findMany({
     where: {
       episodes: {
         some: {
-          messageSent: false
-        }
-      }
-    }
+          messageSent: false,
+        },
+      },
+    },
   })
 
   const embed: APIEmbed = await getUpcomingEpisodesEmbed(shows, 1)
@@ -23,8 +26,8 @@ export async function sendMorningSummary (settings: Settings, c: Client): Promis
     if (channel == null || !isTextChannel(channel)) continue
 
     await channel.send({
-      content: '',
-      embeds: [embed]
+      content: "",
+      embeds: [embed],
     })
   }
 }

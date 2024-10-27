@@ -1,49 +1,62 @@
-import { type AutocompleteInteraction, type ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
-import client from '../lib/prisma'
-import { type CommandV2 } from '../interfaces/command'
-import { type App } from '../app'
-import { getSeriesByImdbId } from '../lib/tvdb'
-import { showSearchAutocomplete } from '../lib/autocomplete'
-import { type Show } from '@prisma/client'
-import { ProgressError } from '../interfaces/error'
-import { getUpcomingEpisodesEmbed } from '../lib/upcoming'
+import {
+  type AutocompleteInteraction,
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+  SlashCommandSubcommandBuilder,
+} from "discord.js"
+import client from "lib/prisma.ts"
+import { type CommandV2 } from "interfaces/command.ts"
+import { type App } from "app.ts"
+import { getSeriesByImdbId } from "lib/tvdb.ts"
+import { showSearchAutocomplete } from "lib/autocomplete.ts"
+import { type Show } from "@prisma/client"
+import { ProgressError } from "interfaces/error.ts"
+import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
 
 export const command: CommandV2 = {
   slashCommand: {
     main: new SlashCommandBuilder()
-      .setName('upcoming')
-      .setDescription('Get upcoming episodes')
+      .setName("upcoming")
+      .setDescription("Get upcoming episodes")
       .setDMPermission(false),
     subCommands: [
       new SlashCommandSubcommandBuilder()
-        .setName('all')
-        .setDescription('Get upcoming episodes this week for all tracked shows'),
+        .setName("all")
+        .setDescription(
+          "Get upcoming episodes this week for all tracked shows",
+        ),
       new SlashCommandSubcommandBuilder()
-        .setName('here')
-        .setDescription('Get upcoming episodes for this channel'),
+        .setName("here")
+        .setDescription("Get upcoming episodes for this channel"),
       new SlashCommandSubcommandBuilder()
-        .setName('show')
-        .setDescription('Get upcoming episodes for a show')
-        .addStringOption(option => option.setName('query')
-          .setDescription('Search for a show saved in the DB. Use the autocomplete!')
-          .setAutocomplete(true))
-    ]
+        .setName("show")
+        .setDescription("Get upcoming episodes for a show")
+        .addStringOption((option) =>
+          option.setName("query")
+            .setDescription(
+              "Search for a show saved in the DB. Use the autocomplete!",
+            )
+            .setAutocomplete(true)
+        ),
+    ],
   },
-  async executeCommand (_app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(_app: App, interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     let s: Show[] = []
 
     try {
       switch (subCommand) {
-        case 'all':
+        case "all":
           s = await getAllShows()
           break
-        case 'here':
+        case "here":
           s = await getShowsHere(interaction.channelId)
           break
-        case 'show':
-          s = [await getShowByImdbId(interaction.options.getString('query', true))]
+        case "show":
+          s = [
+            await getShowByImdbId(interaction.options.getString("query", true)),
+          ]
           break
       }
     } catch (error) {
@@ -52,31 +65,33 @@ export const command: CommandV2 = {
       }
     }
 
-    if (s == null || s.length === 0) return await interaction.editReply('No shows found')
+    if (s == null || s.length === 0) {
+      return await interaction.editReply("No shows found")
+    }
 
     // const message = await getUpcomingEpisodesMessage(s, 7)
     const embed = await getUpcomingEpisodesEmbed(s, 7)
 
     return await interaction.editReply({
-      content: '',
-      embeds: [embed]
+      content: "",
+      embeds: [embed],
     })
   },
-  async executeAutoComplate (_app: App, interaction: AutocompleteInteraction) {
+  async executeAutoComplate(_app: App, interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
-  }
+  },
 }
 
-async function getAllShows (): Promise<Show[]> {
+async function getAllShows(): Promise<Show[]> {
   const shows = await client.show.findMany({
     where: {
       episodes: {
-        some: { messageSent: false }
-      }
-    }
+        some: { messageSent: false },
+      },
+    },
   })
 
-  if (shows.length === 0) throw new ProgressError('No shows found')
+  if (shows.length === 0) throw new ProgressError("No shows found")
 
   return shows
 }
@@ -84,16 +99,18 @@ async function getAllShows (): Promise<Show[]> {
 /**
  * Get all shows that are linked to this channel
  */
-async function getShowsHere (channelId: string): Promise<Show[]> {
+async function getShowsHere(channelId: string): Promise<Show[]> {
   const shows = await client.show.findMany({
     where: {
       destinations: {
-        some: { channelId }
-      }
-    }
+        some: { channelId },
+      },
+    },
   })
 
-  if (shows.length === 0) throw new ProgressError('No shows linked to this channel')
+  if (shows.length === 0) {
+    throw new ProgressError("No shows linked to this channel")
+  }
 
   return shows
 }
@@ -101,22 +118,28 @@ async function getShowsHere (channelId: string): Promise<Show[]> {
 /**
  * Get the show by IMDB ID in the querys
  */
-async function getShowByImdbId (query: string): Promise<Show> {
+async function getShowByImdbId(query: string): Promise<Show> {
   // check that the query is an IMDB ID
-  const imdbId = query.toLowerCase().startsWith('tt') ? query : undefined
-  if (imdbId == null) throw new ProgressError('Invalid query')
+  const imdbId = query.toLowerCase().startsWith("tt") ? query : undefined
+  if (imdbId == null) throw new ProgressError("Invalid query")
 
   // turn IMDB ID into a series
   const series = await getSeriesByImdbId(imdbId)
-  if (series == null) throw new ProgressError(`No show found with IMDB ID \`${imdbId}\``)
+  if (series == null) {
+    throw new ProgressError(`No show found with IMDB ID \`${imdbId}\``)
+  }
 
   const show = await client.show.findUnique({
     where: {
-      imdbId
-    }
+      imdbId,
+    },
   })
 
-  if (show == null) throw new ProgressError(`${series.name} is not linked to any channels. Use \`/link\` or \`/post\` to subscribe a channel to episode notifications.`)
+  if (show == null) {
+    throw new ProgressError(
+      `${series.name} is not linked to any channels. Use \`/link\` or \`/post\` to subscribe a channel to episode notifications.`,
+    )
+  }
 
   return show
 }

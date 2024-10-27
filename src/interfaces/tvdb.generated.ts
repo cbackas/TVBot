@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// deno-fmt-ignore-file
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##

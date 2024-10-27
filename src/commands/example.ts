@@ -1,13 +1,20 @@
-import { type CacheType, type ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { type App } from '../app'
-import { type CommandV2 } from '../interfaces/command'
+import {
+  type CacheType,
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js"
+import { type App } from "app.ts"
+import { type CommandV2 } from "interfaces/command.ts"
 
 const slashCommand = new SlashCommandBuilder()
-  .setName('ping')
-  .setDescription('Replies with Pong!')
+  .setName("ping")
+  .setDescription("Replies with Pong!")
 
-const executeCommand = async (app: App, interaction: ChatInputCommandInteraction<CacheType>): Promise<void> => {
-  await interaction.reply('Pong!')
+const executeCommand = async (
+  app: App,
+  interaction: ChatInputCommandInteraction<CacheType>,
+): Promise<void> => {
+  await interaction.reply("Pong!")
 }
 
 /**
@@ -15,7 +22,7 @@ const executeCommand = async (app: App, interaction: ChatInputCommandInteraction
  */
 export const command: CommandV2 = {
   slashCommand: {
-    main: slashCommand
+    main: slashCommand,
   },
-  executeCommand
+  executeCommand,
 }

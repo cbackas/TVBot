@@ -1,4 +1,8 @@
-import { type ChatInputCommandInteraction, Collection, type Message } from 'discord.js'
+import {
+  type ChatInputCommandInteraction,
+  Collection,
+  type Message,
+} from "discord.js"
 
 interface Step {
   status: typeof StepStatus[keyof typeof StepStatus]
@@ -6,9 +10,9 @@ interface Step {
 }
 
 export const StepStatus = {
-  PENDING: '🔴' as const,
-  IN_PROGRESS: '🟡' as const,
-  COMPLETE: '🟢' as const
+  PENDING: "🔴" as const,
+  IN_PROGRESS: "🟡" as const,
+  COMPLETE: "🟢" as const,
 } as const
 
 export class ProgressMessageBuilder {
@@ -19,7 +23,7 @@ export class ProgressMessageBuilder {
   private currentStep = 0
   private totalSteps = 0
 
-  constructor (interaction?: ChatInputCommandInteraction) {
+  constructor(interaction?: ChatInputCommandInteraction) {
     this.steps = new Collection<number, Step>()
     this.interaction = interaction
   }
@@ -34,7 +38,7 @@ export class ProgressMessageBuilder {
 
     this.steps.set(this.totalSteps, {
       status: StepStatus.PENDING,
-      message
+      message,
     })
 
     return this
@@ -46,7 +50,10 @@ export class ProgressMessageBuilder {
    * @param status desired status
    * @returns ProgressMessageBuilder object
    */
-  setStatus = (stepNumber: number, status: Step['status']): ProgressMessageBuilder => {
+  setStatus = (
+    stepNumber: number,
+    status: Step["status"],
+  ): ProgressMessageBuilder => {
     const step = this.steps.get(stepNumber)
 
     if (step === undefined) throw new Error(`Step ${stepNumber} does not exist`)
@@ -80,15 +87,24 @@ export class ProgressMessageBuilder {
    * only works if the ProgressMessageBuilder was initialized with a chat interaction
    * @returns the sent discord message
    */
-  sendNextStep = async (additionalMessage?: string): Promise<Message<boolean>> => {
-    if (this.interaction == null) throw new Error('ProgressMessageBuilder was not initialized with an interaction')
+  sendNextStep = async (
+    additionalMessage?: string,
+  ): Promise<Message<boolean>> => {
+    if (this.interaction == null) {
+      throw new Error(
+        "ProgressMessageBuilder was not initialized with an interaction",
+      )
+    }
 
     // send the message to the user
-    return await this.interaction.editReply(this.nextStep() + (additionalMessage !== undefined ? `\n\n${additionalMessage}` : ''))
+    return await this.interaction.editReply(
+      this.nextStep() +
+        (additionalMessage !== undefined ? `\n\n${additionalMessage}` : ""),
+    )
   }
 
   public toString = (): string => {
     const messages = this.steps.map((step) => `${step.status} ${step.message}`)
-    return messages.join('\n')
+    return messages.join("\n")
   }
 }

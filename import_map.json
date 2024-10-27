@@ -1,5 +1,7 @@
 {
   "imports": {
-    "lib/": "./src/lib/"
+    "app.ts": "./src/app.ts",
+    "lib/": "./src/lib/",
+    "interfaces/": "./src/interfaces/"
   }
 }
