@@ -5,11 +5,12 @@ import {
   type InteractionResponse,
   type Message,
   type SlashCommandBuilder,
+  type SlashCommandOptionsOnlyBuilder,
   type SlashCommandSubcommandBuilder,
   type SlashCommandSubcommandGroupBuilder,
   type SlashCommandSubcommandsOnlyBuilder,
-} from "discord.js"
-import { type App } from "@app"
+} from "npm:discord.js"
+import { type App } from "app.ts"
 
 type ExecuteFunction = void | Message<boolean> | InteractionResponse<boolean>
 
@@ -19,6 +20,7 @@ export interface CommandV2 {
       | SlashCommandBuilder
       | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
       | SlashCommandSubcommandsOnlyBuilder
+      | SlashCommandOptionsOnlyBuilder
     subCommands?: SlashCommandSubcommandBuilder[]
     subGroups?: Array<{
       main: SlashCommandSubcommandGroupBuilder

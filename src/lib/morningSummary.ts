@@ -1,8 +1,8 @@
-import { type APIEmbed, type Client } from "discord.js"
+import { type APIEmbed, type Client } from "npm:discord.js"
 import { type Settings } from "lib/settingsManager.ts"
 import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
 import client from "lib/prisma.ts"
-import { type Show } from "@prisma/client"
+import { type Show } from "npm:@prisma/client"
 import { isTextChannel } from "lib/episodeNotifier.ts"
 
 export async function sendMorningSummary(

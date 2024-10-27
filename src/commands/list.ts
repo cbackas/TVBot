@@ -6,11 +6,11 @@ import {
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
   type TextBasedChannel,
-} from "discord.js"
+} from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { type App } from "app.ts"
-import { type Show } from "@prisma/client"
+import { type Show } from "npm:@prisma/client"
 
 const subCommands = {
   ALL: "all",

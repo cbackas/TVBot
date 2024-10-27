@@ -2,7 +2,7 @@ import {
   type CacheType,
   type ChatInputCommandInteraction,
   SlashCommandBuilder,
-} from "discord.js"
+} from "npm:discord.js"
 import { type App } from "app.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 

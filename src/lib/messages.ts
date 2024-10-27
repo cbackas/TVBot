@@ -1,5 +1,5 @@
-import { type Destination } from "@prisma/client"
-import { type APIEmbed, type APIEmbedField } from "discord.js"
+import { type Destination } from "npm:@prisma/client"
+import { type APIEmbed, type APIEmbedField } from "npm:discord.js"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 
 export function buildShowEmbed(

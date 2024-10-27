@@ -1,4 +1,4 @@
-import parseUrl from "parse-url"
+import parseUrl from "npm:parse-url"
 
 export function addLeadingZeros(num: number, totalLength: number): string {
   return String(num).padStart(totalLength, "0")

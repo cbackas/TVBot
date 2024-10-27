@@ -8,7 +8,7 @@ import {
   SlashCommandBuilder,
   type TextBasedChannel,
   type ThreadChannel,
-} from "discord.js"
+} from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
@@ -20,7 +20,7 @@ import { ProgressError } from "interfaces/error.ts"
 import { isForumChannel } from "interfaces/discord.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
-import { type Destination, type Show } from "@prisma/client"
+import { type Destination, type Show } from "npm:@prisma/client"
 import { parseIMDBIds } from "lib/util.ts"
 
 interface SeriesWrapper {

@@ -1,7 +1,7 @@
 import "jsr:@std/dotenv/load"
 import process from "node:process"
-import schedule from "node-schedule"
-import { ChannelType, Client, Events, GatewayIntentBits } from "discord.js"
+import schedule from "npm:node-schedule"
+import { ChannelType, Client, Events, GatewayIntentBits } from "npm:discord.js"
 import { scheduleAiringMessages } from "lib/episodeNotifier.ts"
 import { CommandManager } from "lib/commandManager.ts"
 import {

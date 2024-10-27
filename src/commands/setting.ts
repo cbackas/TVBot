@@ -7,12 +7,12 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
-} from "discord.js"
+} from "npm:discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
 import { type App } from "app.ts"
 import { type SettingsManager } from "lib/settingsManager.ts"
-import { type Destination } from "@prisma/client"
+import { type Destination } from "npm:@prisma/client"
 
 export const command: CommandV2 = {
   slashCommand: {

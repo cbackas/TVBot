@@ -1,5 +1,5 @@
 import process from "node:process"
-import axios, { AxiosError, type AxiosRequestConfig } from "axios"
+import axios, { AxiosError, type AxiosRequestConfig } from "npm:axios"
 import {
   type SearchByRemoteIdResult,
   type SearchResult,

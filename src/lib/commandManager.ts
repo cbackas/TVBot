@@ -10,7 +10,7 @@ import {
   type RESTPostAPIContextMenuApplicationCommandsJSONBody,
   Routes,
   type SlashCommandBuilder,
-} from "discord.js"
+} from "npm:discord.js"
 import { type App } from "app.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 
@@ -22,13 +22,13 @@ interface Getter<TInput> {
  * all commands required here will be registered on app startup
  */
 const commandModules: Array<Getter<CommandV2>> = [
-  require("../commands/post"),
-  require("../commands/link"),
-  require("../commands/unlink"),
-  require("../commands/list"),
-  require("../commands/search"),
-  require("../commands/upcoming"),
-  require("../commands/setting"),
+  await import("commands/post.ts"),
+  await import("commands/link.ts"),
+  await import("commands/unlink.ts"),
+  await import("commands/list.ts"),
+  await import("commands/search.ts"),
+  await import("commands/upcoming.ts"),
+  await import("commands/setting.ts"),
 ]
 
 export class CommandManager {

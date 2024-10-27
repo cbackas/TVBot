@@ -2,7 +2,7 @@ import {
   type ChatInputCommandInteraction,
   Collection,
   type Message,
-} from "discord.js"
+} from "npm:discord.js"
 
 interface Step {
   status: typeof StepStatus[keyof typeof StepStatus]

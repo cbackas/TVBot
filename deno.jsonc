@@ -1,11 +1,18 @@
 {
+  "tasks": {
+    "build": "node esbuild.mjs",
+    "dev": "export NODE_ENV=development; node --enable-source-maps esbuild.mjs",
+    "lint": "deno lint",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
+  },
   "compilerOptions": {
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
   },
-  "importMap": "import_map.json",
   "nodeModules": true,
+  "importMap": "import_map.json",
   "lint": {
     "include": ["src/"],
     "exclude": ["src/testdata/", "src/fixtures/**/*.ts"],
@@ -19,5 +26,6 @@
     "options": {
       "semiColons": false
     }
-  }
+  },
+  "exclude": ["dist/"]
 }

@@ -1,5 +1,5 @@
 import process from "node:process"
-import { type Show } from "@prisma/client"
+import { type Show } from "npm:@prisma/client"
 import {
   type AnyThreadChannel,
   type Channel,
@@ -7,9 +7,9 @@ import {
   type Client,
   Collection,
   type TextChannel,
-} from "discord.js"
-import moment from "moment-timezone"
-import schedule, { type Job } from "node-schedule"
+} from "npm:discord.js"
+import moment from "npm:moment-timezone"
+import schedule, { type Job } from "npm:node-schedule"
 import { type App } from "app.ts"
 import { markMessageSent } from "lib/shows.ts"
 import client from "lib/prisma.ts"

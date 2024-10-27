@@ -1,4 +1,4 @@
-import * as cityTimeZones from "city-timezones"
+import * as cityTimeZones from "npm:city-timezones"
 
 /**
  * Returns the offset range for the given city or region
