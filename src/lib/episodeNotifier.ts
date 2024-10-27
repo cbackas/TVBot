@@ -1,3 +1,4 @@
+import process from "node:process"
 import { type Show } from "@prisma/client"
 import {
   type AnyThreadChannel,
@@ -9,7 +10,7 @@ import {
 } from "discord.js"
 import moment from "moment-timezone"
 import schedule, { type Job } from "node-schedule"
-import { type App } from "@app"
+import { type App } from "app.ts"
 import { markMessageSent } from "lib/shows.ts"
 import client from "lib/prisma.ts"
 import { type SettingsManager } from "lib/settingsManager.ts"
@@ -130,7 +131,7 @@ async function scheduleJob(
 
   const existingJob = schedule.scheduledJobs[key]
   if (existingJob != null) {
-    const nextInvocation: Date = (existingJob.nextInvocation() as any).toDate()
+    const nextInvocation: Date = existingJob.nextInvocation()
 
     // if the next invocation is different than the air date, reschedule the job
     if (nextInvocation.toISOString() !== airDateLocal.toDate().toISOString()) {

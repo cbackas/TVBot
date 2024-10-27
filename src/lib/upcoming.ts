@@ -1,3 +1,4 @@
+import process from "node:process"
 import { type Show } from "@prisma/client"
 import { type APIEmbed, type APIEmbedField, Collection } from "discord.js"
 import moment from "moment"

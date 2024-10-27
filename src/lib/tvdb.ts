@@ -1,3 +1,4 @@
+import process from "node:process"
 import axios, { AxiosError, type AxiosRequestConfig } from "axios"
 import {
   type SearchByRemoteIdResult,

@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv"
+import process from "node:process"
 import schedule from "node-schedule"
 import { ChannelType, Client, Events, GatewayIntentBits } from "discord.js"
 import { scheduleAiringMessages } from "lib/episodeNotifier.ts"
