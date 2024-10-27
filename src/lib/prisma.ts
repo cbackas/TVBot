@@ -2,7 +2,7 @@ import process from "node:process"
 import { PrismaClient } from "npm:@prisma/client"
 
 declare global {
-  // eslint-disable-next-line no-var
+  // deno-lint-ignore no-var
   var prisma: PrismaClient | undefined
 }
 

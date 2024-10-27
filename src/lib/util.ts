@@ -45,7 +45,9 @@ export function parseIMDBIds(imdbIds: string): string[] {
         ) {
           return [...acc, parsedUrl.pathname.split("/title/")[1]]
         }
-      } catch (e) {}
+      } catch (e) {
+        // do nothing
+      }
 
       return acc
     }, new Array<string>())

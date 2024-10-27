@@ -77,9 +77,7 @@ export const command: CommandV2 = {
       // if the user passed in a forum then send the post to that forum
       const useInputForum = forumInput !== null &&
         isForumChannel(forumInput as Channel)
-      const tvForum = useInputForum
-        ? forumInput.id
-        : await getDefaultTVForumId(app)
+      const tvForum = useInputForum ? forumInput.id : getDefaultTVForumId(app)
 
       await progress.sendNextStep() // start step 1
 
@@ -188,7 +186,7 @@ export const command: CommandV2 = {
  * @param app main application object instance
  * @returns ID of the default TV forum
  */
-async function getDefaultTVForumId(app: App): Promise<string> {
+function getDefaultTVForumId(app: App): string {
   const forumId = app.getSettings()?.defaultForum
 
   if (forumId == null) {

@@ -12,10 +12,10 @@ interface UpcomingEpisodeMessages {
   embedFields: APIEmbedField[]
 }
 
-async function getShowMessages(
+function getShowMessages(
   shows: Show[],
   days: number = 1,
-): Promise<UpcomingEpisodeMessages> {
+): UpcomingEpisodeMessages {
   if (days <= 0) throw new Error("days must be greater than 0")
 
   const payloadCollection = reduceEpisodes(shows, days)
@@ -82,22 +82,22 @@ async function getShowMessages(
  * @param days number of days to look ahead
  * @returns a string message to send to Discord
  */
-export async function getUpcomingEpisodesMessage(
+export function getUpcomingEpisodesMessage(
   shows: Show[],
   days: number = 1,
-): Promise<string> {
-  const messages = await getShowMessages(shows, days)
+): string {
+  const messages = getShowMessages(shows, days)
 
   return messages.messages.length >= 1
     ? `${messages.prefix}:\n\n${messages.messages.join("\n")}`
     : messages.empty
 }
 
-export async function getUpcomingEpisodesEmbed(
+export function getUpcomingEpisodesEmbed(
   shows: Show[],
   days: number = 1,
-): Promise<APIEmbed> {
-  const messages = await getShowMessages(shows, days)
+): APIEmbed {
+  const messages = getShowMessages(shows, days)
 
   const footer: APIEmbed["footer"] = {
     text: "Powered by TVDB",

@@ -170,7 +170,7 @@ async function scheduleJob(
  * @param message the message to send
  * @returns the scheduled job
  */
-async function scheduleNotification(
+function scheduleNotification(
   discord: Client,
   settingsManager: SettingsManager,
   payload: NotificationPayload,

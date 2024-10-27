@@ -45,7 +45,7 @@ function logPossibleAxiosError(error: unknown, errorPrefix: string): void {
   }
 }
 
-async function axiosOptions(): Promise<AxiosRequestConfig<any>> {
+async function axiosOptions(): Promise<AxiosRequestConfig> {
   const token = await getToken()
   if (token == null) {
     throw new Error("Failed to get TVDB token, couldn't build axios options")

@@ -84,7 +84,7 @@ export class App {
       schedule.scheduleJob(
         "lifecycle:10min:announceEpisodes",
         "5-55/10 * * * *",
-        async () => {
+        () => {
           void scheduleAiringMessages(this)
           void setRandomShowActivity(user)
         },
