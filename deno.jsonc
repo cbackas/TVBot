@@ -1,11 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "resolveJsonModule": true,
-    "sourceMap": true
   },
   "importMap": "import_map.json",
   "nodeModules": true,
