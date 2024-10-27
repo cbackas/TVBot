@@ -1,4 +1,4 @@
-import * as dotenv from "dotenv"
+import "jsr:@std/dotenv/load"
 import process from "node:process"
 import schedule from "node-schedule"
 import { ChannelType, Client, Events, GatewayIntentBits } from "discord.js"
@@ -15,8 +15,6 @@ import {
   setRandomShowActivity,
   setTVDBLoadingActivity,
 } from "lib/discordActivities.ts"
-
-dotenv.config()
 
 /**
  * The main bot application
