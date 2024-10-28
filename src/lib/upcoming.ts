@@ -22,7 +22,7 @@ function getShowMessages(
 
   const sortedPayloads = payloadCollection
     .sort((p1, p2) => {
-      return moment.utc(p1.airDate).unix() - moment.utc(p2.airDate).unix()
+      return p1.timestamp - p2.timestamp
     })
 
   const messages = sortedPayloads
@@ -31,7 +31,7 @@ function getShowMessages(
       const episodeNumbers = toRanges(payload.episodeNumbers)
       const message = `**${payload.showName}** S${seasonNumber}E${
         episodeNumbers.join(",")
-      } - <t:${moment.utc(payload.airDate).unix()}:R>`
+      } - <t:${payload.timestamp}:R>`
       return message
     })
 
@@ -41,8 +41,8 @@ function getShowMessages(
       const episodeNumbers = toRanges(payload.episodeNumbers)
       const message = `**${payload.showName}** S${seasonNumber}E${
         episodeNumbers.join(",")
-      } - <t:${moment.utc(payload.airDate).unix()}:R>`
-      const airDate = moment.utc(payload.airDate).tz(
+      } - <t:${payload.timestamp}:R>`
+      const airDate = moment.utc(payload.timestamp).tz(
         process.env.TZ ?? "America/Chicago",
       )
       acc.ensure(airDate.format("dddd - Do of MMMM"), () => []).push(message)
@@ -150,11 +150,12 @@ function reduceEpisodes(
         // define the default payload to use if one doesn't exist in the collection
         const defaultPayload: NotificationPayload = {
           key,
-          airDate: e.airDate,
+          timestamp: airDate.unix(),
           imdbId: show.imdbId,
           showName: show.name,
           season: e.season,
           episodeNumbers: [], // it has an emtpy array of episode numbers because it will be filled in later
+          destinations: show.destinations,
         }
 
         // grab the payload from the collection or create a new one
