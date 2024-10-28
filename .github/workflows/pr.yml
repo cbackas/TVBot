@@ -30,10 +30,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: denoland/setup-deno@v2
-      - name: Install Semantic Release
-        run: deno install npm:semantic-release@^24.1.2 npm:@codedependant/semantic-release-docker@^5.0.3 npm:conventional-changelog-eslint@^6.0.0
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
       - name: Semantic Release
         run: deno run -A npm:semantic-release --dry-run
         env:
