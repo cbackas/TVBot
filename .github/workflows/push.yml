@@ -16,19 +16,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - uses: denoland/setup-deno@v2
       - name: Install Semantic Release
-        run: npm install semantic-release @codedependant/semantic-release-docker conventional-changelog-eslint
+        run: deno install npm:semantic-release@^24.1.2 npm:@codedependant/semantic-release-docker@^5.0.3 npm:conventional-changelog-eslint@^6.0.0
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - name: Semantic Release
+        run: deno run -A npm:semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           DOCKER_REGISTRY_USER: ${{ github.actor }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
-        run: npx semantic-release
   notify:
     name: Deploy to Fly.io
     runs-on: ubuntu-latest

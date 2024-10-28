@@ -19,39 +19,30 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      # pull the repo
       - uses: actions/checkout@v4
-      # setup node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      # install dependencies
-      - name: Install Node.js dependencies
-        run: npm ci
-      # run eslint
-      - name: Run linters
-        uses: wearerequired/lint-action@master
-        with:
-          auto_fix: false
-          eslint: true
-          eslint_fix: false
-          eslint_extensions: "js,ts"
-  build:
+      - uses: denoland/setup-deno@v2
+      - run: deno lint
+  test-release:
+    name: Semantic Release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/')
+    concurrency: push-concurrency
     steps:
       - uses: actions/checkout@v4
-      # setup node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      # install dependencies
-      - name: Install Node.js dependencies
-        run: npm ci
-      # build the app
-      - name: Build TVBot
-        run: npm run build
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+      - name: Install Semantic Release
+        run: deno install npm:semantic-release@^24.1.2 npm:@codedependant/semantic-release-docker@^5.0.3 npm:conventional-changelog-eslint@^6.0.0
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Semantic Release
+        run: deno run -A npm:semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DOCKER_REGISTRY_USER: ${{ github.actor }}
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
+
   build_docker:
     runs-on: ubuntu-latest
     steps:
