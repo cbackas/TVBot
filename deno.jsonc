@@ -1,8 +1,6 @@
 {
   "tasks": {
-    "build": "node esbuild.mjs",
-    "dev": "export NODE_ENV=development; node --enable-source-maps esbuild.mjs",
-    "lint": "deno lint",
+    "build": "deno compile ./src/app.ts",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
