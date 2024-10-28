@@ -14,7 +14,6 @@ import { ProgressMessageBuilder } from "lib/progressMessages.ts"
 import { type App } from "app.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
 import { createNewSubscription, updateEpisodes } from "lib/shows.ts"
-import { scheduleAiringMessages } from "lib/episodeNotifier.ts"
 import { ProgressError } from "interfaces/error.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
@@ -163,8 +162,6 @@ export const command: CommandV2 = {
       }
 
       await progress.sendNextStep() // start step 4
-
-      await scheduleAiringMessages(app)
 
       return await progress.sendNextStep(
         `Linked show(s) to <#${channel.id}>:\n\n${messages.join("\n")}`,

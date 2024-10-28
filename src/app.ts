@@ -1,14 +1,13 @@
 import "jsr:@std/dotenv/load"
 import process from "node:process"
-import schedule from "npm:node-schedule"
 import { ChannelType, Client, Events, GatewayIntentBits } from "npm:discord.js"
-import { scheduleAiringMessages } from "lib/episodeNotifier.ts"
 import { CommandManager } from "lib/commandManager.ts"
 import {
   checkForAiringEpisodes,
   pruneUnsubscribedShows,
   removeAllSubscriptions,
 } from "lib/shows.ts"
+import { sendAiringMessages } from "lib/episodeNotifier.ts"
 import { type Settings, SettingsManager } from "lib/settingsManager.ts"
 import { sendMorningSummary } from "lib/morningSummary.ts"
 import {
@@ -78,49 +77,33 @@ export class App {
       setTVDBLoadingActivity(user)
       await pruneUnsubscribedShows()
       if (process.env.UPDATE_SHOWS !== "false") await checkForAiringEpisodes()
-      void scheduleAiringMessages(this)
+      void sendAiringMessages(this)
       void setRandomShowActivity(user)
 
-      schedule.scheduleJob(
-        "lifecycle:10min:announceEpisodes",
-        "5-55/10 * * * *",
-        () => {
-          void scheduleAiringMessages(this)
-          void setRandomShowActivity(user)
-        },
-      )
+      Deno.cron("Announcements", { minute: { every: 10, start: 8 } }, () => {
+        void sendAiringMessages(this)
+        void setRandomShowActivity(user)
+      })
 
-      schedule.scheduleJob(
-        "lifecycle:4hours:fetchEpisoded",
-        "0 */4 * * *",
-        async () => {
-          setTVDBLoadingActivity(user)
-          await pruneUnsubscribedShows()
-          await checkForAiringEpisodes()
-        },
-      )
+      Deno.cron("Fetch Episode Data", { hour: { every: 4 } }, async () => {
+        setTVDBLoadingActivity(user)
+        await pruneUnsubscribedShows()
+        await checkForAiringEpisodes()
+      })
 
-      schedule.scheduleJob(
-        "lifecycle:daily:morningSummary",
-        "0 8 * * *",
-        async () => {
-          const settings = this.getSettings()
-          if (settings == null) throw new Error("Settings not found")
+      Deno.cron("Morning Summary", { hour: 8, minute: 0 }, async () => {
+        const settings = this.getSettings()
+        if (settings == null) throw new Error("Settings not found")
 
-          await sendMorningSummary(settings, this.client)
-        },
-      )
+        await sendMorningSummary(settings, this.client)
+      })
 
       const healthcheckUrl = process.env.HEALTHCHECK_URL
       if (healthcheckUrl != null) {
-        schedule.scheduleJob(
-          "lifecycle:60sec:healthcheck",
-          "* * * * *",
-          async () => {
-            await fetch(healthcheckUrl)
-            console.debug("[Healthcheck] Healthcheck ping sent")
-          },
-        )
+        Deno.cron("Healthcheck", { minute: { every: 1 } }, async () => {
+          await fetch(healthcheckUrl)
+          console.debug("[Healthcheck] Healthcheck ping sent")
+        })
       }
     })
 
