@@ -1,16 +1,12 @@
-FROM node:20-slim as build
-WORKDIR /build
-COPY . .
-RUN npm ci
-RUN npm run build
-
-FROM node:20-slim as prod
+FROM denoland/deno:debian
 WORKDIR /app
-RUN apt-get update && apt-get -y install openssl
-RUN npm install pm2 prisma --save-dev && npm install @prisma/client
-COPY --from=build /build/prisma ./prisma
-COPY --from=build /build/dist .
-COPY --from=build /build/entrypoint.sh .
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    openssl \
+    && \
+    rm -rf /var/lib/apt/lists/*
+COPY . .
+RUN deno install -r --node-modules-dir=auto
+RUN deno run -A --unstable npm:prisma generate --no-engine
 ENV TZ="America/Chicago"
-RUN npx prisma generate
 ENTRYPOINT ["sh", "entrypoint.sh"]

@@ -3,7 +3,6 @@
     "@codedependant/semantic-release-docker": "^5.0.3",
     "@es-exec/esbuild-plugin-start": "^0.0.4",
     "conventional-changelog-eslint": "^6.0.0",
-    "prisma": "^5.0.0",
     "semantic-release": "^24.1.2"
   }
 }

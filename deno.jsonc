@@ -2,8 +2,8 @@
   "tasks": {
     "dev": "deno --watch -A --unstable-cron ./src/app.ts"
     "build": "deno compile --unstable-cron -o ./dist/tvbot ./src/app.ts",
-    "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:migrate": "deno run -A npm:prisma migrate dev",
+    "db:studio": "deno run -A npm:prisma studio"
   },
   "compilerOptions": {
     "strict": true,

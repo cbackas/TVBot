@@ -9,3 +9,5 @@ README.md
 data/
 mongodata
 fly.toml
+.git
+node_modules/

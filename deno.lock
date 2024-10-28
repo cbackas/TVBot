@@ -3182,7 +3182,6 @@
         "npm:@codedependant/semantic-release-docker@^5.0.3",
         "npm:@es-exec/esbuild-plugin-start@^0.0.4",
         "npm:conventional-changelog-eslint@6",
-        "npm:prisma@5",
         "npm:semantic-release@^24.1.2"
       ]
     }
