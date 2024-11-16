@@ -16,7 +16,7 @@ import { addLeadingZeros, toRanges } from "lib/util.ts"
 
 export function isTextChannel(
   channel: Channel,
-): channel is AnyThreadChannel<boolean> | TextChannel {
+): channel is AnyThreadChannel | TextChannel {
   return channel.isTextBased() && !channel.isDMBased() &&
     ![ChannelType.GuildVoice].includes(channel.type)
 }
