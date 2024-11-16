@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno --watch --no-clear-screen -A --unstable-cron --allow-scripts=npm:prisma,npm:@prisma/client,npm:@prisma/engines ./src/app.ts"
+    "dev": "deno --watch --no-clear-screen -A --unstable-cron --allow-scripts=npm:prisma,npm:@prisma/client,npm:@prisma/engines ./src/app.ts",
     "build": "deno compile --unstable-cron -o ./dist/tvbot ./src/app.ts",
     "db:migrate": "deno run -A npm:prisma migrate dev",
     "db:studio": "deno run -A npm:prisma studio"
