@@ -62,13 +62,54 @@ export async function getSeriesByImdbId(
   imdbId: string,
 ): Promise<SeriesExtendedRecord | undefined> {
   const data = await searchSeriesByImdbId(imdbId)
+
   if (data == null) {
     return undefined
-  } else if (data?.series?.id != null) {
-    return await getSeries(data?.series.id)
-  } else if (data?.season?.seriesId != null) {
-    return await getSeries(data?.season?.seriesId)
   }
+
+  let series: SeriesExtendedRecord | undefined
+  if (data?.series?.id != null) {
+    series = await getSeries(data?.series.id)
+  } else if (data?.season?.seriesId != null) {
+    series = await getSeries(data?.season?.seriesId)
+  }
+
+  if (
+    series?.originalLanguage == null || series.originalLanguage === "eng"
+  ) return series
+
+  return translateSeries(series)
+}
+
+function translateSeries(series: SeriesExtendedRecord): SeriesExtendedRecord {
+  if (series.translations == null) {
+    console.warn(
+      `Series ${series.id} has a non-english original language but no translations`,
+    )
+    return series
+  }
+
+  const { nameTranslations, overviewTranslations } = series.translations
+  const englishName = nameTranslations?.find((t) => t.language === "eng")?.name
+  if (englishName != null) {
+    series.name = englishName
+  } else {
+    console.warn(
+      `Series ${series.id} has a non-english original language but no english name translation`,
+    )
+  }
+  const englishOverview = overviewTranslations?.find((t) =>
+    t.language === "eng"
+  )?.overview
+  if (englishOverview != null) {
+    series.overview = englishOverview
+  } else {
+    console.warn(
+      `Series ${series.id} has a non-english original language but no english overview translation`,
+    )
+  }
+
+  return series
 }
 
 export async function getSeries(
@@ -83,7 +124,7 @@ export async function getSeries(
       headers: options.headers,
       params: {
         short: true,
-        meta: "episodes",
+        meta: "episodes,translations",
       },
     })
 
