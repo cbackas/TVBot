@@ -1,0 +1,16 @@
+{
+  "imports": {
+    "app.ts": "./src/app.ts",
+    "lib/": "./src/lib/",
+    "interfaces/": "./src/interfaces/",
+    "commands/": "./src/commands/",
+    "npm:discord.js": "npm:discord.js@14.11.0",
+    "npm:@prisma/client": "npm:@prisma/client@5.0.0",
+    "npm:prisma": "npm:prisma@^5.0.0",
+    "npm:axios": "npm:axios@^1.4.0",
+    "npm:city-timezones": "npm:city-timezones@^1.2.1",
+    "npm:moment-timezone": "npm:moment-timezone@^0.5.43",
+    "npm:parse-url": "npm:parse-url@^8.1.0",
+    "npm:sqlite": "npm:sqlite@^4.2.1"
+  }
+}

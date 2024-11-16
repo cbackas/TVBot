@@ -1,7 +1,11 @@
-import client from './prisma'
-import { Prisma, type Settings as DBSettings, type Destination } from '@prisma/client'
+import client from "lib/prisma.ts"
+import {
+  type Destination,
+  Prisma,
+  type Settings as DBSettings,
+} from "npm:@prisma/client"
 
-export type Settings = Omit<DBSettings, 'id'>
+export type Settings = Omit<DBSettings, "id">
 
 /**
  * Manager to handle fetching and saving settings in the DB
@@ -18,12 +22,12 @@ export class SettingsManager {
       await client.settings.create({
         data: {
           id: 0,
-          allEpisodes: []
-        }
+          allEpisodes: [],
+        },
       })
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError)) throw error
-      if (error.code !== 'P2002') throw error
+      if (error.code !== "P2002") throw error
     }
   }
 
@@ -35,14 +39,14 @@ export class SettingsManager {
       // fetch the settings from the DB
       const settings = await client.settings.findUniqueOrThrow({
         where: {
-          id: 0
-        }
+          id: 0,
+        },
       })
       this.settings = settings
       return settings
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError)) throw error
-      if (error.code === 'P2025') await this.initData()
+      if (error.code === "P2025") await this.initData()
     }
   }
 
@@ -55,9 +59,9 @@ export class SettingsManager {
 
     await client.settings.update({
       where: {
-        id: 0
+        id: 0,
       },
-      data
+      data,
     })
 
     await this.refresh()
@@ -68,38 +72,42 @@ export class SettingsManager {
    * @param channelId channel to check
    * @returns true if channel is in list, false if not
    */
-  private readonly channelIsAlreadyGlobal = async (channelId: string): Promise<boolean> => {
+  private readonly channelIsAlreadyGlobal = async (
+    channelId: string,
+  ): Promise<boolean> => {
     const matchingChannels = await client.settings.count({
       where: {
         id: 0,
         allEpisodes: {
           some: {
-            channelId
-          }
-        }
-      }
+            channelId,
+          },
+        },
+      },
     })
 
     return matchingChannels > 0
   }
 
   addGlobalDestination = async (channelId: string): Promise<Destination[]> => {
-    if (await this.channelIsAlreadyGlobal(channelId)) return this.settings?.allEpisodes ?? []
+    if (await this.channelIsAlreadyGlobal(channelId)) {
+      return this.settings?.allEpisodes ?? []
+    }
 
     const settings = await client.settings.update({
       where: {
-        id: 0
+        id: 0,
       },
       data: {
         allEpisodes: {
           push: {
-            channelId
-          }
-        }
+            channelId,
+          },
+        },
       },
       select: {
-        allEpisodes: true
-      }
+        allEpisodes: true,
+      },
     })
 
     console.info(`Added ${channelId} to global destinations`)
@@ -108,22 +116,26 @@ export class SettingsManager {
     return settings.allEpisodes
   }
 
-  removeGlobalDestination = async (channelId: string): Promise<Destination[]> => {
-    if (!await this.channelIsAlreadyGlobal(channelId)) return this.settings?.allEpisodes ?? []
+  removeGlobalDestination = async (
+    channelId: string,
+  ): Promise<Destination[]> => {
+    if (!await this.channelIsAlreadyGlobal(channelId)) {
+      return this.settings?.allEpisodes ?? []
+    }
 
     const settings = await client.settings.update({
       where: {
-        id: 0
+        id: 0,
       },
       data: {
         allEpisodes: {
           deleteMany: {
             where: {
-              channelId
-            }
-          }
-        }
-      }
+              channelId,
+            },
+          },
+        },
+      },
     })
 
     console.info(`Removed ${channelId} from global destinations`)

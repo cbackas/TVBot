@@ -19,48 +19,29 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      # pull the repo
       - uses: actions/checkout@v4
-      # setup node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      # install dependencies
-      - name: Install Node.js dependencies
-        run: npm ci
-      # run eslint
-      - name: Run linters
-        uses: wearerequired/lint-action@master
-        with:
-          auto_fix: false
-          eslint: true
-          eslint_fix: false
-          eslint_extensions: "js,ts"
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # setup node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      # install dependencies
-      - name: Install Node.js dependencies
-        run: npm ci
-      # build the app
-      - name: Build TVBot
-        run: npm run build
+      - uses: denoland/setup-deno@v2
+      - run: deno lint
+  test-semantic-release:
+    uses: ./.github/workflows/semantic-release.yml
+    with:
+      dry_run: true
   build_docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.github_token }}
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
-      - name: Build and push
+      - name: build and push
         uses: docker/build-push-action@v6
         with:
+          tags: ghcr.io/cbackas/tvbot:pr-${{github.event.pull_request.number}}
           platforms: linux/amd64,linux/arm64
-          push: false # just check that it builds, dont push it anywhere cuz whatever
-          tags: cbackas/tvbot:pr
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true

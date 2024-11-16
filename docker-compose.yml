@@ -10,15 +10,15 @@ services:
       - .env
     volumes:
       - ./data:/app/data/
-  mongo:
-    image: bitnami/mongodb:4.4
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=127.0.0.1
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ROOT_USER=root
-      - MONGODB_ROOT_PASSWORD=rootpassword123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    ports:
-      - 27017:27017
-    volumes:
-      - ./mongodata:/bitnami/mongodb
+  # mongo:
+  #   image: bitnami/mongodb:4.4
+  #   environment:
+  #     - MONGODB_ADVERTISED_HOSTNAME=127.0.0.1
+  #     - MONGODB_REPLICA_SET_MODE=primary
+  #     - MONGODB_ROOT_USER=root
+  #     - MONGODB_ROOT_PASSWORD=rootpassword123
+  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
+  #   ports:
+  #     - 27017:27017
+  #   volumes:
+  #     - ./mongodata:/bitnami/mongodb
