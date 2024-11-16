@@ -22,21 +22,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
       - run: deno lint
-  test-release:
-    name: Semantic Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: denoland/setup-deno@v2
-      - name: Semantic Release
-        run: deno run -A npm:semantic-release --dry-run
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          DOCKER_REGISTRY_USER: ${{ github.actor }}
-          DOCKER_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
-
+  test-semantic-release:
+    uses: ./.github/workflows/semantic-release.yml
+    with:
+      dry_run: true
   build_docker:
     runs-on: ubuntu-latest
     steps:
@@ -47,5 +36,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          push: false # just check that it builds, dont push it anywhere cuz whatever
+          push: false
           tags: cbackas/tvbot:pr
