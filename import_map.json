@@ -12,8 +12,5 @@
     "npm:moment-timezone": "npm:moment-timezone@^0.5.43",
     "npm:parse-url": "npm:parse-url@^8.1.0",
     "npm:sqlite": "npm:sqlite@^4.2.1",
-    "npm:semantic-release": "npm:semantic-release@^24.1.2",
-    "npm:@codedependant/semantic-release-docker": "npm:@codedependant/semantic-release-docker@^5.0.3",
-    "npm:conventional-changelog-eslint": "npm:conventional-changelog-eslint@^6.0.0"
   }
 }
