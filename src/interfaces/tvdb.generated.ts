@@ -844,6 +844,9 @@ export interface Translation {
   tagline?: string;
 }
 
+export type NameTranslation = Omit<Translation, "overview">
+export type OverviewTranslation = Omit<Translation, "name">
+
 /** translation simple record */
 export interface TranslationSimple {
   language?: string;
@@ -851,8 +854,8 @@ export interface TranslationSimple {
 
 /** translation extended record */
 export interface TranslationExtended {
-  nameTranslations?: Translation[];
-  overviewTranslations?: Translation[];
+  nameTranslations?: NameTranslation[];
+  overviewTranslations?: OverviewTranslation[];
   alias?: string[];
 }
 
