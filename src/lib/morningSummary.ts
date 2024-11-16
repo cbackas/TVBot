@@ -19,11 +19,16 @@ export async function sendMorningSummary(
     },
   })
 
-  const embed: APIEmbed = await getUpcomingEpisodesEmbed(shows, 1)
+  const embed: APIEmbed = getUpcomingEpisodesEmbed(shows, 1)
 
   for (const dest of settings.morningSummaryDestinations) {
     const channel = await c.channels.fetch(dest.channelId)
-    if (channel == null || !isTextChannel(channel)) continue
+    if (channel == null || !isTextChannel(channel) || !channel.isSendable()) {
+      console.warn(
+        `Found channel ${dest.channelId} in the morning summary destinations but it is not a text channel or is not sendable`,
+      )
+      continue
+    }
 
     await channel.send({
       content: "",

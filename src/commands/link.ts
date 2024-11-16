@@ -2,11 +2,13 @@ import {
   ChannelType,
   type ChatInputCommandInteraction,
   Collection,
+  type GuildTextChannelType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   type SlashCommandStringOption,
   SlashCommandSubcommandBuilder,
   type TextBasedChannel,
+  type TextChannel,
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
@@ -91,11 +93,12 @@ export const command: CommandV2 = {
       channel = interaction.options.getChannel(
         "channel",
         true,
-      ) as TextBasedChannel
+        [ChannelType.GuildText],
+      )
     }
 
     // error if the channel didnt get set for some reason
-    if (channel == null || channel.type === ChannelType.GuildStageVoice) {
+    if (channel == null || !channel.isSendable()) {
       return await interaction.editReply("Invalid channel")
     }
 
