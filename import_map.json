@@ -4,7 +4,7 @@
     "lib/": "./src/lib/",
     "interfaces/": "./src/interfaces/",
     "commands/": "./src/commands/",
-    "npm:discord.js": "npm:discord.js@^14.16.0",
+    "npm:discord.js": "npm:discord.js@^14.16.3",
     "npm:@prisma/client": "npm:@prisma/client@5.0.0",
     "npm:prisma": "npm:prisma@^5.0.0",
     "npm:axios": "npm:axios@^1.4.0",
