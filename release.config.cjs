@@ -20,17 +20,6 @@ module.exports = {
         releasedLabels: false,
       },
     ],
-    [
-      "@codedependant/semantic-release-docker",
-      {
-        dockerTags: ["{{version}}", "latest"],
-        dockerFile: "Dockerfile",
-        dockerPlatform: ["linux/amd64", "linux/arm64"],
-        dockerRegistry: "ghcr.io",
-        dockerProject: "cbackas",
-        dockerImage: "tvbot",
-      },
-    ],
   ],
   preset: "eslint",
 };

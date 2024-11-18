@@ -1,6 +1,12 @@
 name: Fly Deploy
 on:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+        default: 'latest'
 jobs:
   deploy:
     name: Deploy app
@@ -9,6 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --image ghcr.io/cbackas/tvbot:latest
+      - run: flyctl deploy --image ghcr.io/cbackas/tvbot:${{ inputs.version }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

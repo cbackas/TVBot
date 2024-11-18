@@ -1,0 +1,30 @@
+name: Semantic Release
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      dry_run:
+        required: false
+        type: boolean
+        default: false
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+      - name: Install Semantic Release
+        run: npm install semantic-release conventional-changelog-eslint
+      - name: Dry Run Semantic Release
+        if: ${{ inputs.dry_run == true }}
+        run: npx semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Semantic Release
+        if: ${{ inputs.dry_run == false }}
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
