@@ -8,9 +8,7 @@ import client from "lib/prisma.ts"
 export async function showSearchAutocomplete(
   interaction: AutocompleteInteraction,
 ): Promise<void> {
-  const focusedValue = interaction.options.getFocused()
-
-  if (focusedValue === undefined) return
+  const focusedValue = interaction.options.getFocused().value
 
   const where: Prisma.ShowWhereInput =
     focusedValue.toLocaleLowerCase().startsWith("tt")
