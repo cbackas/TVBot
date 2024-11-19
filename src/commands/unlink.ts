@@ -1,9 +1,9 @@
 import {
   ActionRowBuilder,
-  type AnySelectMenuInteraction,
   ChannelType,
   type ChatInputCommandInteraction,
   PermissionFlagsBits,
+  type SelectMenuInteraction,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   StringSelectMenuBuilder,
@@ -41,7 +41,7 @@ export const command: CommandV2 = {
     ],
   },
   selectMenuIds: ["unlink_shows_menu"],
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(_app: App, interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     const progress = new ProgressMessageBuilder()
@@ -115,7 +115,7 @@ export const command: CommandV2 = {
       throw error
     }
   },
-  async executeSelectMenu(_app, interaction: AnySelectMenuInteraction) {
+  async executeSelectMenu(_app, interaction: SelectMenuInteraction) {
     const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
 
     if (channelId === undefined) {

@@ -1,9 +1,9 @@
 import {
-  type AnySelectMenuInteraction,
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
   type InteractionResponse,
   type Message,
+  type SelectMenuInteraction,
   type SlashCommandBuilder,
   type SlashCommandOptionsOnlyBuilder,
   type SlashCommandSubcommandBuilder,
@@ -38,6 +38,6 @@ export interface CommandV2 {
   ) => Promise<ExecuteFunction>
   executeSelectMenu?: (
     app: App,
-    interaction: AnySelectMenuInteraction,
+    interaction: SelectMenuInteraction,
   ) => Promise<ExecuteFunction>
 }

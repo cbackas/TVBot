@@ -1,14 +1,15 @@
 import process from "node:process"
 import {
-  type AnySelectMenuInteraction,
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
   Collection,
   type Interaction,
+  MessageFlags,
   REST,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   type RESTPostAPIContextMenuApplicationCommandsJSONBody,
   Routes,
+  type SelectMenuInteraction,
   type SlashCommandBuilder,
 } from "npm:discord.js"
 import { type App } from "app.ts"
@@ -112,7 +113,7 @@ export class CommandManager {
       `[Command Recieved] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`,
     )
 
-    await interaction.deferReply({ ephemeral: true })
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
     try {
       await command.executeCommand(this.app, interaction)
@@ -125,7 +126,7 @@ export class CommandManager {
   }
 
   public selectMenuInteractionHandler = async (
-    interaction: AnySelectMenuInteraction,
+    interaction: SelectMenuInteraction,
   ): Promise<void> => {
     const command = this.commands.find((c) =>
       c.selectMenuIds?.includes(interaction.customId)
