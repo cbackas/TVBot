@@ -7,6 +7,7 @@
     "npm:axios@^1.4.0": "1.7.7",
     "npm:city-timezones@^1.2.1": "1.3.0",
     "npm:discord.js@14.11.0": "14.11.0",
+    "npm:discord.js@15.0.0-dev.1731931516-b03a9e404": "15.0.0-dev.1731931516-b03a9e404",
     "npm:discord.js@^14.16.0": "14.16.3",
     "npm:moment-timezone@~0.5.43": "0.5.46",
     "npm:node-schedule@^2.1.1": "2.1.1",
@@ -107,6 +108,20 @@
         "@types/ws",
         "@vladfrangu/async_event_emitter",
         "discord-api-types@0.37.83",
+        "tslib",
+        "ws"
+      ]
+    },
+    "@discordjs/ws@2.0.0": {
+      "integrity": "sha512-VSVFMOFE+G9bp/2+4e/lFySIU+urxW8NPRXPsKLbP9AUl1MvQxoUVIUfPjZkUP23jjQh+AvWWm6vaA0A5Rb2Rg==",
+      "dependencies": [
+        "@discordjs/collection@2.1.1",
+        "@discordjs/rest@2.4.0",
+        "@discordjs/util@1.1.1",
+        "@sapphire/async-queue",
+        "@types/ws",
+        "@vladfrangu/async_event_emitter",
+        "discord-api-types@0.37.97",
         "tslib",
         "ws"
       ]
@@ -261,6 +276,23 @@
         "@discordjs/ws@1.1.1",
         "@sapphire/snowflake",
         "discord-api-types@0.37.100",
+        "fast-deep-equal",
+        "lodash.snakecase",
+        "tslib",
+        "undici@6.19.8"
+      ]
+    },
+    "discord.js@15.0.0-dev.1731931516-b03a9e404": {
+      "integrity": "sha512-0XTD4CyFTJz23jx/f6OXR4eyANQ1p4XxokJsVjSIP7nLIUhvCVtBmw5XC2f4bwdtLLpK6QueflPP9OYMDJKDpg==",
+      "dependencies": [
+        "@discordjs/builders",
+        "@discordjs/collection@1.5.3",
+        "@discordjs/formatters@0.5.0",
+        "@discordjs/rest@2.4.0",
+        "@discordjs/util@1.1.1",
+        "@discordjs/ws@2.0.0",
+        "@sapphire/snowflake",
+        "discord-api-types@0.37.103",
         "fast-deep-equal",
         "lodash.snakecase",
         "tslib",
