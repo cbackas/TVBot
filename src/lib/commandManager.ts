@@ -4,6 +4,7 @@ import {
   type ChatInputCommandInteraction,
   Collection,
   type Interaction,
+  MessageFlags,
   REST,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   type RESTPostAPIContextMenuApplicationCommandsJSONBody,
@@ -112,7 +113,7 @@ export class CommandManager {
       `[Command Recieved] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`,
     )
 
-    await interaction.deferReply({ flags: "Ephemeral" })
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
     try {
       await command.executeCommand(this.app, interaction)
