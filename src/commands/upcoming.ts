@@ -9,7 +9,7 @@ import { type CommandV2 } from "interfaces/command.ts"
 import { type App } from "app.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
 import { showSearchAutocomplete } from "lib/autocomplete.ts"
-import { type Show } from "npm:@prisma/client"
+import { type Show } from "prisma-client/client.ts"
 import { ProgressError } from "interfaces/error.ts"
 import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
 

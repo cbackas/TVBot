@@ -3,7 +3,7 @@ import {
   type Destination,
   Prisma,
   type Settings as DBSettings,
-} from "npm:@prisma/client"
+} from "prisma-client/client.ts"
 
 export type Settings = Omit<DBSettings, "id">
 

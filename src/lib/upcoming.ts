@@ -1,5 +1,5 @@
 import process from "node:process"
-import { type Show } from "npm:@prisma/client"
+import { type Show } from "prisma-client/client.ts"
 import { type APIEmbed, type APIEmbedField, Collection } from "npm:discord.js"
 import moment from "npm:moment-timezone"
 import { type NotificationPayload } from "lib/episodeNotifier.ts"

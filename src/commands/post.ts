@@ -19,7 +19,7 @@ import { ProgressError } from "interfaces/error.ts"
 import { isForumChannel } from "interfaces/discord.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
-import { type Destination, type Show } from "npm:@prisma/client"
+import { type Destination, type Show } from "prisma-client/client.ts"
 import { parseIMDBIds } from "lib/util.ts"
 
 interface SeriesWrapper {
