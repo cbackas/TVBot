@@ -7,6 +7,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN deno install -r --allow-scripts=npm:@prisma/client,npm:prisma,npm:@prisma/engines
-RUN deno run -A --unstable npm:prisma generate --no-engine
+RUN deno run -A --unstable-node-globals npm:prisma generate --no-engine
 ENV TZ="America/Chicago"
 ENTRYPOINT ["sh", "entrypoint.sh"]
