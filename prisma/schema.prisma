@@ -2,8 +2,10 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "client"
+  provider     = "prisma-client"
+  output       = "client"
+  runtime      = "deno"
+  moduleFormat = "esm"
 }
 
 datasource db {
