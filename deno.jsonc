@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
   "tasks": {
     "dev": "deno --watch --no-clear-screen -A --unstable-cron --allow-scripts=npm:prisma,npm:@prisma/client,npm:@prisma/engines ./src/app.ts",
     "build": "deno compile --unstable-cron -o ./dist/tvbot ./src/app.ts",
@@ -10,22 +11,35 @@
   "compilerOptions": {
     "strict": true,
     "noImplicitAny": true,
-    "strictNullChecks": true,
+    "strictNullChecks": true
   },
   "nodeModules": true,
   "nodeModulesDir": "auto",
   "importMap": "import_map.json",
   "lint": {
-    "include": ["src/"],
-    "exclude": ["src/testdata/", "src/fixtures/**/*.ts"],
+    "include": [
+      "src/"
+    ],
+    "exclude": [
+      "src/testdata/",
+      "src/fixtures/**/*.ts"
+    ],
     "rules": {
-      "tags": ["recommended"],
-      "include": ["ban-untagged-todo"],
-      "exclude": ["no-unused-vars"]
-    },
+      "tags": [
+        "recommended"
+      ],
+      "include": [
+        "ban-untagged-todo"
+      ],
+      "exclude": [
+        "no-unused-vars"
+      ]
+    }
   },
   "fmt": {
     "semiColons": false
   },
-  "exclude": ["dist/"]
+  "exclude": [
+    "dist/"
+  ]
 }
