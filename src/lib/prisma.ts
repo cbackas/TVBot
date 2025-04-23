@@ -2,7 +2,6 @@ import process from "node:process"
 import { PrismaClient } from "prisma-client/client.ts"
 
 declare global {
-  // deno-lint-ignore no-var
   var prisma: PrismaClient | undefined
 }
 
