@@ -31,6 +31,6 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
 
-  # deploy:
-  #   needs: build_and_push
-  #   uses: ./.github/workflows/fly-deploy.yml
+  deploy:
+    needs: build_and_push
+    uses: ./.github/workflows/fly-deploy.yml
