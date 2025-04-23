@@ -1,4 +1,4 @@
-import { type Destination } from "npm:@prisma/client"
+import { type Destination } from "prisma-client/client.ts"
 import { type APIEmbed, type APIEmbedField } from "npm:discord.js"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 

@@ -1,4 +1,4 @@
-import { type Prisma } from "npm:@prisma/client"
+import { type Prisma } from "prisma-client/client.ts"
 import {
   type ApplicationCommandOptionChoiceData,
   type AutocompleteInteraction,

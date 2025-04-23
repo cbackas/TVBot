@@ -1,4 +1,4 @@
-import { type Show } from "npm:@prisma/client"
+import { type Show } from "prisma-client/client.ts"
 import {
   type AnyThreadChannel,
   type Channel,

@@ -11,3 +11,4 @@ mongodata
 fly.toml
 .git
 node_modules/
+prisma/client/
