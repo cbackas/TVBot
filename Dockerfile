@@ -13,12 +13,14 @@ RUN deno task build
 
 FROM debian:latest
 COPY --from=litestream /usr/local/bin/litestream /usr/local/bin/litestream
-COPY entrypoint.sh /usr/local/bin/entrypoint
 COPY litestream.yml /etc/litestream.yml
+
+COPY entrypoint.sh /app/entrypoint.sh
 
 COPY --from=build /app/dist/tvbot /usr/local/bin/tvbot
 
 ENV DENO_KV_SQLITE_PATH="/data/denokv.sqlite3"
 ENV TZ="America/Chicago"
 
-ENTRYPOINT ["entrypoint"]
+WORKDIR /app
+ENTRYPOINT ["sh", "entrypoint.sh"]
