@@ -12,3 +12,6 @@ data/
 .DS_Store
 
 mongodata
+
+denokv.sqlite3*
+
