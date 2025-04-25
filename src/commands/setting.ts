@@ -220,7 +220,7 @@ async function updateGlobalChannels(
   const destinationsString = destinations.map((d) => `<#${d.channelId}>`).join(
     "\n",
   )
-  return await progress.sendNextStep(`__New List__:\nn${destinationsString}`)
+  return await progress.sendNextStep(`__New List__:\n${destinationsString}`)
 }
 
 /**
