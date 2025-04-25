@@ -42,7 +42,7 @@ function getShowMessages(
       const message = `**${payload.showName}** S${seasonNumber}E${
         episodeNumbers.join(",")
       } - <t:${payload.timestamp}:R>`
-      const airDate = moment.utc(payload.timestamp).tz(
+      const airDate = moment.unix(payload.timestamp).tz(
         getEnv("TZ"),
       )
       acc.ensure(airDate.format("dddd - Do of MMMM"), () => []).push(message)
