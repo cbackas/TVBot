@@ -9,7 +9,6 @@ import {
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
-import { type App } from "app.ts"
 import { type Show } from "prisma-client/client.ts"
 
 const subCommands = {
@@ -45,7 +44,7 @@ export const command: CommandV2 = {
       ],
     }],
   },
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     if (interaction.options.getSubcommandGroup() !== "shows") {
       return await interaction.editReply("Invalid subcommand group")
     }

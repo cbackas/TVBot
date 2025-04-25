@@ -8,7 +8,7 @@ import {
   removeAllSubscriptions,
 } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
-import { type Settings, SettingsManager } from "lib/settingsManager.ts"
+import { SettingsManager } from "lib/settingsManager.ts"
 import { sendMorningSummary } from "lib/morningSummary.ts"
 import {
   setRandomShowActivity,
@@ -33,7 +33,7 @@ const guildId = process.env.DISCORD_GUILD_ID
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 const commandManager = new CommandManager(clientId, token, guildId)
-const settingManager = new SettingsManager()
+const settingsManager = SettingsManager.getInstance()
 
 discordClient.on(Events.ClientReady, async (client) => {
   const { user } = client
@@ -44,11 +44,11 @@ discordClient.on(Events.ClientReady, async (client) => {
   setTVDBLoadingActivity(user)
   await pruneUnsubscribedShows()
   if (process.env.UPDATE_SHOWS !== "false") await checkForAiringEpisodes()
-  void sendAiringMessages(this)
+  void sendAiringMessages()
   void setRandomShowActivity(user)
 
   Deno.cron("Announcements", { minute: { every: 10, start: 8 } }, () => {
-    void sendAiringMessages(this)
+    void sendAiringMessages()
     void setRandomShowActivity(user)
   })
 
@@ -59,7 +59,7 @@ discordClient.on(Events.ClientReady, async (client) => {
   })
 
   Deno.cron("Morning Summary", { hour: 8, minute: 0 }, async () => {
-    const settings = settingManager.fetch()
+    const settings = settingsManager.fetch()
     if (settings == null) throw new Error("Settings not found")
 
     await sendMorningSummary(settings, client)
@@ -96,12 +96,12 @@ discordClient.on(Events.ChannelDelete, async (channel) => {
   if (channel.type === ChannelType.GuildText) {
     await removeAllSubscriptions(channel.id, "channelId")
     await pruneUnsubscribedShows()
-    await settingManager.removeGlobalDestination(channel.id)
+    await settingsManager.removeGlobalDestination(channel.id)
   }
 })
 
 // start the bot
-await settingManager.refresh()
+await settingsManager.refresh()
 await commandManager.registerCommands()
 await discordClient.login(token)
 

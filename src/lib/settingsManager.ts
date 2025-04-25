@@ -11,6 +11,15 @@ export type Settings = Omit<DBSettings, "id">
  * Manager to handle fetching and saving settings in the DB
  */
 export class SettingsManager {
+  private static instance: SettingsManager
+
+  public static getInstance(): SettingsManager {
+    if (!SettingsManager.instance) {
+      SettingsManager.instance = new SettingsManager()
+    }
+    return SettingsManager.instance
+  }
+
   // set the defaults for the settings
   private settings?: Settings
 

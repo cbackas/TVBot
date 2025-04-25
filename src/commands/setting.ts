@@ -10,8 +10,7 @@ import {
 } from "npm:discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { type App } from "app.ts"
-import { type SettingsManager } from "lib/settingsManager.ts"
+import { SettingsManager } from "lib/settingsManager.ts"
 import { type Destination } from "prisma-client/client.ts"
 
 export const command: CommandV2 = {
@@ -117,12 +116,12 @@ export const command: CommandV2 = {
       },
     ],
   },
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
     const subcommandGroup = interaction.options.getSubcommandGroup()
     const channel = interaction.options.getChannel("channel", true) as Channel
 
-    const settingsManager = app.getSettingsManager()
+    const settingsManager = SettingsManager.getInstance()
 
     /**
      * Handle the TV forum setting

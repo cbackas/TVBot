@@ -13,7 +13,6 @@ import {
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { type App } from "app.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
 import { createNewSubscription, updateEpisodes } from "lib/shows.ts"
 import { ProgressError } from "interfaces/error.ts"
@@ -59,7 +58,7 @@ export const command: CommandV2 = {
         .addStringOption(imdbOption),
     ],
   },
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const imdbIds = parseIMDBIds(interaction.options.getString("imdb_id", true))
 
     if (imdbIds.length >= 10) {

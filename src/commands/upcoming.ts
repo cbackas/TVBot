@@ -6,7 +6,6 @@ import {
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
-import { type App } from "app.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
 import { showSearchAutocomplete } from "lib/autocomplete.ts"
 import { type Show } from "prisma-client/client.ts"
@@ -40,7 +39,7 @@ export const command: CommandV2 = {
         ),
     ],
   },
-  async executeCommand(_app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     let s: Show[] = []
@@ -70,14 +69,14 @@ export const command: CommandV2 = {
     }
 
     // const message = await getUpcomingEpisodesMessage(s, 7)
-    const embed = await getUpcomingEpisodesEmbed(s, 7)
+    const embed = getUpcomingEpisodesEmbed(s, 7)
 
     return await interaction.editReply({
       content: "",
       embeds: [embed],
     })
   },
-  async executeAutoComplate(_app: App, interaction: AutocompleteInteraction) {
+  async executeAutoComplate(interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   },
 }
@@ -116,7 +115,7 @@ async function getShowsHere(channelId: string): Promise<Show[]> {
 }
 
 /**
- * Get the show by IMDB ID in the querys
+ * Get the show by IMDB ID in the queries
  */
 async function getShowByImdbId(query: string): Promise<Show> {
   // check that the query is an IMDB ID
