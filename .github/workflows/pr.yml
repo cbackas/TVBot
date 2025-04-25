@@ -27,6 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
+      - run: deno install --allow-scripts=npm:prisma,npm:@prisma/engines
       - run: deno task typecheck
   test-semantic-release:
     uses: ./.github/workflows/semantic-release.yml
