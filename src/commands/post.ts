@@ -4,6 +4,7 @@ import {
   ChannelType,
   type ChatInputCommandInteraction,
   Collection,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   type TextBasedChannel,
@@ -12,7 +13,6 @@ import {
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { type App } from "app.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
 import { createNewSubscription, updateEpisodes } from "lib/shows.ts"
 import { ProgressError } from "interfaces/error.ts"
@@ -21,6 +21,7 @@ import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 import { type Destination, type Show } from "prisma-client/client.ts"
 import { parseIMDBIds } from "lib/util.ts"
+import { Settings } from "lib/settingsManager.ts"
 
 interface SeriesWrapper {
   series: SeriesExtendedRecord
@@ -34,7 +35,7 @@ export const command: CommandV2 = {
       .setDescription(
         'Create a forum post for a show. Require "Manage Channels" permission.',
       )
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
       .addStringOption((option) =>
         option.setName("imdb_id")
@@ -52,7 +53,7 @@ export const command: CommandV2 = {
       ),
   },
 
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     let imdbIds = parseIMDBIds(interaction.options.getString("imdb_id", true))
 
     if (imdbIds.length > 10) {
@@ -76,7 +77,7 @@ export const command: CommandV2 = {
       // if the user passed in a forum then send the post to that forum
       const useInputForum = forumInput !== null &&
         isForumChannel(forumInput as Channel)
-      const tvForum = useInputForum ? forumInput.id : getDefaultTVForumId(app)
+      const tvForum = useInputForum ? forumInput.id : getDefaultTVForumId()
 
       await progress.sendNextStep() // start step 1
 
@@ -183,9 +184,8 @@ export const command: CommandV2 = {
  * @param app main application object instance
  * @returns ID of the default TV forum
  */
-function getDefaultTVForumId(app: App): string {
-  const forumId = app.getSettings()?.defaultForum
-
+function getDefaultTVForumId(): string {
+  const forumId = Settings.fetch()?.defaultForum
   if (forumId == null) {
     throw new ProgressError(
       "No TV forum configured, use /settings tv_forum <channel> to set the default TV forum",

@@ -2,18 +2,16 @@ import {
   ChannelType,
   type ChatInputCommandInteraction,
   Collection,
-  type GuildTextChannelType,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   type SlashCommandStringOption,
   SlashCommandSubcommandBuilder,
   type TextBasedChannel,
-  type TextChannel,
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { type App } from "app.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
 import { createNewSubscription, updateEpisodes } from "lib/shows.ts"
 import { ProgressError } from "interfaces/error.ts"
@@ -40,7 +38,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("link")
       .setDescription("Link a show to a channel for notifications.")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()
@@ -59,7 +57,7 @@ export const command: CommandV2 = {
         .addStringOption(imdbOption),
     ],
   },
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const imdbIds = parseIMDBIds(interaction.options.getString("imdb_id", true))
 
     if (imdbIds.length > 10) {

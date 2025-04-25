@@ -2,6 +2,7 @@ import {
   type Channel,
   ChannelType,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   type Message,
   PermissionFlagsBits,
   SlashCommandBuilder,
@@ -10,8 +11,7 @@ import {
 } from "npm:discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { type App } from "app.ts"
-import { type SettingsManager } from "lib/settingsManager.ts"
+import { Settings } from "lib/settingsManager.ts"
 import { type Destination } from "prisma-client/client.ts"
 
 export const command: CommandV2 = {
@@ -19,7 +19,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("setting")
       .setDescription("Configure various bot settings")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()
@@ -117,18 +117,16 @@ export const command: CommandV2 = {
       },
     ],
   },
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
     const subcommandGroup = interaction.options.getSubcommandGroup()
     const channel = interaction.options.getChannel("channel", true) as Channel
-
-    const settingsManager = app.getSettingsManager()
 
     /**
      * Handle the TV forum setting
      */
     if (subcommandGroup === null && subCommand === "tv_forum") {
-      await setTVForum(settingsManager, interaction, channel)
+      await setTVForum(interaction, channel)
       return
     }
 
@@ -137,7 +135,6 @@ export const command: CommandV2 = {
      */
     if (subcommandGroup === "all_episodes") {
       return await updateGlobalChannels(
-        settingsManager,
         interaction,
         channel,
         subCommand,
@@ -148,7 +145,7 @@ export const command: CommandV2 = {
      * Handle all the morning summary settings
      */
     if (subcommandGroup === "morning_summary") {
-      return await updateMorningSummaryChannels(settingsManager, interaction)
+      return await updateMorningSummaryChannels(interaction)
     }
   },
 }
@@ -159,7 +156,6 @@ export const command: CommandV2 = {
  * @param channel channel to set as the TV forum
  */
 async function setTVForum(
-  settingsManager: SettingsManager,
   interaction: ChatInputCommandInteraction,
   channel: Channel,
 ): Promise<Message<boolean> | void> {
@@ -173,7 +169,7 @@ async function setTVForum(
   await interaction.editReply(progressMessage.nextStep())
 
   // update the db with the new value
-  await settingsManager.update({
+  await Settings.update({
     defaultForum: channel.id,
   })
 
@@ -187,7 +183,6 @@ async function setTVForum(
  * @param mode `add` or `remove`
  */
 async function updateGlobalChannels(
-  settingsManager: SettingsManager,
   interaction: ChatInputCommandInteraction,
   channel: Channel,
   mode: string,
@@ -215,9 +210,9 @@ async function updateGlobalChannels(
 
   // add or remove the channel from the list
   if (mode === "add") {
-    destinations = await settingsManager.addGlobalDestination(channel.id)
+    destinations = await Settings.addGlobalDestination(channel.id)
   } else if (mode === "remove") {
-    destinations = await settingsManager.removeGlobalDestination(channel.id)
+    destinations = await Settings.removeGlobalDestination(channel.id)
   }
 
   const destinationsString = destinations.map((d) => `<#${d.channelId}>`).join(
@@ -235,7 +230,6 @@ async function updateGlobalChannels(
  * @returns nothin
  */
 async function updateMorningSummaryChannels(
-  settingsManager: SettingsManager,
   interaction: ChatInputCommandInteraction,
 ): Promise<Message<boolean>> {
   const subCommand = interaction.options.getSubcommand() // add_channel or remove_channel
@@ -259,7 +253,7 @@ async function updateMorningSummaryChannels(
 
   await progress.sendNextStep()
 
-  let channelList = settingsManager.fetch()?.morningSummaryDestinations ?? []
+  let channelList = Settings.fetch()?.morningSummaryDestinations ?? []
   const hasChannel = channelList.some((d) => d.channelId === channel.id)
 
   // add or remove the channel from the list
@@ -278,7 +272,7 @@ async function updateMorningSummaryChannels(
     channelList = channelList.filter((d) => d.channelId !== channel.id)
   }
 
-  await settingsManager.update({
+  await Settings.update({
     morningSummaryDestinations: channelList,
   })
 

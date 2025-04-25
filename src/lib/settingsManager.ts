@@ -5,14 +5,23 @@ import {
   type Settings as DBSettings,
 } from "prisma-client/client.ts"
 
-export type Settings = Omit<DBSettings, "id">
+export type SettingsType = Omit<DBSettings, "id">
 
 /**
  * Manager to handle fetching and saving settings in the DB
  */
-export class SettingsManager {
+export class Settings {
+  private static instance: Settings
+
+  public static getInstance(): Settings {
+    if (!Settings.instance) {
+      Settings.instance = new Settings()
+    }
+    return Settings.instance
+  }
+
   // set the defaults for the settings
-  private settings?: Settings
+  private settings?: SettingsType
 
   /**
    * Save initial settings data to the DB
@@ -34,7 +43,7 @@ export class SettingsManager {
   /**
    * Fetches the settings from the DB and updates the SettingsManager instance with the latest values
    */
-  refresh = async (): Promise<Settings | undefined> => {
+  refresh = async (): Promise<SettingsType | undefined> => {
     try {
       // fetch the settings from the DB
       const settings = await client.settings.findUniqueOrThrow({
@@ -50,11 +59,19 @@ export class SettingsManager {
     }
   }
 
+  public static refresh = async (): Promise<SettingsType | undefined> => {
+    const instance = Settings.getInstance()
+    const settings = await instance.refresh()
+    return settings
+  }
+
   /**
    * Update settings in the DB
    * @param inputData settings data to update
    */
-  update = async (inputData: Partial<Settings>): Promise<void> => {
+  public static update = async (
+    inputData: Partial<SettingsType>,
+  ): Promise<void> => {
     const data = Prisma.validator<Prisma.SettingsUpdateInput>()(inputData)
 
     await client.settings.update({
@@ -64,7 +81,7 @@ export class SettingsManager {
       data,
     })
 
-    await this.refresh()
+    await Settings.getInstance().refresh()
   }
 
   /**
@@ -89,9 +106,12 @@ export class SettingsManager {
     return matchingChannels > 0
   }
 
-  addGlobalDestination = async (channelId: string): Promise<Destination[]> => {
-    if (await this.channelIsAlreadyGlobal(channelId)) {
-      return this.settings?.allEpisodes ?? []
+  public static addGlobalDestination = async (
+    channelId: string,
+  ): Promise<Destination[]> => {
+    const instance = Settings.getInstance()
+    if (await instance.channelIsAlreadyGlobal(channelId)) {
+      return instance.settings?.allEpisodes ?? []
     }
 
     const settings = await client.settings.update({
@@ -112,15 +132,16 @@ export class SettingsManager {
 
     console.info(`Added ${channelId} to global destinations`)
 
-    await this.refresh()
+    await instance.refresh()
     return settings.allEpisodes
   }
 
-  removeGlobalDestination = async (
+  public static removeGlobalDestination = async (
     channelId: string,
   ): Promise<Destination[]> => {
-    if (!await this.channelIsAlreadyGlobal(channelId)) {
-      return this.settings?.allEpisodes ?? []
+    const instance = Settings.getInstance()
+    if (!await instance.channelIsAlreadyGlobal(channelId)) {
+      return instance.settings?.allEpisodes ?? []
     }
 
     const settings = await client.settings.update({
@@ -140,9 +161,10 @@ export class SettingsManager {
 
     console.info(`Removed ${channelId} from global destinations`)
 
-    await this.refresh()
+    await instance.refresh()
     return settings.allEpisodes
   }
 
-  fetch = (): Settings | undefined => this.settings
+  public static fetch = (): SettingsType | undefined =>
+    Settings.getInstance().settings
 }

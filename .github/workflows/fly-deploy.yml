@@ -6,6 +6,8 @@ jobs:
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     environment: tvbot-prod
     concurrency: deploy-group
     steps:

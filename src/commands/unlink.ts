@@ -3,6 +3,7 @@ import {
   type AnySelectMenuInteraction,
   ChannelType,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
@@ -11,7 +12,6 @@ import {
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
-import { type App } from "app.ts"
 import { ProgressError } from "interfaces/error.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
 import { pruneUnsubscribedShows } from "lib/shows.ts"
@@ -21,7 +21,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("unlink")
       .setDescription("Unlink shows from a channel for notifications.")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()
@@ -41,7 +41,7 @@ export const command: CommandV2 = {
     ],
   },
   selectMenuIds: ["unlink_shows_menu"],
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
 
     const progress = new ProgressMessageBuilder()
@@ -115,7 +115,7 @@ export const command: CommandV2 = {
       throw error
     }
   },
-  async executeSelectMenu(_app, interaction: AnySelectMenuInteraction) {
+  async executeSelectMenu(interaction: AnySelectMenuInteraction) {
     const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
 
     if (channelId === undefined) {

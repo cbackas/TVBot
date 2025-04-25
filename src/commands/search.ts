@@ -1,11 +1,11 @@
 import {
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   SlashCommandBuilder,
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
-import { type App } from "app.ts"
 import { getSeriesByImdbId, getSeriesByName } from "lib/tvdb.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { showSearchAutocomplete } from "lib/autocomplete.ts"
@@ -15,7 +15,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("search")
       .setDescription("Link a show to a channel for notifications.")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .addStringOption((option) =>
         option.setName("query")
           .setDescription(
@@ -26,7 +26,7 @@ export const command: CommandV2 = {
           .setRequired(true)
       ),
   },
-  async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
+  async executeCommand(interaction: ChatInputCommandInteraction) {
     const query = interaction.options.getString("query", true)
 
     let imdbId = query.toLowerCase().startsWith("tt") ? query : undefined
@@ -66,7 +66,7 @@ export const command: CommandV2 = {
       embeds: [buildShowEmbed(imdbId, series, [])],
     })
   },
-  async executeAutoComplate(app: App, interaction: AutocompleteInteraction) {
+  async executeAutoComplete(interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   },
 }

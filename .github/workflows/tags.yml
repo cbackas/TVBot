@@ -7,6 +7,9 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: docker/metadata-action@v5
@@ -33,4 +36,7 @@ jobs:
 
   deploy:
     needs: build_and_push
+    permissions:
+      contents: read
     uses: ./.github/workflows/fly-deploy.yml
+    secrets: inherit

@@ -1,4 +1,3 @@
-import process from "node:process"
 import {
   type AnySelectMenuInteraction,
   type AutocompleteInteraction,
@@ -11,8 +10,8 @@ import {
   Routes,
   type SlashCommandBuilder,
 } from "npm:discord.js"
-import { type App } from "app.ts"
 import { type CommandV2 } from "interfaces/command.ts"
+import { getEnv } from "lib/env.ts"
 
 interface Getter<TInput> {
   command: TInput
@@ -34,22 +33,14 @@ const commandModules: Array<Getter<CommandV2>> = [
 export class CommandManager {
   private readonly commands = new Collection<string, CommandV2>()
 
-  private readonly app: App
-  private readonly clientId: string
-  private readonly token: string
-  private readonly guildId: string
-
-  constructor(app: App, clientId: string, token: string, guildId: string) {
-    this.app = app
-    this.clientId = clientId
-    this.token = token
-    this.guildId = guildId
-  }
-
   /**
    * Register all commands with Discord
    */
-  public registerCommands = async (): Promise<void> => {
+  public registerCommands = async (
+    clientId: string,
+    token: string,
+    guildId: string,
+  ): Promise<void> => {
     type SlashCommandData =
       | RESTPostAPIChatInputApplicationCommandsJSONBody
       | RESTPostAPIContextMenuApplicationCommandsJSONBody
@@ -65,13 +56,13 @@ export class CommandManager {
     }
 
     // when testing locally you dont always need to register commands
-    if (process.env.REGISTER_COMMANDS === "false") return
+    if (getEnv("REGISTER_COMMANDS") === false) return
 
     try {
       console.log("Starting to register slash commands")
-      const rest = new REST({ version: "10" }).setToken(this.token)
+      const rest = new REST({ version: "10" }).setToken(token)
       await rest.put(
-        Routes.applicationGuildCommands(this.clientId, this.guildId),
+        Routes.applicationGuildCommands(clientId, guildId),
         { body: slashCommandData },
       )
       console.log(
@@ -115,7 +106,7 @@ export class CommandManager {
     await interaction.deferReply({ ephemeral: true })
 
     try {
-      await command.executeCommand(this.app, interaction)
+      await command.executeCommand(interaction)
     } catch (error) {
       console.error(error)
       await interaction.editReply(
@@ -135,7 +126,7 @@ export class CommandManager {
     await interaction.deferUpdate()
 
     try {
-      await command.executeSelectMenu(this.app, interaction)
+      await command.executeSelectMenu(interaction)
     } catch (error) {
       console.error(error)
       await interaction.editReply(
@@ -148,10 +139,10 @@ export class CommandManager {
     interaction: AutocompleteInteraction,
   ): Promise<void> => {
     const command = this.commands.get(interaction.commandName)
-    if (command == null || command.executeAutoComplate == null) return
+    if (command == null || command.executeAutoComplete == null) return
 
     try {
-      await command.executeAutoComplate(this.app, interaction)
+      await command.executeAutoComplete(interaction)
     } catch (e) {
       console.error(e)
     }

@@ -1,5 +1,5 @@
-import process from "node:process"
 import { PrismaClient } from "prisma-client/client.ts"
+import { getEnv } from "lib/env.ts"
 
 declare global {
   var prisma: PrismaClient | undefined
@@ -11,6 +11,6 @@ export const DBChannelType = {
 } as const
 
 const client = globalThis.prisma ?? new PrismaClient()
-if (process.env.NODE_ENV !== "production") globalThis.prisma = client
+if (getEnv("NODE_ENV") !== "production") globalThis.prisma = client
 
 export default client
