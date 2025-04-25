@@ -1,17 +1,10 @@
-import process from "node:process"
 import axios, { AxiosError, type AxiosRequestConfig } from "npm:axios"
 import {
   type SearchByRemoteIdResult,
   type SearchResult,
   type SeriesExtendedRecord,
 } from "interfaces/tvdb.generated.ts"
-
-if (process.env.TVDB_API_KEY === undefined) {
-  throw new Error("TVDB_API_KEY is not defined")
-}
-if (process.env.TVDB_USER_PIN === undefined) {
-  throw new Error("TVDB_USER_PIN is not defined")
-}
+import { getEnv } from "lib/env.ts"
 
 let token: string | undefined
 
@@ -20,8 +13,8 @@ async function getToken(): Promise<typeof token> {
 
   try {
     const response = await axios.post("https://api4.thetvdb.com/v4/login", {
-      apikey: process.env.TVDB_API_KEY,
-      pin: process.env.TVDB_USER_PIN,
+      apikey: getEnv("TVDB_API_KEY"),
+      pin: getEnv("TVDB_USER_PIN"),
     })
 
     token = response.data.data.token

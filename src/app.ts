@@ -1,5 +1,4 @@
 import "jsr:@std/dotenv/load"
-import process from "node:process"
 import { ChannelType, Client, Events, GatewayIntentBits } from "npm:discord.js"
 import { CommandManager } from "lib/commandManager.ts"
 import {
@@ -14,21 +13,11 @@ import {
   setRandomShowActivity,
   setTVDBLoadingActivity,
 } from "lib/discordActivities.ts"
+import { getEnv } from "lib/env.ts"
 
-if (process.env.DISCORD_TOKEN === undefined) {
-  throw new Error("DISCORD_TOKEN is not defined")
-}
-if (process.env.DISCORD_CLIENT_ID === undefined) {
-  throw new Error("DISCORD_CLIENT_ID is not defined")
-}
-if (process.env.DISCORD_GUILD_ID === undefined) {
-  throw new Error("DISCORD_GUILD_ID is not defined")
-}
-if (process.env.TZ === undefined) throw new Error("TZ is not defined")
-
-const token = process.env.DISCORD_TOKEN
-const clientId = process.env.DISCORD_CLIENT_ID
-const guildId = process.env.DISCORD_GUILD_ID
+const token = getEnv("DISCORD_TOKEN")
+const clientId = getEnv("DISCORD_CLIENT_ID")
+const guildId = getEnv("DISCORD_GUILD_ID")
 
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 
@@ -42,7 +31,7 @@ discordClient.on(Events.ClientReady, async (client) => {
   // run initial scheduled activities
   setTVDBLoadingActivity(user)
   await pruneUnsubscribedShows()
-  if (process.env.UPDATE_SHOWS !== "false") await checkForAiringEpisodes()
+  if (getEnv("UPDATE_SHOWS") === false) await checkForAiringEpisodes()
   void sendAiringMessages()
   void setRandomShowActivity(user)
 
@@ -64,7 +53,7 @@ discordClient.on(Events.ClientReady, async (client) => {
     await sendMorningSummary(settings, client)
   })
 
-  const healthcheckUrl = process.env.HEALTHCHECK_URL
+  const healthcheckUrl = getEnv("HEALTHCHECK_URL")
   if (healthcheckUrl != null) {
     Deno.cron("Healthcheck", { minute: { every: 1 } }, async () => {
       await fetch(healthcheckUrl)

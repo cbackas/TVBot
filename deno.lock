@@ -16,7 +16,7 @@
     "npm:prisma@^6.6.0": "6.6.0",
     "npm:prisma@latest": "6.6.0",
     "npm:semantic-release@*": "24.2.3_marked@12.0.2",
-    "npm:sqlite@^4.2.1": "4.2.1"
+    "npm:zod@^4.0.0-beta": "4.0.0-beta.20250420T053007"
   },
   "jsr": {
     "@std/dotenv@0.225.2": {
@@ -780,6 +780,9 @@
     },
     "@vladfrangu/async_event_emitter@2.4.6": {
       "integrity": "sha512-RaI5qZo6D2CVS6sTHFKg1v5Ohq/+Bo2LZ5gzUEwZ/WkHhwtGTCB/sVLw8ijOkAUxasZ+WshN/Rzj4ywsABJ5ZA=="
+    },
+    "@zod/core@0.8.1": {
+      "integrity": "sha512-djj8hPhxIHcG8ptxITaw/Bout5HJZ9NyRbKr95Eilqwt9R0kvITwUQGDU+n+MVdsBIka5KwztmZSLti22F+P0A=="
     },
     "abbrev@3.0.1": {
       "integrity": "sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg=="
@@ -2875,9 +2878,6 @@
     "sprintf-js@1.1.3": {
       "integrity": "sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA=="
     },
-    "sqlite@4.2.1": {
-      "integrity": "sha512-Tll0Ndvnwkuv5Hn6WIbh26rZiYQORuH1t5m/or9LUpSmDmmyFG89G9fKrSeugMPxwmEIXoVxqTun4LbizTs4uw=="
-    },
     "ssri@12.0.0": {
       "integrity": "sha512-S7iGNosepx9RadX82oimUkvr0Ct7IjJbEbs4mJcTxst8um95J3sDYU1RBEOvdu6oL1Wek2ODI5i4MAw+dZ6cAQ==",
       "dependencies": [
@@ -3239,6 +3239,12 @@
     },
     "yoctocolors@2.1.1": {
       "integrity": "sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ=="
+    },
+    "zod@4.0.0-beta.20250420T053007": {
+      "integrity": "sha512-5pp8Q0PNDaNcUptGiBE9akyioJh3RJpagIxrLtAVMR9IxwcSZiOsJD/1/98CyhItdTlI2H91MfhhLzRlU+fifA==",
+      "dependencies": [
+        "@zod/core"
+      ]
     }
   },
   "workspace": {
@@ -3251,7 +3257,7 @@
       "npm:moment-timezone@~0.5.43",
       "npm:parse-url@^8.1.0",
       "npm:prisma@^6.6.0",
-      "npm:sqlite@^4.2.1"
+      "npm:zod@^4.0.0-beta"
     ]
   }
 }

@@ -1,4 +1,3 @@
-import process from "node:process"
 import {
   type AnySelectMenuInteraction,
   type AutocompleteInteraction,
@@ -12,6 +11,7 @@ import {
   type SlashCommandBuilder,
 } from "npm:discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
+import { getEnv } from "lib/env.ts"
 
 interface Getter<TInput> {
   command: TInput
@@ -62,7 +62,7 @@ export class CommandManager {
     }
 
     // when testing locally you dont always need to register commands
-    if (process.env.REGISTER_COMMANDS === "false") return
+    if (getEnv("REGISTER_COMMANDS") === false) return
 
     try {
       console.log("Starting to register slash commands")

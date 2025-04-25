@@ -13,6 +13,6 @@
     "npm:city-timezones": "npm:city-timezones@^1.2.1",
     "npm:moment-timezone": "npm:moment-timezone@^0.5.43",
     "npm:parse-url": "npm:parse-url@^8.1.0",
-    "npm:sqlite": "npm:sqlite@^4.2.1"
+    "npm:zod": "npm:zod@^4.0.0-beta"
   }
 }

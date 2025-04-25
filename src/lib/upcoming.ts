@@ -1,9 +1,9 @@
-import process from "node:process"
 import { type Show } from "prisma-client/client.ts"
 import { type APIEmbed, type APIEmbedField, Collection } from "npm:discord.js"
 import moment from "npm:moment-timezone"
 import { type NotificationPayload } from "lib/episodeNotifier.ts"
 import { addLeadingZeros, toRanges } from "lib/util.ts"
+import { getEnv } from "lib/env.ts"
 
 interface UpcomingEpisodeMessages {
   prefix: string
@@ -43,7 +43,7 @@ function getShowMessages(
         episodeNumbers.join(",")
       } - <t:${payload.timestamp}:R>`
       const airDate = moment.utc(payload.timestamp).tz(
-        process.env.TZ ?? "America/Chicago",
+        getEnv("TZ"),
       )
       acc.ensure(airDate.format("dddd - Do of MMMM"), () => []).push(message)
       return acc
@@ -140,7 +140,7 @@ function reduceEpisodes(
         if (!inTimeWindow) continue
 
         const airDateString = moment.utc(e.airDate)
-          .tz(process.env.TZ ?? "America/Chicago")
+          .tz(getEnv("TZ"))
           .format("YYYY-MM-DD@HH:mm")
 
         const key = `announceEpisodes:${airDateString}:${show.imdbId}:S${
