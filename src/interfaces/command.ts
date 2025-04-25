@@ -10,7 +10,6 @@ import {
   type SlashCommandSubcommandGroupBuilder,
   type SlashCommandSubcommandsOnlyBuilder,
 } from "npm:discord.js"
-import { type App } from "app.ts"
 
 type ExecuteFunction = void | Message<boolean> | InteractionResponse<boolean>
 
@@ -29,15 +28,12 @@ export interface CommandV2 {
   }
   selectMenuIds?: string[]
   executeCommand: (
-    app: App,
     interaction: ChatInputCommandInteraction,
   ) => Promise<ExecuteFunction>
   executeAutoComplate?: (
-    app: App,
     interaction: AutocompleteInteraction,
   ) => Promise<ExecuteFunction>
   executeSelectMenu?: (
-    app: App,
     interaction: AnySelectMenuInteraction,
   ) => Promise<ExecuteFunction>
 }

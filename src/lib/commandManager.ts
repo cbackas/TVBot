@@ -34,13 +34,11 @@ const commandModules: Array<Getter<CommandV2>> = [
 export class CommandManager {
   private readonly commands = new Collection<string, CommandV2>()
 
-  private readonly app: App
   private readonly clientId: string
   private readonly token: string
   private readonly guildId: string
 
-  constructor(app: App, clientId: string, token: string, guildId: string) {
-    this.app = app
+  constructor(clientId: string, token: string, guildId: string) {
     this.clientId = clientId
     this.token = token
     this.guildId = guildId
@@ -115,7 +113,7 @@ export class CommandManager {
     await interaction.deferReply({ ephemeral: true })
 
     try {
-      await command.executeCommand(this.app, interaction)
+      await command.executeCommand(interaction)
     } catch (error) {
       console.error(error)
       await interaction.editReply(
@@ -135,7 +133,7 @@ export class CommandManager {
     await interaction.deferUpdate()
 
     try {
-      await command.executeSelectMenu(this.app, interaction)
+      await command.executeSelectMenu(interaction)
     } catch (error) {
       console.error(error)
       await interaction.editReply(
@@ -151,7 +149,7 @@ export class CommandManager {
     if (command == null || command.executeAutoComplate == null) return
 
     try {
-      await command.executeAutoComplate(this.app, interaction)
+      await command.executeAutoComplate(interaction)
     } catch (e) {
       console.error(e)
     }
