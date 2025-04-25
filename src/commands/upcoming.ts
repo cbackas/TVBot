@@ -69,8 +69,7 @@ export const command: CommandV2 = {
       return await interaction.editReply("No shows found")
     }
 
-    // const message = await getUpcomingEpisodesMessage(s, 7)
-    const embed = await getUpcomingEpisodesEmbed(s, 7)
+    const embed = getUpcomingEpisodesEmbed(s, 7)
 
     return await interaction.editReply({
       content: "",
