@@ -7,7 +7,7 @@
     "prisma:generate": "deno task prisma generate --schema=./prisma/schema.prisma",
     "db:migrate": "deno run -A npm:prisma migrate dev",
     "db:studio": "deno run -A npm:prisma studio",
-    "typecheck": "deno check src/**/*.ts"
+    "typecheck": "deno check --allow-scripts=npm:prisma,npm:@prisma/engines src/**/*.ts"
   },
   "compilerOptions": {
     "strict": true,
