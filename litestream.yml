@@ -1,0 +1,4 @@
+dbs:
+  - path: /data/denokv.sqlite3
+    replicas:
+      - url: ${LITESTREAM_S3_REPLICA_URL}
