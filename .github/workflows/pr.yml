@@ -10,6 +10,9 @@ on:
 jobs:
   pr-title:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Check PR Title
         uses: deepakputhraya/action-pr-title@master
@@ -18,12 +21,16 @@ jobs:
           prefix_case_sensitive: true
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
       - run: deno lint
   typecheck:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
@@ -31,10 +38,15 @@ jobs:
       - run: deno task typecheck
   test-semantic-release:
     uses: ./.github/workflows/semantic-release.yml
+    permissions:
+      contents: read
     with:
       dry_run: true
   build_docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: docker/login-action@v3
