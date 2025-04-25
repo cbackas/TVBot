@@ -76,7 +76,7 @@ export const command: CommandV2 = {
       embeds: [embed],
     })
   },
-  async executeAutoComplate(interaction: AutocompleteInteraction) {
+  async executeAutoComplete(interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   },
 }

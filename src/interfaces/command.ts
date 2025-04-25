@@ -30,7 +30,7 @@ export interface CommandV2 {
   executeCommand: (
     interaction: ChatInputCommandInteraction,
   ) => Promise<ExecuteFunction>
-  executeAutoComplate?: (
+  executeAutoComplete?: (
     interaction: AutocompleteInteraction,
   ) => Promise<ExecuteFunction>
   executeSelectMenu?: (

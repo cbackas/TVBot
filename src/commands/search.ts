@@ -66,7 +66,7 @@ export const command: CommandV2 = {
       embeds: [buildShowEmbed(imdbId, series, [])],
     })
   },
-  async executeAutoComplate(interaction: AutocompleteInteraction) {
+  async executeAutoComplete(interaction: AutocompleteInteraction) {
     await showSearchAutocomplete(interaction)
   },
 }

@@ -139,10 +139,10 @@ export class CommandManager {
     interaction: AutocompleteInteraction,
   ): Promise<void> => {
     const command = this.commands.get(interaction.commandName)
-    if (command == null || command.executeAutoComplate == null) return
+    if (command == null || command.executeAutoComplete == null) return
 
     try {
-      await command.executeAutoComplate(interaction)
+      await command.executeAutoComplete(interaction)
     } catch (e) {
       console.error(e)
     }
