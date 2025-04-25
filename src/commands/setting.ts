@@ -10,7 +10,7 @@ import {
 } from "npm:discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { SettingsManager } from "lib/settingsManager.ts"
+import { Settings } from "lib/settingsManager.ts"
 import { type Destination } from "prisma-client/client.ts"
 
 export const command: CommandV2 = {
@@ -121,7 +121,7 @@ export const command: CommandV2 = {
     const subcommandGroup = interaction.options.getSubcommandGroup()
     const channel = interaction.options.getChannel("channel", true) as Channel
 
-    const settingsManager = SettingsManager.getInstance()
+    const settingsManager = Settings.getInstance()
 
     /**
      * Handle the TV forum setting
@@ -158,7 +158,7 @@ export const command: CommandV2 = {
  * @param channel channel to set as the TV forum
  */
 async function setTVForum(
-  settingsManager: SettingsManager,
+  settingsManager: Settings,
   interaction: ChatInputCommandInteraction,
   channel: Channel,
 ): Promise<Message<boolean> | void> {
@@ -186,7 +186,7 @@ async function setTVForum(
  * @param mode `add` or `remove`
  */
 async function updateGlobalChannels(
-  settingsManager: SettingsManager,
+  settingsManager: Settings,
   interaction: ChatInputCommandInteraction,
   channel: Channel,
   mode: string,
@@ -234,7 +234,7 @@ async function updateGlobalChannels(
  * @returns nothin
  */
 async function updateMorningSummaryChannels(
-  settingsManager: SettingsManager,
+  settingsManager: Settings,
   interaction: ChatInputCommandInteraction,
 ): Promise<Message<boolean>> {
   const subCommand = interaction.options.getSubcommand() // add_channel or remove_channel

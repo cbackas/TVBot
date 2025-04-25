@@ -20,7 +20,7 @@ import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 import { type Destination, type Show } from "prisma-client/client.ts"
 import { parseIMDBIds } from "lib/util.ts"
-import { SettingsManager } from "lib/settingsManager.ts"
+import { Settings } from "lib/settingsManager.ts"
 
 interface SeriesWrapper {
   series: SeriesExtendedRecord
@@ -184,7 +184,7 @@ export const command: CommandV2 = {
  * @returns ID of the default TV forum
  */
 function getDefaultTVForumId(): string {
-  const forumId = SettingsManager.getInstance().fetch()?.defaultForum
+  const forumId = Settings.getInstance().fetch()?.defaultForum
   if (forumId == null) {
     throw new ProgressError(
       "No TV forum configured, use /settings tv_forum <channel> to set the default TV forum",

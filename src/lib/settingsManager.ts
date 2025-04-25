@@ -5,23 +5,23 @@ import {
   type Settings as DBSettings,
 } from "prisma-client/client.ts"
 
-export type Settings = Omit<DBSettings, "id">
+export type SettingsType = Omit<DBSettings, "id">
 
 /**
  * Manager to handle fetching and saving settings in the DB
  */
-export class SettingsManager {
-  private static instance: SettingsManager
+export class Settings {
+  private static instance: Settings
 
-  public static getInstance(): SettingsManager {
-    if (!SettingsManager.instance) {
-      SettingsManager.instance = new SettingsManager()
+  public static getInstance(): Settings {
+    if (!Settings.instance) {
+      Settings.instance = new Settings()
     }
-    return SettingsManager.instance
+    return Settings.instance
   }
 
   // set the defaults for the settings
-  private settings?: Settings
+  private settings?: SettingsType
 
   /**
    * Save initial settings data to the DB
@@ -43,7 +43,7 @@ export class SettingsManager {
   /**
    * Fetches the settings from the DB and updates the SettingsManager instance with the latest values
    */
-  refresh = async (): Promise<Settings | undefined> => {
+  refresh = async (): Promise<SettingsType | undefined> => {
     try {
       // fetch the settings from the DB
       const settings = await client.settings.findUniqueOrThrow({
@@ -63,7 +63,7 @@ export class SettingsManager {
    * Update settings in the DB
    * @param inputData settings data to update
    */
-  update = async (inputData: Partial<Settings>): Promise<void> => {
+  update = async (inputData: Partial<SettingsType>): Promise<void> => {
     const data = Prisma.validator<Prisma.SettingsUpdateInput>()(inputData)
 
     await client.settings.update({
@@ -153,5 +153,5 @@ export class SettingsManager {
     return settings.allEpisodes
   }
 
-  fetch = (): Settings | undefined => this.settings
+  fetch = (): SettingsType | undefined => this.settings
 }

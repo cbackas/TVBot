@@ -1,12 +1,12 @@
 import { type APIEmbed, type Client } from "npm:discord.js"
-import { type Settings } from "lib/settingsManager.ts"
+import { type SettingsType } from "lib/settingsManager.ts"
 import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
 import client from "lib/prisma.ts"
 import { type Show } from "prisma-client/client.ts"
 import { isTextChannel } from "lib/episodeNotifier.ts"
 
 export async function sendMorningSummary(
-  settings: Settings,
+  settings: SettingsType,
   c: Client,
 ): Promise<void> {
   const shows: Show[] = await client.show.findMany({

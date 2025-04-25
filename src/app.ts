@@ -8,7 +8,7 @@ import {
   removeAllSubscriptions,
 } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
-import { SettingsManager } from "lib/settingsManager.ts"
+import { Settings } from "lib/settingsManager.ts"
 import { sendMorningSummary } from "lib/morningSummary.ts"
 import {
   setRandomShowActivity,
@@ -33,7 +33,7 @@ const guildId = process.env.DISCORD_GUILD_ID
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 const commandManager = new CommandManager(clientId, token, guildId)
-const settingsManager = SettingsManager.getInstance()
+const settingsManager = Settings.getInstance()
 
 discordClient.on(Events.ClientReady, async (client) => {
   const { user } = client
