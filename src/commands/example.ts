@@ -3,7 +3,6 @@ import {
   type ChatInputCommandInteraction,
   SlashCommandBuilder,
 } from "npm:discord.js"
-import { type App } from "app.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 
 const slashCommand = new SlashCommandBuilder()
@@ -11,7 +10,6 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription("Replies with Pong!")
 
 const executeCommand = async (
-  app: App,
   interaction: ChatInputCommandInteraction<CacheType>,
 ): Promise<void> => {
   await interaction.reply("Pong!")

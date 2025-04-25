@@ -6,7 +6,8 @@
     "prisma": "deno run -A npm:prisma",
     "prisma:generate": "deno task prisma generate --schema=./prisma/schema.prisma",
     "db:migrate": "deno run -A npm:prisma migrate dev",
-    "db:studio": "deno run -A npm:prisma studio"
+    "db:studio": "deno run -A npm:prisma studio",
+    "typecheck": "deno check src/**/*.ts"
   },
   "compilerOptions": {
     "strict": true,
