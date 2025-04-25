@@ -21,10 +21,6 @@
     "include": [
       "src/"
     ],
-    "exclude": [
-      "src/testdata/",
-      "src/fixtures/**/*.ts"
-    ],
     "rules": {
       "tags": [
         "recommended"
