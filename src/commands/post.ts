@@ -21,7 +21,7 @@ import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 import { type Destination, type Show } from "prisma-client/client.ts"
 import { parseIMDBIds } from "lib/util.ts"
-import { Settings } from "lib/settingsManager.ts"
+import { getSetting } from "database/settings.ts"
 
 interface SeriesWrapper {
   series: SeriesExtendedRecord
@@ -77,7 +77,9 @@ export const command: CommandV2 = {
       // if the user passed in a forum then send the post to that forum
       const useInputForum = forumInput !== null &&
         isForumChannel(forumInput as Channel)
-      const tvForum = useInputForum ? forumInput.id : getDefaultTVForumId()
+      const tvForum = useInputForum
+        ? forumInput.id
+        : await getDefaultTVForumId()
 
       await progress.sendNextStep() // start step 1
 
@@ -184,14 +186,13 @@ export const command: CommandV2 = {
  * @param app main application object instance
  * @returns ID of the default TV forum
  */
-function getDefaultTVForumId(): string {
-  const forumId = Settings.fetch()?.defaultForum
+async function getDefaultTVForumId(): Promise<string> {
+  const forumId = await getSetting("defaultForum")
   if (forumId == null) {
     throw new ProgressError(
       "No TV forum configured, use /settings tv_forum <channel> to set the default TV forum",
     )
   }
-
   return forumId
 }
 
@@ -219,7 +220,7 @@ async function checkForExistingPosts(
     },
   })
 
-  // if the show isnt in the DB then we can just return
+  // if the show isn't in the DB then we can just return
   if (show === null) return undefined
   // if the show is in the DB but has no destinations then we can just return
   if (show.destinations.length === 0) return undefined

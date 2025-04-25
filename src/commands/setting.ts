@@ -11,8 +11,7 @@ import {
 } from "npm:discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
-import { Settings } from "lib/settingsManager.ts"
-import { type Destination } from "prisma-client/client.ts"
+import { getSetting, setSetting, Settings } from "database/settings.ts"
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -169,9 +168,7 @@ async function setTVForum(
   await interaction.editReply(progressMessage.nextStep())
 
   // update the db with the new value
-  await Settings.update({
-    defaultForum: channel.id,
-  })
+  await setSetting("defaultForum", channel.id)
 
   await interaction.editReply(progressMessage.nextStep())
 }
@@ -206,13 +203,18 @@ async function updateGlobalChannels(
 
   await progress.sendNextStep()
 
-  let destinations: Destination[] = []
+  const destinations: Settings["allEpisodes"] = await getSetting("allEpisodes")
 
   // add or remove the channel from the list
   if (mode === "add") {
-    destinations = await Settings.addGlobalDestination(channel.id)
+    destinations.push({
+      channelId: channel.id,
+    })
   } else if (mode === "remove") {
-    destinations = await Settings.removeGlobalDestination(channel.id)
+    const index = destinations.findIndex((d) => d.channelId === channel.id)
+    if (index >= 0) {
+      destinations.splice(index, 1)
+    }
   }
 
   const destinationsString = destinations.map((d) => `<#${d.channelId}>`).join(
@@ -225,7 +227,6 @@ async function updateGlobalChannels(
  * handle the morning_sumarry commands
  * allows adding and removing channels from the list of channels that receive the morning summary message
  * todo allow setting the time of the morning summary
- * @param settingsManager pass the settingsManager to avoid having to fetch it multiple times
  * @param interaction the chat interaction that got us here
  * @returns nothin
  */
@@ -253,7 +254,9 @@ async function updateMorningSummaryChannels(
 
   await progress.sendNextStep()
 
-  let channelList = Settings.fetch()?.morningSummaryDestinations ?? []
+  let channelList: Settings["morningSumarryDestinations"] = await getSetting(
+    "morningSumarryDestinations",
+  )
   const hasChannel = channelList.some((d) => d.channelId === channel.id)
 
   // add or remove the channel from the list
@@ -263,7 +266,6 @@ async function updateMorningSummaryChannels(
     }
     channelList.push({
       channelId: channel.id,
-      forumId: null,
     })
   } else if (subCommand === "remove_channel") {
     if (!hasChannel) {
@@ -272,9 +274,7 @@ async function updateMorningSummaryChannels(
     channelList = channelList.filter((d) => d.channelId !== channel.id)
   }
 
-  await Settings.update({
-    morningSummaryDestinations: channelList,
-  })
+  await setSetting("morningSumarryDestinations", channelList)
 
   const channelsString = channelList.map((d) => `<#${d.channelId}>`).join("\n")
   return await progress.sendNextStep(`__New List__:\n${channelsString}`)

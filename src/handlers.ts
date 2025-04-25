@@ -1,6 +1,6 @@
 import { ChannelType, ClientEvents } from "npm:discord.js"
-import { Settings } from "lib/settingsManager.ts"
 import { pruneUnsubscribedShows, removeAllSubscriptions } from "lib/shows.ts"
+import { getSetting, setSetting, type Settings } from "database/settings.ts"
 
 /**
  * When a thread (forum post) is deleted, remove all subscriptions for that post
@@ -28,6 +28,15 @@ export async function handleChannelDelete(
   if (channel.type === ChannelType.GuildText) {
     await removeAllSubscriptions(channel.id, "channelId")
     await pruneUnsubscribedShows()
-    await Settings.removeGlobalDestination(channel.id)
+
+    const destinations: Settings["allEpisodes"] = await getSetting(
+      "allEpisodes",
+    )
+    const filteredDestinations: Settings["allEpisodes"] = destinations.filter((
+      d: Settings["allEpisodes"][number],
+    ) => d.channelId !== channel.id)
+    if (filteredDestinations.length !== destinations.length) {
+      await setSetting("allEpisodes", filteredDestinations)
+    }
   }
 }

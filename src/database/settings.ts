@@ -1,13 +1,25 @@
 import * as z from "npm:zod"
-import { zDestination } from "../schemas.ts"
-import kv from "./client.ts"
+import { zDestination } from "schemas.ts"
+import kv from "database/client.ts"
+
+const nullToEmptyArray = <T>(val: T[] | null): T[] => {
+  if (val == null) {
+    return []
+  }
+  return val
+}
 
 const settingSchema = {
   defaultForum: z.string().nullable(),
-  allEpisodes: z.array(zDestination),
-  morningSumarryDestinations: z.array(zDestination),
-} as const
-export type SettingKey = keyof typeof settingSchema
+  allEpisodes: z.array(zDestination).nullable().transform(nullToEmptyArray),
+  morningSumarryDestinations: z.array(zDestination).nullable().transform(
+    nullToEmptyArray,
+  ),
+}
+export type Settings = {
+  [K in keyof typeof settingSchema]: z.infer<typeof settingSchema[K]>
+}
+export type SettingKey = keyof Settings
 
 export async function getSetting<K extends SettingKey>(
   key: K,
