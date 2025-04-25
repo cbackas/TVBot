@@ -1,5 +1,11 @@
 import "jsr:@std/dotenv/load"
-import { ChannelType, Client, Events, GatewayIntentBits } from "npm:discord.js"
+import {
+  ChannelType,
+  Client,
+  ClientUser,
+  Events,
+  GatewayIntentBits,
+} from "npm:discord.js"
 import { CommandManager } from "lib/commandManager.ts"
 import {
   checkForAiringEpisodes,
@@ -8,12 +14,13 @@ import {
 } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
 import { Settings } from "lib/settingsManager.ts"
-import { sendMorningSummary } from "lib/morningSummary.ts"
 import {
   setRandomShowActivity,
   setTVDBLoadingActivity,
 } from "lib/discordActivities.ts"
 import { getEnv } from "lib/env.ts"
+import { scheduleCronJobs } from "./cron.ts"
+import assert from "node:assert"
 
 const token = getEnv("DISCORD_TOKEN")
 const clientId = getEnv("DISCORD_CLIENT_ID")
@@ -24,42 +31,19 @@ const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 const commandManager = new CommandManager(clientId, token, guildId)
 
 discordClient.on(Events.ClientReady, async (client) => {
-  const { user } = client
-  if (user == null) throw new Error("User is null")
-  console.log(`Logged in as ${user.tag}!`)
+  if (client.user == null) {
+    throw new Error("Fatal: Client user is null")
+  }
+  console.info(`Logged in as ${client.user.tag}!`)
 
   // run initial scheduled activities
-  setTVDBLoadingActivity(user)
+  setTVDBLoadingActivity()
   await pruneUnsubscribedShows()
   if (getEnv("UPDATE_SHOWS")) await checkForAiringEpisodes()
   void sendAiringMessages()
-  void setRandomShowActivity(user)
+  void setRandomShowActivity()
 
-  Deno.cron("Announcements", { minute: { every: 10, start: 8 } }, () => {
-    void sendAiringMessages()
-    void setRandomShowActivity(user)
-  })
-
-  Deno.cron("Fetch Episode Data", { hour: { every: 4 } }, async () => {
-    setTVDBLoadingActivity(user)
-    await pruneUnsubscribedShows()
-    await checkForAiringEpisodes()
-  })
-
-  Deno.cron("Morning Summary", { hour: 8, minute: 0 }, async () => {
-    const settings = Settings.fetch()
-    if (settings == null) throw new Error("Settings not found")
-
-    await sendMorningSummary(settings, client)
-  })
-
-  const healthcheckUrl = getEnv("HEALTHCHECK_URL")
-  if (healthcheckUrl != null) {
-    Deno.cron("Healthcheck", { minute: { every: 1 } }, async () => {
-      await fetch(healthcheckUrl)
-      console.debug("[Healthcheck] Healthcheck ping sent")
-    })
-  }
+  scheduleCronJobs()
 })
 
 discordClient.on(Events.InteractionCreate, commandManager.interactionHandler)
@@ -94,3 +78,7 @@ await commandManager.registerCommands()
 await discordClient.login(token)
 
 export const getClient = (): Client<boolean> => discordClient
+export const getClientUser = (): ClientUser => {
+  assert(discordClient.user != null, "Client user is null")
+  return discordClient.user
+}
