@@ -2,6 +2,7 @@
   "imports": {
     "app.ts": "./src/app.ts",
     "lib/": "./src/lib/",
+    "database/": "./src/database/",
     "prisma-client/": "./prisma/client/",
     "interfaces/": "./src/interfaces/",
     "commands/": "./src/commands/",

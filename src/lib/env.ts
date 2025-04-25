@@ -13,6 +13,7 @@ const envKeys = {
   "NODE_ENV": z.enum(["development", "production"]).optional().default(
     "development",
   ),
+  "DENO_KV_ACCESS_TOKEN": z.string().optional(),
 } as const
 export type EnvKey = keyof typeof envKeys
 
