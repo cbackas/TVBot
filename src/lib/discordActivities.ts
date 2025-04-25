@@ -31,6 +31,7 @@ export function setWatchingActivity(
   show: string,
 ): void {
   const clientUser = getClientUser()
+  console.info(`Setting activity to watching ${show}`)
   clientUser.setActivity(show, { type: ActivityType.Watching })
 }
 
