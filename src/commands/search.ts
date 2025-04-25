@@ -1,6 +1,7 @@
 import {
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   SlashCommandBuilder,
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
@@ -14,7 +15,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("search")
       .setDescription("Link a show to a channel for notifications.")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .addStringOption((option) =>
         option.setName("query")
           .setDescription(

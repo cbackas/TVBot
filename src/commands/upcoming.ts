@@ -1,6 +1,7 @@
 import {
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
 } from "npm:discord.js"
@@ -17,7 +18,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("upcoming")
       .setDescription("Get upcoming episodes")
-      .setDMPermission(false),
+      .setContexts(InteractionContextType.Guild),
     subCommands: [
       new SlashCommandSubcommandBuilder()
         .setName("all")

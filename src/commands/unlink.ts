@@ -3,6 +3,7 @@ import {
   type AnySelectMenuInteraction,
   ChannelType,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
@@ -20,7 +21,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("unlink")
       .setDescription("Unlink shows from a channel for notifications.")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()

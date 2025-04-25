@@ -2,6 +2,7 @@ import {
   type Channel,
   ChannelType,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   type Message,
   PermissionFlagsBits,
   SlashCommandBuilder,
@@ -18,7 +19,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("setting")
       .setDescription("Configure various bot settings")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()

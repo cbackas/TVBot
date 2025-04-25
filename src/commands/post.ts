@@ -4,6 +4,7 @@ import {
   ChannelType,
   type ChatInputCommandInteraction,
   Collection,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   type TextBasedChannel,
@@ -34,7 +35,7 @@ export const command: CommandV2 = {
       .setDescription(
         'Create a forum post for a show. Require "Manage Channels" permission.',
       )
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
       .addStringOption((option) =>
         option.setName("imdb_id")

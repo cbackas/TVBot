@@ -1,6 +1,7 @@
 import {
   ChannelType,
   type ChatInputCommandInteraction,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
@@ -22,7 +23,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("list")
       .setDescription("List various things from the bot's DB")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subGroups: [{
       main: new SlashCommandSubcommandGroupBuilder()

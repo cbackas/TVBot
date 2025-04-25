@@ -2,13 +2,12 @@ import {
   ChannelType,
   type ChatInputCommandInteraction,
   Collection,
-  type GuildTextChannelType,
+  InteractionContextType,
   PermissionFlagsBits,
   SlashCommandBuilder,
   type SlashCommandStringOption,
   SlashCommandSubcommandBuilder,
   type TextBasedChannel,
-  type TextChannel,
 } from "npm:discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
@@ -39,7 +38,7 @@ export const command: CommandV2 = {
     main: new SlashCommandBuilder()
       .setName("link")
       .setDescription("Link a show to a channel for notifications.")
-      .setDMPermission(false)
+      .setContexts(InteractionContextType.Guild)
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
     subCommands: [
       new SlashCommandSubcommandBuilder()
