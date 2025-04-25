@@ -184,7 +184,7 @@ export const command: CommandV2 = {
  * @returns ID of the default TV forum
  */
 function getDefaultTVForumId(): string {
-  const forumId = Settings.getInstance().fetch()?.defaultForum
+  const forumId = Settings.fetch()?.defaultForum
   if (forumId == null) {
     throw new ProgressError(
       "No TV forum configured, use /settings tv_forum <channel> to set the default TV forum",

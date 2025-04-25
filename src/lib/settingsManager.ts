@@ -59,11 +59,19 @@ export class Settings {
     }
   }
 
+  public static refresh = async (): Promise<SettingsType | undefined> => {
+    const instance = Settings.getInstance()
+    const settings = await instance.refresh()
+    return settings
+  }
+
   /**
    * Update settings in the DB
    * @param inputData settings data to update
    */
-  update = async (inputData: Partial<SettingsType>): Promise<void> => {
+  public static update = async (
+    inputData: Partial<SettingsType>,
+  ): Promise<void> => {
     const data = Prisma.validator<Prisma.SettingsUpdateInput>()(inputData)
 
     await client.settings.update({
@@ -73,7 +81,7 @@ export class Settings {
       data,
     })
 
-    await this.refresh()
+    await Settings.getInstance().refresh()
   }
 
   /**
@@ -98,9 +106,12 @@ export class Settings {
     return matchingChannels > 0
   }
 
-  addGlobalDestination = async (channelId: string): Promise<Destination[]> => {
-    if (await this.channelIsAlreadyGlobal(channelId)) {
-      return this.settings?.allEpisodes ?? []
+  public static addGlobalDestination = async (
+    channelId: string,
+  ): Promise<Destination[]> => {
+    const instance = Settings.getInstance()
+    if (await instance.channelIsAlreadyGlobal(channelId)) {
+      return instance.settings?.allEpisodes ?? []
     }
 
     const settings = await client.settings.update({
@@ -121,15 +132,16 @@ export class Settings {
 
     console.info(`Added ${channelId} to global destinations`)
 
-    await this.refresh()
+    await instance.refresh()
     return settings.allEpisodes
   }
 
-  removeGlobalDestination = async (
+  public static removeGlobalDestination = async (
     channelId: string,
   ): Promise<Destination[]> => {
-    if (!await this.channelIsAlreadyGlobal(channelId)) {
-      return this.settings?.allEpisodes ?? []
+    const instance = Settings.getInstance()
+    if (!await instance.channelIsAlreadyGlobal(channelId)) {
+      return instance.settings?.allEpisodes ?? []
     }
 
     const settings = await client.settings.update({
@@ -149,9 +161,10 @@ export class Settings {
 
     console.info(`Removed ${channelId} from global destinations`)
 
-    await this.refresh()
+    await instance.refresh()
     return settings.allEpisodes
   }
 
-  fetch = (): SettingsType | undefined => this.settings
+  public static fetch = (): SettingsType | undefined =>
+    Settings.getInstance().settings
 }

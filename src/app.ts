@@ -33,7 +33,6 @@ const guildId = process.env.DISCORD_GUILD_ID
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 const commandManager = new CommandManager(clientId, token, guildId)
-const settingsManager = Settings.getInstance()
 
 discordClient.on(Events.ClientReady, async (client) => {
   const { user } = client
@@ -59,7 +58,7 @@ discordClient.on(Events.ClientReady, async (client) => {
   })
 
   Deno.cron("Morning Summary", { hour: 8, minute: 0 }, async () => {
-    const settings = settingsManager.fetch()
+    const settings = Settings.fetch()
     if (settings == null) throw new Error("Settings not found")
 
     await sendMorningSummary(settings, client)
@@ -96,12 +95,12 @@ discordClient.on(Events.ChannelDelete, async (channel) => {
   if (channel.type === ChannelType.GuildText) {
     await removeAllSubscriptions(channel.id, "channelId")
     await pruneUnsubscribedShows()
-    await settingsManager.removeGlobalDestination(channel.id)
+    await Settings.removeGlobalDestination(channel.id)
   }
 })
 
 // start the bot
-await settingsManager.refresh()
+await Settings.refresh()
 await commandManager.registerCommands()
 await discordClient.login(token)
 

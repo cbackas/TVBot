@@ -40,7 +40,7 @@ type PayloadCollection = Collection<string, NotificationPayload>
  */
 export async function sendAiringMessages(): Promise<void> {
   const discord = getClient()
-  const globalDestinations = Settings.getInstance().fetch()?.allEpisodes ?? []
+  const globalDestinations = Settings.fetch()?.allEpisodes ?? []
 
   const payloadCollection = await getShowPayloads()
   for (const payload of payloadCollection.values()) {
