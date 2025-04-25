@@ -8,11 +8,12 @@
     "npm:discord.js": "npm:discord.js@^14.18.0",
     "@prisma/client/runtime/library": "npm:@prisma/client/runtime/library",
     "npm:@prisma/client": "npm:@prisma/client@6.6.0",
+    "npm:@libsql/client": "npm:@libsql/client@^0.15.4",
     "npm:prisma": "npm:prisma@^6.6.0",
     "npm:axios": "npm:axios@^1.4.0",
     "npm:city-timezones": "npm:city-timezones@^1.2.1",
     "npm:moment-timezone": "npm:moment-timezone@^0.5.43",
     "npm:parse-url": "npm:parse-url@^8.1.0",
-    "npm:sqlite": "npm:sqlite@^4.2.1"
+    "npm:zod": "npm:zod@^4.0.0-beta"
   }
 }
