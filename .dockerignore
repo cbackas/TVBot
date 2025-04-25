@@ -12,3 +12,5 @@ fly.toml
 .git
 node_modules/
 prisma/client/
+*.sqlite*
+*.db*
