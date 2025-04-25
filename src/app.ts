@@ -31,7 +31,7 @@ discordClient.on(Events.ClientReady, async (client) => {
   // run initial scheduled activities
   setTVDBLoadingActivity(user)
   await pruneUnsubscribedShows()
-  if (getEnv("UPDATE_SHOWS") === false) await checkForAiringEpisodes()
+  if (getEnv("UPDATE_SHOWS")) await checkForAiringEpisodes()
   void sendAiringMessages()
   void setRandomShowActivity(user)
 
