@@ -1,17 +1,7 @@
 import "jsr:@std/dotenv/load"
-import {
-  ChannelType,
-  Client,
-  ClientUser,
-  Events,
-  GatewayIntentBits,
-} from "npm:discord.js"
+import { Client, ClientUser, Events, GatewayIntentBits } from "npm:discord.js"
 import { CommandManager } from "lib/commandManager.ts"
-import {
-  checkForAiringEpisodes,
-  pruneUnsubscribedShows,
-  removeAllSubscriptions,
-} from "lib/shows.ts"
+import { checkForAiringEpisodes, pruneUnsubscribedShows } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
 import { Settings } from "lib/settingsManager.ts"
 import {
@@ -21,14 +11,18 @@ import {
 import { getEnv } from "lib/env.ts"
 import { scheduleCronJobs } from "./cron.ts"
 import assert from "node:assert"
+import { handleChannelDelete, handleThreadDelete } from "./handlers.ts"
 
 const token = getEnv("DISCORD_TOKEN")
 const clientId = getEnv("DISCORD_CLIENT_ID")
 const guildId = getEnv("DISCORD_GUILD_ID")
 
-const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
+await Settings.refresh()
 
-const commandManager = new CommandManager(clientId, token, guildId)
+const commandManager = new CommandManager()
+await commandManager.registerCommands(clientId, token, guildId)
+
+const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 discordClient.on(Events.ClientReady, async (client) => {
   if (client.user == null) {
@@ -47,34 +41,10 @@ discordClient.on(Events.ClientReady, async (client) => {
 })
 
 discordClient.on(Events.InteractionCreate, commandManager.interactionHandler)
-
-/**
- * When a thread (forum post) is deleted, remove all subscriptions for that post
- */
-discordClient.on(Events.ThreadDelete, async (thread) => {
-  await removeAllSubscriptions(thread.id, "channelId")
-  await pruneUnsubscribedShows()
-})
-
-/**
- * When a forum is deleted, remove all subscriptions for post in that forum
- */
-discordClient.on(Events.ChannelDelete, async (channel) => {
-  if (channel.type === ChannelType.GuildForum) {
-    await removeAllSubscriptions(channel.id, "forumId")
-    await pruneUnsubscribedShows()
-  }
-
-  if (channel.type === ChannelType.GuildText) {
-    await removeAllSubscriptions(channel.id, "channelId")
-    await pruneUnsubscribedShows()
-    await Settings.removeGlobalDestination(channel.id)
-  }
-})
+discordClient.on(Events.ThreadDelete, handleThreadDelete)
+discordClient.on(Events.ChannelDelete, handleChannelDelete)
 
 // start the bot
-await Settings.refresh()
-await commandManager.registerCommands()
 await discordClient.login(token)
 
 export const getClient = (): Client<boolean> => discordClient

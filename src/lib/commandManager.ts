@@ -33,20 +33,14 @@ const commandModules: Array<Getter<CommandV2>> = [
 export class CommandManager {
   private readonly commands = new Collection<string, CommandV2>()
 
-  private readonly clientId: string
-  private readonly token: string
-  private readonly guildId: string
-
-  constructor(clientId: string, token: string, guildId: string) {
-    this.clientId = clientId
-    this.token = token
-    this.guildId = guildId
-  }
-
   /**
    * Register all commands with Discord
    */
-  public registerCommands = async (): Promise<void> => {
+  public registerCommands = async (
+    clientId: string,
+    token: string,
+    guildId: string,
+  ): Promise<void> => {
     type SlashCommandData =
       | RESTPostAPIChatInputApplicationCommandsJSONBody
       | RESTPostAPIContextMenuApplicationCommandsJSONBody
@@ -66,9 +60,9 @@ export class CommandManager {
 
     try {
       console.log("Starting to register slash commands")
-      const rest = new REST({ version: "10" }).setToken(this.token)
+      const rest = new REST({ version: "10" }).setToken(token)
       await rest.put(
-        Routes.applicationGuildCommands(this.clientId, this.guildId),
+        Routes.applicationGuildCommands(clientId, guildId),
         { body: slashCommandData },
       )
       console.log(
