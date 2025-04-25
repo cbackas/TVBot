@@ -62,9 +62,9 @@ export const command: CommandV2 = {
   async executeCommand(app: App, interaction: ChatInputCommandInteraction) {
     const imdbIds = parseIMDBIds(interaction.options.getString("imdb_id", true))
 
-    if (imdbIds.length >= 10) {
+    if (imdbIds.length > 10) {
       return await interaction.editReply({
-        content: "You can only create 10 posts at a time",
+        content: "You can only create 10 links at a time",
       })
     }
 
