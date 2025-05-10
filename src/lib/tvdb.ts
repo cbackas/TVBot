@@ -10,26 +10,27 @@ const baseURL = "https://api4.thetvdb.com/v4" as const
 let token: string | undefined
 
 async function getAuthToken(): Promise<{ Authorization: string }> {
-  if (token != null) return { Authorization: `Bearer ${token}` }
-
-  const response = await fetch(`${baseURL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      apikey: getEnv("TVDB_API_KEY"),
-      pin: getEnv("TVDB_USER_PIN"),
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to get TVDB token", {
-      cause: await response.text(),
+  if (token == null) {
+    const response = await fetch(`${baseURL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apikey: getEnv("TVDB_API_KEY"),
+        pin: getEnv("TVDB_USER_PIN"),
+      }),
     })
+
+    if (!response.ok) {
+      throw new Error("Failed to get TVDB token", {
+        cause: await response.text(),
+      })
+    }
+
+    const data = await response.json()
+    token = data.data.token
   }
 
-  const data = await response.json()
-  token = data.data.token
-  return { Authorization: data.data.token }
+  return { Authorization: `Bearer ${token}` }
 }
 
 export async function getSeriesByImdbId(
