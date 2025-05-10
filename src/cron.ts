@@ -5,7 +5,6 @@ import {
 import { getEnv } from "lib/env.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
 import { sendMorningSummary } from "lib/morningSummary.ts"
-import { Settings } from "lib/settingsManager.ts"
 import { checkForAiringEpisodes, pruneUnsubscribedShows } from "lib/shows.ts"
 
 export function scheduleCronJobs() {
@@ -21,8 +20,6 @@ export function scheduleCronJobs() {
   })
 
   Deno.cron("Morning Summary", { hour: 8, minute: 0 }, async () => {
-    const settings = Settings.fetch()
-    if (settings == null) throw new Error("Settings not found")
     await sendMorningSummary()
   })
 

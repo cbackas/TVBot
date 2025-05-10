@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
   "tasks": {
-    "dev": "deno --watch --no-clear-screen -A --unstable-cron --allow-scripts=npm:prisma,npm:@prisma/client,npm:@prisma/engines ./src/app.ts",
-    "build": "deno compile --unstable-cron -o ./dist/tvbot ./src/app.ts",
+    "dev": "deno --watch --no-clear-screen -ERN --unstable-cron --unstable-kv --allow-scripts=npm:prisma,npm:@prisma/client,npm:@prisma/engines ./src/app.ts",
+    "build": "deno compile --unstable-cron --unstable-kv -EN -o ./dist/tvbot ./src/app.ts",
     "prisma": "deno run -A npm:prisma",
     "prisma:generate": "deno task prisma generate --schema=./prisma/schema.prisma",
     "db:migrate": "deno run -A npm:prisma migrate dev",
