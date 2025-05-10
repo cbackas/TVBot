@@ -27,6 +27,9 @@ async function getAuthToken(): Promise<{ Authorization: string }> {
     }
 
     const data = await response.json()
+    if (!data?.data?.token) {
+      throw new Error("Invalid API response: Missing token")
+    }
     token = data.data.token
   }
 
