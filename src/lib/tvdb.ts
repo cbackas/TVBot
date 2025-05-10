@@ -1,4 +1,3 @@
-import axios, { AxiosError, type AxiosRequestConfig } from "npm:axios"
 import {
   type SearchByRemoteIdResult,
   type SearchResult,
@@ -6,49 +5,31 @@ import {
 } from "interfaces/tvdb.generated.ts"
 import { getEnv } from "lib/env.ts"
 
+const baseURL = "https://api4.thetvdb.com/v4" as const
+
 let token: string | undefined
 
-async function getToken(): Promise<typeof token> {
-  if (token != null) return token
+async function getAuthToken(): Promise<{ Authorization: string }> {
+  if (token != null) return { Authorization: `Bearer ${token}` }
 
-  try {
-    const response = await axios.post("https://api4.thetvdb.com/v4/login", {
+  const response = await fetch(`${baseURL}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       apikey: getEnv("TVDB_API_KEY"),
       pin: getEnv("TVDB_USER_PIN"),
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to get TVDB token", {
+      cause: await response.text(),
     })
+  }
 
-    token = response.data.data.token
-    return response.data.data.token
-  } catch (error) {
-    logPossibleAxiosError(error, "Getting TVDB Token")
-  }
-  return undefined
-}
-
-function logPossibleAxiosError(error: unknown, errorPrefix: string): void {
-  if (error instanceof AxiosError) {
-    console.error(`Error ${errorPrefix}:`, {
-      url: error.config?.url,
-      code: error.code,
-      data: error.response?.data,
-      status: error.response?.status,
-    })
-  } else {
-    console.error(`Unexpected Error ${errorPrefix}:`, error)
-  }
-}
-
-async function axiosOptions(): Promise<AxiosRequestConfig> {
-  const token = await getToken()
-  if (token == null) {
-    throw new Error("Failed to get TVDB token, couldn't build axios options")
-  }
-  return {
-    baseURL: "https://api4.thetvdb.com/v4",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
+  const data = await response.json()
+  token = data.data.token
+  return { Authorization: data.data.token }
 }
 
 export async function getSeriesByImdbId(
@@ -109,21 +90,30 @@ export async function getSeries(
   tvdbId: number,
 ): Promise<SeriesExtendedRecord | undefined> {
   try {
-    const options = await axiosOptions()
-    const response = await axios.get<{
-      data?: SeriesExtendedRecord
-    }>(`/series/${tvdbId}/extended`, {
-      ...options,
-      headers: options.headers,
-      params: {
-        short: true,
-        meta: "episodes,translations",
-      },
+    const params = new URLSearchParams({
+      short: "true",
+      meta: "episodes,translations",
     })
+    const response = await fetch(
+      `${baseURL}/series/${tvdbId}/extended?${params}`,
+      {
+        headers: await getAuthToken(),
+      },
+    )
 
-    return response.data?.data
+    if (!response.ok) {
+      console.error(`Error Getting Extended Show Data:`, {
+        url: response.url,
+        status: response.status,
+        data: await response.text(),
+      })
+      return undefined
+    }
+
+    const data: { data?: SeriesExtendedRecord } = await response.json()
+    return data.data
   } catch (error) {
-    logPossibleAxiosError(error, "Getting Extended Show Data")
+    console.error(`Unexpected Error Getting Extended Show Data:`, error)
   }
   return undefined
 }
@@ -132,14 +122,26 @@ async function searchSeriesByImdbId(
   imdbId: string,
 ): Promise<SearchByRemoteIdResult | undefined> {
   try {
-    const options = await axiosOptions()
-    const response = await axios.get<{
-      data?: SearchByRemoteIdResult[]
-    }>(`/search/remoteid/${imdbId}`, options)
+    const response = await fetch(
+      `${baseURL}/search/remoteid/${imdbId}`,
+      {
+        headers: await getAuthToken(),
+      },
+    )
 
-    return response.data.data?.at(0)
+    if (!response.ok) {
+      console.error(`Error Searching Series by IMDB ID:`, {
+        url: response.url,
+        status: response.status,
+        data: await response.text(),
+      })
+      return undefined
+    }
+
+    const data: { data?: SearchByRemoteIdResult[] } = await response.json()
+    return data.data?.at(0)
   } catch (error) {
-    logPossibleAxiosError(error, "Searching Series by IMDB ID")
+    console.error(`Unexpected Error Searching Series by IMDB ID:`, error)
   }
   return undefined
 }
@@ -148,18 +150,35 @@ async function searchSeriesByName(
   query: string,
 ): Promise<SearchResult[] | undefined> {
   try {
-    const options = await axiosOptions()
-    const response = await axios.get<{
-      data: SearchResult[]
-    }>(`/search?type=series&limit=10&q=${query}`, options)
+    const params = new URLSearchParams({
+      type: "series",
+      limit: "10",
+      q: query,
+    })
+    const response = await fetch(
+      `${baseURL}/search?${params}`,
+      {
+        headers: await getAuthToken(),
+      },
+    )
 
-    const searchResult = response.data?.data
+    if (!response.ok) {
+      console.error(`Error Searching Series:`, {
+        url: response.url,
+        status: response.status,
+        data: await response.text(),
+      })
+      return undefined
+    }
+
+    const data: { data: SearchResult[] } = await response.json()
+    const searchResult = data?.data
     if (searchResult == null || searchResult[0].tvdb_id == null) {
       return undefined
     }
     return searchResult
   } catch (error) {
-    logPossibleAxiosError(error, "Searching Series")
+    console.error(`Unexpected Error Searching Series:`, error)
   }
   return undefined
 }
