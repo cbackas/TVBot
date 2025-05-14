@@ -2,8 +2,10 @@
   "imports": {
     "app.ts": "./src/app.ts",
     "lib/": "./src/lib/",
+    "database/": "./src/database/",
     "prisma-client/": "./prisma/client/",
     "interfaces/": "./src/interfaces/",
+    "schemas.ts": "./src/schemas.ts",
     "commands/": "./src/commands/",
     "npm:discord.js": "npm:discord.js@^14.18.0",
     "@prisma/client/runtime/library": "npm:@prisma/client/runtime/library",

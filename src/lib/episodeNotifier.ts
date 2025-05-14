@@ -10,9 +10,9 @@ import {
 import moment from "npm:moment-timezone"
 import { markMessageSent } from "lib/shows.ts"
 import client from "lib/prisma.ts"
-import { Settings, type SettingsType } from "lib/settingsManager.ts"
 import { addLeadingZeros, toRanges } from "lib/util.ts"
 import { getClient } from "app.ts"
+import { getSetting, type Settings } from "database/settings.ts"
 
 export function isTextChannel(
   channel: Channel,
@@ -40,7 +40,7 @@ type PayloadCollection = Collection<string, NotificationPayload>
  */
 export async function sendAiringMessages(): Promise<void> {
   const discord = getClient()
-  const globalDestinations = Settings.fetch()?.allEpisodes ?? []
+  const globalDestinations = await getSetting("allEpisodes") ?? []
 
   const payloadCollection = await getShowPayloads()
   for (const payload of payloadCollection.values()) {
@@ -126,7 +126,7 @@ async function getShowPayloads(
 async function sendNotificationPayload(
   payload: NotificationPayload,
   discord: Client,
-  globalDestinations: SettingsType["allEpisodes"],
+  globalDestinations: Settings["allEpisodes"],
 ): Promise<void> {
   const message = getEpisodeMessage(
     payload.showName,

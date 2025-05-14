@@ -1,8 +1,10 @@
 #!/bin/bash
 
-set -e
-# migrate the database
-deno run -A --allow-scripts=npm:prisma,npm:@prisma/engines npm:prisma db push --skip-generate
-set +e
+if ! test -d /data; then
+	mkdir /data
+fi
+if ! test -f "$DENO_KV_SQLITE_PATH"; then
+	litestream restore --if-replica-exists -o "$DENO_KV_SQLITE_PATH"
+fi
 
-deno -A --unstable-cron ./src/app.ts
+litestream replicate -exec 'tvbot'

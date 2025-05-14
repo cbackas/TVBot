@@ -3,7 +3,6 @@ import { Client, ClientUser, Events, GatewayIntentBits } from "npm:discord.js"
 import { CommandManager } from "lib/commandManager.ts"
 import { checkForAiringEpisodes, pruneUnsubscribedShows } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
-import { Settings } from "lib/settingsManager.ts"
 import {
   setRandomShowActivity,
   setTVDBLoadingActivity,
@@ -16,8 +15,6 @@ import { handleChannelDelete, handleThreadDelete } from "./handlers.ts"
 const token = getEnv("DISCORD_TOKEN")
 const clientId = getEnv("DISCORD_CLIENT_ID")
 const guildId = getEnv("DISCORD_GUILD_ID")
-
-await Settings.refresh()
 
 const commandManager = new CommandManager()
 await commandManager.registerCommands(clientId, token, guildId)
