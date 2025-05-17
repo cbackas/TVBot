@@ -5,7 +5,7 @@
     "prisma-client/": "./prisma/client/",
     "interfaces/": "./src/interfaces/",
     "commands/": "./src/commands/",
-    "npm:discord.js": "npm:discord.js@^14.18.0",
+    "npm:discord.js": "npm:discord.js@^14.19.0",
     "@prisma/client/runtime/library": "npm:@prisma/client/runtime/library",
     "npm:@prisma/client": "npm:@prisma/client@6.6.0",
     "npm:prisma": "npm:prisma@^6.6.0",
