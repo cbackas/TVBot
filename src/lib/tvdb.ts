@@ -7,10 +7,11 @@ import { getEnv } from "lib/env.ts"
 
 const baseURL = "https://api4.thetvdb.com/v4" as const
 
-let token: string | undefined
+let token: { token: string; refreshAfter: Date } | undefined
+const refreshInterval = 14
 
 async function getAuthToken(): Promise<{ Authorization: string }> {
-  if (token == null) {
+  if (token == null || token.refreshAfter < new Date()) {
     const response = await fetch(`${baseURL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -26,14 +27,19 @@ async function getAuthToken(): Promise<{ Authorization: string }> {
       })
     }
 
-    const data = await response.json()
-    if (!data?.data?.token) {
+    const tokenData: { data?: { token?: string } } = await response.json()
+    if (tokenData?.data?.token == null) {
       throw new Error("Invalid API response: Missing token")
     }
-    token = data.data.token
+    token = {
+      token: tokenData.data.token,
+      refreshAfter: new Date(
+        Date.now() + refreshInterval * 24 * 60 * 60 * 1000,
+      ),
+    }
   }
 
-  return { Authorization: `Bearer ${token}` }
+  return { Authorization: `Bearer ${token.token}` }
 }
 
 export async function getSeriesByImdbId(
