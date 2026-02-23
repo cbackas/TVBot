@@ -1,31 +1,26 @@
-import {
-  type ChatInputCommandInteraction,
-  Collection,
-  type Message,
-} from "npm:discord.js"
+import { editInteractionResponse } from "./discord.js";
 
 interface Step {
-  status: typeof StepStatus[keyof typeof StepStatus]
-  message: string
+  status: (typeof StepStatus)[keyof typeof StepStatus];
+  message: string;
 }
 
 export const StepStatus = {
   PENDING: "🔴" as const,
   IN_PROGRESS: "🟡" as const,
   COMPLETE: "🟢" as const,
-} as const
+} as const;
 
 export class ProgressMessageBuilder {
-  // a discord interaction can optionally be passed in, this is useful for updating the message in place
-  private readonly interaction?: ChatInputCommandInteraction
+  private readonly interactionToken: string;
 
-  private readonly steps: Collection<number, Step>
-  private currentStep = 0
-  private totalSteps = 0
+  private readonly steps: Map<number, Step>;
+  private currentStep = 0;
+  private totalSteps = 0;
 
-  constructor(interaction?: ChatInputCommandInteraction) {
-    this.steps = new Collection<number, Step>()
-    this.interaction = interaction
+  constructor(interactionToken: string) {
+    this.steps = new Map<number, Step>();
+    this.interactionToken = interactionToken;
   }
 
   /**
@@ -34,15 +29,15 @@ export class ProgressMessageBuilder {
    * @returns ProgressMessageBuilder object
    */
   public addStep = (message: string): ProgressMessageBuilder => {
-    this.totalSteps += 1
+    this.totalSteps += 1;
 
     this.steps.set(this.totalSteps, {
       status: StepStatus.PENDING,
       message,
-    })
+    });
 
-    return this
-  }
+    return this;
+  };
 
   /**
    * set the status of a step
@@ -54,57 +49,52 @@ export class ProgressMessageBuilder {
     stepNumber: number,
     status: Step["status"],
   ): ProgressMessageBuilder => {
-    const step = this.steps.get(stepNumber)
+    const step = this.steps.get(stepNumber);
 
-    if (step === undefined) throw new Error(`Step ${stepNumber} does not exist`)
+    if (step === undefined)
+      throw new Error(`Step ${stepNumber} does not exist`);
 
-    step.status = status
+    step.status = status;
 
-    return this
-  }
+    return this;
+  };
 
   /**
    * updates the current step and returns the updated progress message
    * @returns the updated progress message
    */
   nextStep = (): string => {
-    const isFirstStep = this.currentStep === 0
+    const isFirstStep = this.currentStep === 0;
     if (!isFirstStep) {
-      this.setStatus(this.currentStep, StepStatus.COMPLETE)
+      this.setStatus(this.currentStep, StepStatus.COMPLETE);
     }
 
     if (this.currentStep !== this.totalSteps) {
-      this.setStatus(this.currentStep + 1, StepStatus.IN_PROGRESS)
+      this.setStatus(this.currentStep + 1, StepStatus.IN_PROGRESS);
     }
 
-    this.currentStep += 1
+    this.currentStep += 1;
 
-    return this.toString()
-  }
+    return this.toString();
+  };
 
   /**
    * wrapper function that updates the ProgressMessage object and sends it to the user
-   * only works if the ProgressMessageBuilder was initialized with a chat interaction
-   * @returns the sent discord message
+   * @returns void
    */
-  sendNextStep = async (
-    additionalMessage?: string,
-  ): Promise<Message<boolean>> => {
-    if (this.interaction == null) {
-      throw new Error(
-        "ProgressMessageBuilder was not initialized with an interaction",
-      )
-    }
-
-    // send the message to the user
-    return await this.interaction.editReply(
+  sendNextStep = async (additionalMessage?: string): Promise<void> => {
+    const content =
       this.nextStep() +
-        (additionalMessage !== undefined ? `\n\n${additionalMessage}` : ""),
-    )
-  }
+      (additionalMessage !== undefined ? `\n\n${additionalMessage}` : "");
+
+    await editInteractionResponse(this.interactionToken, { content });
+  };
 
   public toString = (): string => {
-    const messages = this.steps.map((step) => `${step.status} ${step.message}`)
-    return messages.join("\n")
-  }
+    const messages: string[] = [];
+    for (const [, step] of this.steps) {
+      messages.push(`${step.status} ${step.message}`);
+    }
+    return messages.join("\n");
+  };
 }

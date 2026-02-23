@@ -1,38 +1,24 @@
-import { type APIEmbed } from "npm:discord.js"
-import { Settings } from "lib/settingsManager.ts"
-import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
-import client from "lib/prisma.ts"
-import { type Show } from "prisma-client/client.ts"
-import { isTextChannel } from "lib/episodeNotifier.ts"
-import { getClient } from "app.ts"
+import { getEnv } from "./env.js";
+import { sendDiscordEmbed } from "./messages.js";
+import { getGlobalDestinations } from "./settingsManager.js";
+import { getAllShows } from "./shows.js";
+import { getUpcomingEpisodesEmbed } from "./upcoming.js";
 
 export async function sendMorningSummary(): Promise<void> {
-  const shows: Show[] = await client.show.findMany({
-    where: {
-      episodes: {
-        some: {
-          messageSent: false,
-        },
-      },
-    },
-  })
+  const allShows = await getAllShows();
+  const showsWithUnsentEpisodes = allShows.filter((show) =>
+    show.episodes.some((e) => !e.messageSent),
+  );
 
-  const embed: APIEmbed = getUpcomingEpisodesEmbed(shows, 1)
+  const embed = getUpcomingEpisodesEmbed(showsWithUnsentEpisodes, 1);
 
-  const discordClient = getClient()
-  const destinations = Settings.fetch()?.morningSummaryDestinations ?? []
+  const token = getEnv("DISCORD_TOKEN");
+  const destinations = await getGlobalDestinations("morning_summary");
   for (const dest of destinations) {
-    const channel = await discordClient.channels.fetch(dest.channelId)
-    if (channel == null || !isTextChannel(channel) || !channel.isSendable()) {
-      console.warn(
-        `Found channel ${dest.channelId} in the morning summary destinations but it is not a text channel or is not sendable`,
-      )
-      continue
+    try {
+      await sendDiscordEmbed(dest.channelId, embed, token);
+    } catch (e) {
+      console.error(`Error sending morning summary to ${dest.channelId}`, e);
     }
-
-    await channel.send({
-      content: "",
-      embeds: [embed],
-    })
   }
 }

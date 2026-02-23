@@ -1,14 +1,21 @@
-import { type Destination, Prisma, type Show } from "prisma-client/client.ts"
-import { type TextBasedChannel } from "npm:discord.js"
-import moment, { type Moment } from "npm:moment-timezone"
-import { isThreadChannel } from "interfaces/discord.ts"
-import client from "lib/prisma.ts"
-import { getTimezone } from "lib/timezones.ts"
-import { getSeries } from "lib/tvdb.ts"
+import { and, asc, eq, inArray, like, notInArray, or } from "drizzle-orm";
+import moment, { type Moment } from "moment-timezone";
+import { getDb } from "../database/db.js";
+import { episodes, showDestinations, shows } from "../database/schema.js";
 import {
-  type EpisodeBaseRecord,
-  type SeriesExtendedRecord,
-} from "interfaces/tvdb.generated.ts"
+  type Destination,
+  type Episode,
+  type Show,
+  showSchema,
+} from "../database/types.js";
+import type {
+  EpisodeBaseRecord,
+  SeriesExtendedRecord,
+} from "../interfaces/tvdb.generated.js";
+import { getTimezone } from "./timezones.js";
+import { getSeries } from "./tvdb.js";
+
+export type { Destination, Episode, Show };
 
 /**
  * Get a moment airdate with the specified date and time
@@ -26,10 +33,53 @@ function getAirDate(
     return moment.tz(
       `${dateStr} ${timeStr !== null ? timeStr : "00:00"}`,
       timezone,
-    )
+    );
   } catch (error) {
-    throw new Error("Could not parse air date")
+    throw new Error(
+      "Could not parse air date",
+      error instanceof Error ? { cause: error } : undefined,
+    );
   }
+}
+
+// ---- Query helpers ----
+
+export async function getShowByImdbId(imdbId: string): Promise<Show | null> {
+  const db = getDb();
+
+  const row = await db.query.shows.findFirst({
+    where: { imdbId },
+    with: { episodes: true, destinations: true },
+  });
+
+  if (row == null) return null;
+  return showSchema.parse(row);
+}
+
+export async function getAllShows(): Promise<Show[]> {
+  const db = getDb();
+
+  const rows = await db.query.shows.findMany({
+    with: { episodes: true, destinations: true },
+  });
+
+  return rows.map((r) => showSchema.parse(r));
+}
+
+export async function searchShows(
+  query: string,
+  limit: number = 25,
+): Promise<Pick<Show, "name" | "imdbId">[]> {
+  const db = getDb();
+  const condition = query.toLowerCase().startsWith("tt")
+    ? or(like(shows.imdbId, `${query}%`), like(shows.name, `${query}%`))
+    : like(shows.name, `${query}%`);
+  return db
+    .select({ name: shows.name, imdbId: shows.imdbId })
+    .from(shows)
+    .where(condition)
+    .orderBy(asc(shows.name))
+    .limit(limit);
 }
 
 /**
@@ -43,107 +93,95 @@ export async function updateEpisodes(
   tvdbId: number,
   providedSeries?: SeriesExtendedRecord,
 ): Promise<void> {
-  // if the caller already has series data for whatever reason and provided it, just use that
-  const series: SeriesExtendedRecord | undefined = providedSeries ??
-    (await getSeries(tvdbId))
+  const series: SeriesExtendedRecord | undefined =
+    providedSeries ?? (await getSeries(tvdbId));
 
-  // if we still dont have series data, throw an error
   if (series == null) {
-    throw new Error(`Could not fetch series data for ${imdbId}`)
+    throw new Error(`Could not fetch series data for ${imdbId}`);
   }
 
-  const timezone = getTimezone(series.latestNetwork?.country ?? "usa")
-  const airsTime = series.airsTime
+  const timezone = getTimezone(series.latestNetwork?.country ?? "usa");
+  const airsTime = series.airsTime;
 
-  // filter out episodes that have already aired
-  // map to the episode list of objects we want to store
   const upcomingEpisodes = series.episodes
     .filter((e: EpisodeBaseRecord) => {
-      if (e.aired == null) return false
-      return getAirDate(e.aired, airsTime, timezone).toDate() > new Date()
+      if (e.aired == null) return false;
+      return getAirDate(e.aired, airsTime, timezone).toDate() > new Date();
     })
     .map((e) => {
-      if (e.aired == null) throw new Error("Episode has no air date")
+      if (e.aired == null) throw new Error("Episode has no air date");
 
-      const airDate = getAirDate(e.aired, airsTime, timezone)
-      const airDateUTC = airDate.utc().toDate()
-      return Prisma.validator<Prisma.ShowCreateInput["episodes"]>()({
+      const airDate = getAirDate(e.aired, airsTime, timezone);
+      const airDateUTC = airDate.utc().toDate();
+      return {
         season: e.seasonNumber,
         number: e.number,
         title: e.name ?? "",
         airDate: airDateUTC,
-      })
-    })
+      };
+    });
 
-  // update the show with the new episodes (we can just replace all of them)
-  await client.show.update({
-    where: {
-      imdbId,
-    },
-    data: {
-      name: series.name,
+  // Upsert show
+  const db = getDb();
+  await db
+    .insert(shows)
+    .values({ imdbId, tvdbId, name: series.name })
+    .onConflictDoUpdate({
+      target: shows.imdbId,
+      set: { tvdbId, name: series.name },
+    });
 
-      episodes: {
-        set: upcomingEpisodes,
-      },
-    },
-  })
+  // Replace episodes
+  const showRow = await db
+    .select({ id: shows.id })
+    .from(shows)
+    .where(eq(shows.imdbId, imdbId))
+    .get();
+
+  if (showRow != null) {
+    const insertValues = upcomingEpisodes.map((e) => ({
+      showId: showRow.id,
+      season: e.season,
+      number: e.number,
+      title: e.title,
+      airDate: e.airDate.toISOString(),
+    }));
+
+    if (insertValues.length === 0) {
+      await db.delete(episodes).where(eq(episodes.showId, showRow.id));
+    } else {
+      await db.batch([
+        db.delete(episodes).where(eq(episodes.showId, showRow.id)),
+        db.insert(episodes).values(insertValues),
+      ]);
+    }
+  }
 
   console.info(
     `[Get Episode Data] ${series.name} / Upcoming episodes: ${upcomingEpisodes.length}`,
-  )
+  );
 }
 
 /**
  * Updates all shows in the DB with new episodes
  */
 export async function checkForAiringEpisodes(): Promise<void> {
-  console.info("== Checking all shows for airing episodes ==")
-  const shows = await client.show.findMany({
-    select: {
-      id: true,
-      name: true,
-      imdbId: true,
-      tvdbId: true,
-      episodes: true,
-      destinations: true,
-    },
-  })
+  console.info("== Checking all shows for airing episodes ==");
+  const allShows = await getAllShows();
 
-  for (const show of shows) {
+  for (const show of allShows) {
     try {
-      await updateEpisodes(show.imdbId, show.tvdbId)
+      await updateEpisodes(show.imdbId, show.tvdbId);
     } catch (error) {
-      console.error(`Error updating episodes for ${show.name} (${show.imdbId})`)
+      console.error(
+        `Error updating episodes for ${show.name} (${show.imdbId})`,
+        error,
+      );
     }
   }
 
-  console.info("== Finished checking all shows for airing episodes ==")
+  console.info("== Finished checking all shows for airing episodes ==");
 }
-
-/**
- * Mark episodes as sent in the DB, just to avoid sending the same message twice
- * @param showId id of the show to mark episodes sent in
- * @param seasonNumber season to mark episodes sent in
- * @param episodeNumbers array of episode numbers to mark as sent
- */
-export async function markMessageSent(
-  imdbId: string,
-  seasonNumber: number,
-  episodeNumbers: number[],
-): Promise<void>
-
-/**
- * Mark episodes as sent in the DB, just to avoid sending the same message twice
- * @param showId id of the show to mark episodes sent in
- * @param seasonNumber season to mark episodes sent in
- * @param episodeNumber episode number(s) to mark as sent
- */
-export async function markMessageSent(
-  imdbId: string,
-  seasonNumber: number,
-  episodeNumber: number,
-): Promise<void>
 
 /**
  * Mark episodes as sent in the DB, just to avoid sending the same message twice
@@ -156,31 +194,30 @@ export async function markMessageSent(
   seasonNumber: number,
   episodeNumber: number | number[],
 ): Promise<void> {
-  // handle overloaded function to turn params into an array
   const episodeNumbers: number[] = Array.isArray(episodeNumber)
     ? episodeNumber
-    : [episodeNumber]
+    : [episodeNumber];
 
-  await client.show.update({
-    where: {
-      imdbId,
-    },
-    data: {
-      episodes: {
-        updateMany: {
-          where: {
-            season: seasonNumber,
-            number: {
-              in: episodeNumbers,
-            },
-          },
-          data: {
-            messageSent: true,
-          },
-        },
-      },
-    },
-  })
+  const db = getDb();
+
+  const showRow = await db
+    .select({ id: shows.id })
+    .from(shows)
+    .where(eq(shows.imdbId, imdbId))
+    .get();
+
+  if (showRow == null) return;
+
+  await db
+    .update(episodes)
+    .set({ messageSent: true })
+    .where(
+      and(
+        eq(episodes.showId, showRow.id),
+        eq(episodes.season, seasonNumber),
+        inArray(episodes.number, episodeNumbers),
+      ),
+    );
 }
 
 /**
@@ -188,45 +225,53 @@ export async function markMessageSent(
  * @param imdbId imdbID for the show to subscribe to
  * @param tvdbSeriesId tvdb id for the show
  * @param seriesName name of the tv show
- * @param channel discord channel to send notifications to
- * @returns
+ * @param destination where to send notifications
+ * @returns the show after subscription is added
  */
 export async function createNewSubscription(
   imdbId: string,
   tvdbSeriesId: number,
   seriesName: string,
-  channel: TextBasedChannel,
+  destination: Pick<Destination, "channelId" | "forumId">,
 ): Promise<Show> {
-  return await client.show.upsert({
-    where: {
-      imdbId,
-    },
-    update: {
-      tvdbId: tvdbSeriesId,
-      name: seriesName,
-      destinations: {
-        push: {
-          channelId: channel.id,
-          forumId: isThreadChannel(channel) ? channel.parentId : null,
-        },
-      },
-    },
-    create: {
-      imdbId,
-      tvdbId: tvdbSeriesId,
-      name: seriesName,
-      destinations: {
-        set: [{
-          channelId: channel.id,
-          forumId: isThreadChannel(channel) ? channel.parentId : null,
-        }],
-      },
-    },
-  })
+  const db = getDb();
+
+  // Upsert show
+  await db
+    .insert(shows)
+    .values({ imdbId, tvdbId: tvdbSeriesId, name: seriesName })
+    .onConflictDoUpdate({
+      target: shows.imdbId,
+      set: { tvdbId: tvdbSeriesId, name: seriesName },
+    });
+
+  // Add destination
+  const showRow = await db
+    .select({ id: shows.id })
+    .from(shows)
+    .where(eq(shows.imdbId, imdbId))
+    .get();
+
+  if (showRow != null) {
+    await db
+      .insert(showDestinations)
+      .values({
+        showId: showRow.id,
+        channelId: destination.channelId,
+        forumId: destination.forumId,
+      })
+      .onConflictDoNothing();
+  }
+
+  const show = await getShowByImdbId(imdbId);
+  if (show == null) {
+    throw new Error(`Show ${imdbId} not found after creation`);
+  }
+  return show;
 }
 
 /**
- * unsubscribe a channel from notifications for a show
+ * Unsubscribe a channel from notifications for a show
  * @param imdbId imdbID for the show to remove the subscription from
  * @param channelId channel to unsubscribe the show from
  * @returns the show that was unsubscribed from
@@ -235,57 +280,68 @@ export async function removeSubscription(
   imdbId: string,
   channelId: string,
 ): Promise<Show> {
-  return await client.show.update({
-    where: {
-      imdbId,
-    },
-    data: {
-      destinations: {
-        deleteMany: {
-          where: {
-            channelId,
-          },
-        },
-      },
-    },
-  })
+  const db = getDb();
+
+  const showRow = await db
+    .select({ id: shows.id })
+    .from(shows)
+    .where(eq(shows.imdbId, imdbId))
+    .get();
+
+  if (showRow != null) {
+    await db
+      .delete(showDestinations)
+      .where(
+        and(
+          eq(showDestinations.showId, showRow.id),
+          eq(showDestinations.channelId, channelId),
+        ),
+      );
+  }
+
+  const show = await getShowByImdbId(imdbId);
+  if (show == null) {
+    throw new Error(`Show ${imdbId} not found`);
+  }
+  return show;
 }
 
 /**
- * unsubscribes a channel from all notifications
+ * Unsubscribes a channel from all notifications
  * @param id id to use in the where clause
- * @param idType whether to use the channel id or forum id in the where clause, defaults to channel id
+ * @param idType whether to use the channel id or forum id in the where clause
  */
 export async function removeAllSubscriptions(
   id: string,
-  idType: keyof Destination = "channelId",
+  idType: "channelId" | "forumId" = "channelId",
 ): Promise<void> {
-  await client.show.updateMany({
-    data: {
-      destinations: {
-        deleteMany: {
-          where: {
-            [idType]: id,
-          },
-        },
-      },
-    },
-  })
+  const db = getDb();
+  const column =
+    idType === "channelId"
+      ? showDestinations.channelId
+      : showDestinations.forumId;
 
-  console.log("Deleted all show destinations for channel " + id)
+  await db.delete(showDestinations).where(eq(column, id));
+  console.info(`Deleted all show destinations for channel ${id}`);
 }
 
 /**
- * removes all shows that have no destinations
+ * Removes all shows that have no destinations
  */
 export async function pruneUnsubscribedShows(): Promise<void> {
-  const result = await client.show.deleteMany({
-    where: {
-      destinations: {
-        isEmpty: true,
-      },
-    },
-  })
+  const db = getDb();
 
-  console.info(`Pruned shows ${result.count} with no destinations`)
+  const result = await db
+    .delete(shows)
+    .where(
+      notInArray(
+        shows.id,
+        db
+          .selectDistinct({ showId: showDestinations.showId })
+          .from(showDestinations),
+      ),
+    );
+
+  const count = result.meta.changes ?? 0;
+  console.info(`Pruned shows ${count} with no destinations`);
 }

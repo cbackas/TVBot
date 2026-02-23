@@ -1,7 +1,7 @@
-import parseUrl from "npm:parse-url"
+import parseUrl from "parse-url";
 
 export function addLeadingZeros(num: number, totalLength: number): string {
-  return String(num).padStart(totalLength, "0")
+  return String(num).padStart(totalLength, "0");
 }
 
 export function toRanges(
@@ -13,16 +13,16 @@ export function toRanges(
     .slice()
     .sort((p, q) => p - q)
     .reduce((acc: number[][], cur, idx, src) => {
-      if ((idx > 0) && ((cur - src[idx - 1]) === 1)) {
-        acc[acc.length - 1][1] = cur
+      if (idx > 0 && cur - src[idx - 1] === 1) {
+        acc[acc.length - 1][1] = cur;
       } else {
-        acc.push([cur])
+        acc.push([cur]);
       }
-      return acc
+      return acc;
     }, [])
     .map((range) =>
-      range.map((value) => addLeadingZeros(value, totalLength)).join(separator)
-    )
+      range.map((value) => addLeadingZeros(value, totalLength)).join(separator),
+    );
 }
 
 /**
@@ -32,23 +32,26 @@ export function toRanges(
  * @returns array of imdb ids
  */
 export function parseIMDBIds(imdbIds: string): string[] {
-  return imdbIds.split(",")
-    // filter out invalid imdb ids and handle imdb urls
-    .reduce((acc, id) => {
-      if (id.startsWith("tt")) return [...acc, id]
+  return (
+    imdbIds
+      .split(",")
+      // filter out invalid imdb ids and handle imdb urls
+      .reduce((acc, id) => {
+        if (id.startsWith("tt")) return [...acc, id];
 
-      try {
-        const parsedUrl = parseUrl(id, true)
-        if (
-          ["imdb.com", "m.imdb.com"].includes(parsedUrl.resource) &&
-          parsedUrl.pathname.startsWith("/title/")
-        ) {
-          return [...acc, parsedUrl.pathname.split("/title/")[1]]
+        try {
+          const parsedUrl = parseUrl(id, true);
+          if (
+            ["imdb.com", "m.imdb.com"].includes(parsedUrl.resource) &&
+            parsedUrl.pathname.startsWith("/title/")
+          ) {
+            return [...acc, parsedUrl.pathname.split("/title/")[1]];
+          }
+        } catch (_e) {
+          // do nothing
         }
-      } catch (e) {
-        // do nothing
-      }
 
-      return acc
-    }, new Array<string>())
+        return acc;
+      }, [] as string[])
+  );
 }

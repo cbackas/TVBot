@@ -1,50 +1,48 @@
-import { type Prisma } from "prisma-client/client.ts"
 import {
-  type ApplicationCommandOptionChoiceData,
-  type AutocompleteInteraction,
-} from "npm:discord.js"
-import client from "lib/prisma.ts"
+  type APIApplicationCommandAutocompleteInteraction,
+  type APIApplicationCommandInteractionDataOption,
+  ApplicationCommandOptionType,
+} from "discord-api-types/v10";
+import { InteractionResponseType } from "discord-interactions";
+import { searchShows } from "./shows.js";
+
+/**
+ * Recursively find the focused option, unwrapping subcommand groups and subcommands.
+ */
+function findFocusedOption(
+  options: APIApplicationCommandInteractionDataOption[],
+): APIApplicationCommandInteractionDataOption | undefined {
+  for (const opt of options) {
+    if ("focused" in opt && opt.focused) return opt;
+    if (
+      (opt.type === ApplicationCommandOptionType.SubcommandGroup ||
+        opt.type === ApplicationCommandOptionType.Subcommand) &&
+      "options" in opt &&
+      opt.options
+    ) {
+      const found = findFocusedOption(opt.options);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
 
 export async function showSearchAutocomplete(
-  interaction: AutocompleteInteraction,
-): Promise<void> {
-  const focusedValue = interaction.options.getFocused()
+  interaction: APIApplicationCommandAutocompleteInteraction,
+): Promise<Response> {
+  const focused = findFocusedOption(interaction.data.options ?? []);
+  const focusedValue =
+    focused && "value" in focused ? String(focused.value) : "";
 
-  if (focusedValue === undefined) return
+  const data = await searchShows(focusedValue);
 
-  const where: Prisma.ShowWhereInput =
-    focusedValue.toLocaleLowerCase().startsWith("tt")
-      ? {
-        imdbId: {
-          startsWith: focusedValue,
-          mode: "insensitive",
-        },
-      }
-      : {
-        name: {
-          startsWith: focusedValue,
-          mode: "insensitive",
-        },
-      }
+  const choices = data.map((item) => ({
+    name: `${item.name} - (${item.imdbId})`,
+    value: item.imdbId,
+  }));
 
-  const data = await client.show.findMany({
-    where,
-    orderBy: {
-      name: "asc",
-    },
-    select: {
-      name: true,
-      imdbId: true,
-    },
-    take: 25,
-  })
-
-  const choices = data.map(
-    (item): ApplicationCommandOptionChoiceData<string | number> => {
-      const { name, imdbId } = item
-      return ({ name: `${name} - (${name})`, value: imdbId })
-    },
-  )
-
-  await interaction.respond(choices)
+  return Response.json({
+    type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+    data: { choices },
+  });
 }

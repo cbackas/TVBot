@@ -1,170 +1,66 @@
-import client from "lib/prisma.ts"
-import {
-  type Destination,
-  Prisma,
-  type Settings as DBSettings,
-} from "prisma-client/client.ts"
+import { and, eq } from "drizzle-orm";
+import { getDb } from "../database/db.js";
+import { globalDestinations } from "../database/schema.js";
+import type { GlobalDestination } from "../database/types.js";
 
-export type SettingsType = Omit<DBSettings, "id">
+export type { GlobalDestination };
+export type GlobalDestinationType =
+  | "all_episodes"
+  | "morning_summary"
+  | "tv_forum";
 
-/**
- * Manager to handle fetching and saving settings in the DB
- */
-export class Settings {
-  private static instance: Settings
+export async function getGlobalDestinations(
+  type: GlobalDestinationType,
+): Promise<GlobalDestination[]> {
+  const db = getDb();
+  return db
+    .select()
+    .from(globalDestinations)
+    .where(eq(globalDestinations.type, type));
+}
 
-  public static getInstance(): Settings {
-    if (!Settings.instance) {
-      Settings.instance = new Settings()
-    }
-    return Settings.instance
+export async function addGlobalDestination(
+  type: GlobalDestinationType,
+  channelId: string,
+): Promise<GlobalDestination[]> {
+  const db = getDb();
+  await db
+    .insert(globalDestinations)
+    .values({ channelId, type })
+    .onConflictDoNothing();
+  return getGlobalDestinations(type);
+}
+
+export async function removeGlobalDestination(
+  type: GlobalDestinationType,
+  channelId: string,
+): Promise<GlobalDestination[]> {
+  const db = getDb();
+  await db
+    .delete(globalDestinations)
+    .where(
+      and(
+        eq(globalDestinations.channelId, channelId),
+        eq(globalDestinations.type, type),
+      ),
+    );
+  return getGlobalDestinations(type);
+}
+
+export async function getDefaultForum(): Promise<string | null> {
+  const rows = await getGlobalDestinations("tv_forum");
+  return rows[0]?.channelId ?? null;
+}
+
+export async function setDefaultForum(channelId: string): Promise<void> {
+  const db = getDb();
+  const existing = await getGlobalDestinations("tv_forum");
+  if (existing.length > 0) {
+    await db
+      .update(globalDestinations)
+      .set({ channelId })
+      .where(eq(globalDestinations.type, "tv_forum"));
+  } else {
+    await db.insert(globalDestinations).values({ channelId, type: "tv_forum" });
   }
-
-  // set the defaults for the settings
-  private settings?: SettingsType
-
-  /**
-   * Save initial settings data to the DB
-   */
-  private readonly initData = async (): Promise<void> => {
-    try {
-      await client.settings.create({
-        data: {
-          id: 0,
-          allEpisodes: [],
-        },
-      })
-    } catch (error) {
-      if (!(error instanceof Prisma.PrismaClientKnownRequestError)) throw error
-      if (error.code !== "P2002") throw error
-    }
-  }
-
-  /**
-   * Fetches the settings from the DB and updates the SettingsManager instance with the latest values
-   */
-  refresh = async (): Promise<SettingsType | undefined> => {
-    try {
-      // fetch the settings from the DB
-      const settings = await client.settings.findUniqueOrThrow({
-        where: {
-          id: 0,
-        },
-      })
-      this.settings = settings
-      return settings
-    } catch (error) {
-      if (!(error instanceof Prisma.PrismaClientKnownRequestError)) throw error
-      if (error.code === "P2025") await this.initData()
-    }
-  }
-
-  public static refresh = async (): Promise<SettingsType | undefined> => {
-    const instance = Settings.getInstance()
-    const settings = await instance.refresh()
-    return settings
-  }
-
-  /**
-   * Update settings in the DB
-   * @param inputData settings data to update
-   */
-  public static update = async (
-    inputData: Partial<SettingsType>,
-  ): Promise<void> => {
-    const data = Prisma.validator<Prisma.SettingsUpdateInput>()(inputData)
-
-    await client.settings.update({
-      where: {
-        id: 0,
-      },
-      data,
-    })
-
-    await Settings.getInstance().refresh()
-  }
-
-  /**
-   * check if a channel is already in settings 'allEpisodes' list global destiations list
-   * @param channelId channel to check
-   * @returns true if channel is in list, false if not
-   */
-  private readonly channelIsAlreadyGlobal = async (
-    channelId: string,
-  ): Promise<boolean> => {
-    const matchingChannels = await client.settings.count({
-      where: {
-        id: 0,
-        allEpisodes: {
-          some: {
-            channelId,
-          },
-        },
-      },
-    })
-
-    return matchingChannels > 0
-  }
-
-  public static addGlobalDestination = async (
-    channelId: string,
-  ): Promise<Destination[]> => {
-    const instance = Settings.getInstance()
-    if (await instance.channelIsAlreadyGlobal(channelId)) {
-      return instance.settings?.allEpisodes ?? []
-    }
-
-    const settings = await client.settings.update({
-      where: {
-        id: 0,
-      },
-      data: {
-        allEpisodes: {
-          push: {
-            channelId,
-          },
-        },
-      },
-      select: {
-        allEpisodes: true,
-      },
-    })
-
-    console.info(`Added ${channelId} to global destinations`)
-
-    await instance.refresh()
-    return settings.allEpisodes
-  }
-
-  public static removeGlobalDestination = async (
-    channelId: string,
-  ): Promise<Destination[]> => {
-    const instance = Settings.getInstance()
-    if (!await instance.channelIsAlreadyGlobal(channelId)) {
-      return instance.settings?.allEpisodes ?? []
-    }
-
-    const settings = await client.settings.update({
-      where: {
-        id: 0,
-      },
-      data: {
-        allEpisodes: {
-          deleteMany: {
-            where: {
-              channelId,
-            },
-          },
-        },
-      },
-    })
-
-    console.info(`Removed ${channelId} from global destinations`)
-
-    await instance.refresh()
-    return settings.allEpisodes
-  }
-
-  public static fetch = (): SettingsType | undefined =>
-    Settings.getInstance().settings
 }
