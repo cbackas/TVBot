@@ -1,6 +1,8 @@
-import type {
-  APIApplicationCommandAutocompleteInteraction,
-  APIApplicationCommandInteraction,
+import {
+  type APIApplicationCommandAutocompleteInteraction,
+  type APIApplicationCommandInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
 import { deferWithWork, editInteractionResponse } from "../lib/discord.js";
@@ -12,6 +14,21 @@ import type { Command } from "./index.js";
 
 export default class SearchCommand implements Command {
   public readonly name = "search";
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "search" as const,
+      description: "Search for a TV show",
+      options: [
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "query",
+          description: "Show name or IMDB ID",
+          required: true,
+          autocomplete: true,
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,

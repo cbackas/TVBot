@@ -2,10 +2,12 @@ import type {
   APIApplicationCommandAutocompleteInteraction,
   APIApplicationCommandInteraction,
   APIMessageComponentInteraction,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 
 export interface Command {
   name: string;
+  definition: RESTPostAPIChatInputApplicationCommandsJSONBody;
   selectMenuIds?: string[];
 
   handler(interaction: APIApplicationCommandInteraction): Promise<Response>;

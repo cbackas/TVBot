@@ -1,4 +1,8 @@
-import type { APIApplicationCommandInteraction } from "discord-api-types/v10";
+import {
+  type APIApplicationCommandInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
 import {
   getChannelOption,
@@ -10,6 +14,39 @@ import type { Command } from "./index.js";
 
 export default class ListCommand implements Command {
   public readonly name = "list";
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "list" as const,
+      description: "List linked shows",
+      options: [
+        {
+          type: ApplicationCommandOptionType.SubcommandGroup,
+          name: "shows",
+          description: "List shows",
+          options: [
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "here",
+              description: "Shows linked to this channel",
+            },
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "channel",
+              description: "Shows linked to a specific channel",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Channel,
+                  name: "channel",
+                  description: "Target channel",
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,

@@ -1,6 +1,8 @@
-import type {
-  APIApplicationCommandInteraction,
-  APIMessageComponentInteraction,
+import {
+  type APIApplicationCommandInteraction,
+  type APIMessageComponentInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
 import { getChannelOption, getSubcommand } from "../lib/interactionOptions.js";
@@ -14,6 +16,32 @@ import type { Command } from "./index.js";
 export default class UnlinkCommand implements Command {
   public readonly name = "unlink";
   public readonly selectMenuIds = ["unlink_shows_menu"];
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "unlink" as const,
+      description: "Unlink shows from a channel",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "here",
+          description: "Unlink from the current channel",
+        },
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "channel",
+          description: "Unlink from a specific channel",
+          options: [
+            {
+              type: ApplicationCommandOptionType.Channel,
+              name: "channel",
+              description: "Target channel",
+              required: true,
+            },
+          ],
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,

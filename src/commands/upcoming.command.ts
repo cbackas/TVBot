@@ -1,6 +1,8 @@
-import type {
-  APIApplicationCommandAutocompleteInteraction,
-  APIApplicationCommandInteraction,
+import {
+  type APIApplicationCommandAutocompleteInteraction,
+  type APIApplicationCommandInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
@@ -13,6 +15,38 @@ import type { Command } from "./index.js";
 
 export default class UpcomingCommand implements Command {
   public readonly name = "upcoming";
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "upcoming" as const,
+      description: "Show upcoming episodes",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "all",
+          description: "All upcoming episodes",
+        },
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "here",
+          description: "Upcoming for shows linked here",
+        },
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "show",
+          description: "Upcoming for a specific show",
+          options: [
+            {
+              type: ApplicationCommandOptionType.String,
+              name: "query",
+              description: "Show name or IMDB ID",
+              required: true,
+              autocomplete: true,
+            },
+          ],
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,

@@ -1,4 +1,8 @@
-import type { APIApplicationCommandInteraction } from "discord-api-types/v10";
+import {
+  type APIApplicationCommandInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from "discord-api-types/v10";
 import type { Show } from "../database/types.js";
 import type { SeriesExtendedRecord } from "../interfaces/tvdb.generated.js";
 import { deferWithWork, editInteractionResponse } from "../lib/discord.js";
@@ -21,6 +25,46 @@ import type { Command } from "./index.js";
 
 export default class LinkCommand implements Command {
   public readonly name = "link";
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "link" as const,
+      description: "Link a show to a channel for notifications",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "here",
+          description: "Link to the current channel",
+          options: [
+            {
+              type: ApplicationCommandOptionType.String,
+              name: "imdb_id",
+              description: "IMDB ID(s), comma-separated",
+              required: true,
+            },
+          ],
+        },
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "channel",
+          description: "Link to a specific channel",
+          options: [
+            {
+              type: ApplicationCommandOptionType.String,
+              name: "imdb_id",
+              description: "IMDB ID(s), comma-separated",
+              required: true,
+            },
+            {
+              type: ApplicationCommandOptionType.Channel,
+              name: "channel",
+              description: "Target channel",
+              required: true,
+            },
+          ],
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,

@@ -1,4 +1,8 @@
-import type { APIApplicationCommandInteraction } from "discord-api-types/v10";
+import {
+  type APIApplicationCommandInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
 import {
   getChannelOption,
@@ -14,6 +18,93 @@ import type { Command } from "./index.js";
 
 export default class SettingCommand implements Command {
   public readonly name = "setting";
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "setting" as const,
+      description: "Bot settings",
+      options: [
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "tv_forum",
+          description: "Set the default TV forum",
+          options: [
+            {
+              type: ApplicationCommandOptionType.Channel,
+              name: "channel",
+              description: "Forum channel",
+              required: true,
+            },
+          ],
+        },
+        {
+          type: ApplicationCommandOptionType.SubcommandGroup,
+          name: "all_episodes",
+          description: "All-episodes notification channels",
+          options: [
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "add",
+              description: "Add a channel",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Channel,
+                  name: "channel",
+                  description: "Channel",
+                  required: true,
+                },
+              ],
+            },
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "remove",
+              description: "Remove a channel",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Channel,
+                  name: "channel",
+                  description: "Channel",
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: ApplicationCommandOptionType.SubcommandGroup,
+          name: "morning_summary",
+          description: "Morning summary channels",
+          options: [
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "add_channel",
+              description: "Add a channel",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Channel,
+                  name: "channel",
+                  description: "Channel",
+                  required: true,
+                },
+              ],
+            },
+            {
+              type: ApplicationCommandOptionType.Subcommand,
+              name: "remove_channel",
+              description: "Remove a channel",
+              options: [
+                {
+                  type: ApplicationCommandOptionType.Channel,
+                  name: "channel",
+                  description: "Channel",
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,

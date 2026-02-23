@@ -1,4 +1,8 @@
-import type { APIApplicationCommandInteraction } from "discord-api-types/v10";
+import {
+  type APIApplicationCommandInteraction,
+  ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from "discord-api-types/v10";
 import type { SeriesExtendedRecord } from "../interfaces/tvdb.generated.js";
 import { deferWithWork, editInteractionResponse } from "../lib/discord.js";
 import { getEnv } from "../lib/env.js";
@@ -24,6 +28,26 @@ import type { Command } from "./index.js";
 
 export default class PostCommand implements Command {
   public readonly name = "post";
+
+  public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
+    {
+      name: "post" as const,
+      description: "Create a forum post for a show",
+      options: [
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "imdb_id",
+          description: "IMDB ID(s), comma-separated",
+          required: true,
+        },
+        {
+          type: ApplicationCommandOptionType.Channel,
+          name: "forum",
+          description: "Forum channel (defaults to configured forum)",
+          required: false,
+        },
+      ],
+    };
 
   async handler(
     interaction: APIApplicationCommandInteraction,
