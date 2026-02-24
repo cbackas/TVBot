@@ -4,9 +4,8 @@ import {
   ApplicationCommandOptionType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import { InteractionResponseType } from "discord-interactions";
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
-import { deferWithWork, editInteractionResponse } from "../lib/discord.js";
+import { editInteractionResponse } from "../lib/discord.js";
 import { getStringOption, getSubcommand } from "../lib/interactionOptions.js";
 import { getAllShows, getShowByImdbId } from "../lib/shows.js";
 import { getSeriesByImdbId } from "../lib/tvdb.js";
@@ -50,54 +49,52 @@ export default class UpcomingCommand implements Command {
 
   async handler(
     interaction: APIApplicationCommandInteraction,
-  ): Promise<Response> {
+  ): Promise<void> {
     const sub = getSubcommand(interaction);
+    const token = interaction.token;
 
     if (sub === "all") {
-      return this.handleAll();
+      await this.handleAll(token);
+      return;
     }
     if (sub === "here") {
-      return this.handleHere(interaction);
+      await this.handleHere(interaction);
+      return;
     }
     if (sub === "show") {
-      return this.handleShow(interaction);
+      await this.handleShow(interaction);
+      return;
     }
 
-    return Response.json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { content: "Invalid subcommand" },
-    });
+    await editInteractionResponse(token, { content: "Invalid subcommand" });
   }
 
-  private async handleAll(): Promise<Response> {
+  private async handleAll(token: string): Promise<void> {
     const allShows = await getAllShows();
     const showsWithUnsent = allShows.filter((s) =>
       s.episodes.some((e) => !e.messageSent),
     );
 
     if (showsWithUnsent.length === 0) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "No shows found" },
-      });
+      await editInteractionResponse(token, { content: "No shows found" });
+      return;
     }
 
     const embed = getUpcomingEpisodesEmbed(showsWithUnsent, 7);
-    return Response.json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { embeds: [embed] },
-    });
+    await editInteractionResponse(token, { embeds: [embed] });
   }
 
   private async handleHere(
     interaction: APIApplicationCommandInteraction,
-  ): Promise<Response> {
+  ): Promise<void> {
     const channelId = interaction.channel?.id;
+    const token = interaction.token;
+
     if (channelId == null) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "Could not determine channel" },
+      await editInteractionResponse(token, {
+        content: "Could not determine channel",
       });
+      return;
     }
 
     const allShows = await getAllShows();
@@ -106,63 +103,49 @@ export default class UpcomingCommand implements Command {
     );
 
     if (showsHere.length === 0) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "No shows linked to this channel" },
+      await editInteractionResponse(token, {
+        content: "No shows linked to this channel",
       });
+      return;
     }
 
     const embed = getUpcomingEpisodesEmbed(showsHere, 7);
-    return Response.json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { embeds: [embed] },
-    });
+    await editInteractionResponse(token, { embeds: [embed] });
   }
 
-  private handleShow(interaction: APIApplicationCommandInteraction): Response {
+  private async handleShow(
+    interaction: APIApplicationCommandInteraction,
+  ): Promise<void> {
     const query = getStringOption(interaction, "query") ?? "";
     const token = interaction.token;
 
-    return deferWithWork(
-      (async () => {
-        try {
-          const imdbId = query.toLowerCase().startsWith("tt")
-            ? query
-            : undefined;
+    const imdbId = query.toLowerCase().startsWith("tt") ? query : undefined;
 
-          if (imdbId == null) {
-            await editInteractionResponse(token, {
-              content: "Invalid query — use the autocomplete to select a show",
-            });
-            return;
-          }
+    if (imdbId == null) {
+      await editInteractionResponse(token, {
+        content: "Invalid query — use the autocomplete to select a show",
+      });
+      return;
+    }
 
-          const series = await getSeriesByImdbId(imdbId);
-          if (series == null) {
-            await editInteractionResponse(token, {
-              content: `No show found with IMDB ID \`${imdbId}\``,
-            });
-            return;
-          }
+    const series = await getSeriesByImdbId(imdbId);
+    if (series == null) {
+      await editInteractionResponse(token, {
+        content: `No show found with IMDB ID \`${imdbId}\``,
+      });
+      return;
+    }
 
-          const show = await getShowByImdbId(imdbId);
-          if (show == null) {
-            await editInteractionResponse(token, {
-              content: `${series.name} is not linked to any channels. Use \`/link\` or \`/post\` to subscribe a channel to episode notifications.`,
-            });
-            return;
-          }
+    const show = await getShowByImdbId(imdbId);
+    if (show == null) {
+      await editInteractionResponse(token, {
+        content: `${series.name} is not linked to any channels. Use \`/link\` or \`/post\` to subscribe a channel to episode notifications.`,
+      });
+      return;
+    }
 
-          const embed = getUpcomingEpisodesEmbed([show], 7);
-          await editInteractionResponse(token, { embeds: [embed] });
-        } catch (error) {
-          console.error("Error in upcoming show command:", error);
-          await editInteractionResponse(token, {
-            content: "An error occurred while fetching upcoming episodes.",
-          });
-        }
-      })(),
-    );
+    const embed = getUpcomingEpisodesEmbed([show], 7);
+    await editInteractionResponse(token, { embeds: [embed] });
   }
 
   async autoComplete(

@@ -2,9 +2,11 @@ import {
   type APIApplicationCommandInteraction,
   type APIMessageComponentInteraction,
   ApplicationCommandOptionType,
+  ChannelType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
+import { editInteractionResponse } from "../lib/discord.js";
 import { getChannelOption, getSubcommand } from "../lib/interactionOptions.js";
 import {
   getAllShows,
@@ -21,6 +23,7 @@ export default class UnlinkCommand implements Command {
     {
       name: "unlink" as const,
       description: "Unlink shows from a channel",
+      default_member_permissions: "16",
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,
@@ -37,15 +40,14 @@ export default class UnlinkCommand implements Command {
               name: "channel",
               description: "Target channel",
               required: true,
+              channel_types: [ChannelType.GuildText],
             },
           ],
         },
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<Response> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const sub = getSubcommand(interaction);
 
     let channelId: string | null = null;
@@ -56,10 +58,10 @@ export default class UnlinkCommand implements Command {
     }
 
     if (channelId == null) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "Invalid channel" },
+      await editInteractionResponse(interaction.token, {
+        content: "Invalid channel",
       });
+      return;
     }
 
     const allShows = await getAllShows();
@@ -68,37 +70,42 @@ export default class UnlinkCommand implements Command {
     );
 
     if (showsInChannel.length === 0) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "This channel has no shows linked to it." },
+      await editInteractionResponse(interaction.token, {
+        content: "This channel has no shows linked to it.",
       });
+      return;
     }
 
-    const options = showsInChannel.map((s) => ({
+    const MAX_OPTIONS = 25;
+    const allOptions = showsInChannel.map((s) => ({
       label: s.name,
       value: s.imdbId,
     }));
+    const truncated = allOptions.length > MAX_OPTIONS;
+    const options = truncated ? allOptions.slice(0, MAX_OPTIONS) : allOptions;
 
-    return Response.json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-        content: `Select the shows that you'd like to unlink from <#${channelId}>`,
-        components: [
-          {
-            type: 1, // ActionRow
-            components: [
-              {
-                type: 3, // StringSelect
-                custom_id: "unlink_shows_menu",
-                placeholder: "Nothing selected",
-                min_values: 1,
-                max_values: options.length,
-                options,
-              },
-            ],
-          },
-        ],
-      },
+    let content = `Select the shows that you'd like to unlink from <#${channelId}>`;
+    if (truncated) {
+      content += `\nShowing 25 of ${allOptions.length}. Run the command again after unlinking to see the rest.`;
+    }
+
+    await editInteractionResponse(interaction.token, {
+      content,
+      components: [
+        {
+          type: 1, // ActionRow
+          components: [
+            {
+              type: 3, // StringSelect
+              custom_id: "unlink_shows_menu",
+              placeholder: "Nothing selected",
+              min_values: 1,
+              max_values: options.length,
+              options,
+            },
+          ],
+        },
+      ],
     });
   }
 
@@ -116,22 +123,29 @@ export default class UnlinkCommand implements Command {
 
     const values = "values" in interaction.data ? interaction.data.values : [];
 
-    let count = 0;
+    const success: string[] = [];
+    const failed: string[] = [];
     for (const imdbId of values) {
       try {
-        await removeSubscription(imdbId, channelId);
-        count++;
+        const show = await removeSubscription(imdbId, channelId);
+        success.push(show.name);
       } catch (error) {
+        failed.push(imdbId);
         console.error(`Failed to unlink ${imdbId}:`, error);
       }
     }
 
     await pruneUnsubscribedShows();
 
+    const content = [
+      `Unlinked ${success.length} shows from <#${channelId}>:`,
+      ...success.map((s) => `- ${s}`),
+    ].join("\n");
+
     return Response.json({
       type: InteractionResponseType.UPDATE_MESSAGE,
       data: {
-        content: `Unlinked ${count} shows from <#${channelId}>`,
+        content,
         components: [],
       },
     });

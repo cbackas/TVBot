@@ -5,7 +5,7 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
-import { deferWithWork, editInteractionResponse } from "../lib/discord.js";
+import { editInteractionResponse } from "../lib/discord.js";
 import { getStringOption } from "../lib/interactionOptions.js";
 import { buildShowEmbed } from "../lib/messages.js";
 import { getShowByImdbId } from "../lib/shows.js";
@@ -32,61 +32,48 @@ export default class SearchCommand implements Command {
 
   async handler(
     interaction: APIApplicationCommandInteraction,
-  ): Promise<Response> {
+  ): Promise<void> {
     const query = getStringOption(interaction, "query") ?? "";
     const token = interaction.token;
 
-    return deferWithWork(
-      (async () => {
-        try {
-          let imdbId = query.toLowerCase().startsWith("tt") ? query : undefined;
+    let imdbId = query.toLowerCase().startsWith("tt") ? query : undefined;
 
-          if (imdbId !== undefined) {
-            const series = await getSeriesByImdbId(imdbId);
-            if (series === undefined) {
-              await editInteractionResponse(token, {
-                content: `No show found with IMDB ID \`${imdbId}\``,
-              });
-              return;
-            }
+    if (imdbId !== undefined) {
+      const series = await getSeriesByImdbId(imdbId);
+      if (series === undefined) {
+        await editInteractionResponse(token, {
+          content: `No show found with IMDB ID \`${imdbId}\``,
+        });
+        return;
+      }
 
-            const show = await getShowByImdbId(imdbId);
-            await editInteractionResponse(token, {
-              embeds: [
-                buildShowEmbed(imdbId, series, show?.destinations ?? []),
-              ],
-            });
-            return;
-          }
+      const show = await getShowByImdbId(imdbId);
+      await editInteractionResponse(token, {
+        embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
+      });
+      return;
+    }
 
-          const series = await getSeriesByName(query);
-          if (series == null) {
-            await editInteractionResponse(token, {
-              content: "Show not found",
-            });
-            return;
-          }
+    const series = await getSeriesByName(query);
+    if (series == null) {
+      await editInteractionResponse(token, {
+        content: "Show not found",
+      });
+      return;
+    }
 
-          imdbId = series.remoteIds.find((r) => r.type === 2)?.id;
-          if (imdbId == null) {
-            await editInteractionResponse(token, {
-              content: "Show not found",
-            });
-            return;
-          }
+    imdbId = series.remoteIds.find((r) => r.type === 2)?.id;
+    if (imdbId == null) {
+      await editInteractionResponse(token, {
+        content: "Show not found",
+      });
+      return;
+    }
 
-          const show = await getShowByImdbId(imdbId);
-          await editInteractionResponse(token, {
-            embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
-          });
-        } catch (error) {
-          console.error("Error in search command:", error);
-          await editInteractionResponse(token, {
-            content: "An error occurred while searching.",
-          });
-        }
-      })(),
-    );
+    const show = await getShowByImdbId(imdbId);
+    await editInteractionResponse(token, {
+      embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
+    });
   }
 
   async autoComplete(

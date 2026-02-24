@@ -1,9 +1,10 @@
 import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
+  ChannelType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import { InteractionResponseType } from "discord-interactions";
+import { editInteractionResponse } from "../lib/discord.js";
 import {
   getChannelOption,
   getSubcommand,
@@ -19,6 +20,7 @@ export default class ListCommand implements Command {
     {
       name: "list" as const,
       description: "List linked shows",
+      default_member_permissions: "16",
       options: [
         {
           type: ApplicationCommandOptionType.SubcommandGroup,
@@ -40,6 +42,7 @@ export default class ListCommand implements Command {
                   name: "channel",
                   description: "Target channel",
                   required: true,
+                  channel_types: [ChannelType.GuildText],
                 },
               ],
             },
@@ -50,15 +53,15 @@ export default class ListCommand implements Command {
 
   async handler(
     interaction: APIApplicationCommandInteraction,
-  ): Promise<Response> {
+  ): Promise<void> {
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
 
     if (group !== "shows") {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "Invalid subcommand group" },
+      await editInteractionResponse(interaction.token, {
+        content: "Invalid subcommand group",
       });
+      return;
     }
 
     let channelId: string | null = null;
@@ -69,10 +72,10 @@ export default class ListCommand implements Command {
     }
 
     if (channelId == null) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "Invalid channel" },
+      await editInteractionResponse(interaction.token, {
+        content: "Invalid channel",
       });
+      return;
     }
 
     const allShows = await getAllShows();
@@ -81,28 +84,39 @@ export default class ListCommand implements Command {
     );
 
     if (showsInChannel.length === 0) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `No shows linked to <#${channelId}>`,
-        },
+      await editInteractionResponse(interaction.token, {
+        content: `No shows linked to <#${channelId}>`,
       });
+      return;
     }
 
-    const showMessages = showsInChannel
-      .map((show) => {
-        const destinations = show.destinations
-          .map((d) => `<#${d.channelId}>`)
-          .join(" ");
-        return `**${show.name}** ${destinations}`;
-      })
-      .join("\n");
+    const MAX_LENGTH = 2000;
+    const header = `Shows in channel <#${channelId}>:\n\n`;
+    let content = header;
+    let added = 0;
 
-    return Response.json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-        content: `Shows in channel <#${channelId}>:\n\n${showMessages}`,
-      },
-    });
+    for (let i = 0; i < showsInChannel.length; i++) {
+      const show = showsInChannel[i];
+      const destinations = show.destinations
+        .map((d) => `<#${d.channelId}>`)
+        .join(" ");
+      const line = `**${show.name}** ${destinations}`;
+      const remaining = showsInChannel.length - added;
+      const suffix = `\n...and ${remaining} more`;
+
+      if (
+        content.length + (added > 0 ? 1 : 0) + line.length + suffix.length >
+        MAX_LENGTH
+      ) {
+        content += suffix;
+        break;
+      }
+
+      if (added > 0) content += "\n";
+      content += line;
+      added++;
+    }
+
+    await editInteractionResponse(interaction.token, { content });
   }
 }

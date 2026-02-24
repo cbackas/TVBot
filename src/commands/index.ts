@@ -10,7 +10,7 @@ export interface Command {
   definition: RESTPostAPIChatInputApplicationCommandsJSONBody;
   selectMenuIds?: string[];
 
-  handler(interaction: APIApplicationCommandInteraction): Promise<Response>;
+  handler(interaction: APIApplicationCommandInteraction): Promise<void>;
   autoComplete?(
     interaction: APIApplicationCommandAutocompleteInteraction,
   ): Promise<Response>;

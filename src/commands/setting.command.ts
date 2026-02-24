@@ -1,9 +1,10 @@
 import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
+  ChannelType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import { InteractionResponseType } from "discord-interactions";
+import { editInteractionResponse } from "../lib/discord.js";
 import {
   getChannelOption,
   getSubcommand,
@@ -23,6 +24,7 @@ export default class SettingCommand implements Command {
     {
       name: "setting" as const,
       description: "Bot settings",
+      default_member_permissions: "16",
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,
@@ -34,6 +36,7 @@ export default class SettingCommand implements Command {
               name: "channel",
               description: "Forum channel",
               required: true,
+              channel_types: [ChannelType.GuildForum],
             },
           ],
         },
@@ -52,6 +55,10 @@ export default class SettingCommand implements Command {
                   name: "channel",
                   description: "Channel",
                   required: true,
+                  channel_types: [
+                    ChannelType.GuildText,
+                    ChannelType.GuildAnnouncement,
+                  ],
                 },
               ],
             },
@@ -65,6 +72,10 @@ export default class SettingCommand implements Command {
                   name: "channel",
                   description: "Channel",
                   required: true,
+                  channel_types: [
+                    ChannelType.GuildText,
+                    ChannelType.GuildAnnouncement,
+                  ],
                 },
               ],
             },
@@ -85,6 +96,10 @@ export default class SettingCommand implements Command {
                   name: "channel",
                   description: "Channel",
                   required: true,
+                  channel_types: [
+                    ChannelType.GuildText,
+                    ChannelType.GuildAnnouncement,
+                  ],
                 },
               ],
             },
@@ -98,6 +113,10 @@ export default class SettingCommand implements Command {
                   name: "channel",
                   description: "Channel",
                   required: true,
+                  channel_types: [
+                    ChannelType.GuildText,
+                    ChannelType.GuildAnnouncement,
+                  ],
                 },
               ],
             },
@@ -108,25 +127,25 @@ export default class SettingCommand implements Command {
 
   async handler(
     interaction: APIApplicationCommandInteraction,
-  ): Promise<Response> {
+  ): Promise<void> {
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
     const channelId = getChannelOption(interaction, "channel");
 
     if (channelId == null) {
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: "No channel provided" },
+      await editInteractionResponse(interaction.token, {
+        content: "No channel provided",
       });
+      return;
     }
 
     // /setting tv_forum <channel>
     if (group == null && sub === "tv_forum") {
       await setDefaultForum(channelId);
-      return Response.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: `TV forum set to <#${channelId}>` },
+      await editInteractionResponse(interaction.token, {
+        content: `TV forum set to <#${channelId}>`,
       });
+      return;
     }
 
     // /setting all_episodes add/remove <channel>
@@ -137,12 +156,10 @@ export default class SettingCommand implements Command {
           channelId,
         );
         const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        return Response.json({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `Updated All Episodes channel list.\n\n__New List__:\n${list}`,
-          },
+        await editInteractionResponse(interaction.token, {
+          content: `Updated All Episodes channel list.\n\n__New List__:\n${list}`,
         });
+        return;
       }
       if (sub === "remove") {
         const destinations = await removeGlobalDestination(
@@ -150,12 +167,10 @@ export default class SettingCommand implements Command {
           channelId,
         );
         const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        return Response.json({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `Updated All Episodes channel list.\n\n__New List__:\n${list}`,
-          },
+        await editInteractionResponse(interaction.token, {
+          content: `Updated All Episodes channel list.\n\n__New List__:\n${list}`,
         });
+        return;
       }
     }
 
@@ -167,12 +182,10 @@ export default class SettingCommand implements Command {
           channelId,
         );
         const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        return Response.json({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `Updated Morning Summary channel list.\n\n__New List__:\n${list}`,
-          },
+        await editInteractionResponse(interaction.token, {
+          content: `Updated Morning Summary channel list.\n\n__New List__:\n${list}`,
         });
+        return;
       }
       if (sub === "remove_channel") {
         const destinations = await removeGlobalDestination(
@@ -180,18 +193,15 @@ export default class SettingCommand implements Command {
           channelId,
         );
         const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        return Response.json({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `Updated Morning Summary channel list.\n\n__New List__:\n${list}`,
-          },
+        await editInteractionResponse(interaction.token, {
+          content: `Updated Morning Summary channel list.\n\n__New List__:\n${list}`,
         });
+        return;
       }
     }
 
-    return Response.json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { content: "Unknown setting command" },
+    await editInteractionResponse(interaction.token, {
+      content: "Unknown setting command",
     });
   }
 }

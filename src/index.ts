@@ -24,19 +24,24 @@ async function fetch(
   }
 
   const interaction: APIInteraction = JSON.parse(textDecoder.decode(body));
-  switch (interaction.type) {
-    case InteractionType.Ping: {
-      return handlePing();
+  try {
+    switch (interaction.type) {
+      case InteractionType.Ping: {
+        return handlePing();
+      }
+      case InteractionType.ApplicationCommand: {
+        return await handleCommand(interaction);
+      }
+      case InteractionType.ApplicationCommandAutocomplete: {
+        return await handleAutocomplete(interaction);
+      }
+      case InteractionType.MessageComponent: {
+        return await handleComponent(interaction);
+      }
     }
-    case InteractionType.ApplicationCommand: {
-      return await handleCommand(interaction);
-    }
-    case InteractionType.ApplicationCommandAutocomplete: {
-      return await handleAutocomplete(interaction);
-    }
-    case InteractionType.MessageComponent: {
-      return await handleComponent(interaction);
-    }
+  } catch (error) {
+    console.error("Error handling interaction:", error);
+    return new Response("Internal Server Error", { status: 500 });
   }
 
   return new Response("Not implemented", { status: 200 });
