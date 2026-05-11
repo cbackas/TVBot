@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -115,10 +115,14 @@ async function main() {
 	// console.log(`Wrote ${lines.length} SQL statements to ${sqlFile}`);
 
 	console.log("Executing SQL against local D1...");
-	execSync(`npx wrangler d1 execute DB --remote --file=${sqlFile}`, {
-		stdio: "inherit",
-		cwd: resolve(__dirname, ".."),
-	});
+	execFileSync(
+		"npx",
+		["wrangler", "d1", "execute", "DB", "--remote", `--file=${sqlFile}`],
+		{
+			stdio: "inherit",
+			cwd: resolve(__dirname, ".."),
+		}
+	);
 	console.log("Migration complete!");
 }
 
