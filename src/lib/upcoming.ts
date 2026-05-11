@@ -1,10 +1,10 @@
 import type { APIEmbed, APIEmbedField } from "discord-api-types/v10";
 import moment from "moment-timezone";
+import { assert } from "../utils.js";
 import { getEnv } from "./env.js";
 import type { NotificationPayload } from "./episodeNotifier.js";
 import type { Show } from "./shows.js";
 import { addLeadingZeros, toRanges } from "./util.js";
-import { assert } from "../utils.js";
 
 interface UpcomingEpisodeMessages {
   prefix: string;

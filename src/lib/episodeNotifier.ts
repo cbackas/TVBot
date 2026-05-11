@@ -1,12 +1,12 @@
 import moment from "moment-timezone";
 import { getDb } from "../database/db.js";
 import { showSchema } from "../database/types.js";
+import { assert } from "../utils.js";
 import { getEnv } from "./env.js";
 import { getGlobalDestinations } from "./settingsManager.js";
 import type { Show } from "./shows.js";
 import { markMessageSent } from "./shows.js";
 import { addLeadingZeros, toRanges } from "./util.js";
-import { assert } from "../utils.js";
 
 export interface NotificationPayload {
   key: string;
