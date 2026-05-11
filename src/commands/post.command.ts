@@ -2,6 +2,7 @@ import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
   ChannelType,
+  InteractionContextType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import type { SeriesExtendedRecord } from "../interfaces/tvdb.generated.js";
@@ -14,6 +15,7 @@ import {
 import {
   buildShowEmbed,
   createForumThread,
+  deleteChannel,
   pinMessage,
 } from "../lib/messages.js";
 import { ProgressMessageBuilder } from "../lib/progressMessages.js";
@@ -33,8 +35,10 @@ export default class PostCommand implements Command {
   public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
     {
       name: "post" as const,
-      description: "Create a forum post for a show",
+      description:
+        'Create a forum post for a show. Requires "Manage Channels" permission.',
       default_member_permissions: "16",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.String,
@@ -46,7 +50,8 @@ export default class PostCommand implements Command {
         {
           type: ApplicationCommandOptionType.Channel,
           name: "forum",
-          description: "Forum channel (defaults to configured forum)",
+          description:
+            "Destination Discord forum for show post (defaults to value defined in `/setting tv_forum`)",
           required: false,
           channel_types: [ChannelType.GuildForum],
         },
@@ -75,8 +80,10 @@ export default class PostCommand implements Command {
       return;
     }
 
+    const imdbIdString = imdbIds.map((s) => `\`${s}\``).join(", ");
+
     const progress = new ProgressMessageBuilder(token)
-      .addStep("Checking for existing forum posts with ID(s) ...")
+      .addStep(`Checking for existing forum posts with ID(s) ${imdbIdString}`)
       .addStep("Fetching show data")
       .addStep("Creating forum post")
       .addStep("Saving show to DB")
@@ -136,6 +143,13 @@ export default class PostCommand implements Command {
         found.push({ imdbId, series });
       }
 
+      if (found.length === 0) {
+        await editInteractionResponse(token, {
+          content: `${progress.toString()}\n\nError: No show found with IMDB ID(s) ${imdbIdString}`,
+        });
+        return;
+      }
+
       // Step 3: Creating forum post
       await progress.sendNextStep();
       const created: {
@@ -145,6 +159,7 @@ export default class PostCommand implements Command {
       }[] = [];
 
       for (const { imdbId, series } of found) {
+        let createdThreadId: string | null = null;
         try {
           const embed = buildShowEmbed(imdbId, series);
 
@@ -154,6 +169,7 @@ export default class PostCommand implements Command {
             embed,
             discordToken,
           );
+          createdThreadId = threadId;
 
           await pinMessage(threadId, messageId, discordToken);
 
@@ -161,6 +177,19 @@ export default class PostCommand implements Command {
         } catch (error) {
           messages.push(`Error creating post for \`${imdbId}\``);
           console.error(error);
+          if (createdThreadId !== null) {
+            try {
+              await deleteChannel(createdThreadId, discordToken);
+              console.info(
+                `Rolled back orphan thread ${createdThreadId} for ${imdbId}`,
+              );
+            } catch (deleteError) {
+              console.error(
+                `Failed to delete orphan thread ${createdThreadId} for ${imdbId}:`,
+                deleteError,
+              );
+            }
+          }
         }
       }
 
@@ -189,6 +218,17 @@ export default class PostCommand implements Command {
         } catch (error) {
           messages.push(`Error saving show \`${imdbId}\` to DB`);
           console.error(error);
+          try {
+            await deleteChannel(threadId, discordToken);
+            console.info(
+              `Rolled back orphan thread ${threadId} for ${imdbId} after DB save failure`,
+            );
+          } catch (deleteError) {
+            console.error(
+              `Failed to delete orphan thread ${threadId} for ${imdbId}:`,
+              deleteError,
+            );
+          }
         }
       }
 

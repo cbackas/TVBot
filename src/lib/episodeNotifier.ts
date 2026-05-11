@@ -125,7 +125,7 @@ async function sendDiscordMessage(
   );
   if (!response.ok) {
     throw new Error(
-      `Discord API error ${response.status}: ${await response.text()}`,
+      `Send message to channel ${channelId} — Discord API error ${response.status}: ${await response.text()}`,
     );
   }
 }

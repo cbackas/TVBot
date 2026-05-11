@@ -2,6 +2,7 @@ import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
   ChannelType,
+  InteractionContextType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import type { Show } from "../database/types.js";
@@ -32,6 +33,7 @@ export default class LinkCommand implements Command {
       name: "link" as const,
       description: "Link a show to a channel for notifications",
       default_member_permissions: "16",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,
@@ -77,9 +79,24 @@ export default class LinkCommand implements Command {
     const token = interaction.token;
     const discordToken = getEnv("DISCORD_TOKEN");
 
+    const THREAD_TYPES = new Set<number>([
+      ChannelType.AnnouncementThread,
+      ChannelType.PublicThread,
+      ChannelType.PrivateThread,
+    ]);
+
     let channelId: string | null = null;
+    let parentForumId: string | null = null;
     if (sub === "here") {
-      channelId = interaction.channel?.id ?? null;
+      const channel = interaction.channel;
+      channelId = channel?.id ?? null;
+      if (
+        channel != null &&
+        THREAD_TYPES.has(channel.type) &&
+        "parent_id" in channel
+      ) {
+        parentForumId = channel.parent_id ?? null;
+      }
     } else if (sub === "channel") {
       channelId = getChannelOption(interaction, "channel");
     }
@@ -106,10 +123,11 @@ export default class LinkCommand implements Command {
     }
 
     const targetChannelId = channelId;
+    const imdbIdString = imdbIds.map((s) => `\`${s}\``).join(", ");
 
     const progress = new ProgressMessageBuilder(token)
       .addStep("Check for existing show subscriptions")
-      .addStep("Searching for shows with IMDB ID(s) ...")
+      .addStep(`Searching for shows with IMDB ID(s) ${imdbIdString}`)
       .addStep("Linking shows to channel")
       .addStep("Fetching upcoming episodes");
 
@@ -146,6 +164,13 @@ export default class LinkCommand implements Command {
         found.push({ imdbId, series });
       }
 
+      if (found.length === 0) {
+        await editInteractionResponse(token, {
+          content: `${progress.toString()}\n\nError: No shows found with IMDB ID(s) ${imdbIdString}`,
+        });
+        return;
+      }
+
       // Step 3: Linking shows to channel
       await progress.sendNextStep();
       const linked: {
@@ -163,7 +188,7 @@ export default class LinkCommand implements Command {
             imdbId,
             series.id,
             series.name,
-            { channelId: targetChannelId, forumId: null },
+            { channelId: targetChannelId, forumId: parentForumId },
           );
           linked.push({ imdbId, series, show });
           messages.push(`Linked show \`${series.name}\` (${imdbId})`);
@@ -188,6 +213,7 @@ export default class LinkCommand implements Command {
             targetChannelId,
             buildShowEmbed(imdbId, series, show.destinations),
             discordToken,
+            `Linked \`${series.name}\` to <#${targetChannelId}>`,
           );
         } catch (error) {
           console.error(

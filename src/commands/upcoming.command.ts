@@ -2,6 +2,7 @@ import {
   type APIApplicationCommandAutocompleteInteraction,
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
+  InteractionContextType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
@@ -19,6 +20,7 @@ export default class UpcomingCommand implements Command {
     {
       name: "upcoming" as const,
       description: "Show upcoming episodes",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,

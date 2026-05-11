@@ -5,6 +5,7 @@ import {
   ButtonStyle,
   ChannelType,
   ComponentType,
+  InteractionContextType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
@@ -79,6 +80,7 @@ export default class UnlinkCommand implements Command {
       name: "unlink" as const,
       description: "Unlink shows from a channel",
       default_member_permissions: "16",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,
@@ -208,10 +210,18 @@ export default class UnlinkCommand implements Command {
 
     await pruneUnsubscribedShows();
 
-    const content = [
+    const lines = [
       `Unlinked ${success.length} shows from <#${channelId}>:`,
       ...success.map((s) => `- ${s}`),
-    ].join("\n");
+    ];
+    if (failed.length > 0) {
+      lines.push(
+        "",
+        `Failed to unlink ${failed.length} show(s):`,
+        ...failed.map((id) => `- \`${id}\``),
+      );
+    }
+    const content = lines.join("\n");
 
     return Response.json({
       type: InteractionResponseType.UPDATE_MESSAGE,

@@ -6,6 +6,7 @@ export async function sendDiscordEmbed(
   channelId: string,
   embed: APIEmbed,
   token: string,
+  content: string = "",
 ): Promise<void> {
   const response = await fetch(
     `https://discord.com/api/v10/channels/${channelId}/messages`,
@@ -15,12 +16,12 @@ export async function sendDiscordEmbed(
         Authorization: `Bot ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ content: "", embeds: [embed] }),
+      body: JSON.stringify({ content, embeds: [embed] }),
     },
   );
   if (!response.ok) {
     throw new Error(
-      `Discord API error ${response.status}: ${await response.text()}`,
+      `Send embed to channel ${channelId} — Discord API error ${response.status}: ${await response.text()}`,
     );
   }
 }
@@ -113,7 +114,7 @@ export async function createForumThread(
   );
   if (!response.ok) {
     throw new Error(
-      `Discord API error ${response.status}: ${await response.text()}`,
+      `Create forum thread "${name}" in ${forumChannelId} — Discord API error ${response.status}: ${await response.text()}`,
     );
   }
   const data: { id: string; last_message_id?: string } = await response.json();
@@ -135,9 +136,28 @@ export async function pinMessage(
     },
   );
   if (!response.ok) {
-    console.error(
-      `Failed to pin message: ${response.status}`,
-      await response.text(),
+    throw new Error(
+      `Pin message ${messageId} in channel ${channelId} — Discord API error ${response.status}: ${await response.text()}`,
+    );
+  }
+}
+
+export async function deleteChannel(
+  channelId: string,
+  token: string,
+): Promise<void> {
+  const response = await fetch(
+    `https://discord.com/api/v10/channels/${channelId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bot ${token}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Delete channel ${channelId} — Discord API error ${response.status}: ${await response.text()}`,
     );
   }
 }

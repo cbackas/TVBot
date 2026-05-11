@@ -2,6 +2,7 @@ import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
   ChannelType,
+  InteractionContextType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { editInteractionResponse } from "../lib/discord.js";
@@ -12,6 +13,7 @@ import {
 } from "../lib/interactionOptions.js";
 import {
   addGlobalDestination,
+  getGlobalDestinations,
   removeGlobalDestination,
   setDefaultForum,
 } from "../lib/settingsManager.js";
@@ -25,6 +27,7 @@ export default class SettingCommand implements Command {
       name: "setting" as const,
       description: "Bot settings",
       default_member_permissions: "16",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,
@@ -174,7 +177,16 @@ export default class SettingCommand implements Command {
 
     // /setting morning_summary add_channel/remove_channel <channel>
     if (group === "morning_summary") {
+      const existing = await getGlobalDestinations("morning_summary");
+      const alreadyHas = existing.some((d) => d.channelId === channelId);
+
       if (sub === "add_channel") {
+        if (alreadyHas) {
+          await editInteractionResponse(interaction.token, {
+            content: "Channel already in list",
+          });
+          return;
+        }
         const destinations = await addGlobalDestination(
           "morning_summary",
           channelId,
@@ -186,6 +198,12 @@ export default class SettingCommand implements Command {
         return;
       }
       if (sub === "remove_channel") {
+        if (!alreadyHas) {
+          await editInteractionResponse(interaction.token, {
+            content: "Channel not in morning_summary list",
+          });
+          return;
+        }
         const destinations = await removeGlobalDestination(
           "morning_summary",
           channelId,

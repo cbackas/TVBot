@@ -3,6 +3,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType,
   ComponentType,
+  InteractionContextType,
   MessageFlags,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
@@ -26,6 +27,7 @@ export default class ListCommand implements Command {
       name: "list" as const,
       description: "List linked shows",
       default_member_permissions: "16",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.SubcommandGroup,

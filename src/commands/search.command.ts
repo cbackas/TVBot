@@ -2,6 +2,7 @@ import {
   type APIApplicationCommandAutocompleteInteraction,
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
+  InteractionContextType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
@@ -19,6 +20,7 @@ export default class SearchCommand implements Command {
     {
       name: "search" as const,
       description: "Search for a TV show",
+      contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.String,
@@ -26,6 +28,7 @@ export default class SearchCommand implements Command {
           description: "Show name or IMDB ID",
           required: true,
           autocomplete: true,
+          min_length: 1,
         },
       ],
     };
