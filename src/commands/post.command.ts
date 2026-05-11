@@ -213,8 +213,7 @@ export default class PostCommand implements Command {
     } catch (error) {
       console.error("Error in post command:", error);
       await editInteractionResponse(token, {
-        content:
-          progress.toString() + "\n\nAn error occurred while creating posts.",
+        content: `${progress.toString()}\n\nAn error occurred while creating posts.`,
       });
     }
   }

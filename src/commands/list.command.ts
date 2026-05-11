@@ -104,7 +104,10 @@ export default class ListCommand implements Command {
 
     const header = textDisplayComponents(`Shows in channel <#${channelId}>:`);
     // Container limit is 40 components; 1 for the container itself, 1 for the header
-    const body = textDisplayComponents(lines.join("\n"), { chunk: true, maxComponents: 38 });
+    const body = textDisplayComponents(lines.join("\n"), {
+      chunk: true,
+      maxComponents: 38,
+    });
     const textDisplays = [...header, ...body];
 
     await editInteractionResponse(interaction.token, {
