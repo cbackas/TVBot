@@ -203,6 +203,8 @@ export default class PostCommand implements Command {
         }
       }
 
+      await progress.sendNextStep();
+
       await editInteractionResponse(token, {
         content:
           progress.toString() +
