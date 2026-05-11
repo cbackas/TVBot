@@ -4,7 +4,6 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "tvbot-dev",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-12-05",
 	"observability": {
@@ -22,17 +21,20 @@
    * https://developers.cloudflare.com/workers/runtime-apis/bindings/
    */
 	/**
-   * D1 Database — dev by default, prod overrides below
+   * D1 Database — defined per environment below
    * https://developers.cloudflare.com/d1/
    */
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "tvbot-db-dev",
-			"database_id": "1ac4c0b9-e9f3-4045-bfed-8be2cff9eb9c"
-		}
-	],
 	"env": {
+		"dev": {
+			"name": "tvbot-dev",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "tvbot-db-dev",
+					"database_id": "1ac4c0b9-e9f3-4045-bfed-8be2cff9eb9c"
+				}
+			]
+		},
 		"prod": {
 			"name": "tvbot-prod",
 			"d1_databases": [

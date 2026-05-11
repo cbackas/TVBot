@@ -1,0 +1,47 @@
+name: PR Preview
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    name: Deploy preview
+    runs-on: ubuntu-latest
+    environment: tvbot-dev
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: versions upload --env dev --message "PR #${{ github.event.pull_request.number }}" --tag "pr-${{ github.event.pull_request.number }}"
+      - name: Extract preview URL
+        id: url
+        run: |
+          URL=$(echo "${{ steps.deploy.outputs.command-output }}" | grep -oE 'https://[a-z0-9-]+-tvbot-dev\.[a-z0-9.-]+\.workers\.dev' | head -n1)
+          if [ -z "$URL" ]; then
+            echo "Failed to extract preview URL from wrangler output" >&2
+            exit 1
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            **Preview**: ${{ steps.url.outputs.url }}
+
+            Uploaded as `pr-${{ github.event.pull_request.number }}`. Shares the dev D1 — not traffic-routed. Re-uploads on every push.
