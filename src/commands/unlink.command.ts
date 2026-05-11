@@ -2,7 +2,9 @@ import {
   type APIApplicationCommandInteraction,
   type APIMessageComponentInteraction,
   ApplicationCommandOptionType,
+  ButtonStyle,
   ChannelType,
+  ComponentType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
@@ -14,6 +16,59 @@ import {
   removeSubscription,
 } from "../lib/shows.js";
 import type { Command } from "./index.js";
+
+const MAX_OPTIONS = 25;
+
+function buildPageComponents(
+  allOptions: { label: string; value: string }[],
+  page: number,
+) {
+  const totalPages = Math.ceil(allOptions.length / MAX_OPTIONS);
+  const pageOptions = allOptions.slice(
+    page * MAX_OPTIONS,
+    (page + 1) * MAX_OPTIONS,
+  );
+
+  const components: object[] = [
+    {
+      type: ComponentType.ActionRow,
+      components: [
+        {
+          type: ComponentType.StringSelect,
+          custom_id: "unlink_shows_menu",
+          placeholder: "Nothing selected",
+          min_values: 1,
+          max_values: pageOptions.length,
+          options: pageOptions,
+        },
+      ],
+    },
+  ];
+
+  if (totalPages > 1) {
+    components.push({
+      type: ComponentType.ActionRow,
+      components: [
+        {
+          type: ComponentType.Button,
+          style: ButtonStyle.Secondary,
+          label: "Previous",
+          custom_id: `unlink_shows_menu:prev:${page - 1}`,
+          disabled: page === 0,
+        },
+        {
+          type: ComponentType.Button,
+          style: ButtonStyle.Secondary,
+          label: "Next",
+          custom_id: `unlink_shows_menu:next:${page + 1}`,
+          disabled: page === totalPages - 1,
+        },
+      ],
+    });
+  }
+
+  return { components, totalPages };
+}
 
 export default class UnlinkCommand implements Command {
   public readonly name = "unlink";
@@ -76,42 +131,27 @@ export default class UnlinkCommand implements Command {
       return;
     }
 
-    const MAX_OPTIONS = 25;
-    const allOptions = showsInChannel.map((s) => ({
-      label: s.name,
-      value: s.imdbId,
-    }));
-    const truncated = allOptions.length > MAX_OPTIONS;
-    const options = truncated ? allOptions.slice(0, MAX_OPTIONS) : allOptions;
+    const allOptions = showsInChannel
+      .map((s) => ({ label: s.name, value: s.imdbId }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+    const { components, totalPages } = buildPageComponents(allOptions, 0);
 
     let content = `Select the shows that you'd like to unlink from <#${channelId}>`;
-    if (truncated) {
-      content += `\nShowing 25 of ${allOptions.length}. Run the command again after unlinking to see the rest.`;
+    if (totalPages > 1) {
+      content += ` (Page 1 of ${totalPages})`;
     }
 
     await editInteractionResponse(interaction.token, {
       content,
-      components: [
-        {
-          type: 1, // ActionRow
-          components: [
-            {
-              type: 3, // StringSelect
-              custom_id: "unlink_shows_menu",
-              placeholder: "Nothing selected",
-              min_values: 1,
-              max_values: options.length,
-              options,
-            },
-          ],
-        },
-      ],
+      components,
     });
   }
 
   async componentHandler(
     interaction: APIMessageComponentInteraction,
   ): Promise<Response> {
+    const customId = interaction.data.custom_id;
     const channelId = interaction.message?.content?.match(/<#([0-9]+)>/)?.[1];
 
     if (channelId == null) {
@@ -121,6 +161,37 @@ export default class UnlinkCommand implements Command {
       });
     }
 
+    // Handle pagination buttons
+    if (
+      customId.startsWith("unlink_shows_menu:prev:") ||
+      customId.startsWith("unlink_shows_menu:next:")
+    ) {
+      const targetPage = parseInt(customId.split(":")[2], 10);
+
+      const allShows = await getAllShows();
+      const showsInChannel = allShows.filter((show) =>
+        show.destinations.some((d) => d.channelId === channelId),
+      );
+
+      const allOptions = showsInChannel
+        .map((s) => ({ label: s.name, value: s.imdbId }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+      const { components, totalPages } = buildPageComponents(
+        allOptions,
+        targetPage,
+      );
+
+      return Response.json({
+        type: InteractionResponseType.UPDATE_MESSAGE,
+        data: {
+          content: `Select the shows that you'd like to unlink from <#${channelId}> (Page ${targetPage + 1} of ${totalPages})`,
+          components,
+        },
+      });
+    }
+
+    // Handle select menu submission
     const values = "values" in interaction.data ? interaction.data.values : [];
 
     const success: string[] = [];

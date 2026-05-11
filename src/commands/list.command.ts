@@ -2,9 +2,14 @@ import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
   ChannelType,
+  ComponentType,
+  MessageFlags,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import { editInteractionResponse } from "../lib/discord.js";
+import {
+  editInteractionResponse,
+  textDisplayComponents,
+} from "../lib/discord.js";
 import {
   getChannelOption,
   getSubcommand,
@@ -51,9 +56,7 @@ export default class ListCommand implements Command {
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<void> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
 
@@ -90,33 +93,28 @@ export default class ListCommand implements Command {
       return;
     }
 
-    const MAX_LENGTH = 2000;
-    const header = `Shows in channel <#${channelId}>:\n\n`;
-    let content = header;
-    let added = 0;
+    const sorted = showsInChannel.sort((a, b) => a.name.localeCompare(b.name));
 
-    for (let i = 0; i < showsInChannel.length; i++) {
-      const show = showsInChannel[i];
+    const lines = sorted.map((show) => {
       const destinations = show.destinations
         .map((d) => `<#${d.channelId}>`)
         .join(" ");
-      const line = `**${show.name}** ${destinations}`;
-      const remaining = showsInChannel.length - added;
-      const suffix = `\n...and ${remaining} more`;
+      return `**${show.name}** ${destinations}`;
+    });
 
-      if (
-        content.length + (added > 0 ? 1 : 0) + line.length + suffix.length >
-        MAX_LENGTH
-      ) {
-        content += suffix;
-        break;
-      }
+    const header = textDisplayComponents(`Shows in channel <#${channelId}>:`);
+    // Container limit is 40 components; 1 for the container itself, 1 for the header
+    const body = textDisplayComponents(lines.join("\n"), { chunk: true, maxComponents: 38 });
+    const textDisplays = [...header, ...body];
 
-      if (added > 0) content += "\n";
-      content += line;
-      added++;
-    }
-
-    await editInteractionResponse(interaction.token, { content });
+    await editInteractionResponse(interaction.token, {
+      components: [
+        {
+          type: ComponentType.Container,
+          components: textDisplays,
+        },
+      ],
+      flags: MessageFlags.IsComponentsV2,
+    });
   }
 }

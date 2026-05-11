@@ -71,9 +71,7 @@ export default class LinkCommand implements Command {
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<void> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const sub = getSubcommand(interaction);
     const imdbIdInput = getStringOption(interaction, "imdb_id") ?? "";
     const token = interaction.token;
@@ -170,9 +168,7 @@ export default class LinkCommand implements Command {
           linked.push({ imdbId, series, show });
           messages.push(`Linked show \`${series.name}\` (${imdbId})`);
         } catch (error) {
-          messages.push(
-            `Failed to link show \`${series.name}\` (${imdbId})`,
-          );
+          messages.push(`Failed to link show \`${series.name}\` (${imdbId})`);
           console.error(error);
         }
       }
@@ -183,6 +179,11 @@ export default class LinkCommand implements Command {
       for (const { imdbId, series, show } of linked) {
         try {
           await updateEpisodes(show.imdbId, show.tvdbId, series);
+        } catch (error) {
+          console.error(`Error updating episodes for ${series.name}:`, error);
+        }
+
+        try {
           await sendDiscordEmbed(
             targetChannelId,
             buildShowEmbed(imdbId, series, show.destinations),
@@ -190,7 +191,7 @@ export default class LinkCommand implements Command {
           );
         } catch (error) {
           console.error(
-            `Error updating episodes for ${series.name}:`,
+            `Error sending embed for ${series.name} to channel ${targetChannelId}:`,
             error,
           );
         }
@@ -204,9 +205,7 @@ export default class LinkCommand implements Command {
     } catch (error) {
       console.error("Error in link command:", error);
       await editInteractionResponse(token, {
-        content:
-          progress.toString() +
-          "\n\nAn error occurred while linking shows.",
+        content: `${progress.toString()}\n\nAn error occurred while linking shows.`,
       });
     }
   }

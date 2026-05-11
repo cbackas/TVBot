@@ -53,9 +53,7 @@ export default class PostCommand implements Command {
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<void> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const imdbIdInput = getStringOption(interaction, "imdb_id") ?? "";
     const forumOption = getChannelOption(interaction, "forum");
     const token = interaction.token;
@@ -201,10 +199,7 @@ export default class PostCommand implements Command {
         try {
           await updateEpisodes(show.imdbId, show.tvdbId, series);
         } catch (error) {
-          console.error(
-            `Error updating episodes for ${series.name}:`,
-            error,
-          );
+          console.error(`Error updating episodes for ${series.name}:`, error);
         }
       }
 
@@ -217,8 +212,7 @@ export default class PostCommand implements Command {
       console.error("Error in post command:", error);
       await editInteractionResponse(token, {
         content:
-          progress.toString() +
-          "\n\nAn error occurred while creating posts.",
+          progress.toString() + "\n\nAn error occurred while creating posts.",
       });
     }
   }

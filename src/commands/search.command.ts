@@ -30,9 +30,7 @@ export default class SearchCommand implements Command {
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<void> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const query = getStringOption(interaction, "query") ?? "";
     const token = interaction.token;
 

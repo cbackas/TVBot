@@ -9,7 +9,11 @@ export default async function handleComponent(
   interaction: APIMessageComponentInteraction,
 ) {
   for (const command of commands.values()) {
-    if (command.selectMenuIds?.includes(interaction.data.custom_id)) {
+    if (
+      command.selectMenuIds?.some((id) =>
+        interaction.data.custom_id.startsWith(id),
+      )
+    ) {
       if (!command.componentHandler) break;
       try {
         return await command.componentHandler(interaction);

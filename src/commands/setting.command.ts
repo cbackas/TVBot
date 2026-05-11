@@ -125,9 +125,7 @@ export default class SettingCommand implements Command {
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<void> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
     const channelId = getChannelOption(interaction, "channel");

@@ -47,9 +47,7 @@ export default class UpcomingCommand implements Command {
       ],
     };
 
-  async handler(
-    interaction: APIApplicationCommandInteraction,
-  ): Promise<void> {
+  async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
     const sub = getSubcommand(interaction);
     const token = interaction.token;
 
