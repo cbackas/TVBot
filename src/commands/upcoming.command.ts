@@ -8,7 +8,11 @@ import {
 import { showSearchAutocomplete } from "../lib/autocomplete.js";
 import { editInteractionResponse } from "../lib/discord.js";
 import { getStringOption, getSubcommand } from "../lib/interactionOptions.js";
-import { getAllShows, getShowByImdbId } from "../lib/shows.js";
+import {
+  getShowByImdbId,
+  getShowsByChannelId,
+  getShowsWithUnsentEpisodes,
+} from "../lib/shows.js";
 import { getSeriesByImdbId } from "../lib/tvdb.js";
 import { getUpcomingEpisodesEmbed } from "../lib/upcoming.js";
 import type { Command } from "./index.js";
@@ -70,10 +74,7 @@ export default class UpcomingCommand implements Command {
   }
 
   private async handleAll(token: string): Promise<void> {
-    const allShows = await getAllShows();
-    const showsWithUnsent = allShows.filter((s) =>
-      s.episodes.some((e) => !e.messageSent),
-    );
+    const showsWithUnsent = await getShowsWithUnsentEpisodes();
 
     if (showsWithUnsent.length === 0) {
       await editInteractionResponse(token, { content: "No shows found" });
@@ -97,10 +98,7 @@ export default class UpcomingCommand implements Command {
       return;
     }
 
-    const allShows = await getAllShows();
-    const showsHere = allShows.filter((s) =>
-      s.destinations.some((d) => d.channelId === channelId),
-    );
+    const showsHere = await getShowsByChannelId(channelId);
 
     if (showsHere.length === 0) {
       await editInteractionResponse(token, {

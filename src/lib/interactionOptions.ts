@@ -102,3 +102,25 @@ export function getChannelOption(
   );
   return opt && "value" in opt ? String(opt.value) : null;
 }
+
+export interface ResolvedChannelInfo {
+  id: string;
+  type: number;
+  name: string | null;
+}
+
+export function getResolvedChannel(
+  interaction: APIApplicationCommandInteraction,
+  name: string,
+): ResolvedChannelInfo | null {
+  const id = getChannelOption(interaction, name);
+  if (id == null) return null;
+  if (!("resolved" in interaction.data) || interaction.data.resolved == null) {
+    return null;
+  }
+  const resolved = interaction.data.resolved;
+  if (!("channels" in resolved) || resolved.channels == null) return null;
+  const channel = resolved.channels[id];
+  if (channel == null) return null;
+  return { id, type: channel.type, name: channel.name ?? null };
+}

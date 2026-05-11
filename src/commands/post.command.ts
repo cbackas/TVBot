@@ -203,6 +203,9 @@ export default class PostCommand implements Command {
 
       for (const { imdbId, series, threadId } of created) {
         try {
+          console.info(
+            `[New Subscription] ${series.name} (${imdbId}) ${threadId}`,
+          );
           const show = await createNewSubscription(
             imdbId,
             series.id,

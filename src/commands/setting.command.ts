@@ -7,10 +7,11 @@ import {
 } from "discord-api-types/v10";
 import { editInteractionResponse } from "../lib/discord.js";
 import {
-  getChannelOption,
+  getResolvedChannel,
   getSubcommand,
   getSubcommandGroup,
 } from "../lib/interactionOptions.js";
+import { ProgressMessageBuilder } from "../lib/progressMessages.js";
 import {
   addGlobalDestination,
   getGlobalDestinations,
@@ -18,6 +19,11 @@ import {
   setDefaultForum,
 } from "../lib/settingsManager.js";
 import type { Command } from "./index.js";
+
+const TEXT_CHANNEL_TYPES = new Set<number>([
+  ChannelType.GuildText,
+  ChannelType.GuildAnnouncement,
+]);
 
 export default class SettingCommand implements Command {
   public readonly name = "setting";
@@ -129,94 +135,110 @@ export default class SettingCommand implements Command {
     };
 
   async handler(interaction: APIApplicationCommandInteraction): Promise<void> {
+    const token = interaction.token;
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
-    const channelId = getChannelOption(interaction, "channel");
+    const channel = getResolvedChannel(interaction, "channel");
 
-    if (channelId == null) {
-      await editInteractionResponse(interaction.token, {
-        content: "No channel provided",
-      });
+    if (channel == null) {
+      await editInteractionResponse(token, { content: "No channel provided" });
       return;
     }
 
     // /setting tv_forum <channel>
     if (group == null && sub === "tv_forum") {
-      await setDefaultForum(channelId);
-      await editInteractionResponse(interaction.token, {
-        content: `TV forum set to <#${channelId}>`,
+      if (channel.type !== ChannelType.GuildForum) {
+        await editInteractionResponse(token, {
+          content: "Invalid channel type — must be a forum channel",
+        });
+        return;
+      }
+      const channelLabel =
+        channel.name != null ? `\`${channel.name}\`` : `<#${channel.id}>`;
+      const progress = new ProgressMessageBuilder(token).addStep(
+        `Setting TV forum to ${channelLabel}`,
+      );
+      await progress.sendNextStep();
+      await setDefaultForum(channel.id);
+      await editInteractionResponse(token, {
+        content: `${progress.toString()}\n\nTV forum set to <#${channel.id}>`,
       });
       return;
     }
 
     // /setting all_episodes add/remove <channel>
     if (group === "all_episodes") {
-      if (sub === "add") {
-        const destinations = await addGlobalDestination(
-          "all_episodes",
-          channelId,
-        );
-        const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        await editInteractionResponse(interaction.token, {
-          content: `Updated All Episodes channel list.\n\n__New List__:\n${list}`,
+      if (!TEXT_CHANNEL_TYPES.has(channel.type)) {
+        await editInteractionResponse(token, {
+          content:
+            "Invalid channel type — must be a text or announcement channel",
         });
         return;
       }
-      if (sub === "remove") {
-        const destinations = await removeGlobalDestination(
-          "all_episodes",
-          channelId,
-        );
-        const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        await editInteractionResponse(interaction.token, {
-          content: `Updated All Episodes channel list.\n\n__New List__:\n${list}`,
-        });
+      if (sub !== "add" && sub !== "remove") {
+        await editInteractionResponse(token, { content: "Invalid mode" });
         return;
       }
+      const progress = new ProgressMessageBuilder(token).addStep(
+        "Updating All Episodes channel list",
+      );
+      await progress.sendNextStep();
+      const destinations =
+        sub === "add"
+          ? await addGlobalDestination("all_episodes", channel.id)
+          : await removeGlobalDestination("all_episodes", channel.id);
+      const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
+      await editInteractionResponse(token, {
+        content: `${progress.toString()}\n\nUpdated All Episodes channel list.\n\n__New List__:\n${list}`,
+      });
+      return;
     }
 
     // /setting morning_summary add_channel/remove_channel <channel>
     if (group === "morning_summary") {
+      if (!TEXT_CHANNEL_TYPES.has(channel.type)) {
+        await editInteractionResponse(token, {
+          content:
+            "Invalid channel type — must be a text or announcement channel",
+        });
+        return;
+      }
+      if (sub !== "add_channel" && sub !== "remove_channel") {
+        await editInteractionResponse(token, { content: "Invalid mode" });
+        return;
+      }
       const existing = await getGlobalDestinations("morning_summary");
-      const alreadyHas = existing.some((d) => d.channelId === channelId);
+      const alreadyHas = existing.some((d) => d.channelId === channel.id);
 
-      if (sub === "add_channel") {
-        if (alreadyHas) {
-          await editInteractionResponse(interaction.token, {
-            content: "Channel already in list",
-          });
-          return;
-        }
-        const destinations = await addGlobalDestination(
-          "morning_summary",
-          channelId,
-        );
-        const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        await editInteractionResponse(interaction.token, {
-          content: `Updated Morning Summary channel list.\n\n__New List__:\n${list}`,
+      if (sub === "add_channel" && alreadyHas) {
+        await editInteractionResponse(token, {
+          content: "Channel already in list",
         });
         return;
       }
-      if (sub === "remove_channel") {
-        if (!alreadyHas) {
-          await editInteractionResponse(interaction.token, {
-            content: "Channel not in morning_summary list",
-          });
-          return;
-        }
-        const destinations = await removeGlobalDestination(
-          "morning_summary",
-          channelId,
-        );
-        const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
-        await editInteractionResponse(interaction.token, {
-          content: `Updated Morning Summary channel list.\n\n__New List__:\n${list}`,
+      if (sub === "remove_channel" && !alreadyHas) {
+        await editInteractionResponse(token, {
+          content: "Channel not in morning_summary list",
         });
         return;
       }
+
+      const progress = new ProgressMessageBuilder(token).addStep(
+        "Updating Morning Summary channel list",
+      );
+      await progress.sendNextStep();
+      const destinations =
+        sub === "add_channel"
+          ? await addGlobalDestination("morning_summary", channel.id)
+          : await removeGlobalDestination("morning_summary", channel.id);
+      const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
+      await editInteractionResponse(token, {
+        content: `${progress.toString()}\n\nUpdated Morning Summary channel list.\n\n__New List__:\n${list}`,
+      });
+      return;
     }
 
-    await editInteractionResponse(interaction.token, {
+    await editInteractionResponse(token, {
       content: "Unknown setting command",
     });
   }

@@ -45,17 +45,15 @@ async function getShowPayloads(
 
   const db = getDb();
   const rows = await db.query.shows.findMany({
+    where: {
+      episodes: {
+        messageSent: false,
+        airDate: { lte: minutesFromNow.toISOString() },
+      },
+    },
     with: { episodes: true, destinations: true },
   });
-  const allShows: Show[] = rows.map((r) => showSchema.parse(r));
-
-  // Filter to only shows that have unsent episodes within the time window
-  const showsWithEpisodes = allShows.filter((show) =>
-    show.episodes.some(
-      (e) =>
-        !e.messageSent && moment.utc(e.airDate).isSameOrBefore(minutesFromNow),
-    ),
-  );
+  const showsWithEpisodes: Show[] = rows.map((r) => showSchema.parse(r));
 
   // Convert the shows into a map of notification payloads
   return showsWithEpisodes.reduce(

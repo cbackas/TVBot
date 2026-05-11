@@ -10,7 +10,7 @@ import type { SeriesExtendedRecord } from "../interfaces/tvdb.generated.js";
 import { editInteractionResponse } from "../lib/discord.js";
 import { getEnv } from "../lib/env.js";
 import {
-  getChannelOption,
+  getResolvedChannel,
   getStringOption,
   getSubcommand,
 } from "../lib/interactionOptions.js";
@@ -84,12 +84,21 @@ export default class LinkCommand implements Command {
       ChannelType.PublicThread,
       ChannelType.PrivateThread,
     ]);
+    const SENDABLE_TYPES = new Set<number>([
+      ChannelType.GuildText,
+      ChannelType.GuildAnnouncement,
+      ChannelType.AnnouncementThread,
+      ChannelType.PublicThread,
+      ChannelType.PrivateThread,
+    ]);
 
     let channelId: string | null = null;
+    let channelType: number | null = null;
     let parentForumId: string | null = null;
     if (sub === "here") {
       const channel = interaction.channel;
       channelId = channel?.id ?? null;
+      channelType = channel?.type ?? null;
       if (
         channel != null &&
         THREAD_TYPES.has(channel.type) &&
@@ -98,11 +107,23 @@ export default class LinkCommand implements Command {
         parentForumId = channel.parent_id ?? null;
       }
     } else if (sub === "channel") {
-      channelId = getChannelOption(interaction, "channel");
+      const resolved = getResolvedChannel(interaction, "channel");
+      channelId = resolved?.id ?? null;
+      channelType = resolved?.type ?? null;
+    } else {
+      await editInteractionResponse(token, { content: "Invalid subcommand" });
+      return;
     }
 
     if (channelId == null) {
       await editInteractionResponse(token, { content: "Invalid channel" });
+      return;
+    }
+
+    if (channelType == null || !SENDABLE_TYPES.has(channelType)) {
+      await editInteractionResponse(token, {
+        content: "Invalid channel — not a sendable text channel",
+      });
       return;
     }
 
@@ -205,6 +226,9 @@ export default class LinkCommand implements Command {
         try {
           await updateEpisodes(show.imdbId, show.tvdbId, series);
         } catch (error) {
+          messages.push(
+            `Linked \`${series.name}\` but failed to fetch upcoming episodes`,
+          );
           console.error(`Error updating episodes for ${series.name}:`, error);
         }
 
@@ -216,6 +240,9 @@ export default class LinkCommand implements Command {
             `Linked \`${series.name}\` to <#${targetChannelId}>`,
           );
         } catch (error) {
+          messages.push(
+            `Linked \`${series.name}\` but failed to send announcement embed`,
+          );
           console.error(
             `Error sending embed for ${series.name} to channel ${targetChannelId}:`,
             error,
@@ -232,8 +259,10 @@ export default class LinkCommand implements Command {
       });
     } catch (error) {
       console.error("Error in link command:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       await editInteractionResponse(token, {
-        content: `${progress.toString()}\n\nAn error occurred while linking shows.`,
+        content: `${progress.toString()}\n\nAn error occurred while linking shows: ${errorMessage}`,
       });
     }
   }

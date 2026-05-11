@@ -66,6 +66,28 @@ export async function getAllShows(): Promise<Show[]> {
   return rows.map((r) => showSchema.parse(r));
 }
 
+export async function getShowsWithUnsentEpisodes(): Promise<Show[]> {
+  const db = getDb();
+
+  const rows = await db.query.shows.findMany({
+    where: { episodes: { messageSent: false } },
+    with: { episodes: true, destinations: true },
+  });
+
+  return rows.map((r) => showSchema.parse(r));
+}
+
+export async function getShowsByChannelId(channelId: string): Promise<Show[]> {
+  const db = getDb();
+
+  const rows = await db.query.shows.findMany({
+    where: { destinations: { channelId } },
+    with: { episodes: true, destinations: true },
+  });
+
+  return rows.map((r) => showSchema.parse(r));
+}
+
 export async function searchShows(
   query: string,
   limit: number = 25,
