@@ -4,6 +4,7 @@ import { getEnv } from "./env.js";
 import type { NotificationPayload } from "./episodeNotifier.js";
 import type { Show } from "./shows.js";
 import { addLeadingZeros, toRanges } from "./util.js";
+import { assert } from "../utils.js";
 
 interface UpcomingEpisodeMessages {
   prefix: string;
@@ -162,7 +163,8 @@ function reduceEpisodes(
 
       // grab the payload from the map or create a new one
       if (!acc.has(key)) acc.set(key, defaultPayload);
-      const payload = acc.get(key)!;
+      const payload = acc.get(key);
+      assert(payload != null);
 
       // add the episode number to the payload
       payload.episodeNumbers.push(e.number);

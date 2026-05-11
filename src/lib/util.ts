@@ -36,8 +36,11 @@ export function parseIMDBIds(imdbIds: string): string[] {
     imdbIds
       .split(",")
       // filter out invalid imdb ids and handle imdb urls
-      .reduce((acc, id) => {
-        if (id.startsWith("tt")) return [...acc, id];
+      .reduce<string[]>((acc, id) => {
+        if (id.startsWith("tt")) {
+          acc.push(id);
+          return acc;
+        }
 
         try {
           const parsedUrl = parseUrl(id, true);
@@ -45,13 +48,13 @@ export function parseIMDBIds(imdbIds: string): string[] {
             ["imdb.com", "m.imdb.com"].includes(parsedUrl.resource) &&
             parsedUrl.pathname.startsWith("/title/")
           ) {
-            return [...acc, parsedUrl.pathname.split("/title/")[1]];
+            acc.push(parsedUrl.pathname.split("/title/")[1]);
           }
         } catch (_e) {
           // do nothing
         }
 
         return acc;
-      }, [] as string[])
+      }, [])
   );
 }
