@@ -46,7 +46,11 @@
 					}
 				],
 				"consumers": [
-					{ "queue": "tvbot-interactions-dev" }
+					{
+						"queue": "tvbot-interactions-dev",
+						"max_batch_size": 1,
+						"max_batch_timeout": 0
+					}
 				]
 			}
 		},
@@ -70,7 +74,11 @@
 					}
 				],
 				"consumers": [
-					{ "queue": "tvbot-interactions-prod" }
+					{
+						"queue": "tvbot-interactions-prod",
+						"max_batch_size": 1,
+						"max_batch_timeout": 0
+					}
 				]
 			},
 			"triggers": {
