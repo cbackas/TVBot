@@ -28,16 +28,33 @@
 	"env": {
 		"dev": {
 			"name": "tvbot-dev",
+			"observability": {
+				"enabled": true
+			},
 			"d1_databases": [
 				{
 					"binding": "DB",
 					"database_name": "tvbot-db-dev",
 					"database_id": "1ac4c0b9-e9f3-4045-bfed-8be2cff9eb9c"
 				}
-			]
+			],
+			"queues": {
+				"producers": [
+					{
+						"queue": "tvbot-interactions-dev",
+						"binding": "WORK_QUEUE"
+					}
+				],
+				"consumers": [
+					{ "queue": "tvbot-interactions-dev" }
+				]
+			}
 		},
 		"prod": {
 			"name": "tvbot-prod",
+			"observability": {
+				"enabled": true
+			},
 			"d1_databases": [
 				{
 					"binding": "DB",
@@ -45,6 +62,17 @@
 					"database_id": "694579ba-92f5-4a55-bce6-34c3ac6f6877"
 				}
 			],
+			"queues": {
+				"producers": [
+					{
+						"queue": "tvbot-interactions-prod",
+						"binding": "WORK_QUEUE"
+					}
+				],
+				"consumers": [
+					{ "queue": "tvbot-interactions-prod" }
+				]
+			},
 			"triggers": {
 				"crons": [
 					"* * * * *",

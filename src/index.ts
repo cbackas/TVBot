@@ -3,6 +3,10 @@ import handleAutocomplete from "./interactions/autocomplete.handler.js";
 import handleCommand from "./interactions/command.handler.js";
 import handleComponent from "./interactions/component.handler.js";
 import handlePing from "./interactions/ping.handler.js";
+import {
+  handleQueuedWork,
+  type WorkQueueMessage,
+} from "./interactions/queue.handler.js";
 import { verifyInteraction } from "./interactions/verify.js";
 import { getEnv } from "./lib/env.js";
 import { sendAiringMessages } from "./lib/episodeNotifier.js";
@@ -79,7 +83,24 @@ async function scheduled(
   }
 }
 
+async function queue(
+  batch: MessageBatch<WorkQueueMessage>,
+  _env: Env,
+  _ctx: ExecutionContext,
+): Promise<void> {
+  for (const message of batch.messages) {
+    try {
+      await handleQueuedWork(message.body);
+    } catch (error) {
+      console.error("Unhandled error in queue handler:", error);
+    } finally {
+      message.ack();
+    }
+  }
+}
+
 export default {
   fetch,
   scheduled,
-} satisfies ExportedHandler<Env>;
+  queue,
+} satisfies ExportedHandler<Env, WorkQueueMessage>;

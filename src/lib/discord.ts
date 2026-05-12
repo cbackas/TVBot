@@ -1,6 +1,4 @@
-import { waitUntil } from "cloudflare:workers";
 import { type APIEmbed, ComponentType } from "discord-api-types/v10";
-import { InteractionResponseType } from "discord-interactions";
 import { getEnv } from "./env.js";
 import { pruneDeadChannel } from "./shows.js";
 
@@ -33,17 +31,6 @@ export async function handleChannelSendError(
   throw new Error(
     `${operation} ${channelId} — Discord API error ${response.status}: ${errorText}`,
   );
-}
-
-/**
- * Returns a deferred response and schedules async work via waitUntil.
- * Use for commands that need >3s (e.g. TVDB API calls).
- */
-export function deferWithWork(work: Promise<void>): Response {
-  waitUntil(work);
-  return Response.json({
-    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-  });
 }
 
 /**
