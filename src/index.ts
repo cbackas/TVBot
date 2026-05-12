@@ -65,7 +65,7 @@ async function scheduled(
   _ctx: ExecutionContext,
 ): Promise<void> {
   switch (controller.cron) {
-    case "* * * * *":
+    case "*/2 * * * *":
       await sendAiringMessages();
       return;
     case "0 */4 * * *":

@@ -41,7 +41,7 @@ export async function sendAiringMessages(): Promise<void> {
  * @returns a map of payloads for each show that has an episode airing in the next x minutes
  */
 async function getShowPayloads(
-  minutes: number = 2,
+  minutes: number = 5,
 ): Promise<Map<string, NotificationPayload>> {
   const nowUtc = moment.utc();
   const minutesFromNow = nowUtc.clone().add(minutes, "minutes");
