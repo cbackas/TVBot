@@ -2,6 +2,38 @@ import { waitUntil } from "cloudflare:workers";
 import { type APIEmbed, ComponentType } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
 import { getEnv } from "./env.js";
+import { pruneDeadChannel } from "./shows.js";
+
+/**
+ * Translate a non-ok Discord channel/message response into a thrown error,
+ * self-healing when Discord reports the channel itself no longer exists (10003).
+ * Other 404s (e.g. 50001 missing access) bubble up as plain errors — they may
+ * be a recoverable permission misconfig, not a deletion.
+ */
+export async function handleChannelSendError(
+  response: Response,
+  channelId: string,
+  operation: string,
+): Promise<never> {
+  const errorText = await response.text();
+  if (response.status === 404) {
+    let code: number | undefined;
+    try {
+      code = (JSON.parse(errorText) as { code?: number }).code;
+    } catch {
+      // not JSON, treat as opaque 404
+    }
+    if (code === 10003) {
+      await pruneDeadChannel(channelId);
+      throw new Error(
+        `${operation} ${channelId} — channel no longer exists; pruned from DB`,
+      );
+    }
+  }
+  throw new Error(
+    `${operation} ${channelId} — Discord API error ${response.status}: ${errorText}`,
+  );
+}
 
 /**
  * Returns a deferred response and schedules async work via waitUntil.

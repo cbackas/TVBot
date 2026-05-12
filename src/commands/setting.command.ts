@@ -2,10 +2,15 @@ import {
   type APIApplicationCommandInteraction,
   ApplicationCommandOptionType,
   ChannelType,
+  ComponentType,
   InteractionContextType,
+  MessageFlags,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import { editInteractionResponse } from "../lib/discord.js";
+import {
+  editInteractionResponse,
+  textDisplayComponents,
+} from "../lib/discord.js";
 import {
   getResolvedChannel,
   getSubcommand,
@@ -14,6 +19,7 @@ import {
 import { ProgressMessageBuilder } from "../lib/progressMessages.js";
 import {
   addGlobalDestination,
+  getDefaultForum,
   getGlobalDestinations,
   removeGlobalDestination,
   setDefaultForum,
@@ -25,20 +31,30 @@ const TEXT_CHANNEL_TYPES = new Set<number>([
   ChannelType.GuildAnnouncement,
 ]);
 
+function renderList(channelIds: string[]): string {
+  if (channelIds.length === 0) return "(none)";
+  return channelIds.map((id) => `<#${id}>`).join("\n");
+}
+
 export default class SettingCommand implements Command {
   public readonly name = "setting";
 
   public readonly definition: RESTPostAPIChatInputApplicationCommandsJSONBody =
     {
       name: "setting" as const,
-      description: "Bot settings",
+      description: "Configure bot-wide channels and defaults",
       default_member_permissions: "16",
       contexts: [InteractionContextType.Guild],
       options: [
         {
           type: ApplicationCommandOptionType.Subcommand,
-          name: "tv_forum",
-          description: "Set the default TV forum",
+          name: "view",
+          description: "View current settings",
+        },
+        {
+          type: ApplicationCommandOptionType.Subcommand,
+          name: "default_forum",
+          description: "Where /post creates new show threads by default",
           options: [
             {
               type: ApplicationCommandOptionType.Channel,
@@ -51,18 +67,19 @@ export default class SettingCommand implements Command {
         },
         {
           type: ApplicationCommandOptionType.SubcommandGroup,
-          name: "all_episodes",
-          description: "All-episodes notification channels",
+          name: "global_episode_broadcast",
+          description:
+            "Channels that receive a broadcast for every airing episode across all tracked shows",
           options: [
             {
               type: ApplicationCommandOptionType.Subcommand,
               name: "add",
-              description: "Add a channel",
+              description: "Start broadcasting to this channel",
               options: [
                 {
                   type: ApplicationCommandOptionType.Channel,
                   name: "channel",
-                  description: "Channel",
+                  description: "Text or announcement channel",
                   required: true,
                   channel_types: [
                     ChannelType.GuildText,
@@ -74,12 +91,12 @@ export default class SettingCommand implements Command {
             {
               type: ApplicationCommandOptionType.Subcommand,
               name: "remove",
-              description: "Remove a channel",
+              description: "Stop broadcasting to this channel",
               options: [
                 {
                   type: ApplicationCommandOptionType.Channel,
                   name: "channel",
-                  description: "Channel",
+                  description: "Text or announcement channel",
                   required: true,
                   channel_types: [
                     ChannelType.GuildText,
@@ -93,17 +110,18 @@ export default class SettingCommand implements Command {
         {
           type: ApplicationCommandOptionType.SubcommandGroup,
           name: "morning_summary",
-          description: "Morning summary channels",
+          description:
+            "Channels that receive the daily digest of upcoming episodes across all tracked shows",
           options: [
             {
               type: ApplicationCommandOptionType.Subcommand,
-              name: "add_channel",
-              description: "Add a channel",
+              name: "add",
+              description: "Start sending the daily digest to this channel",
               options: [
                 {
                   type: ApplicationCommandOptionType.Channel,
                   name: "channel",
-                  description: "Channel",
+                  description: "Text or announcement channel",
                   required: true,
                   channel_types: [
                     ChannelType.GuildText,
@@ -114,13 +132,13 @@ export default class SettingCommand implements Command {
             },
             {
               type: ApplicationCommandOptionType.Subcommand,
-              name: "remove_channel",
-              description: "Remove a channel",
+              name: "remove",
+              description: "Stop sending the daily digest to this channel",
               options: [
                 {
                   type: ApplicationCommandOptionType.Channel,
                   name: "channel",
-                  description: "Channel",
+                  description: "Text or announcement channel",
                   required: true,
                   channel_types: [
                     ChannelType.GuildText,
@@ -138,15 +156,47 @@ export default class SettingCommand implements Command {
     const token = interaction.token;
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
-    const channel = getResolvedChannel(interaction, "channel");
 
+    // /setting view
+    if (group == null && sub === "view") {
+      const [forumId, broadcast, digest] = await Promise.all([
+        getDefaultForum(),
+        getGlobalDestinations("global_episode_broadcast"),
+        getGlobalDestinations("morning_summary"),
+      ]);
+
+      const body = [
+        "__Default Forum__",
+        forumId != null ? `<#${forumId}>` : "(none)",
+        "",
+        "__Global Episode Broadcast__",
+        renderList(broadcast.map((d) => d.channelId)),
+        "",
+        "__Morning Summary__",
+        renderList(digest.map((d) => d.channelId)),
+      ].join("\n");
+
+      await editInteractionResponse(token, {
+        components: [
+          {
+            type: ComponentType.Container,
+            components: textDisplayComponents(body),
+          },
+        ],
+        flags: MessageFlags.IsComponentsV2,
+      });
+      return;
+    }
+
+    // Every other branch operates on a channel option
+    const channel = getResolvedChannel(interaction, "channel");
     if (channel == null) {
       await editInteractionResponse(token, { content: "No channel provided" });
       return;
     }
 
-    // /setting tv_forum <channel>
-    if (group == null && sub === "tv_forum") {
+    // /setting default_forum channel:<forum>
+    if (group == null && sub === "default_forum") {
       if (channel.type !== ChannelType.GuildForum) {
         await editInteractionResponse(token, {
           content: "Invalid channel type — must be a forum channel",
@@ -156,18 +206,18 @@ export default class SettingCommand implements Command {
       const channelLabel =
         channel.name != null ? `\`${channel.name}\`` : `<#${channel.id}>`;
       const progress = new ProgressMessageBuilder(token).addStep(
-        `Setting TV forum to ${channelLabel}`,
+        `Setting default forum to ${channelLabel}`,
       );
       await progress.sendNextStep();
       await setDefaultForum(channel.id);
       await editInteractionResponse(token, {
-        content: `${progress.toString()}\n\nTV forum set to <#${channel.id}>`,
+        content: `${progress.toString()}\n\nDefault forum set to <#${channel.id}>`,
       });
       return;
     }
 
-    // /setting all_episodes add/remove <channel>
-    if (group === "all_episodes") {
+    // /setting global_episode_broadcast add|remove channel:<x>
+    if (group === "global_episode_broadcast") {
       if (!TEXT_CHANNEL_TYPES.has(channel.type)) {
         await editInteractionResponse(token, {
           content:
@@ -179,22 +229,66 @@ export default class SettingCommand implements Command {
         await editInteractionResponse(token, { content: "Invalid mode" });
         return;
       }
+
+      const existing = await getGlobalDestinations("global_episode_broadcast");
+      const alreadyHas = existing.some((d) => d.channelId === channel.id);
+
+      // Idempotent no-ops
+      if (sub === "add" && alreadyHas) {
+        await editInteractionResponse(token, {
+          content: [
+            `Already broadcasting to <#${channel.id}>. No change.`,
+            "",
+            "__Broadcasting to:__",
+            renderList(existing.map((d) => d.channelId)),
+          ].join("\n"),
+        });
+        return;
+      }
+      if (sub === "remove" && !alreadyHas) {
+        await editInteractionResponse(token, {
+          content: [
+            `<#${channel.id}> wasn't on the broadcast list. No change.`,
+            "",
+            "__Broadcasting to:__",
+            renderList(existing.map((d) => d.channelId)),
+          ].join("\n"),
+        });
+        return;
+      }
+
       const progress = new ProgressMessageBuilder(token).addStep(
-        "Updating All Episodes channel list",
+        sub === "add"
+          ? `Adding <#${channel.id}> to the broadcast list`
+          : `Removing <#${channel.id}> from the broadcast list`,
       );
       await progress.sendNextStep();
+
       const destinations =
         sub === "add"
-          ? await addGlobalDestination("all_episodes", channel.id)
-          : await removeGlobalDestination("all_episodes", channel.id);
-      const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
+          ? await addGlobalDestination("global_episode_broadcast", channel.id)
+          : await removeGlobalDestination(
+              "global_episode_broadcast",
+              channel.id,
+            );
+
+      const headline =
+        sub === "add"
+          ? `Now broadcasting episodes to <#${channel.id}>.`
+          : `Stopped broadcasting to <#${channel.id}>.`;
+
       await editInteractionResponse(token, {
-        content: `${progress.toString()}\n\nUpdated All Episodes channel list.\n\n__New List__:\n${list}`,
+        content: [
+          `${progress.toString()}\n\n${headline}`,
+          "",
+          "__Broadcasting to:__",
+          renderList(destinations.map((d) => d.channelId)),
+        ].join("\n"),
       });
       return;
     }
 
-    // /setting morning_summary add_channel/remove_channel <channel>
+    // /setting morning_summary add|remove channel:<x>
     if (group === "morning_summary") {
       if (!TEXT_CHANNEL_TYPES.has(channel.type)) {
         await editInteractionResponse(token, {
@@ -203,37 +297,61 @@ export default class SettingCommand implements Command {
         });
         return;
       }
-      if (sub !== "add_channel" && sub !== "remove_channel") {
+      if (sub !== "add" && sub !== "remove") {
         await editInteractionResponse(token, { content: "Invalid mode" });
         return;
       }
+
       const existing = await getGlobalDestinations("morning_summary");
       const alreadyHas = existing.some((d) => d.channelId === channel.id);
 
-      if (sub === "add_channel" && alreadyHas) {
+      if (sub === "add" && alreadyHas) {
         await editInteractionResponse(token, {
-          content: "Channel already in list",
+          content: [
+            `Already sending the daily digest to <#${channel.id}>. No change.`,
+            "",
+            "__Digest going to:__",
+            renderList(existing.map((d) => d.channelId)),
+          ].join("\n"),
         });
         return;
       }
-      if (sub === "remove_channel" && !alreadyHas) {
+      if (sub === "remove" && !alreadyHas) {
         await editInteractionResponse(token, {
-          content: "Channel not in morning_summary list",
+          content: [
+            `<#${channel.id}> wasn't on the digest list. No change.`,
+            "",
+            "__Digest going to:__",
+            renderList(existing.map((d) => d.channelId)),
+          ].join("\n"),
         });
         return;
       }
 
       const progress = new ProgressMessageBuilder(token).addStep(
-        "Updating Morning Summary channel list",
+        sub === "add"
+          ? `Adding <#${channel.id}> to the digest list`
+          : `Removing <#${channel.id}> from the digest list`,
       );
       await progress.sendNextStep();
+
       const destinations =
-        sub === "add_channel"
+        sub === "add"
           ? await addGlobalDestination("morning_summary", channel.id)
           : await removeGlobalDestination("morning_summary", channel.id);
-      const list = destinations.map((d) => `<#${d.channelId}>`).join("\n");
+
+      const headline =
+        sub === "add"
+          ? `Now sending the daily digest to <#${channel.id}>.`
+          : `Stopped sending the daily digest to <#${channel.id}>.`;
+
       await editInteractionResponse(token, {
-        content: `${progress.toString()}\n\nUpdated Morning Summary channel list.\n\n__New List__:\n${list}`,
+        content: [
+          `${progress.toString()}\n\n${headline}`,
+          "",
+          "__Digest going to:__",
+          renderList(destinations.map((d) => d.channelId)),
+        ].join("\n"),
       });
       return;
     }

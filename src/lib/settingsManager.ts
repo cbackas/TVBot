@@ -5,9 +5,9 @@ import type { GlobalDestination } from "../database/types.js";
 
 export type { GlobalDestination };
 export type GlobalDestinationType =
-  | "all_episodes"
-  | "morning_summary"
-  | "tv_forum";
+  | "default_forum"
+  | "global_episode_broadcast"
+  | "morning_summary";
 
 export async function getGlobalDestinations(
   type: GlobalDestinationType,
@@ -48,19 +48,21 @@ export async function removeGlobalDestination(
 }
 
 export async function getDefaultForum(): Promise<string | null> {
-  const rows = await getGlobalDestinations("tv_forum");
+  const rows = await getGlobalDestinations("default_forum");
   return rows[0]?.channelId ?? null;
 }
 
 export async function setDefaultForum(channelId: string): Promise<void> {
   const db = getDb();
-  const existing = await getGlobalDestinations("tv_forum");
+  const existing = await getGlobalDestinations("default_forum");
   if (existing.length > 0) {
     await db
       .update(globalDestinations)
       .set({ channelId })
-      .where(eq(globalDestinations.type, "tv_forum"));
+      .where(eq(globalDestinations.type, "default_forum"));
   } else {
-    await db.insert(globalDestinations).values({ channelId, type: "tv_forum" });
+    await db
+      .insert(globalDestinations)
+      .values({ channelId, type: "default_forum" });
   }
 }

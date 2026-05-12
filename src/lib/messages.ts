@@ -1,6 +1,7 @@
 import type { APIEmbed, APIEmbedField } from "discord-api-types/v10";
 import type { Destination } from "../database/types.js";
 import type { SeriesExtendedRecord } from "../interfaces/tvdb.generated.js";
+import { handleChannelSendError } from "./discord.js";
 
 export async function sendDiscordEmbed(
   channelId: string,
@@ -20,9 +21,7 @@ export async function sendDiscordEmbed(
     },
   );
   if (!response.ok) {
-    throw new Error(
-      `Send embed to channel ${channelId} — Discord API error ${response.status}: ${await response.text()}`,
-    );
+    await handleChannelSendError(response, channelId, "Send embed to channel");
   }
 }
 

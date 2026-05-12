@@ -2,6 +2,7 @@ import moment from "moment-timezone";
 import { getDb } from "../database/db.js";
 import { showSchema } from "../database/types.js";
 import { assert } from "../utils.js";
+import { handleChannelSendError } from "./discord.js";
 import { getEnv } from "./env.js";
 import { getGlobalDestinations } from "./settingsManager.js";
 import type { Show } from "./shows.js";
@@ -24,7 +25,9 @@ export interface NotificationPayload {
  */
 export async function sendAiringMessages(): Promise<void> {
   const token = getEnv("DISCORD_TOKEN");
-  const globalDestinations = await getGlobalDestinations("all_episodes");
+  const globalDestinations = await getGlobalDestinations(
+    "global_episode_broadcast",
+  );
 
   const payloadMap = await getShowPayloads();
   for (const payload of payloadMap.values()) {
@@ -38,7 +41,7 @@ export async function sendAiringMessages(): Promise<void> {
  * @returns a map of payloads for each show that has an episode airing in the next x minutes
  */
 async function getShowPayloads(
-  minutes: number = 5,
+  minutes: number = 2,
 ): Promise<Map<string, NotificationPayload>> {
   const nowUtc = moment.utc();
   const minutesFromNow = nowUtc.clone().add(minutes, "minutes");
@@ -122,8 +125,10 @@ async function sendDiscordMessage(
     },
   );
   if (!response.ok) {
-    throw new Error(
-      `Send message to channel ${channelId} — Discord API error ${response.status}: ${await response.text()}`,
+    await handleChannelSendError(
+      response,
+      channelId,
+      "Send message to channel",
     );
   }
 }

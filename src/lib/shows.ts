@@ -1,7 +1,12 @@
 import { and, asc, eq, inArray, like, notInArray, or } from "drizzle-orm";
 import moment, { type Moment } from "moment-timezone";
 import { getDb } from "../database/db.js";
-import { episodes, showDestinations, shows } from "../database/schema.js";
+import {
+  episodes,
+  globalDestinations,
+  showDestinations,
+  shows,
+} from "../database/schema.js";
 import {
   type Destination,
   type Episode,
@@ -360,4 +365,58 @@ export async function pruneUnsubscribedShows(): Promise<void> {
 
   const count = result.meta.changes ?? 0;
   console.info(`Pruned shows ${count} with no destinations`);
+}
+
+/**
+ * Delete every destination row pointing at a channel we know is gone.
+ * Idempotent — safe to call on every Discord 10003 we see.
+ */
+export async function pruneDeadChannel(channelId: string): Promise<void> {
+  const db = getDb();
+  await db.batch([
+    db
+      .delete(showDestinations)
+      .where(eq(showDestinations.channelId, channelId)),
+    db
+      .delete(globalDestinations)
+      .where(eq(globalDestinations.channelId, channelId)),
+  ]);
+  console.info(`Pruned dead channel ${channelId}`);
+}
+
+/**
+ * Probe every distinct destination channelId against Discord; prune the dead ones.
+ * Catches channels deleted while the bot had no upcoming work to surface them.
+ */
+export async function sweepDeadChannels(token: string): Promise<void> {
+  const db = getDb();
+  const [showRows, globalRows] = await db.batch([
+    db
+      .selectDistinct({ channelId: showDestinations.channelId })
+      .from(showDestinations),
+    db
+      .selectDistinct({ channelId: globalDestinations.channelId })
+      .from(globalDestinations),
+  ]);
+  const distinct = new Set<string>([
+    ...showRows.map((r) => r.channelId),
+    ...globalRows.map((r) => r.channelId),
+  ]);
+
+  for (const channelId of distinct) {
+    try {
+      const response = await fetch(
+        `https://discord.com/api/v10/channels/${channelId}`,
+        { headers: { Authorization: `Bot ${token}` } },
+      );
+      if (response.ok) continue;
+      if (response.status !== 404) continue;
+      const body = (await response.json().catch(() => ({}))) as {
+        code?: number;
+      };
+      if (body.code === 10003) await pruneDeadChannel(channelId);
+    } catch (e) {
+      console.error(`Sweep: error probing channel ${channelId}`, e);
+    }
+  }
 }

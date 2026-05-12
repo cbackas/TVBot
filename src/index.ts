@@ -4,6 +4,14 @@ import handleCommand from "./interactions/command.handler.js";
 import handleComponent from "./interactions/component.handler.js";
 import handlePing from "./interactions/ping.handler.js";
 import { verifyInteraction } from "./interactions/verify.js";
+import { getEnv } from "./lib/env.js";
+import { sendAiringMessages } from "./lib/episodeNotifier.js";
+import { sendMorningSummary } from "./lib/morningSummary.js";
+import {
+  checkForAiringEpisodes,
+  pruneUnsubscribedShows,
+  sweepDeadChannels,
+} from "./lib/shows.js";
 
 const textDecoder = new TextDecoder();
 
@@ -47,6 +55,31 @@ async function fetch(
   return new Response("Not implemented", { status: 200 });
 }
 
+async function scheduled(
+  controller: ScheduledController,
+  _env: Env,
+  _ctx: ExecutionContext,
+): Promise<void> {
+  switch (controller.cron) {
+    case "* * * * *":
+      await sendAiringMessages();
+      return;
+    case "0 */4 * * *":
+      await checkForAiringEpisodes();
+      return;
+    case "0 5 * * *":
+      await pruneUnsubscribedShows();
+      await sweepDeadChannels(getEnv("DISCORD_TOKEN"));
+      return;
+    case "0 8 * * *":
+      await sendMorningSummary();
+      return;
+    default:
+      console.warn(`Unhandled cron trigger: ${controller.cron}`);
+  }
+}
+
 export default {
   fetch,
+  scheduled,
 } satisfies ExportedHandler<Env>;

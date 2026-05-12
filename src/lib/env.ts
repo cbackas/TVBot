@@ -7,8 +7,6 @@ const envKeys = {
   DISCORD_TOKEN: z.string(),
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_GUILD_ID: z.string(),
-  UPDATE_SHOWS: z.stringbool().optional().default(true),
-  HEALTHCHECK_URL: z.string().optional(),
   TVDB_API_KEY: z.string(),
   TVDB_USER_PIN: z.string(),
   NODE_ENV: z

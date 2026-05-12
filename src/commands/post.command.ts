@@ -51,7 +51,7 @@ export default class PostCommand implements Command {
           type: ApplicationCommandOptionType.Channel,
           name: "forum",
           description:
-            "Destination Discord forum for show post (defaults to value defined in `/setting tv_forum`)",
+            "Destination Discord forum for show post (defaults to value defined in `/setting default_forum`)",
           required: false,
           channel_types: [ChannelType.GuildForum],
         },
@@ -98,7 +98,7 @@ export default class PostCommand implements Command {
       if (forumId == null) {
         await editInteractionResponse(token, {
           content:
-            "No TV forum configured. Use `/setting tv_forum <channel>` to set the default TV forum, or provide a forum channel with the `forum` option.",
+            "No default forum configured. Use `/setting default_forum channel:<channel>` to set one, or provide a `forum` option.",
         });
         return;
       }

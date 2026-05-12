@@ -43,7 +43,15 @@
 					"database_name": "tvbot-db-prod",
 					"database_id": "694579ba-92f5-4a55-bce6-34c3ac6f6877"
 				}
-			]
+			],
+			"triggers": {
+				"crons": [
+					"* * * * *",
+					"0 */4 * * *",
+					"0 5 * * *",
+					"0 8 * * *"
+				]
+			}
 		}
 	}
 }

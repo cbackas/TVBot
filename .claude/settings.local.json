@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh api:*)",
+      "WebFetch(domain:docs.discord.com)",
+      "Bash(npm run biome*)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

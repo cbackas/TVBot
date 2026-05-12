@@ -44,7 +44,7 @@ export const globalDestinations = sqliteTable(
   {
     id: integer().primaryKey({ autoIncrement: true }),
     channelId: text("channel_id").notNull(),
-    type: text().notNull(), // "all_episodes" | "morning_summary"
+    type: text().notNull(), // "default_forum" | "global_episode_broadcast" | "morning_summary"
   },
   (table) => [
     unique().on(table.channelId, table.type),
