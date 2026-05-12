@@ -251,11 +251,8 @@ export default class LinkCommand implements Command {
             `Linked \`${series.name}\` to <#${targetChannelId}>`,
           );
         } catch (error) {
-          messages.push(
-            `Linked \`${series.name}\` but failed to send announcement embed`,
-          );
           console.error(
-            `Error sending embed for ${series.name} to channel ${targetChannelId}:`,
+            `Failed to send announcement embed for ${series.name} (${imdbId}) to channel ${targetChannelId}:`,
             error,
           );
         }
