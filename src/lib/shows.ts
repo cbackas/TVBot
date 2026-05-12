@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, like, notInArray, or } from "drizzle-orm";
+import { and, asc, eq, inArray, like, notInArray, or, sql } from "drizzle-orm";
 import moment, { type Moment } from "moment-timezone";
 import { getDb } from "../database/db.js";
 import {
@@ -174,13 +174,51 @@ export async function updateEpisodes(
       airDate: e.airDate.toISOString(),
     }));
 
-    if (insertValues.length === 0) {
-      await db.delete(episodes).where(eq(episodes.showId, showRow.id));
-    } else {
-      await db.batch([
-        db.delete(episodes).where(eq(episodes.showId, showRow.id)),
-        db.insert(episodes).values(insertValues),
-      ]);
+    // Upsert by (showId, season, number) so IDs and messageSent persist across refreshes.
+    // Then delete every existing episode that isn't in TVDB's current upcoming list —
+    // this catches both TVDB-cancelled future episodes and episodes that have aired since
+    // the last refresh. messageSent history is intentionally not retained.
+    const existing = await db
+      .select({
+        id: episodes.id,
+        season: episodes.season,
+        number: episodes.number,
+      })
+      .from(episodes)
+      .where(eq(episodes.showId, showRow.id));
+
+    const incomingKeys = new Set(
+      insertValues.map((v) => `${v.season}-${v.number}`),
+    );
+    const idsToDelete = existing
+      .filter((e) => !incomingKeys.has(`${e.season}-${e.number}`))
+      .map((e) => e.id);
+
+    const upsertOp =
+      insertValues.length > 0
+        ? db
+            .insert(episodes)
+            .values(insertValues)
+            .onConflictDoUpdate({
+              target: [episodes.showId, episodes.season, episodes.number],
+              set: {
+                title: sql`excluded.title`,
+                airDate: sql`excluded.air_date`,
+              },
+            })
+        : null;
+
+    const deleteOp =
+      idsToDelete.length > 0
+        ? db.delete(episodes).where(inArray(episodes.id, idsToDelete))
+        : null;
+
+    if (upsertOp != null && deleteOp != null) {
+      await db.batch([upsertOp, deleteOp]);
+    } else if (upsertOp != null) {
+      await upsertOp;
+    } else if (deleteOp != null) {
+      await deleteOp;
     }
   }
 
