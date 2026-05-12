@@ -14,7 +14,7 @@ import { getChannelOption, getSubcommand } from "../lib/interactionOptions.js";
 import {
   getAllShows,
   pruneUnsubscribedShows,
-  removeSubscription,
+  removeSubscriptions,
 } from "../lib/shows.js";
 import type { Command } from "./index.js";
 
@@ -196,32 +196,35 @@ export default class UnlinkCommand implements Command {
     // Handle select menu submission
     const values = "values" in interaction.data ? interaction.data.values : [];
 
-    const success: string[] = [];
-    const failed: string[] = [];
-    for (const imdbId of values) {
-      try {
-        const show = await removeSubscription(imdbId, channelId);
-        success.push(show.name);
-      } catch (error) {
-        failed.push(imdbId);
-        console.error(`Failed to unlink ${imdbId}:`, error);
-      }
-    }
+    const allShows = await getAllShows();
+    const valueSet = new Set(values);
+    const selectedNames = allShows
+      .filter(
+        (s) =>
+          valueSet.has(s.imdbId) &&
+          s.destinations.some((d) => d.channelId === channelId),
+      )
+      .map((s) => s.name)
+      .sort((a, b) => a.localeCompare(b));
 
-    await pruneUnsubscribedShows();
+    let content: string;
+    try {
+      await removeSubscriptions(values, channelId);
+      await pruneUnsubscribedShows();
 
-    const lines = [
-      `Unlinked ${success.length} shows from <#${channelId}>:`,
-      ...success.map((s) => `- ${s}`),
-    ];
-    if (failed.length > 0) {
-      lines.push(
+      content = [
+        `Unlinked ${selectedNames.length} shows from <#${channelId}>:`,
+        ...selectedNames.map((n) => `- ${n}`),
+      ].join("\n");
+    } catch (error) {
+      console.error("Failed to unlink shows:", error);
+      content = [
+        `Failed to unlink shows from <#${channelId}>:`,
+        ...selectedNames.map((n) => `- ${n}`),
         "",
-        `Failed to unlink ${failed.length} show(s):`,
-        ...failed.map((id) => `- \`${id}\``),
-      );
+        "Please try again.",
+      ].join("\n");
     }
-    const content = lines.join("\n");
 
     return Response.json({
       type: InteractionResponseType.UPDATE_MESSAGE,

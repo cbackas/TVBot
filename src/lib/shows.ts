@@ -293,39 +293,33 @@ export async function createNewSubscription(
 }
 
 /**
- * Unsubscribe a channel from notifications for a show
- * @param imdbId imdbID for the show to remove the subscription from
- * @param channelId channel to unsubscribe the show from
- * @returns the show that was unsubscribed from
+ * Unsubscribe a channel from notifications for one or more shows
+ * @param imdbIds imdb IDs for the shows to remove the subscription from
+ * @param channelId channel to unsubscribe the shows from
  */
-export async function removeSubscription(
-  imdbId: string,
+export async function removeSubscriptions(
+  imdbIds: string[],
   channelId: string,
-): Promise<Show> {
+): Promise<void> {
+  if (imdbIds.length === 0) return;
   const db = getDb();
 
-  const showRow = await db
+  const showRows = await db
     .select({ id: shows.id })
     .from(shows)
-    .where(eq(shows.imdbId, imdbId))
-    .get();
+    .where(inArray(shows.imdbId, imdbIds));
 
-  if (showRow != null) {
-    await db
-      .delete(showDestinations)
-      .where(
-        and(
-          eq(showDestinations.showId, showRow.id),
-          eq(showDestinations.channelId, channelId),
-        ),
-      );
-  }
+  if (showRows.length === 0) return;
 
-  const show = await getShowByImdbId(imdbId);
-  if (show == null) {
-    throw new Error(`Show ${imdbId} not found`);
-  }
-  return show;
+  await db.delete(showDestinations).where(
+    and(
+      inArray(
+        showDestinations.showId,
+        showRows.map((r) => r.id),
+      ),
+      eq(showDestinations.channelId, channelId),
+    ),
+  );
 }
 
 /**
