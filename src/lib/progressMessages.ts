@@ -6,9 +6,11 @@ interface Step {
 }
 
 export const StepStatus = {
-  PENDING: "🔴" as const,
-  IN_PROGRESS: "🟡" as const,
-  COMPLETE: "🟢" as const,
+  PENDING: "🟦" as const,
+  IN_PROGRESS: "🟨" as const,
+  COMPLETE: "🟩" as const,
+  ERROR: "🟥" as const,
+  SKIPPED: "🟧" as const,
 } as const;
 
 export class ProgressMessageBuilder {
@@ -56,6 +58,26 @@ export class ProgressMessageBuilder {
 
     step.status = status;
 
+    return this;
+  };
+
+  setCurrentStatus = (status: Step["status"]): ProgressMessageBuilder => {
+    if (this.currentStep === 0) return this;
+    this.setStatus(this.currentStep, status);
+    if (status === StepStatus.ERROR) {
+      this.skipRemaining();
+    }
+    return this;
+  };
+
+  /**
+   * Mark every step after the current one as SKIPPED.
+   * Useful when an early step short-circuits the rest of the flow.
+   */
+  skipRemaining = (): ProgressMessageBuilder => {
+    for (let i = this.currentStep + 1; i <= this.totalSteps; i++) {
+      this.setStatus(i, StepStatus.SKIPPED);
+    }
     return this;
   };
 

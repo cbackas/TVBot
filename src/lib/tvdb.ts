@@ -57,9 +57,8 @@ export async function getSeriesByImdbId(
   } else if (data.season?.seriesId != null) {
     series = await getSeries(data.season.seriesId);
   } else {
-    console.warn(
-      `TVDB search hit for ${imdbId} has no series.id or season.seriesId`,
-      data,
+    console.error(
+      `TVDB search hit for ${imdbId} has no series.id or season.seriesId, keys=${Object.keys(data).join(",")}`,
     );
     return undefined;
   }
@@ -116,22 +115,18 @@ export async function getSeries(
   );
 
   if (!response.ok) {
-    const body = await response.text();
-    console.error(`TVDB series/${tvdbId}/extended failed:`, {
-      url: response.url,
-      status: response.status,
-      data: body,
-    });
+    console.error(
+      `TVDB series/${tvdbId}/extended failed status=${response.status}`,
+    );
     throw new Error(
-      `TVDB series/${tvdbId}/extended returned ${response.status}: ${body}`,
+      `TVDB series/${tvdbId}/extended returned ${response.status}`,
     );
   }
 
   const data: { data?: SeriesExtendedRecord } = await response.json();
   if (data.data == null) {
-    console.warn(
-      `TVDB series/${tvdbId}/extended returned ok but no data`,
-      data,
+    console.error(
+      `TVDB series/${tvdbId}/extended returned ok but no data, keys=${Object.keys(data).join(",")}`,
     );
   }
   return data.data;
@@ -145,23 +140,19 @@ async function searchSeriesByImdbId(
   });
 
   if (!response.ok) {
-    const body = await response.text();
-    console.error(`TVDB search/remoteid/${imdbId} failed:`, {
-      url: response.url,
-      status: response.status,
-      data: body,
-    });
+    console.error(
+      `TVDB search/remoteid/${imdbId} failed status=${response.status}`,
+    );
     throw new Error(
-      `TVDB search/remoteid/${imdbId} returned ${response.status}: ${body}`,
+      `TVDB search/remoteid/${imdbId} returned ${response.status}`,
     );
   }
 
   const data: { data?: SearchByRemoteIdResult[] } = await response.json();
   const first = data.data?.at(0);
   if (first == null) {
-    console.warn(
-      `TVDB search/remoteid returned empty result for ${imdbId}`,
-      data,
+    console.error(
+      `TVDB search/remoteid empty for ${imdbId}, data length=${data.data?.length ?? 0}`,
     );
   }
   return first;

@@ -15,7 +15,7 @@ import {
   getSubcommand,
 } from "../lib/interactionOptions.js";
 import { buildShowEmbed, sendDiscordEmbed } from "../lib/messages.js";
-import { ProgressMessageBuilder } from "../lib/progressMessages.js";
+import { ProgressMessageBuilder, StepStatus } from "../lib/progressMessages.js";
 import {
   createNewSubscription,
   getAllShows,
@@ -159,35 +159,46 @@ export default class LinkCommand implements Command {
       await progress.sendNextStep();
       const allShows = await getAllShows();
 
+      const needsFetch: string[] = [];
+      for (const imdbId of imdbIds) {
+        const existing = allShows.find((s) => s.imdbId === imdbId);
+        const alreadyLinked = existing?.destinations.some(
+          (d) => d.channelId === targetChannelId,
+        );
+        if (alreadyLinked && existing) {
+          messages.push(
+            `Show \`${existing.name}\` is already linked to <#${targetChannelId}>`,
+          );
+        } else {
+          needsFetch.push(imdbId);
+        }
+      }
+
+      if (needsFetch.length === 0) {
+        progress.setCurrentStatus(StepStatus.COMPLETE).skipRemaining();
+        await editInteractionResponse(token, {
+          content: `${progress.toString()}\n\n${messages.join("\n")}`,
+        });
+        return;
+      }
+
       // Step 2: Searching for shows
       await progress.sendNextStep();
       const found: { imdbId: string; series: SeriesExtendedRecord }[] = [];
 
-      for (const imdbId of imdbIds) {
+      for (const imdbId of needsFetch) {
         const series = await getSeriesByImdbId(imdbId);
         if (series === undefined) {
           messages.push(`No TVDB match for IMDB ID \`${imdbId}\``);
           continue;
         }
-
-        const existingShow = allShows.find((s) => s.imdbId === imdbId);
-        const alreadyLinked = existingShow?.destinations.some(
-          (d) => d.channelId === targetChannelId,
-        );
-
-        if (alreadyLinked) {
-          messages.push(
-            `Show \`${series.name}\` is already linked to <#${targetChannelId}>`,
-          );
-          continue;
-        }
-
         found.push({ imdbId, series });
       }
 
       if (found.length === 0) {
+        progress.setCurrentStatus(StepStatus.ERROR);
         await editInteractionResponse(token, {
-          content: `${progress.toString()}\n\nError: No TVDB matches found for IMDB ID(s) ${imdbIdString}`,
+          content: `${progress.toString()}\n\n${messages.join("\n")}`,
         });
         return;
       }
@@ -261,6 +272,7 @@ export default class LinkCommand implements Command {
       console.error("Error in link command:", error);
       const errorMessage =
         error instanceof Error ? error.message : String(error);
+      progress.setCurrentStatus(StepStatus.ERROR);
       await editInteractionResponse(token, {
         content: `${progress.toString()}\n\nAn error occurred while linking shows: ${errorMessage}`,
       });
