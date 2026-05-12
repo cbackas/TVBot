@@ -37,13 +37,37 @@ export default class SearchCommand implements Command {
     const query = getStringOption(interaction, "query") ?? "";
     const token = interaction.token;
 
-    let imdbId = query.toLowerCase().startsWith("tt") ? query : undefined;
+    try {
+      let imdbId = query.toLowerCase().startsWith("tt") ? query : undefined;
 
-    if (imdbId !== undefined) {
-      const series = await getSeriesByImdbId(imdbId);
-      if (series === undefined) {
+      if (imdbId !== undefined) {
+        const series = await getSeriesByImdbId(imdbId);
+        if (series === undefined) {
+          await editInteractionResponse(token, {
+            content: `No TVDB match for IMDB ID \`${imdbId}\``,
+          });
+          return;
+        }
+
+        const show = await getShowByImdbId(imdbId);
         await editInteractionResponse(token, {
-          content: `No show found with IMDB ID \`${imdbId}\``,
+          embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
+        });
+        return;
+      }
+
+      const series = await getSeriesByName(query);
+      if (series == null) {
+        await editInteractionResponse(token, {
+          content: "Show not found",
+        });
+        return;
+      }
+
+      imdbId = series.remoteIds.find((r) => r.type === 2)?.id;
+      if (imdbId == null) {
+        await editInteractionResponse(token, {
+          content: "Show not found",
         });
         return;
       }
@@ -52,29 +76,14 @@ export default class SearchCommand implements Command {
       await editInteractionResponse(token, {
         embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
       });
-      return;
-    }
-
-    const series = await getSeriesByName(query);
-    if (series == null) {
+    } catch (error) {
+      console.error("Error in search command:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       await editInteractionResponse(token, {
-        content: "Show not found",
+        content: `An error occurred while searching: ${errorMessage}`,
       });
-      return;
     }
-
-    imdbId = series.remoteIds.find((r) => r.type === 2)?.id;
-    if (imdbId == null) {
-      await editInteractionResponse(token, {
-        content: "Show not found",
-      });
-      return;
-    }
-
-    const show = await getShowByImdbId(imdbId);
-    await editInteractionResponse(token, {
-      embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
-    });
   }
 
   async autoComplete(

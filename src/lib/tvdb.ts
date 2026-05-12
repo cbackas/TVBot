@@ -52,10 +52,16 @@ export async function getSeriesByImdbId(
   }
 
   let series: SeriesExtendedRecord | undefined;
-  if (data?.series?.id != null) {
-    series = await getSeries(data?.series.id);
-  } else if (data?.season?.seriesId != null) {
-    series = await getSeries(data?.season?.seriesId);
+  if (data.series?.id != null) {
+    series = await getSeries(data.series.id);
+  } else if (data.season?.seriesId != null) {
+    series = await getSeries(data.season.seriesId);
+  } else {
+    console.warn(
+      `TVDB search hit for ${imdbId} has no series.id or season.seriesId`,
+      data,
+    );
+    return undefined;
   }
 
   if (series?.originalLanguage == null || series.originalLanguage === "eng")
@@ -98,58 +104,67 @@ function translateSeries(series: SeriesExtendedRecord): SeriesExtendedRecord {
 export async function getSeries(
   tvdbId: number,
 ): Promise<SeriesExtendedRecord | undefined> {
-  try {
-    const params = new URLSearchParams({
-      short: "true",
-      meta: "episodes,translations",
+  const params = new URLSearchParams({
+    short: "true",
+    meta: "episodes,translations",
+  });
+  const response = await fetch(
+    `${baseURL}/series/${tvdbId}/extended?${params}`,
+    {
+      headers: await getAuthToken(),
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.text();
+    console.error(`TVDB series/${tvdbId}/extended failed:`, {
+      url: response.url,
+      status: response.status,
+      data: body,
     });
-    const response = await fetch(
-      `${baseURL}/series/${tvdbId}/extended?${params}`,
-      {
-        headers: await getAuthToken(),
-      },
+    throw new Error(
+      `TVDB series/${tvdbId}/extended returned ${response.status}: ${body}`,
     );
-
-    if (!response.ok) {
-      console.error(`Error Getting Extended Show Data:`, {
-        url: response.url,
-        status: response.status,
-        data: await response.text(),
-      });
-      return undefined;
-    }
-
-    const data: { data?: SeriesExtendedRecord } = await response.json();
-    return data.data;
-  } catch (error) {
-    console.error(`Unexpected Error Getting Extended Show Data:`, error);
   }
-  return undefined;
+
+  const data: { data?: SeriesExtendedRecord } = await response.json();
+  if (data.data == null) {
+    console.warn(
+      `TVDB series/${tvdbId}/extended returned ok but no data`,
+      data,
+    );
+  }
+  return data.data;
 }
 
 async function searchSeriesByImdbId(
   imdbId: string,
 ): Promise<SearchByRemoteIdResult | undefined> {
-  try {
-    const response = await fetch(`${baseURL}/search/remoteid/${imdbId}`, {
-      headers: await getAuthToken(),
+  const response = await fetch(`${baseURL}/search/remoteid/${imdbId}`, {
+    headers: await getAuthToken(),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    console.error(`TVDB search/remoteid/${imdbId} failed:`, {
+      url: response.url,
+      status: response.status,
+      data: body,
     });
-
-    if (!response.ok) {
-      console.error(`Error Searching Series by IMDB ID:`, {
-        url: response.url,
-        status: response.status,
-        data: await response.text(),
-      });
-      return undefined;
-    }
-
-    const data: { data?: SearchByRemoteIdResult[] } = await response.json();
-    return data.data?.at(0);
-  } catch (error) {
-    console.error(`Unexpected Error Searching Series by IMDB ID:`, error);
+    throw new Error(
+      `TVDB search/remoteid/${imdbId} returned ${response.status}: ${body}`,
+    );
   }
-  return undefined;
+
+  const data: { data?: SearchByRemoteIdResult[] } = await response.json();
+  const first = data.data?.at(0);
+  if (first == null) {
+    console.warn(
+      `TVDB search/remoteid returned empty result for ${imdbId}`,
+      data,
+    );
+  }
+  return first;
 }
 
 async function searchSeriesByName(

@@ -166,7 +166,7 @@ export default class LinkCommand implements Command {
       for (const imdbId of imdbIds) {
         const series = await getSeriesByImdbId(imdbId);
         if (series === undefined) {
-          messages.push(`No show found with IMDB ID \`${imdbId}\``);
+          messages.push(`No TVDB match for IMDB ID \`${imdbId}\``);
           continue;
         }
 
@@ -187,7 +187,7 @@ export default class LinkCommand implements Command {
 
       if (found.length === 0) {
         await editInteractionResponse(token, {
-          content: `${progress.toString()}\n\nError: No shows found with IMDB ID(s) ${imdbIdString}`,
+          content: `${progress.toString()}\n\nError: No TVDB matches found for IMDB ID(s) ${imdbIdString}`,
         });
         return;
       }
