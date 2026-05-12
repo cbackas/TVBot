@@ -4,6 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tvbot",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-12-05",
 	"observability": {
