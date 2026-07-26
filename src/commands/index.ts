@@ -27,6 +27,7 @@ import PingCommand from "./ping.command.js";
 import PostCommand from "./post.command.js";
 import SearchCommand from "./search.command.js";
 import SettingCommand from "./setting.command.js";
+import TriggerCommand from "./trigger.command.js";
 import UnlinkCommand from "./unlink.command.js";
 import UpcomingCommand from "./upcoming.command.js";
 
@@ -39,6 +40,7 @@ for (const cmd of [
   new UpcomingCommand(),
   new SettingCommand(),
   new PostCommand(),
+  new TriggerCommand(),
 ]) {
   commands.set(cmd.name, cmd);
 }
