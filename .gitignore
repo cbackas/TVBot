@@ -8,6 +8,8 @@ data/
 *.db
 *.db-journal
 
+scripts/mongo-migration.sql
+
 # Mac
 .DS_Store
 
