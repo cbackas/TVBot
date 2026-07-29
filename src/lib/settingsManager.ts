@@ -11,6 +11,27 @@ export type GlobalDestinationType =
 
 export async function getGlobalDestinations(
   type: GlobalDestinationType,
+  guildId: string,
+): Promise<GlobalDestination[]> {
+  const db = getDb();
+  return db
+    .select()
+    .from(globalDestinations)
+    .where(
+      and(
+        eq(globalDestinations.type, type),
+        eq(globalDestinations.guildId, guildId),
+      ),
+    );
+}
+
+/**
+ * Every destination of a type across all guilds. Used by scheduled jobs that
+ * fan out per guild (broadcast, morning digest) rather than serving one guild's
+ * interaction.
+ */
+export async function getAllGlobalDestinations(
+  type: GlobalDestinationType,
 ): Promise<GlobalDestination[]> {
   const db = getDb();
   return db
@@ -22,18 +43,20 @@ export async function getGlobalDestinations(
 export async function addGlobalDestination(
   type: GlobalDestinationType,
   channelId: string,
+  guildId: string,
 ): Promise<GlobalDestination[]> {
   const db = getDb();
   await db
     .insert(globalDestinations)
-    .values({ channelId, type })
+    .values({ channelId, type, guildId })
     .onConflictDoNothing();
-  return getGlobalDestinations(type);
+  return getGlobalDestinations(type, guildId);
 }
 
 export async function removeGlobalDestination(
   type: GlobalDestinationType,
   channelId: string,
+  guildId: string,
 ): Promise<GlobalDestination[]> {
   const db = getDb();
   await db
@@ -42,27 +65,36 @@ export async function removeGlobalDestination(
       and(
         eq(globalDestinations.channelId, channelId),
         eq(globalDestinations.type, type),
+        eq(globalDestinations.guildId, guildId),
       ),
     );
-  return getGlobalDestinations(type);
+  return getGlobalDestinations(type, guildId);
 }
 
-export async function getDefaultForum(): Promise<string | null> {
-  const rows = await getGlobalDestinations("default_forum");
+export async function getDefaultForum(guildId: string): Promise<string | null> {
+  const rows = await getGlobalDestinations("default_forum", guildId);
   return rows[0]?.channelId ?? null;
 }
 
-export async function setDefaultForum(channelId: string): Promise<void> {
+export async function setDefaultForum(
+  channelId: string,
+  guildId: string,
+): Promise<void> {
   const db = getDb();
-  const existing = await getGlobalDestinations("default_forum");
+  const existing = await getGlobalDestinations("default_forum", guildId);
   if (existing.length > 0) {
     await db
       .update(globalDestinations)
       .set({ channelId })
-      .where(eq(globalDestinations.type, "default_forum"));
+      .where(
+        and(
+          eq(globalDestinations.type, "default_forum"),
+          eq(globalDestinations.guildId, guildId),
+        ),
+      );
   } else {
     await db
       .insert(globalDestinations)
-      .values({ channelId, type: "default_forum" });
+      .values({ channelId, type: "default_forum", guildId });
   }
 }

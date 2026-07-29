@@ -15,6 +15,11 @@ if (!MONGODB_URI) {
 // Defaults to local for safety.
 const REMOTE = process.env.MIGRATION_REMOTE === "true";
 
+// The Mongo bot ran in a single Discord server, so every destination it holds
+// belongs to that guild. Stamp it onto the guild-scoped rows in D1. Override
+// with MIGRATION_GUILD_ID if migrating a different source server.
+const GUILD_ID = process.env.MIGRATION_GUILD_ID ?? "1054158011742044160";
+
 interface MongoEpisode {
 	season: number;
 	number: number;
@@ -134,7 +139,7 @@ async function main(): Promise<void> {
 					continue;
 				}
 				lines.push(
-					`INSERT INTO show_destinations (show_id, channel_id, forum_id) VALUES (${showRef}, ${sqlString(dest.channelId)}, ${sqlNullable(dest.forumId)}) ON CONFLICT(show_id, channel_id) DO NOTHING;`,
+					`INSERT INTO show_destinations (show_id, guild_id, channel_id, forum_id) VALUES (${showRef}, ${sqlString(GUILD_ID)}, ${sqlString(dest.channelId)}, ${sqlNullable(dest.forumId)}) ON CONFLICT(show_id, channel_id) DO NOTHING;`,
 				);
 				counts.showDestinations++;
 			}
@@ -149,7 +154,7 @@ async function main(): Promise<void> {
 			for (const dest of settings.allEpisodes ?? []) {
 				if (!dest.channelId) continue;
 				lines.push(
-					`INSERT INTO global_destinations (channel_id, type) VALUES (${sqlString(dest.channelId)}, 'global_episode_broadcast') ON CONFLICT(channel_id, type) DO NOTHING;`,
+					`INSERT INTO global_destinations (guild_id, channel_id, type) VALUES (${sqlString(GUILD_ID)}, ${sqlString(dest.channelId)}, 'global_episode_broadcast') ON CONFLICT(guild_id, channel_id, type) DO NOTHING;`,
 				);
 				counts.globalDestinations++;
 			}
@@ -163,13 +168,13 @@ async function main(): Promise<void> {
 					);
 				}
 				lines.push(
-					`INSERT INTO global_destinations (channel_id, type) VALUES (${sqlString(dest.channelId)}, 'morning_summary') ON CONFLICT(channel_id, type) DO NOTHING;`,
+					`INSERT INTO global_destinations (guild_id, channel_id, type) VALUES (${sqlString(GUILD_ID)}, ${sqlString(dest.channelId)}, 'morning_summary') ON CONFLICT(guild_id, channel_id, type) DO NOTHING;`,
 				);
 				counts.globalDestinations++;
 			}
 			if (settings.defaultForum) {
 				lines.push(
-					`INSERT INTO global_destinations (channel_id, type) VALUES (${sqlString(settings.defaultForum)}, 'default_forum') ON CONFLICT(channel_id, type) DO NOTHING;`,
+					`INSERT INTO global_destinations (guild_id, channel_id, type) VALUES (${sqlString(GUILD_ID)}, ${sqlString(settings.defaultForum)}, 'default_forum') ON CONFLICT(guild_id, channel_id, type) DO NOTHING;`,
 				);
 				counts.globalDestinations++;
 			}

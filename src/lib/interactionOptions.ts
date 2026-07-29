@@ -2,12 +2,26 @@ import {
   type APIApplicationCommandAutocompleteInteraction,
   type APIApplicationCommandInteraction,
   type APIApplicationCommandInteractionDataOption,
+  type APIMessageComponentInteraction,
   ApplicationCommandOptionType,
 } from "discord-api-types/v10";
 
 type AnyCommandInteraction =
   | APIApplicationCommandInteraction
   | APIApplicationCommandAutocompleteInteraction;
+
+/**
+ * The guild an interaction came from. All of our commands are Guild-context
+ * only (`contexts: [InteractionContextType.Guild]`), so this is always present
+ * in practice — but Discord types it optional, so callers must handle null.
+ */
+export function getGuildId(
+  interaction:
+    | APIApplicationCommandInteraction
+    | APIMessageComponentInteraction,
+): string | null {
+  return interaction.guild_id ?? null;
+}
 
 function getOptions(
   interaction: AnyCommandInteraction,

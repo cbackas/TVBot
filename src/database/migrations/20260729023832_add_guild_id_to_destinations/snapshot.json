@@ -1,0 +1,436 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "662f81bd-6056-4f84-ba41-72e5c245b0b3",
+  "prevIds": [
+    "9383b90e-b01f-434c-9591-e64c8f8c01e5"
+  ],
+  "ddl": [
+    {
+      "name": "episodes",
+      "entityType": "tables"
+    },
+    {
+      "name": "global_destinations",
+      "entityType": "tables"
+    },
+    {
+      "name": "show_destinations",
+      "entityType": "tables"
+    },
+    {
+      "name": "shows",
+      "entityType": "tables"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "show_id",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "season",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "number",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "air_date",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "message_sent",
+      "entityType": "columns",
+      "table": "episodes"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "global_destinations"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'1054158011742044160'",
+      "generated": null,
+      "name": "guild_id",
+      "entityType": "columns",
+      "table": "global_destinations"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "channel_id",
+      "entityType": "columns",
+      "table": "global_destinations"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "global_destinations"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "show_destinations"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "show_id",
+      "entityType": "columns",
+      "table": "show_destinations"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'1054158011742044160'",
+      "generated": null,
+      "name": "guild_id",
+      "entityType": "columns",
+      "table": "show_destinations"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "channel_id",
+      "entityType": "columns",
+      "table": "show_destinations"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "forum_id",
+      "entityType": "columns",
+      "table": "show_destinations"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "shows"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "imdb_id",
+      "entityType": "columns",
+      "table": "shows"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "tvdb_id",
+      "entityType": "columns",
+      "table": "shows"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "shows"
+    },
+    {
+      "columns": [
+        "show_id"
+      ],
+      "tableTo": "shows",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_episodes_show_id_shows_id_fk",
+      "entityType": "fks",
+      "table": "episodes"
+    },
+    {
+      "columns": [
+        "show_id"
+      ],
+      "tableTo": "shows",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_show_destinations_show_id_shows_id_fk",
+      "entityType": "fks",
+      "table": "show_destinations"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "episodes_pk",
+      "table": "episodes",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "global_destinations_pk",
+      "table": "global_destinations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "show_destinations_pk",
+      "table": "show_destinations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "shows_pk",
+      "table": "shows",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "show_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_episodes_show_id",
+      "entityType": "indexes",
+      "table": "episodes"
+    },
+    {
+      "columns": [
+        {
+          "value": "air_date",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_episodes_air_date",
+      "entityType": "indexes",
+      "table": "episodes"
+    },
+    {
+      "columns": [
+        {
+          "value": "message_sent",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_episodes_message_sent",
+      "entityType": "indexes",
+      "table": "episodes"
+    },
+    {
+      "columns": [
+        {
+          "value": "guild_id",
+          "isExpression": false
+        },
+        {
+          "value": "type",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_global_destinations_guild_type",
+      "entityType": "indexes",
+      "table": "global_destinations"
+    },
+    {
+      "columns": [
+        {
+          "value": "show_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_show_destinations_show_id",
+      "entityType": "indexes",
+      "table": "show_destinations"
+    },
+    {
+      "columns": [
+        {
+          "value": "channel_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_show_destinations_channel_id",
+      "entityType": "indexes",
+      "table": "show_destinations"
+    },
+    {
+      "columns": [
+        {
+          "value": "guild_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "idx_show_destinations_guild_id",
+      "entityType": "indexes",
+      "table": "show_destinations"
+    },
+    {
+      "columns": [
+        "show_id",
+        "season",
+        "number"
+      ],
+      "nameExplicit": false,
+      "name": "episodes_show_id_season_number_unique",
+      "entityType": "uniques",
+      "table": "episodes"
+    },
+    {
+      "columns": [
+        "guild_id",
+        "channel_id",
+        "type"
+      ],
+      "nameExplicit": false,
+      "name": "global_destinations_guild_id_channel_id_type_unique",
+      "entityType": "uniques",
+      "table": "global_destinations"
+    },
+    {
+      "columns": [
+        "show_id",
+        "channel_id"
+      ],
+      "nameExplicit": false,
+      "name": "show_destinations_show_id_channel_id_unique",
+      "entityType": "uniques",
+      "table": "show_destinations"
+    },
+    {
+      "columns": [
+        "imdb_id"
+      ],
+      "nameExplicit": false,
+      "name": "shows_imdb_id_unique",
+      "entityType": "uniques",
+      "table": "shows"
+    }
+  ],
+  "renames": []
+}

@@ -43,12 +43,13 @@ export const globalDestinations = sqliteTable(
   "global_destinations",
   {
     id: integer().primaryKey({ autoIncrement: true }),
+    guildId: text("guild_id").notNull(),
     channelId: text("channel_id").notNull(),
     type: text().notNull(), // "default_forum" | "global_episode_broadcast" | "morning_summary"
   },
   (table) => [
-    unique().on(table.channelId, table.type),
-    index("idx_global_destinations_type").on(table.type),
+    unique().on(table.guildId, table.channelId, table.type),
+    index("idx_global_destinations_guild_type").on(table.guildId, table.type),
   ],
 );
 
@@ -57,6 +58,7 @@ export const showDestinations = sqliteTable(
   {
     id: integer().primaryKey({ autoIncrement: true }),
     showId: integer("show_id").notNull(),
+    guildId: text("guild_id").notNull(),
     channelId: text("channel_id").notNull(),
     forumId: text("forum_id"),
   },
@@ -68,5 +70,6 @@ export const showDestinations = sqliteTable(
     unique().on(table.showId, table.channelId),
     index("idx_show_destinations_show_id").on(table.showId),
     index("idx_show_destinations_channel_id").on(table.channelId),
+    index("idx_show_destinations_guild_id").on(table.guildId),
   ],
 );

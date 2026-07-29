@@ -12,6 +12,7 @@ import {
   textDisplayComponents,
 } from "../lib/discord.js";
 import {
+  getGuildId,
   getResolvedChannel,
   getSubcommand,
   getSubcommandGroup,
@@ -157,12 +158,20 @@ export default class SettingCommand implements Command {
     const group = getSubcommandGroup(interaction);
     const sub = getSubcommand(interaction);
 
+    const guildId = getGuildId(interaction);
+    if (guildId == null) {
+      await editInteractionResponse(token, {
+        content: "This command can only be used in a server.",
+      });
+      return;
+    }
+
     // /setting view
     if (group == null && sub === "view") {
       const [forumId, broadcast, digest] = await Promise.all([
-        getDefaultForum(),
-        getGlobalDestinations("global_episode_broadcast"),
-        getGlobalDestinations("morning_summary"),
+        getDefaultForum(guildId),
+        getGlobalDestinations("global_episode_broadcast", guildId),
+        getGlobalDestinations("morning_summary", guildId),
       ]);
 
       const body = [
@@ -209,7 +218,7 @@ export default class SettingCommand implements Command {
         `Setting default forum to ${channelLabel}`,
       );
       await progress.sendNextStep();
-      await setDefaultForum(channel.id);
+      await setDefaultForum(channel.id, guildId);
       progress.setCurrentStatus(StepStatus.COMPLETE);
       await editInteractionResponse(token, {
         content: `${progress.toString()}\n\nDefault forum set to <#${channel.id}>`,
@@ -231,7 +240,10 @@ export default class SettingCommand implements Command {
         return;
       }
 
-      const existing = await getGlobalDestinations("global_episode_broadcast");
+      const existing = await getGlobalDestinations(
+        "global_episode_broadcast",
+        guildId,
+      );
       const alreadyHas = existing.some((d) => d.channelId === channel.id);
 
       // Idempotent no-ops
@@ -267,10 +279,15 @@ export default class SettingCommand implements Command {
 
       const destinations =
         sub === "add"
-          ? await addGlobalDestination("global_episode_broadcast", channel.id)
+          ? await addGlobalDestination(
+              "global_episode_broadcast",
+              channel.id,
+              guildId,
+            )
           : await removeGlobalDestination(
               "global_episode_broadcast",
               channel.id,
+              guildId,
             );
 
       const headline =
@@ -304,7 +321,7 @@ export default class SettingCommand implements Command {
         return;
       }
 
-      const existing = await getGlobalDestinations("morning_summary");
+      const existing = await getGlobalDestinations("morning_summary", guildId);
       const alreadyHas = existing.some((d) => d.channelId === channel.id);
 
       if (sub === "add" && alreadyHas) {
@@ -339,8 +356,12 @@ export default class SettingCommand implements Command {
 
       const destinations =
         sub === "add"
-          ? await addGlobalDestination("morning_summary", channel.id)
-          : await removeGlobalDestination("morning_summary", channel.id);
+          ? await addGlobalDestination("morning_summary", channel.id, guildId)
+          : await removeGlobalDestination(
+              "morning_summary",
+              channel.id,
+              guildId,
+            );
 
       const headline =
         sub === "add"

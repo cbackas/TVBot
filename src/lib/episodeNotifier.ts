@@ -4,7 +4,7 @@ import { showSchema } from "../database/types.js";
 import { assert } from "../utils.js";
 import { handleChannelSendError } from "./discord.js";
 import { getEnv } from "./env.js";
-import { getGlobalDestinations } from "./settingsManager.js";
+import { getAllGlobalDestinations } from "./settingsManager.js";
 import type { Show } from "./shows.js";
 import { markMessageSent } from "./shows.js";
 import { addLeadingZeros, toRanges } from "./util.js";
@@ -25,13 +25,23 @@ export interface NotificationPayload {
  */
 export async function sendAiringMessages(): Promise<void> {
   const token = getEnv("DISCORD_TOKEN");
-  const globalDestinations = await getGlobalDestinations(
+  const broadcastDestinations = await getAllGlobalDestinations(
     "global_episode_broadcast",
   );
 
+  // Group broadcast channels by guild so a guild only broadcasts episodes for
+  // shows linked within that guild — and only links to its own discussion
+  // channels.
+  const broadcastByGuild = new Map<string, string[]>();
+  for (const dest of broadcastDestinations) {
+    const list = broadcastByGuild.get(dest.guildId) ?? [];
+    list.push(dest.channelId);
+    broadcastByGuild.set(dest.guildId, list);
+  }
+
   const payloadMap = await getShowPayloads();
   for (const payload of payloadMap.values()) {
-    await sendNotificationPayload(payload, token, globalDestinations);
+    await sendNotificationPayload(payload, token, broadcastByGuild);
   }
 }
 
@@ -134,15 +144,15 @@ async function sendDiscordMessage(
 }
 
 /**
- * Send discord messages to episode and global destinations with info about the episode(s)
+ * Send discord messages to episode and broadcast destinations with info about the episode(s)
  * @param payload all the info needed to schedule a notification job
  * @param token bot token needed to send the messages
- * @param globalDestinations additional destinations to send the message to
+ * @param broadcastByGuild broadcast channels keyed by the guild they belong to
  */
 async function sendNotificationPayload(
   payload: NotificationPayload,
   token: string,
-  globalDestinations: { channelId: string }[],
+  broadcastByGuild: Map<string, string[]>,
 ): Promise<void> {
   const message = getEpisodeMessage(
     payload.showName,
@@ -161,19 +171,30 @@ async function sendNotificationPayload(
     }
   }
 
-  // build the message that's sent to the global destinations
-  const channelsString = payload.destinations
-    .map((d) => `<#${d.channelId}>`)
-    .join(" ");
-  const globalMessage = `${message} Check out the discussions here: ${channelsString}`;
+  // Broadcast per guild: each guild's broadcast channels only hear about this
+  // show if it's linked in that guild, and the "discussions here" links point
+  // only at that guild's own channels.
+  const destChannelsByGuild = new Map<string, string[]>();
+  for (const d of payload.destinations) {
+    const list = destChannelsByGuild.get(d.guildId) ?? [];
+    list.push(d.channelId);
+    destChannelsByGuild.set(d.guildId, list);
+  }
 
-  // send messages to all the global destinations
-  for (const destination of globalDestinations) {
-    try {
-      await sendDiscordMessage(destination.channelId, globalMessage, token);
-      console.info(`Message Sent: ${globalMessage}`);
-    } catch (e) {
-      console.error("Error sending message to global destination", e);
+  for (const [guildId, channelIds] of destChannelsByGuild) {
+    const broadcastChannels = broadcastByGuild.get(guildId);
+    if (broadcastChannels == null || broadcastChannels.length === 0) continue;
+
+    const channelsString = channelIds.map((id) => `<#${id}>`).join(" ");
+    const globalMessage = `${message} Check out the discussions here: ${channelsString}`;
+
+    for (const channelId of broadcastChannels) {
+      try {
+        await sendDiscordMessage(channelId, globalMessage, token);
+        console.info(`Message Sent: ${globalMessage}`);
+      } catch (e) {
+        console.error("Error sending message to broadcast destination", e);
+      }
     }
   }
 

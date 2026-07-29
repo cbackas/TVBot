@@ -331,14 +331,14 @@ export async function markMessageSent(
  * @param imdbId imdbID for the show to subscribe to
  * @param tvdbSeriesId tvdb id for the show
  * @param seriesName name of the tv show
- * @param destination where to send notifications
+ * @param destination where to send notifications, including the guild it belongs to
  * @returns the show after subscription is added
  */
 export async function createNewSubscription(
   imdbId: string,
   tvdbSeriesId: number,
   seriesName: string,
-  destination: Pick<Destination, "channelId" | "forumId">,
+  destination: Pick<Destination, "guildId" | "channelId" | "forumId">,
 ): Promise<Show> {
   const db = getDb();
 
@@ -363,6 +363,7 @@ export async function createNewSubscription(
       .insert(showDestinations)
       .values({
         showId: showRow.id,
+        guildId: destination.guildId,
         channelId: destination.channelId,
         forumId: destination.forumId,
       })

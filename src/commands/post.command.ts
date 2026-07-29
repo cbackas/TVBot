@@ -10,6 +10,7 @@ import { editInteractionResponse } from "../lib/discord.js";
 import { getEnv } from "../lib/env.js";
 import {
   getChannelOption,
+  getGuildId,
   getStringOption,
 } from "../lib/interactionOptions.js";
 import {
@@ -64,6 +65,14 @@ export default class PostCommand implements Command {
     const token = interaction.token;
     const discordToken = getEnv("DISCORD_TOKEN");
 
+    const guildId = getGuildId(interaction);
+    if (guildId == null) {
+      await editInteractionResponse(token, {
+        content: "This command can only be used in a server.",
+      });
+      return;
+    }
+
     const imdbIds = parseIMDBIds(imdbIdInput);
 
     if (imdbIds.length === 0) {
@@ -93,7 +102,7 @@ export default class PostCommand implements Command {
       // Resolve forum channel
       let forumId = forumOption;
       if (forumId == null) {
-        forumId = await getDefaultForum();
+        forumId = await getDefaultForum(guildId);
       }
       if (forumId == null) {
         await editInteractionResponse(token, {
@@ -211,7 +220,7 @@ export default class PostCommand implements Command {
             imdbId,
             series.id,
             series.name,
-            { channelId: threadId, forumId },
+            { guildId, channelId: threadId, forumId },
           );
 
           saved.push({ imdbId, series, show });

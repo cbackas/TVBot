@@ -10,6 +10,7 @@ import type { SeriesExtendedRecord } from "../interfaces/tvdb.generated.js";
 import { editInteractionResponse } from "../lib/discord.js";
 import { getEnv } from "../lib/env.js";
 import {
+  getGuildId,
   getResolvedChannel,
   getStringOption,
   getSubcommand,
@@ -78,6 +79,14 @@ export default class LinkCommand implements Command {
     const imdbIdInput = getStringOption(interaction, "imdb_id") ?? "";
     const token = interaction.token;
     const discordToken = getEnv("DISCORD_TOKEN");
+
+    const guildId = getGuildId(interaction);
+    if (guildId == null) {
+      await editInteractionResponse(token, {
+        content: "This command can only be used in a server.",
+      });
+      return;
+    }
 
     const THREAD_TYPES = new Set<number>([
       ChannelType.AnnouncementThread,
@@ -220,7 +229,7 @@ export default class LinkCommand implements Command {
             imdbId,
             series.id,
             series.name,
-            { channelId: targetChannelId, forumId: parentForumId },
+            { guildId, channelId: targetChannelId, forumId: parentForumId },
           );
           linked.push({ imdbId, series, show });
           messages.push(`Linked show \`${series.name}\` (${imdbId})`);

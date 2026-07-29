@@ -1,11 +1,11 @@
 import { getEnv } from "./env.js";
 import { sendDiscordEmbed } from "./messages.js";
-import { getGlobalDestinations } from "./settingsManager.js";
+import { getAllGlobalDestinations } from "./settingsManager.js";
 import { getAllShows } from "./shows.js";
 import { getUpcomingEpisodesEmbed } from "./upcoming.js";
 
 export async function sendMorningSummary(): Promise<void> {
-  const destinations = await getGlobalDestinations("morning_summary");
+  const destinations = await getAllGlobalDestinations("morning_summary");
   if (destinations.length === 0) {
     console.info(
       "Morning summary: no `morning_summary` destinations configured — nothing to send. Use `/setting morning_summary add`.",
@@ -13,29 +13,43 @@ export async function sendMorningSummary(): Promise<void> {
     return;
   }
 
-  const allShows = await getAllShows();
-  const showsWithUnsentEpisodes = allShows.filter((show) =>
-    show.episodes.some((e) => !e.messageSent),
-  );
+  // Fan out per guild: each guild's digest only covers the shows linked within
+  // that guild, so servers don't see each other's shows.
+  const channelsByGuild = new Map<string, string[]>();
+  for (const dest of destinations) {
+    const list = channelsByGuild.get(dest.guildId) ?? [];
+    list.push(dest.channelId);
+    channelsByGuild.set(dest.guildId, list);
+  }
 
-  const embed = getUpcomingEpisodesEmbed(showsWithUnsentEpisodes, 1);
+  const allShows = await getAllShows();
   const token = getEnv("DISCORD_TOKEN");
 
-  console.info(
-    `Morning summary: sending digest of ${showsWithUnsentEpisodes.length} show(s) to ${destinations.length} destination(s)`,
-  );
-
   let sent = 0;
-  for (const dest of destinations) {
-    try {
-      await sendDiscordEmbed(dest.channelId, embed, token);
-      sent += 1;
-    } catch (e) {
-      console.error(`Error sending morning summary to ${dest.channelId}`, e);
+  let total = 0;
+  for (const [guildId, channelIds] of channelsByGuild) {
+    const guildShows = allShows.filter(
+      (show) =>
+        show.destinations.some((d) => d.guildId === guildId) &&
+        show.episodes.some((e) => !e.messageSent),
+    );
+
+    const embed = getUpcomingEpisodesEmbed(guildShows, 1);
+
+    console.info(
+      `Morning summary: guild ${guildId} — digest of ${guildShows.length} show(s) to ${channelIds.length} channel(s)`,
+    );
+
+    for (const channelId of channelIds) {
+      total += 1;
+      try {
+        await sendDiscordEmbed(channelId, embed, token);
+        sent += 1;
+      } catch (e) {
+        console.error(`Error sending morning summary to ${channelId}`, e);
+      }
     }
   }
 
-  console.info(
-    `Morning summary: sent to ${sent}/${destinations.length} destination(s)`,
-  );
+  console.info(`Morning summary: sent to ${sent}/${total} destination(s)`);
 }
