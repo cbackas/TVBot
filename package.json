@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "deploy": "wrangler deploy --env dev",
+    "deploy": "wrangler deploy --env dev && npm run logs:dev",
     "predeploy": "npm run db:migrate:dev",
     "deploy:prod": "wrangler deploy --env prod",
     "predeploy:prod": "npm run db:migrate:prod",
@@ -18,7 +18,9 @@
     "db:migrate:prod": "wrangler d1 migrations apply tvbot-db-prod --env prod --remote",
     "db:push": "drizzle-kit push",
     "db:migrate-mongo": "tsx scripts/migrate-from-mongo.ts",
-    "register-commands": "tsx --import ./scripts/cloudflare-shim.ts --env-file=.env scripts/register-commands.ts"
+    "register-commands": "tsx --import ./scripts/cloudflare-shim.ts --env-file=.env scripts/register-commands.ts",
+    "logs:dev": "wrangler tail --env dev",
+    "logs:prod": "wrangler tail --env prod"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
