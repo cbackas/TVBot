@@ -37,17 +37,24 @@ export async function handleQueuedWork(msg: WorkQueueMessage): Promise<void> {
     fields,
   );
 
+  const start = Date.now();
   try {
     await command.handler(interaction);
+    const durationMs = Date.now() - start;
     logger.debug(
-      `Finished command ${invocation} for user ${interaction.member?.user.username} [interaction ${interaction.id}]`,
-      fields,
+      `Finished command ${invocation} for user ${interaction.member?.user.username} in ${(durationMs / 1000).toFixed(1)}s [interaction ${interaction.id}]`,
+      { ...fields, durationMs },
     );
   } catch (error) {
-    logger.error(`Error executing command ${invocation}`, {
-      ...fields,
-      error,
-    });
+    const durationMs = Date.now() - start;
+    logger.error(
+      `Error executing command ${invocation} after ${(durationMs / 1000).toFixed(1)}s`,
+      {
+        ...fields,
+        durationMs,
+        error,
+      },
+    );
     await editInteractionResponse(interaction.token, {
       content: "There was an error while executing this command!",
     });
