@@ -10,6 +10,7 @@ import {
 import { verifyInteraction } from "./interactions/verify.js";
 import { getEnv } from "./lib/env.js";
 import { sendAiringMessages } from "./lib/episodeNotifier.js";
+import { runWithLogContext } from "./lib/logger.js";
 import { sendMorningSummary } from "./lib/morningSummary.js";
 import {
   checkForAiringEpisodes,
@@ -36,27 +37,35 @@ async function fetch(
   }
 
   const interaction: APIInteraction = JSON.parse(textDecoder.decode(body));
-  try {
-    switch (interaction.type) {
-      case InteractionType.Ping: {
-        return handlePing();
-      }
-      case InteractionType.ApplicationCommand: {
-        return await handleCommand(interaction);
-      }
-      case InteractionType.ApplicationCommandAutocomplete: {
-        return await handleAutocomplete(interaction);
-      }
-      case InteractionType.MessageComponent: {
-        return await handleComponent(interaction);
-      }
-    }
-  } catch (error) {
-    console.error("Error handling interaction:", error);
-    return new Response("Internal Server Error", { status: 500 });
-  }
 
-  return new Response("Not implemented", { status: 200 });
+  // Establish a log context for the whole interaction so every downstream log
+  // carries the interaction id (handlers pin command/user fields on top).
+  return runWithLogContext(
+    { interactionId: interaction.id, interactionType: interaction.type },
+    async () => {
+      try {
+        switch (interaction.type) {
+          case InteractionType.Ping: {
+            return handlePing();
+          }
+          case InteractionType.ApplicationCommand: {
+            return await handleCommand(interaction);
+          }
+          case InteractionType.ApplicationCommandAutocomplete: {
+            return await handleAutocomplete(interaction);
+          }
+          case InteractionType.MessageComponent: {
+            return await handleComponent(interaction);
+          }
+        }
+      } catch (error) {
+        console.error("Error handling interaction:", error);
+        return new Response("Internal Server Error", { status: 500 });
+      }
+
+      return new Response("Not implemented", { status: 200 });
+    },
+  );
 }
 
 async function scheduled(
@@ -64,23 +73,28 @@ async function scheduled(
   _env: Env,
   _ctx: ExecutionContext,
 ): Promise<void> {
-  switch (controller.cron) {
-    case "*/2 * * * *":
-      await sendAiringMessages();
-      return;
-    case "25 */4 * * *":
-      await checkForAiringEpisodes();
-      return;
-    case "15 */4 * * *":
-      await pruneUnsubscribedShows();
-      await sweepDeadChannels(getEnv("DISCORD_TOKEN"));
-      return;
-    case "0 13 * * *":
-      await sendMorningSummary();
-      return;
-    default:
-      console.warn(`Unhandled cron trigger: ${controller.cron}`);
-  }
+  await runWithLogContext(
+    { trigger: "cron", cron: controller.cron },
+    async () => {
+      switch (controller.cron) {
+        case "*/2 * * * *":
+          await sendAiringMessages();
+          return;
+        case "25 */4 * * *":
+          await checkForAiringEpisodes();
+          return;
+        case "15 */4 * * *":
+          await pruneUnsubscribedShows();
+          await sweepDeadChannels(getEnv("DISCORD_TOKEN"));
+          return;
+        case "0 13 * * *":
+          await sendMorningSummary();
+          return;
+        default:
+          console.warn(`Unhandled cron trigger: ${controller.cron}`);
+      }
+    },
+  );
 }
 
 async function queue(

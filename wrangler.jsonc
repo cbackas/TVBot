@@ -7,6 +7,8 @@
 	"name": "tvbot",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-12-05",
+	// Enables AsyncLocalStorage (node:async_hooks) used for per-request log context.
+	"compatibility_flags": ["nodejs_als"],
 	"observability": {
 		"enabled": true
 	},
