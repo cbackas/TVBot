@@ -247,7 +247,9 @@ export interface RefreshStats {
   newEpisodes: number;
 }
 
-export async function checkForAiringEpisodes(): Promise<RefreshStats> {
+export async function checkForAiringEpisodes(
+  onProgress?: (processed: number, total: number) => void | Promise<void>,
+): Promise<RefreshStats> {
   console.info("== Checking all shows for airing episodes ==");
   const allShows = await getAllShows();
 
@@ -259,6 +261,7 @@ export async function checkForAiringEpisodes(): Promise<RefreshStats> {
     newEpisodes: 0,
   };
 
+  let processed = 0;
   for (const show of allShows) {
     try {
       const { episodesFound, newEpisodes } = await updateEpisodes(
@@ -274,6 +277,11 @@ export async function checkForAiringEpisodes(): Promise<RefreshStats> {
         `Error updating episodes for ${show.name} (${show.imdbId})`,
         error,
       );
+    }
+
+    processed += 1;
+    if (onProgress != null) {
+      await onProgress(processed, allShows.length);
     }
   }
 

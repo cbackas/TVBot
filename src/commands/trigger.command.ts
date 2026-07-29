@@ -15,10 +15,13 @@ import {
 } from "../lib/shows.js";
 import type { Command } from "./index.js";
 
+/** Push a live progress line under the current step (best-effort). */
+type ProgressReporter = (detail: string) => Promise<void>;
+
 interface Task {
   label: string;
   /** Runs the task and returns a one-line summary of what it did. */
-  run(): Promise<string>;
+  run(report: ProgressReporter): Promise<string>;
 }
 
 function plural(n: number, word: string): string {
@@ -28,8 +31,10 @@ function plural(n: number, word: string): string {
 const TASKS: Record<string, Task> = {
   check_episodes: {
     label: "Refreshing episode data for tracked shows",
-    run: async () => {
-      const s = await checkForAiringEpisodes();
+    run: async (report) => {
+      const s = await checkForAiringEpisodes(async (processed, total) => {
+        await report(`Refreshing… ${processed}/${total} shows`);
+      });
       const parts = [
         `${plural(s.showsRefreshed, "show")} refreshed`,
         `${plural(s.episodesFound, "upcoming episode")} (${s.newEpisodes} new)`,
@@ -107,9 +112,21 @@ export default class TriggerCommand implements Command {
     const progress = new ProgressMessageBuilder(token).addStep(task.label);
     const start = Date.now();
 
+    // Best-effort live progress line under the in-progress step. A failed edit
+    // must never abort the task, so swallow errors here.
+    const report: ProgressReporter = async (detail) => {
+      try {
+        await editInteractionResponse(token, {
+          content: `${progress.toString()}\n\n${detail}`,
+        });
+      } catch (error) {
+        console.error("Error updating trigger progress:", error);
+      }
+    };
+
     try {
       await progress.sendNextStep();
-      const summary = await task.run();
+      const summary = await task.run(report);
 
       const elapsed = formatDuration(Date.now() - start);
       progress.setCurrentStatus(StepStatus.COMPLETE);
