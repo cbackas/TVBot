@@ -7,7 +7,7 @@ import {
 import { editInteractionResponse } from "../lib/discord.js";
 import { getEnv } from "../lib/env.js";
 import { getStringOption } from "../lib/interactionOptions.js";
-import { StepStatus } from "../lib/progressMessages.js";
+import { ProgressMessageBuilder, StepStatus } from "../lib/progressMessages.js";
 import {
   checkForAiringEpisodes,
   pruneUnsubscribedShows,
@@ -16,33 +16,44 @@ import {
 import type { Command } from "./index.js";
 
 interface Task {
-  /** Present-tense line shown while the task is running (🟦). */
-  running: string;
-  /** Past-tense line shown once the task finishes (🟩). */
-  done: string;
-  /** Line shown if the task throws (🟥). */
-  error: string;
-  run(): Promise<void>;
+  label: string;
+  /** Runs the task and returns a one-line summary of what it did. */
+  run(): Promise<string>;
+}
+
+function plural(n: number, word: string): string {
+  return `${n} ${word}${n === 1 ? "" : "s"}`;
 }
 
 const TASKS: Record<string, Task> = {
   check_episodes: {
-    running: "Refreshing episode data for tracked shows",
-    done: "Refreshed episode data for tracked shows",
-    error: "Failed to refresh episode data",
-    run: () => checkForAiringEpisodes(),
+    label: "Refreshing episode data for tracked shows",
+    run: async () => {
+      const s = await checkForAiringEpisodes();
+      const parts = [
+        `${plural(s.showsRefreshed, "show")} refreshed`,
+        `${plural(s.episodesFound, "upcoming episode")} (${s.newEpisodes} new)`,
+      ];
+      if (s.showsFailed > 0)
+        parts.push(`${plural(s.showsFailed, "show")} failed`);
+      return parts.join(" · ");
+    },
   },
   prune_shows: {
-    running: "Pruning shows with no subscriptions",
-    done: "Pruned shows with no subscriptions",
-    error: "Failed to prune shows",
-    run: () => pruneUnsubscribedShows(),
+    label: "Pruning shows with no subscriptions",
+    run: async () => {
+      const count = await pruneUnsubscribedShows();
+      return `${plural(count, "show")} pruned`;
+    },
   },
   sweep_channels: {
-    running: "Sweeping destinations for deleted channels",
-    done: "Swept destinations for deleted channels",
-    error: "Failed to sweep dead channels",
-    run: () => sweepDeadChannels(getEnv("DISCORD_TOKEN")),
+    label: "Sweeping destinations for deleted channels",
+    run: async () => {
+      const { probed, pruned } = await sweepDeadChannels(
+        getEnv("DISCORD_TOKEN"),
+      );
+      return `${plural(probed, "channel")} probed · ${plural(pruned, "dead channel")} pruned`;
+    },
   },
 };
 
@@ -93,25 +104,24 @@ export default class TriggerCommand implements Command {
       return;
     }
 
-    // 🟦 while the task runs
-    await editInteractionResponse(token, {
-      content: `${StepStatus.PENDING} ${task.running}`,
-    });
-
+    const progress = new ProgressMessageBuilder(token).addStep(task.label);
     const start = Date.now();
+
     try {
-      await task.run();
+      await progress.sendNextStep();
+      const summary = await task.run();
+
       const elapsed = formatDuration(Date.now() - start);
-      // 🟩 once complete, swapping in the done message + elapsed time
+      progress.setCurrentStatus(StepStatus.COMPLETE);
       await editInteractionResponse(token, {
-        content: `${StepStatus.COMPLETE} ${task.done} (${elapsed})`,
+        content: `${progress.toString()}\n\n${summary}\nTook ${elapsed}`,
       });
     } catch (error) {
       const elapsed = formatDuration(Date.now() - start);
       console.error(`Error running triggered task ${taskName}:`, error);
-      // 🟥 on failure
+      progress.setCurrentStatus(StepStatus.ERROR);
       await editInteractionResponse(token, {
-        content: `${StepStatus.ERROR} ${task.error} (${elapsed})`,
+        content: `${progress.toString()}\n\nFailed after ${elapsed}`,
       });
     }
   }

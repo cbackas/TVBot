@@ -1,5 +1,6 @@
 import { and, asc, eq, inArray, like, notInArray, or, sql } from "drizzle-orm";
 import moment, { type Moment } from "moment-timezone";
+import { chunkedDelete, chunkedUpsert } from "../database/batching.js";
 import { getDb } from "../database/db.js";
 import {
   episodes,
@@ -119,7 +120,7 @@ export async function updateEpisodes(
   imdbId: string,
   tvdbId: number,
   providedSeries?: SeriesExtendedRecord,
-): Promise<void> {
+): Promise<{ episodesFound: number; newEpisodes: number }> {
   const series: SeriesExtendedRecord | undefined =
     providedSeries ?? (await getSeries(tvdbId));
 
@@ -147,6 +148,9 @@ export async function updateEpisodes(
         airDate: airDateUTC,
       };
     });
+
+  // Count episodes we haven't seen before (present in TVDB, absent from the DB)
+  let newEpisodes = 0;
 
   // Upsert show
   const db = getDb();
@@ -187,6 +191,13 @@ export async function updateEpisodes(
       .from(episodes)
       .where(eq(episodes.showId, showRow.id));
 
+    const existingKeys = new Set(
+      existing.map((e) => `${e.season}-${e.number}`),
+    );
+    newEpisodes = insertValues.filter(
+      (v) => !existingKeys.has(`${v.season}-${v.number}`),
+    ).length;
+
     const incomingKeys = new Set(
       insertValues.map((v) => `${v.season}-${v.number}`),
     );
@@ -194,50 +205,57 @@ export async function updateEpisodes(
       .filter((e) => !incomingKeys.has(`${e.season}-${e.number}`))
       .map((e) => e.id);
 
-    const upsertOp =
-      insertValues.length > 0
-        ? db
-            .insert(episodes)
-            .values(insertValues)
-            .onConflictDoUpdate({
-              target: [episodes.showId, episodes.season, episodes.number],
-              set: {
-                title: sql`excluded.title`,
-                airDate: sql`excluded.air_date`,
-              },
-            })
-        : null;
-
-    const deleteOp =
-      idsToDelete.length > 0
-        ? db.delete(episodes).where(inArray(episodes.id, idsToDelete))
-        : null;
-
-    if (upsertOp != null && deleteOp != null) {
-      await db.batch([upsertOp, deleteOp]);
-    } else if (upsertOp != null) {
-      await upsertOp;
-    } else if (deleteOp != null) {
-      await deleteOp;
-    }
+    await chunkedUpsert(db, episodes, insertValues, {
+      target: [episodes.showId, episodes.season, episodes.number],
+      set: {
+        title: sql`excluded.title`,
+        airDate: sql`excluded.air_date`,
+      },
+    });
+    await chunkedDelete(db, episodes, episodes.id, idsToDelete);
   }
 
   console.info(
     `[Get Episode Data] ${series.name} / Upcoming episodes: ${upcomingEpisodes.length}`,
   );
+
+  return { episodesFound: upcomingEpisodes.length, newEpisodes };
 }
 
 /**
  * Updates all shows in the DB with new episodes
  */
-export async function checkForAiringEpisodes(): Promise<void> {
+export interface RefreshStats {
+  showsTotal: number;
+  showsRefreshed: number;
+  showsFailed: number;
+  episodesFound: number;
+  newEpisodes: number;
+}
+
+export async function checkForAiringEpisodes(): Promise<RefreshStats> {
   console.info("== Checking all shows for airing episodes ==");
   const allShows = await getAllShows();
 
+  const stats: RefreshStats = {
+    showsTotal: allShows.length,
+    showsRefreshed: 0,
+    showsFailed: 0,
+    episodesFound: 0,
+    newEpisodes: 0,
+  };
+
   for (const show of allShows) {
     try {
-      await updateEpisodes(show.imdbId, show.tvdbId);
+      const { episodesFound, newEpisodes } = await updateEpisodes(
+        show.imdbId,
+        show.tvdbId,
+      );
+      stats.showsRefreshed += 1;
+      stats.episodesFound += episodesFound;
+      stats.newEpisodes += newEpisodes;
     } catch (error) {
+      stats.showsFailed += 1;
       console.error(
         `Error updating episodes for ${show.name} (${show.imdbId})`,
         error,
@@ -246,6 +264,7 @@ export async function checkForAiringEpisodes(): Promise<void> {
   }
 
   console.info("== Finished checking all shows for airing episodes ==");
+  return stats;
 }
 
 /**
@@ -387,7 +406,7 @@ export async function removeAllSubscriptions(
 /**
  * Removes all shows that have no destinations
  */
-export async function pruneUnsubscribedShows(): Promise<void> {
+export async function pruneUnsubscribedShows(): Promise<number> {
   const db = getDb();
 
   const result = await db
@@ -403,6 +422,7 @@ export async function pruneUnsubscribedShows(): Promise<void> {
 
   const count = result.meta.changes ?? 0;
   console.info(`Pruned shows ${count} with no destinations`);
+  return count;
 }
 
 /**
@@ -426,7 +446,9 @@ export async function pruneDeadChannel(channelId: string): Promise<void> {
  * Probe every distinct destination channelId against Discord; prune the dead ones.
  * Catches channels deleted while the bot had no upcoming work to surface them.
  */
-export async function sweepDeadChannels(token: string): Promise<void> {
+export async function sweepDeadChannels(
+  token: string,
+): Promise<{ probed: number; pruned: number }> {
   const db = getDb();
   const [showRows, globalRows] = await db.batch([
     db
@@ -441,6 +463,7 @@ export async function sweepDeadChannels(token: string): Promise<void> {
     ...globalRows.map((r) => r.channelId),
   ]);
 
+  let pruned = 0;
   for (const channelId of distinct) {
     try {
       const response = await fetch(
@@ -452,9 +475,14 @@ export async function sweepDeadChannels(token: string): Promise<void> {
       const body = (await response.json().catch(() => ({}))) as {
         code?: number;
       };
-      if (body.code === 10003) await pruneDeadChannel(channelId);
+      if (body.code === 10003) {
+        await pruneDeadChannel(channelId);
+        pruned += 1;
+      }
     } catch (e) {
       console.error(`Sweep: error probing channel ${channelId}`, e);
     }
   }
+
+  return { probed: distinct.size, pruned };
 }
