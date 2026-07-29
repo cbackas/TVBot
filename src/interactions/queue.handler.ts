@@ -1,7 +1,10 @@
 import type { APIApplicationCommandInteraction } from "discord-api-types/v10";
 import { commands } from "../commands/index.js";
 import { editInteractionResponse } from "../lib/discord.js";
-import { formatCommandInvocation } from "../lib/interactionOptions.js";
+import {
+  formatCommandInvocation,
+  formatUser,
+} from "../lib/interactionOptions.js";
 import { logger } from "../lib/logger.js";
 
 export type WorkQueueMessage = {
@@ -33,7 +36,7 @@ export async function handleQueuedWork(msg: WorkQueueMessage): Promise<void> {
   };
 
   logger.info(
-    `Executing queued command ${invocation} for user ${interaction.member?.user.username} (${interaction.member?.user.id}) [interaction ${interaction.id}]`,
+    `Executing queued command ${invocation} for user ${formatUser(interaction)} [interaction ${interaction.id}]`,
     fields,
   );
 
@@ -42,7 +45,7 @@ export async function handleQueuedWork(msg: WorkQueueMessage): Promise<void> {
     await command.handler(interaction);
     const durationMs = Date.now() - start;
     logger.debug(
-      `Finished command ${invocation} for user ${interaction.member?.user.username} in ${(durationMs / 1000).toFixed(1)}s [interaction ${interaction.id}]`,
+      `Finished command ${invocation} for user ${formatUser(interaction)} in ${(durationMs / 1000).toFixed(1)}s [interaction ${interaction.id}]`,
       { ...fields, durationMs },
     );
   } catch (error) {

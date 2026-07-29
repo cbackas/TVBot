@@ -25,6 +25,21 @@ export function getGuildId(
   return interaction.guild_id ?? null;
 }
 
+/**
+ * Render the invoking user as `id (username)`. IDs are stable and safe to
+ * grep/correlate on; usernames are for human eyeballs only and can contain
+ * spaces or unicode — so the ID leads and the name is the parenthetical.
+ */
+export function formatUser(
+  interaction:
+    | APIApplicationCommandInteraction
+    | APIMessageComponentInteraction,
+): string {
+  const user = interaction.member?.user ?? interaction.user;
+  if (!user) return "unknown user";
+  return `${user.id} (${user.username})`;
+}
+
 function getOptions(
   interaction: AnyCommandInteraction,
 ): APIApplicationCommandInteractionDataOption[] {

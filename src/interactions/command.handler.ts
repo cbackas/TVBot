@@ -5,7 +5,10 @@ import {
   InteractionResponseType,
 } from "discord-interactions";
 import { commands } from "../commands/index.js";
-import { formatCommandInvocation } from "../lib/interactionOptions.js";
+import {
+  formatCommandInvocation,
+  formatUser,
+} from "../lib/interactionOptions.js";
 import { logger } from "../lib/logger.js";
 
 export default async function handleCommand(
@@ -25,7 +28,7 @@ export default async function handleCommand(
   const invocation = formatCommandInvocation(interaction, command.definition);
 
   logger.info(
-    `Queuing command ${invocation} for user ${interaction.member?.user.username} (${interaction.member?.user.id}) in channel ${interaction.channel.id} of guild ${interaction.guild_id} [interaction ${interaction.id}]`,
+    `Queuing command ${invocation} for user ${formatUser(interaction)} in channel ${interaction.channel.id} of guild ${interaction.guild_id} [interaction ${interaction.id}]`,
     {
       interactionId: interaction.id,
       commandName: interaction.data.name,
