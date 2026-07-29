@@ -1,6 +1,5 @@
 import { and, asc, eq, inArray, like, notInArray, or, sql } from "drizzle-orm";
 import moment, { type Moment } from "moment-timezone";
-import { chunkedDelete, chunkedUpsert } from "../database/batching.js";
 import { getDb } from "../database/db.js";
 import {
   episodes,
@@ -205,14 +204,29 @@ export async function updateEpisodes(
       .filter((e) => !incomingKeys.has(`${e.season}-${e.number}`))
       .map((e) => e.id);
 
-    await chunkedUpsert(db, episodes, insertValues, {
-      target: [episodes.showId, episodes.season, episodes.number],
-      set: {
-        title: sql`excluded.title`,
-        airDate: sql`excluded.air_date`,
-      },
-    });
-    await chunkedDelete(db, episodes, episodes.id, idsToDelete);
+    // Apply the upsert + deletes in one atomic batch. Each row is its own
+    // statement (≈6 bound params), so no single statement approaches D1's
+    // 100-param cap — no chunking math required.
+    const ops = [
+      ...insertValues.map((v) =>
+        db
+          .insert(episodes)
+          .values(v)
+          .onConflictDoUpdate({
+            target: [episodes.showId, episodes.season, episodes.number],
+            set: {
+              title: sql`excluded.title`,
+              airDate: sql`excluded.air_date`,
+            },
+          }),
+      ),
+      ...idsToDelete.map((id) =>
+        db.delete(episodes).where(eq(episodes.id, id)),
+      ),
+    ];
+
+    const [first, ...rest] = ops;
+    if (first !== undefined) await db.batch([first, ...rest]);
   }
 
   console.info(
