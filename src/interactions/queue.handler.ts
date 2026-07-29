@@ -21,6 +21,7 @@ export async function handleQueuedWork(msg: WorkQueueMessage): Promise<void> {
   }
 
   const fields = {
+    interactionId: interaction.id,
     commandName: interaction.data.name,
     userId: interaction.member?.user.id,
     username: interaction.member?.user.username,
@@ -29,14 +30,14 @@ export async function handleQueuedWork(msg: WorkQueueMessage): Promise<void> {
   };
 
   logger.info(
-    `Executing queued command ${interaction.data.name} for user ${interaction.member?.user.username} (${interaction.member?.user.id})`,
+    `Executing queued command ${interaction.data.name} for user ${interaction.member?.user.username} (${interaction.member?.user.id}) [interaction ${interaction.id}]`,
     fields,
   );
 
   try {
     await command.handler(interaction);
     logger.debug(
-      `Finished command ${interaction.data.name} for user ${interaction.member?.user.username}`,
+      `Finished command ${interaction.data.name} for user ${interaction.member?.user.username} [interaction ${interaction.id}]`,
       fields,
     );
   } catch (error) {

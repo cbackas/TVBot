@@ -22,8 +22,9 @@ export default async function handleCommand(
   }
 
   logger.info(
-    `Queuing command ${interaction.data.name} for user ${interaction.member?.user.username} (${interaction.member?.user.id}) in channel ${interaction.channel.id} of guild ${interaction.guild_id}`,
+    `Queuing command ${interaction.data.name} for user ${interaction.member?.user.username} (${interaction.member?.user.id}) in channel ${interaction.channel.id} of guild ${interaction.guild_id} [interaction ${interaction.id}]`,
     {
+      interactionId: interaction.id,
       commandName: interaction.data.name,
       userId: interaction.member?.user.id,
       username: interaction.member?.user.username,
