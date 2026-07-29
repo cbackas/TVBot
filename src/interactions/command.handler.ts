@@ -9,7 +9,7 @@ import {
   formatCommandInvocation,
   formatUser,
 } from "../lib/interactionOptions.js";
-import { logger } from "../lib/logger.js";
+import { addLogContext } from "../lib/logger.js";
 
 export default async function handleCommand(
   interaction: APIApplicationCommandInteraction,
@@ -27,18 +27,18 @@ export default async function handleCommand(
 
   const invocation = formatCommandInvocation(interaction, command.definition);
 
-  logger.info(
-    `Queuing command ${invocation} for user ${formatUser(interaction)} in channel ${interaction.channel.id} of guild ${interaction.guild_id} [interaction ${interaction.id}]`,
-    {
-      interactionId: interaction.id,
-      commandName: interaction.data.name,
-      commandInput: invocation,
-      userId: interaction.member?.user.id,
-      username: interaction.member?.user.username,
-      guildId: interaction.guild_id,
-      channelId: interaction.channel.id,
-    },
-  );
+  // Pin command/user metadata onto the interaction's log context so it rides
+  // along with every log from here through the queued execution.
+  addLogContext({
+    commandName: interaction.data.name,
+    commandInput: invocation,
+    userId: interaction.member?.user.id,
+    username: interaction.member?.user.username,
+    guildId: interaction.guild_id,
+    channelId: interaction.channel.id,
+  });
+
+  console.info(`Queuing ${invocation} from ${formatUser(interaction)}`);
 
   await env.WORK_QUEUE.send({ type: "command", interaction });
 

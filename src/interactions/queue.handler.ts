@@ -5,7 +5,7 @@ import {
   formatCommandInvocation,
   formatUser,
 } from "../lib/interactionOptions.js";
-import { logger } from "../lib/logger.js";
+import { addLogContext, runWithLogContext } from "../lib/logger.js";
 
 export type WorkQueueMessage = {
   type: "command";
@@ -25,41 +25,36 @@ export async function handleQueuedWork(msg: WorkQueueMessage): Promise<void> {
   }
 
   const invocation = formatCommandInvocation(interaction, command.definition);
-  const fields = {
-    interactionId: interaction.id,
-    commandName: interaction.data.name,
-    commandInput: invocation,
-    userId: interaction.member?.user.id,
-    username: interaction.member?.user.username,
-    guildId: interaction.guild_id,
-    channelId: interaction.channel?.id,
-  };
 
-  logger.info(
-    `Executing queued command ${invocation} for user ${formatUser(interaction)} [interaction ${interaction.id}]`,
-    fields,
+  // Fresh context for this queue invocation. The interaction id matches the one
+  // logged when the command was queued, so the two halves correlate.
+  await runWithLogContext(
+    {
+      interactionId: interaction.id,
+      commandName: interaction.data.name,
+      commandInput: invocation,
+      userId: interaction.member?.user.id,
+      username: interaction.member?.user.username,
+      guildId: interaction.guild_id,
+      channelId: interaction.channel?.id,
+    },
+    async () => {
+      console.info(`Executing ${invocation} from ${formatUser(interaction)}`);
+
+      const start = Date.now();
+      try {
+        await command.handler(interaction);
+        addLogContext({ durationMs: Date.now() - start });
+        console.debug(
+          `Finished ${invocation} in ${((Date.now() - start) / 1000).toFixed(1)}s`,
+        );
+      } catch (error) {
+        addLogContext({ durationMs: Date.now() - start });
+        console.error(`Failed ${invocation}`, error);
+        await editInteractionResponse(interaction.token, {
+          content: "There was an error while executing this command!",
+        });
+      }
+    },
   );
-
-  const start = Date.now();
-  try {
-    await command.handler(interaction);
-    const durationMs = Date.now() - start;
-    logger.debug(
-      `Finished command ${invocation} for user ${formatUser(interaction)} in ${(durationMs / 1000).toFixed(1)}s [interaction ${interaction.id}]`,
-      { ...fields, durationMs },
-    );
-  } catch (error) {
-    const durationMs = Date.now() - start;
-    logger.error(
-      `Error executing command ${invocation} after ${(durationMs / 1000).toFixed(1)}s`,
-      {
-        ...fields,
-        durationMs,
-        error,
-      },
-    );
-    await editInteractionResponse(interaction.token, {
-      content: "There was an error while executing this command!",
-    });
-  }
 }
