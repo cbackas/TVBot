@@ -2,8 +2,10 @@ import {
   type APIApplicationCommandAutocompleteInteraction,
   type APIApplicationCommandInteraction,
   type APIApplicationCommandInteractionDataOption,
+  type APIApplicationCommandOption,
   type APIMessageComponentInteraction,
   ApplicationCommandOptionType,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 
 type AnyCommandInteraction =
@@ -93,6 +95,59 @@ export function getSubcommand(
     return options[0].name;
   }
   return null;
+}
+
+/**
+ * Walk a command definition and collect, per option name, a map of choice
+ * value → human label. Lets logs show `task:Refresh episode data` instead of
+ * the raw `task:check_episodes` the user actually sent.
+ */
+function collectChoiceLabels(
+  options: APIApplicationCommandOption[] | undefined,
+  acc: Map<string, Map<string, string>>,
+): void {
+  for (const opt of options ?? []) {
+    if ("choices" in opt && opt.choices) {
+      const labels = acc.get(opt.name) ?? new Map<string, string>();
+      for (const choice of opt.choices) {
+        labels.set(String(choice.value), choice.name);
+      }
+      acc.set(opt.name, labels);
+    }
+    if ("options" in opt && opt.options) {
+      collectChoiceLabels(opt.options, acc);
+    }
+  }
+}
+
+/**
+ * Render an interaction the way the user typed it, e.g.
+ * `/trigger task:Refresh episode data` or `/setting morning_summary add
+ * channel:1054…`. When the command `definition` is provided, choice values are
+ * resolved to their display labels.
+ */
+export function formatCommandInvocation(
+  interaction: APIApplicationCommandInteraction,
+  definition?: RESTPostAPIChatInputApplicationCommandsJSONBody,
+): string {
+  const parts: string[] = [`/${interaction.data.name}`];
+
+  const group = getSubcommandGroup(interaction);
+  if (group) parts.push(group);
+  const sub = getSubcommand(interaction);
+  if (sub) parts.push(sub);
+
+  const choiceLabels = new Map<string, Map<string, string>>();
+  if (definition) collectChoiceLabels(definition.options, choiceLabels);
+
+  for (const opt of resolveOptions(interaction)) {
+    if (!("value" in opt)) continue;
+    const raw = String(opt.value);
+    const label = choiceLabels.get(opt.name)?.get(raw) ?? raw;
+    parts.push(`${opt.name}:${label}`);
+  }
+
+  return parts.join(" ");
 }
 
 export function getStringOption(
