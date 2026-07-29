@@ -68,14 +68,14 @@ async function scheduled(
     case "*/2 * * * *":
       await sendAiringMessages();
       return;
-    case "0 */4 * * *":
+    case "25 */4 * * *":
       await checkForAiringEpisodes();
       return;
-    case "0 5 * * *":
+    case "15 */4 * * *":
       await pruneUnsubscribedShows();
       await sweepDeadChannels(getEnv("DISCORD_TOKEN"));
       return;
-    case "0 8 * * *":
+    case "0 13 * * *":
       await sendMorningSummary();
       return;
     default:
