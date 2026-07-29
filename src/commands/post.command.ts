@@ -18,7 +18,7 @@ import {
   deleteChannel,
   pinMessage,
 } from "../lib/messages.js";
-import { ProgressMessageBuilder } from "../lib/progressMessages.js";
+import { ProgressMessageBuilder, StepStatus } from "../lib/progressMessages.js";
 import { getDefaultForum } from "../lib/settingsManager.js";
 import {
   createNewSubscription,
@@ -144,6 +144,7 @@ export default class PostCommand implements Command {
       }
 
       if (found.length === 0) {
+        progress.setCurrentStatus(StepStatus.ERROR);
         await editInteractionResponse(token, {
           content: `${progress.toString()}\n\nError: No show found with IMDB ID(s) ${imdbIdString}`,
         });

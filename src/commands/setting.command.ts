@@ -16,7 +16,7 @@ import {
   getSubcommand,
   getSubcommandGroup,
 } from "../lib/interactionOptions.js";
-import { ProgressMessageBuilder } from "../lib/progressMessages.js";
+import { ProgressMessageBuilder, StepStatus } from "../lib/progressMessages.js";
 import {
   addGlobalDestination,
   getDefaultForum,
@@ -210,6 +210,7 @@ export default class SettingCommand implements Command {
       );
       await progress.sendNextStep();
       await setDefaultForum(channel.id);
+      progress.setCurrentStatus(StepStatus.COMPLETE);
       await editInteractionResponse(token, {
         content: `${progress.toString()}\n\nDefault forum set to <#${channel.id}>`,
       });
@@ -277,6 +278,7 @@ export default class SettingCommand implements Command {
           ? `Now broadcasting episodes to <#${channel.id}>.`
           : `Stopped broadcasting to <#${channel.id}>.`;
 
+      progress.setCurrentStatus(StepStatus.COMPLETE);
       await editInteractionResponse(token, {
         content: [
           `${progress.toString()}\n\n${headline}`,
@@ -345,6 +347,7 @@ export default class SettingCommand implements Command {
           ? `Now sending the daily digest to <#${channel.id}>.`
           : `Stopped sending the daily digest to <#${channel.id}>.`;
 
+      progress.setCurrentStatus(StepStatus.COMPLETE);
       await editInteractionResponse(token, {
         content: [
           `${progress.toString()}\n\n${headline}`,
