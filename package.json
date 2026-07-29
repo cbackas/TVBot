@@ -5,16 +5,17 @@
   "type": "module",
   "scripts": {
     "deploy": "wrangler deploy --env dev",
+    "predeploy": "npm run db:migrate:dev",
     "deploy:prod": "wrangler deploy --env prod",
-    "dev": "wrangler dev --env dev",
-    "start": "wrangler dev --env dev",
+    "predeploy:prod": "npm run db:migrate:prod",
     "test": "vitest",
     "cf-typegen": "wrangler types --env dev",
     "biome:fix": "biome check --write --unsafe",
     "biome:check": "biome check",
     "biome:ci": "biome ci",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:dev": "wrangler d1 migrations apply tvbot-db-dev --env dev --remote",
+    "db:migrate:prod": "wrangler d1 migrations apply tvbot-db-prod --env prod --remote",
     "db:push": "drizzle-kit push",
     "db:migrate-mongo": "tsx scripts/migrate-from-mongo.ts",
     "register-commands": "tsx --import ./scripts/cloudflare-shim.ts --env-file=.env scripts/register-commands.ts"
@@ -27,7 +28,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.5.2",
     "vitest": "~3.2.0",
-    "wrangler": "^4.90.0"
+    "wrangler": "^4.115.0"
   },
   "dependencies": {
     "city-timezones": "^1.3.3",

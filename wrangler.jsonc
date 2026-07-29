@@ -35,7 +35,9 @@
 				{
 					"binding": "DB",
 					"database_name": "tvbot-db-dev",
-					"database_id": "1ac4c0b9-e9f3-4045-bfed-8be2cff9eb9c"
+					"database_id": "1ac4c0b9-e9f3-4045-bfed-8be2cff9eb9c",
+					"migrations_dir": "src/database/migrations/",
+					"migrations_pattern": "src/database/migrations/*/migration.sql"
 				}
 			],
 			"queues": {
@@ -71,7 +73,9 @@
 				{
 					"binding": "DB",
 					"database_name": "tvbot-db-prod",
-					"database_id": "694579ba-92f5-4a55-bce6-34c3ac6f6877"
+					"database_id": "694579ba-92f5-4a55-bce6-34c3ac6f6877",
+					"migrations_dir": "src/database/migrations/",
+					"migrations_pattern": "src/database/migrations/*/migration.sql"
 				}
 			],
 			"queues": {
