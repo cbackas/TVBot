@@ -9,6 +9,7 @@ import {
 } from "discord-api-types/v10";
 import {
   editInteractionResponse,
+  getGuild,
   textDisplayComponents,
 } from "../lib/discord.js";
 import {
@@ -168,20 +169,23 @@ export default class SettingCommand implements Command {
 
     // /setting view
     if (group == null && sub === "view") {
-      const [forumId, broadcast, digest] = await Promise.all([
+      const [forumId, broadcast, digest, guild] = await Promise.all([
         getDefaultForum(guildId),
         getGlobalDestinations("global_episode_broadcast", guildId),
         getGlobalDestinations("morning_summary", guildId),
+        getGuild(guildId),
       ]);
 
       const body = [
-        "__Default Forum__",
+        `# Settings for ${guild?.name ?? "this server"}`,
+        "",
+        "**Default Forum**",
         forumId != null ? `<#${forumId}>` : "(none)",
         "",
-        "__Global Episode Broadcast__",
+        "**Global Episode Broadcast**",
         renderList(broadcast.map((d) => d.channelId)),
         "",
-        "__Morning Summary__",
+        "**Morning Summary**",
         renderList(digest.map((d) => d.channelId)),
       ].join("\n");
 

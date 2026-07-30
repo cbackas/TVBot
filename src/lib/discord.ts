@@ -1,4 +1,8 @@
-import { type APIEmbed, ComponentType } from "discord-api-types/v10";
+import {
+  type APIEmbed,
+  type APIGuild,
+  ComponentType,
+} from "discord-api-types/v10";
 import { getEnv } from "./env.js";
 import { pruneDeadChannel } from "./shows.js";
 
@@ -61,6 +65,29 @@ export async function editInteractionResponse(
       await response.text(),
     );
   }
+}
+
+/**
+ * Fetch a guild's basic info (currently just used for display purposes, e.g.
+ * naming the server a settings view belongs to). Returns null on failure
+ * rather than throwing — a missing name shouldn't break the caller.
+ */
+export async function getGuild(
+  guildId: string,
+): Promise<Pick<APIGuild, "id" | "name"> | null> {
+  const token = getEnv("DISCORD_TOKEN");
+  const response = await fetch(
+    `https://discord.com/api/v10/guilds/${guildId}`,
+    { headers: { Authorization: `Bot ${token}` } },
+  );
+  if (!response.ok) {
+    console.warn(
+      `Failed to fetch guild ${guildId}: ${response.status}`,
+      await response.text(),
+    );
+    return null;
+  }
+  return response.json();
 }
 
 export function textDisplayComponents(
