@@ -1,14 +1,14 @@
-import {
-  type SearchByRemoteIdResult,
-  type SearchResult,
-  type SeriesExtendedRecord,
-} from "interfaces/tvdb.generated.ts"
-import { getEnv } from "lib/env.ts"
+import type {
+  SearchByRemoteIdResult,
+  SearchResult,
+  SeriesExtendedRecord,
+} from "../interfaces/tvdb.generated.js";
+import { getEnv } from "../lib/env.js";
 
-const baseURL = "https://api4.thetvdb.com/v4" as const
+const baseURL = "https://api4.thetvdb.com/v4" as const;
 
-let token: { token: string; refreshAfter: Date } | undefined
-const refreshInterval = 14
+let token: { token: string; refreshAfter: Date } | undefined;
+const refreshInterval = 14;
 
 async function getAuthToken(): Promise<{ Authorization: string }> {
   if (token == null || token.refreshAfter < new Date()) {
@@ -19,141 +19,143 @@ async function getAuthToken(): Promise<{ Authorization: string }> {
         apikey: getEnv("TVDB_API_KEY"),
         pin: getEnv("TVDB_USER_PIN"),
       }),
-    })
+    });
 
     if (!response.ok) {
       throw new Error("Failed to get TVDB token", {
         cause: await response.text(),
-      })
+      });
     }
 
-    const tokenData: { data?: { token?: string } } = await response.json()
+    const tokenData: { data?: { token?: string } } = await response.json();
     if (tokenData?.data?.token == null) {
-      throw new Error("Invalid API response: Missing token")
+      throw new Error("Invalid API response: Missing token");
     }
     token = {
       token: tokenData.data.token,
       refreshAfter: new Date(
         Date.now() + refreshInterval * 24 * 60 * 60 * 1000,
       ),
-    }
+    };
   }
 
-  return { Authorization: `Bearer ${token.token}` }
+  return { Authorization: `Bearer ${token.token}` };
 }
 
 export async function getSeriesByImdbId(
   imdbId: string,
 ): Promise<SeriesExtendedRecord | undefined> {
-  const data = await searchSeriesByImdbId(imdbId)
+  const data = await searchSeriesByImdbId(imdbId);
 
   if (data == null) {
-    return undefined
+    return undefined;
   }
 
-  let series: SeriesExtendedRecord | undefined
-  if (data?.series?.id != null) {
-    series = await getSeries(data?.series.id)
-  } else if (data?.season?.seriesId != null) {
-    series = await getSeries(data?.season?.seriesId)
+  let series: SeriesExtendedRecord | undefined;
+  if (data.series?.id != null) {
+    series = await getSeries(data.series.id);
+  } else if (data.season?.seriesId != null) {
+    series = await getSeries(data.season.seriesId);
+  } else {
+    console.error(
+      `TVDB search hit for ${imdbId} has no series.id or season.seriesId, keys=${Object.keys(data).join(",")}`,
+    );
+    return undefined;
   }
 
-  if (
-    series?.originalLanguage == null || series.originalLanguage === "eng"
-  ) return series
+  if (series?.originalLanguage == null || series.originalLanguage === "eng")
+    return series;
 
-  return translateSeries(series)
+  return translateSeries(series);
 }
 
 function translateSeries(series: SeriesExtendedRecord): SeriesExtendedRecord {
   if (series.translations == null) {
     console.warn(
       `Series ${series.id} has a non-english original language but no translations`,
-    )
-    return series
+    );
+    return series;
   }
 
-  const { nameTranslations, overviewTranslations } = series.translations
-  const englishName = nameTranslations?.find((t) => t.language === "eng")?.name
+  const { nameTranslations, overviewTranslations } = series.translations;
+  const englishName = nameTranslations?.find((t) => t.language === "eng")?.name;
   if (englishName != null) {
-    series.name = englishName
+    series.name = englishName;
   } else {
     console.warn(
       `Series ${series.id} has a non-english original language but no english name translation`,
-    )
+    );
   }
-  const englishOverview = overviewTranslations?.find((t) =>
-    t.language === "eng"
-  )?.overview
+  const englishOverview = overviewTranslations?.find(
+    (t) => t.language === "eng",
+  )?.overview;
   if (englishOverview != null) {
-    series.overview = englishOverview
+    series.overview = englishOverview;
   } else {
     console.warn(
       `Series ${series.id} has a non-english original language but no english overview translation`,
-    )
+    );
   }
 
-  return series
+  return series;
 }
 
 export async function getSeries(
   tvdbId: number,
 ): Promise<SeriesExtendedRecord | undefined> {
-  try {
-    const params = new URLSearchParams({
-      short: "true",
-      meta: "episodes,translations",
-    })
-    const response = await fetch(
-      `${baseURL}/series/${tvdbId}/extended?${params}`,
-      {
-        headers: await getAuthToken(),
-      },
-    )
+  const params = new URLSearchParams({
+    short: "true",
+    meta: "episodes,translations",
+  });
+  const response = await fetch(
+    `${baseURL}/series/${tvdbId}/extended?${params}`,
+    {
+      headers: await getAuthToken(),
+    },
+  );
 
-    if (!response.ok) {
-      console.error(`Error Getting Extended Show Data:`, {
-        url: response.url,
-        status: response.status,
-        data: await response.text(),
-      })
-      return undefined
-    }
-
-    const data: { data?: SeriesExtendedRecord } = await response.json()
-    return data.data
-  } catch (error) {
-    console.error(`Unexpected Error Getting Extended Show Data:`, error)
+  if (!response.ok) {
+    console.error(
+      `TVDB series/${tvdbId}/extended failed status=${response.status}`,
+    );
+    throw new Error(
+      `TVDB series/${tvdbId}/extended returned ${response.status}`,
+    );
   }
-  return undefined
+
+  const data: { data?: SeriesExtendedRecord } = await response.json();
+  if (data.data == null) {
+    console.error(
+      `TVDB series/${tvdbId}/extended returned ok but no data, keys=${Object.keys(data).join(",")}`,
+    );
+  }
+  return data.data;
 }
 
 async function searchSeriesByImdbId(
   imdbId: string,
 ): Promise<SearchByRemoteIdResult | undefined> {
-  try {
-    const response = await fetch(
-      `${baseURL}/search/remoteid/${imdbId}`,
-      {
-        headers: await getAuthToken(),
-      },
-    )
+  const response = await fetch(`${baseURL}/search/remoteid/${imdbId}`, {
+    headers: await getAuthToken(),
+  });
 
-    if (!response.ok) {
-      console.error(`Error Searching Series by IMDB ID:`, {
-        url: response.url,
-        status: response.status,
-        data: await response.text(),
-      })
-      return undefined
-    }
-
-    const data: { data?: SearchByRemoteIdResult[] } = await response.json()
-    return data.data?.at(0)
-  } catch (error) {
-    console.error(`Unexpected Error Searching Series by IMDB ID:`, error)
+  if (!response.ok) {
+    console.error(
+      `TVDB search/remoteid/${imdbId} failed status=${response.status}`,
+    );
+    throw new Error(
+      `TVDB search/remoteid/${imdbId} returned ${response.status}`,
+    );
   }
-  return undefined
+
+  const data: { data?: SearchByRemoteIdResult[] } = await response.json();
+  const first = data.data?.at(0);
+  if (first == null) {
+    console.error(
+      `TVDB search/remoteid empty for ${imdbId}, data length=${data.data?.length ?? 0}`,
+    );
+  }
+  return first;
 }
 
 async function searchSeriesByName(
@@ -164,40 +166,37 @@ async function searchSeriesByName(
       type: "series",
       limit: "10",
       q: query,
-    })
-    const response = await fetch(
-      `${baseURL}/search?${params}`,
-      {
-        headers: await getAuthToken(),
-      },
-    )
+    });
+    const response = await fetch(`${baseURL}/search?${params}`, {
+      headers: await getAuthToken(),
+    });
 
     if (!response.ok) {
       console.error(`Error Searching Series:`, {
         url: response.url,
         status: response.status,
         data: await response.text(),
-      })
-      return undefined
+      });
+      return undefined;
     }
 
-    const data: { data: SearchResult[] } = await response.json()
-    const searchResult = data?.data
+    const data: { data: SearchResult[] } = await response.json();
+    const searchResult = data?.data;
     if (searchResult == null || searchResult[0].tvdb_id == null) {
-      return undefined
+      return undefined;
     }
-    return searchResult
+    return searchResult;
   } catch (error) {
-    console.error(`Unexpected Error Searching Series:`, error)
+    console.error(`Unexpected Error Searching Series:`, error);
   }
-  return undefined
+  return undefined;
 }
 
 export async function getSeriesByName(
   query: string,
 ): Promise<SeriesExtendedRecord | undefined> {
-  const searchResult = await searchSeriesByName(query)
-  if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
-  const series = await getSeries(parseInt(searchResult[0].tvdb_id))
-  return series
+  const searchResult = await searchSeriesByName(query);
+  if (searchResult == null || searchResult[0].tvdb_id == null) return undefined;
+  const series = await getSeries(parseInt(searchResult[0].tvdb_id, 10));
+  return series;
 }

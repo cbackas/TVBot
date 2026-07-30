@@ -1,0 +1,108 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tvbot",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-12-05",
+	// Enables AsyncLocalStorage (node:async_hooks) used for per-request log context.
+	"compatibility_flags": ["nodejs_als"],
+	"observability": {
+		"enabled": true
+	},
+	/**
+   * Smart Placement
+   * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+   */
+	// "placement": { "mode": "smart" }
+	/**
+   * Bindings
+   * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+   * databases, object storage, AI inference, real-time communication and more.
+   * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+   */
+	/**
+   * D1 Database — defined per environment below
+   * https://developers.cloudflare.com/d1/
+   */
+	"env": {
+		"dev": {
+			"name": "tvbot-dev",
+			"observability": {
+				"enabled": true
+			},
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "tvbot-db-dev",
+					"database_id": "1ac4c0b9-e9f3-4045-bfed-8be2cff9eb9c",
+					"migrations_dir": "src/database/migrations/",
+					"migrations_pattern": "src/database/migrations/*/migration.sql"
+				}
+			],
+			"queues": {
+				"producers": [
+					{
+						"queue": "tvbot-interactions-dev",
+						"binding": "WORK_QUEUE"
+					}
+				],
+				"consumers": [
+					{
+						"queue": "tvbot-interactions-dev",
+						"max_batch_size": 1,
+						"max_batch_timeout": 0
+					}
+				]
+			},
+			"triggers": {
+				"crons": [
+					"*/2 * * * *",
+					"25 */4 * * *",
+					"15 */4 * * *",
+					"0 13 * * *"
+				]
+			}
+		},
+		"prod": {
+			"name": "tvbot-prod",
+			"observability": {
+				"enabled": true
+			},
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "tvbot-db-prod",
+					"database_id": "694579ba-92f5-4a55-bce6-34c3ac6f6877",
+					"migrations_dir": "src/database/migrations/",
+					"migrations_pattern": "src/database/migrations/*/migration.sql"
+				}
+			],
+			"queues": {
+				"producers": [
+					{
+						"queue": "tvbot-interactions-prod",
+						"binding": "WORK_QUEUE"
+					}
+				],
+				"consumers": [
+					{
+						"queue": "tvbot-interactions-prod",
+						"max_batch_size": 1,
+						"max_batch_timeout": 0
+					}
+				]
+			},
+			"triggers": {
+				"crons": [
+					"*/2 * * * *",
+					"25 */4 * * *",
+					"15 */4 * * *",
+					"0 13 * * *"
+				]
+			}
+		}
+	}
+}

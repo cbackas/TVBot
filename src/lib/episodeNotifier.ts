@@ -1,192 +1,205 @@
-import { type Show } from "prisma-client/client.ts"
-import {
-  type AnyThreadChannel,
-  type Channel,
-  ChannelType,
-  type Client,
-  Collection,
-  type TextChannel,
-} from "npm:discord.js"
-import moment from "npm:moment-timezone"
-import { markMessageSent } from "lib/shows.ts"
-import client from "lib/prisma.ts"
-import { Settings, type SettingsType } from "lib/settingsManager.ts"
-import { addLeadingZeros, toRanges } from "lib/util.ts"
-import { getClient } from "app.ts"
-
-export function isTextChannel(
-  channel: Channel,
-): channel is AnyThreadChannel | TextChannel {
-  return channel.isTextBased() && !channel.isDMBased() &&
-    ![ChannelType.GuildVoice].includes(channel.type)
-}
+import moment from "moment-timezone";
+import { getDb } from "../database/db.js";
+import { showSchema } from "../database/types.js";
+import { assert } from "../utils.js";
+import { handleChannelSendError } from "./discord.js";
+import { getEnv } from "./env.js";
+import { getAllGlobalDestinations } from "./settingsManager.js";
+import type { Show } from "./shows.js";
+import { markMessageSent } from "./shows.js";
+import { addLeadingZeros, toRanges } from "./util.js";
 
 export interface NotificationPayload {
-  key: string
-  timestamp: number
-  imdbId: string
-  showName: string
-  season: number
-  episodeNumbers: number[]
-  destinations: Show["destinations"]
+  key: string;
+  timestamp: number;
+  imdbId: string;
+  showName: string;
+  season: number;
+  episodeNumbers: number[];
+  destinations: Show["destinations"];
 }
-
-type PayloadCollection = Collection<string, NotificationPayload>
 
 /**
  * Send messages for all the shows that have episodes airing in the next few minutes
- * @param app the app instance
  * @returns a promise that resolves when all the messages have been sent
  */
 export async function sendAiringMessages(): Promise<void> {
-  const discord = getClient()
-  const globalDestinations = Settings.fetch()?.allEpisodes ?? []
+  const token = getEnv("DISCORD_TOKEN");
+  const broadcastDestinations = await getAllGlobalDestinations(
+    "global_episode_broadcast",
+  );
 
-  const payloadCollection = await getShowPayloads()
-  for (const payload of payloadCollection.values()) {
-    await sendNotificationPayload(payload, discord, globalDestinations)
+  // Group broadcast channels by guild so a guild only broadcasts episodes for
+  // shows linked within that guild — and only links to its own discussion
+  // channels.
+  const broadcastByGuild = new Map<string, string[]>();
+  for (const dest of broadcastDestinations) {
+    const list = broadcastByGuild.get(dest.guildId) ?? [];
+    list.push(dest.channelId);
+    broadcastByGuild.set(dest.guildId, list);
+  }
+
+  const payloadMap = await getShowPayloads();
+  for (const payload of payloadMap.values()) {
+    await sendNotificationPayload(payload, token, broadcastByGuild);
   }
 }
 
 /**
  * Get all the shows that have episodes airing in the next x minutes
  * @param minutes how many minutes in the future to look for shows
- * @returns a collection of payloads for each show that has an episode airing in the next x minutes
+ * @returns a map of payloads for each show that has an episode airing in the next x minutes
  */
 async function getShowPayloads(
   minutes: number = 5,
-): Promise<PayloadCollection> {
-  const nowUtc = moment.utc()
-  const minutesFromNow = nowUtc.add(minutes, "minutes")
+): Promise<Map<string, NotificationPayload>> {
+  const nowUtc = moment.utc();
+  const minutesFromNow = nowUtc.clone().add(minutes, "minutes");
 
-  const showsWithEpisodes: Show[] = await client.show.findMany({
+  const db = getDb();
+  const rows = await db.query.shows.findMany({
     where: {
       episodes: {
-        some: {
-          messageSent: false,
-          airDate: {
-            lte: minutesFromNow.toDate(),
-          },
-        },
+        messageSent: false,
+        airDate: { lte: minutesFromNow.toISOString() },
       },
     },
-  })
+    with: { episodes: true, destinations: true },
+  });
+  const showsWithEpisodes: Show[] = rows.map((r) => showSchema.parse(r));
 
-  // convert the shows into a collection of notification payloads
-  const payloadCollection: PayloadCollection = showsWithEpisodes.reduce(
-    (
-      acc: Collection<string, NotificationPayload>,
-      show: Show,
-    ): Collection<string, NotificationPayload> => {
-      const momentUTC = moment.utc(new Date())
+  // Convert the shows into a map of notification payloads
+  return showsWithEpisodes.reduce(
+    (acc: Map<string, NotificationPayload>, show: Show) => {
+      const momentUTC = moment.utc(new Date());
 
       for (const e of show.episodes) {
-        const airDate = moment.utc(e.airDate)
-        const inTimeWindow = airDate.isSameOrAfter(momentUTC) &&
-          airDate.isSameOrBefore(momentUTC.clone().add(minutes, "minutes"))
+        const airDate = moment.utc(e.airDate);
+        const inTimeWindow =
+          airDate.isSameOrAfter(momentUTC) &&
+          airDate.isSameOrBefore(momentUTC.clone().add(minutes, "minutes"));
 
-        if (!inTimeWindow) continue
+        if (!inTimeWindow) continue;
 
-        const key = `announceEpisodes:${show.imdbId}:S${
-          addLeadingZeros(e.season, 2)
-        }`
+        const key = `announceEpisodes:${show.imdbId}:S${addLeadingZeros(
+          e.season,
+          2,
+        )}`;
 
-        // define the default payload to use if one doesn't exist in the collection
+        // define the default payload to use if one doesn't exist in the map
         const defaultPayload: NotificationPayload = {
           key,
           timestamp: airDate.unix(),
           imdbId: show.imdbId,
           showName: show.name,
           season: e.season,
-          episodeNumbers: [], // it has an emtpy array of episode numbers because it will be filled in later
+          episodeNumbers: [], // it has an empty array of episode numbers because it will be filled in later
           destinations: show.destinations,
-        }
+        };
 
-        // grab the payload from the collection or create a new one
-        const payload = acc.ensure(key, () => defaultPayload)
+        // grab the payload from the map or create a new one
+        if (!acc.has(key)) acc.set(key, defaultPayload);
+        const payload = acc.get(key);
+        assert(payload != null);
 
         // add the episode number to the payload
-        payload.episodeNumbers.push(e.number)
+        payload.episodeNumbers.push(e.number);
       }
 
-      return acc
+      return acc;
     },
-    new Collection<string, NotificationPayload>(),
-  )
-
-  return payloadCollection
+    new Map<string, NotificationPayload>(),
+  );
 }
 
 /**
- * send discord messages to epissode and global destinations with info about the episode(s)
+ * Send a message to a Discord channel via REST API
+ * @param channelId the channel to send the message to
+ * @param content the message content
+ * @param token the bot token for authorization
+ */
+async function sendDiscordMessage(
+  channelId: string,
+  content: string,
+  token: string,
+): Promise<void> {
+  const response = await fetch(
+    `https://discord.com/api/v10/channels/${channelId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bot ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content }),
+    },
+  );
+  if (!response.ok) {
+    await handleChannelSendError(
+      response,
+      channelId,
+      "Send message to channel",
+    );
+  }
+}
+
+/**
+ * Send discord messages to episode and broadcast destinations with info about the episode(s)
  * @param payload all the info needed to schedule a notification job
- * @param discord client needed to send the messages
- * @param globalDestinations additional destinations to send the message to
+ * @param token bot token needed to send the messages
+ * @param broadcastByGuild broadcast channels keyed by the guild they belong to
  */
 async function sendNotificationPayload(
   payload: NotificationPayload,
-  discord: Client,
-  globalDestinations: SettingsType["allEpisodes"],
+  token: string,
+  broadcastByGuild: Map<string, string[]>,
 ): Promise<void> {
   const message = getEpisodeMessage(
     payload.showName,
     payload.season,
     payload.episodeNumbers,
     payload.timestamp,
-  )
+  );
 
   // send the message to all the channels subscribed to the show
   for (const destination of payload.destinations) {
     try {
-      const channel = await discord.channels.fetch(destination.channelId)
-      if (channel == null) throw new Error("Channel not found")
-
-      // send message to discord
-      await sendMessage(channel, message)
+      await sendDiscordMessage(destination.channelId, message, token);
+      console.info(`Message Sent: ${message}`);
     } catch (e) {
-      console.error("Error sending message to destination", e)
+      console.error("Error sending message to destination", e);
     }
   }
 
-  // build the message that's sent to the global destinations
-  const channelsString = payload.destinations.map((d) => `<#${d.channelId}>`)
-    .join(" ")
-  const globalMessage = message +
-    ` Check out the discussions here: ${channelsString}`
+  // Broadcast per guild: each guild's broadcast channels only hear about this
+  // show if it's linked in that guild, and the "discussions here" links point
+  // only at that guild's own channels.
+  const destChannelsByGuild = new Map<string, string[]>();
+  for (const d of payload.destinations) {
+    const list = destChannelsByGuild.get(d.guildId) ?? [];
+    list.push(d.channelId);
+    destChannelsByGuild.set(d.guildId, list);
+  }
 
-  // send messages to all the global destinations
-  for (const destination of globalDestinations) {
-    try {
-      const channel = await discord.channels.fetch(destination.channelId)
-      if (channel == null) throw new Error("Channel not found")
+  for (const [guildId, channelIds] of destChannelsByGuild) {
+    const broadcastChannels = broadcastByGuild.get(guildId);
+    if (broadcastChannels == null || broadcastChannels.length === 0) continue;
 
-      // send message to discord
-      await sendMessage(channel, globalMessage)
-    } catch (e) {
-      console.error("Error sending message to global destination", e)
+    const channelsString = channelIds.map((id) => `<#${id}>`).join(" ");
+    const globalMessage = `${message} Check out the discussions here: ${channelsString}`;
+
+    for (const channelId of broadcastChannels) {
+      try {
+        await sendDiscordMessage(channelId, globalMessage, token);
+        console.info(`Message Sent: ${globalMessage}`);
+      } catch (e) {
+        console.error("Error sending message to broadcast destination", e);
+      }
     }
   }
 
-  // mark message as sent in  the db
-  await markMessageSent(
-    payload.imdbId,
-    payload.season,
-    payload.episodeNumbers,
-  )
-}
-
-/**
- * Send a message to a discord channel
- * @param channel where to send the message
- * @param message what to send
- */
-async function sendMessage(channel: Channel, message: string): Promise<void> {
-  if (!isTextChannel(channel)) throw new Error("Channel is not a text channel")
-
-  // send discord message
-  await channel.send(message)
-
-  console.info(`Message Sent: ${message} `)
+  // mark message as sent in the db
+  await markMessageSent(payload.imdbId, payload.season, payload.episodeNumbers);
 }
 
 /**
@@ -204,16 +217,17 @@ function getEpisodeMessage(
   timestamp: number,
 ): string {
   if (episodeNumbers.length <= 0) {
-    throw new Error("No episodes to schedule")
+    throw new Error("No episodes to schedule");
   }
 
   if (episodeNumbers.length === 1) {
-    return `**${showName} S${addLeadingZeros(season, 2)}E${
-      addLeadingZeros(episodeNumbers[0], 2)
-    }** is airing <t:${timestamp}:R>`
+    return `**${showName} S${addLeadingZeros(season, 2)}E${addLeadingZeros(
+      episodeNumbers[0],
+      2,
+    )}** is airing <t:${timestamp}:R>`;
   }
 
-  return `**${showName} S${addLeadingZeros(season, 2)}E${
-    toRanges(episodeNumbers).join(",")
-  }** is streaming somewhere <t:${timestamp}:R>!`
+  return `**${showName} S${addLeadingZeros(season, 2)}E${toRanges(
+    episodeNumbers,
+  ).join(",")}** is streaming somewhere <t:${timestamp}:R>!`;
 }

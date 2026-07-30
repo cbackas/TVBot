@@ -215,7 +215,7 @@ export type Company = {
   /** A parent company record */
   parentCompany?: ParentCompany;
   tagOptions?: TagOption[];
-}
+};
 
 /** A parent company record */
 export interface ParentCompany {
@@ -771,7 +771,7 @@ export type SeriesExtendedRecord = {
   /** translation extended record */
   translations?: TranslationExtended;
   year?: string;
-}
+};
 
 /** source type record */
 export interface SourceType {
@@ -792,7 +792,7 @@ export type Status = Required<{
   keepUpdated?: boolean;
   name?: string;
   recordType?: string;
-}>
+}>;
 
 /** studio record */
 export interface StudioBaseRecord {
@@ -845,8 +845,8 @@ export interface Translation {
   tagline?: string;
 }
 
-export type NameTranslation = Omit<Translation, "overview">
-export type OverviewTranslation = Omit<Translation, "name">
+export type NameTranslation = Omit<Translation, "overview">;
+export type OverviewTranslation = Omit<Translation, "name">;
 
 /** translation simple record */
 export interface TranslationSimple {

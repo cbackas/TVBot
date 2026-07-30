@@ -1,38 +1,55 @@
-import { type APIEmbed } from "npm:discord.js"
-import { Settings } from "lib/settingsManager.ts"
-import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
-import client from "lib/prisma.ts"
-import { type Show } from "prisma-client/client.ts"
-import { isTextChannel } from "lib/episodeNotifier.ts"
-import { getClient } from "app.ts"
+import { getEnv } from "./env.js";
+import { sendDiscordEmbed } from "./messages.js";
+import { getAllGlobalDestinations } from "./settingsManager.js";
+import { getAllShows } from "./shows.js";
+import { getUpcomingEpisodesEmbed } from "./upcoming.js";
 
 export async function sendMorningSummary(): Promise<void> {
-  const shows: Show[] = await client.show.findMany({
-    where: {
-      episodes: {
-        some: {
-          messageSent: false,
-        },
-      },
-    },
-  })
-
-  const embed: APIEmbed = getUpcomingEpisodesEmbed(shows, 1)
-
-  const discordClient = getClient()
-  const destinations = Settings.fetch()?.morningSummaryDestinations ?? []
-  for (const dest of destinations) {
-    const channel = await discordClient.channels.fetch(dest.channelId)
-    if (channel == null || !isTextChannel(channel) || !channel.isSendable()) {
-      console.warn(
-        `Found channel ${dest.channelId} in the morning summary destinations but it is not a text channel or is not sendable`,
-      )
-      continue
-    }
-
-    await channel.send({
-      content: "",
-      embeds: [embed],
-    })
+  const destinations = await getAllGlobalDestinations("morning_summary");
+  if (destinations.length === 0) {
+    console.info(
+      "Morning summary: no `morning_summary` destinations configured — nothing to send. Use `/setting morning_summary add`.",
+    );
+    return;
   }
+
+  // Fan out per guild: each guild's digest only covers the shows linked within
+  // that guild, so servers don't see each other's shows.
+  const channelsByGuild = new Map<string, string[]>();
+  for (const dest of destinations) {
+    const list = channelsByGuild.get(dest.guildId) ?? [];
+    list.push(dest.channelId);
+    channelsByGuild.set(dest.guildId, list);
+  }
+
+  const allShows = await getAllShows();
+  const token = getEnv("DISCORD_TOKEN");
+
+  let sent = 0;
+  let total = 0;
+  for (const [guildId, channelIds] of channelsByGuild) {
+    const guildShows = allShows.filter(
+      (show) =>
+        show.destinations.some((d) => d.guildId === guildId) &&
+        show.episodes.some((e) => !e.messageSent),
+    );
+
+    const embed = getUpcomingEpisodesEmbed(guildShows, 1);
+
+    console.info(
+      `Morning summary: guild ${guildId} — digest of ${guildShows.length} show(s) to ${channelIds.length} channel(s)`,
+    );
+
+    for (const channelId of channelIds) {
+      total += 1;
+      try {
+        await sendDiscordEmbed(channelId, embed, token);
+        sent += 1;
+      } catch (e) {
+        console.error(`Error sending morning summary to ${channelId}`, e);
+      }
+    }
+  }
+
+  console.info(`Morning summary: sent to ${sent}/${total} destination(s)`);
 }
