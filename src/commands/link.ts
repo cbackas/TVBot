@@ -39,7 +39,7 @@ export const command: CommandV2 = {
       .setName("link")
       .setDescription("Link a show to a channel for notifications.")
       .setContexts(InteractionContextType.Guild)
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
     subCommands: [
       new SlashCommandSubcommandBuilder()
         .setName("here")

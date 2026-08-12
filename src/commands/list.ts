@@ -24,7 +24,7 @@ export const command: CommandV2 = {
       .setName("list")
       .setDescription("List various things from the bot's DB")
       .setContexts(InteractionContextType.Guild)
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
     subGroups: [{
       main: new SlashCommandSubcommandGroupBuilder()
         .setName("shows")

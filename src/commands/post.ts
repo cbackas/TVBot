@@ -36,7 +36,7 @@ export const command: CommandV2 = {
         'Create a forum post for a show. Require "Manage Channels" permission.',
       )
       .setContexts(InteractionContextType.Guild)
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
       .addStringOption((option) =>
         option.setName("imdb_id")
           .setDescription("The IMDB ID to search for")

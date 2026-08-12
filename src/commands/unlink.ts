@@ -22,7 +22,7 @@ export const command: CommandV2 = {
       .setName("unlink")
       .setDescription("Unlink shows from a channel for notifications.")
       .setContexts(InteractionContextType.Guild)
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
     subCommands: [
       new SlashCommandSubcommandBuilder()
         .setName("here")
