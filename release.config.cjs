@@ -9,7 +9,17 @@ module.exports = {
   tagFormat: "${version}",
   repositoryUrl: "https://github.com/cbackas/TVBot",
   plugins: [
-    "@semantic-release/commit-analyzer",
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        releaseRules: [
+          { breaking: true, release: "major" },
+          { revert: true, release: "patch" },
+          { type: "feat", release: "minor" },
+          { release: "patch" },
+        ],
+      },
+    ],
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/github",
