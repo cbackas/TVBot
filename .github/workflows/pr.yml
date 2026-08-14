@@ -17,7 +17,7 @@ jobs:
       - name: Check PR Title
         uses: deepakputhraya/action-pr-title@master
         with:
-          allowed_prefixes: 'Breaking:,Fix:,Update:,New:,Build:,Upgrade:,Chore:,NoBuild:'
+          allowed_prefixes: 'feat:,fix:,perf:,revert:,docs:,style:,refactor:,test:,build:,ci:,chore:'
           prefix_case_sensitive: true
   lint:
     runs-on: ubuntu-latest
