@@ -22,7 +22,7 @@ export type EnvKey = keyof typeof envKeys
 export function getEnv<K extends EnvKey>(key: K): z.infer<(typeof envKeys)[K]> {
   const value = Deno.env.get(key)
   const parsed = parseEnv(key, value)
-  return parsed !== undefined ? parsed : undefined
+  return parsed as z.infer<(typeof envKeys)[K]>
 }
 
 /**

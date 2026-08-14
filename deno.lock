@@ -10,7 +10,7 @@
     "npm:moment-timezone@~0.5.43": "0.5.46",
     "npm:parse-url@^8.1.0": "8.1.0",
     "npm:prisma@6.19.3": "6.19.3",
-    "npm:zod@^4.0.0-beta": "4.0.0-beta.20250420T053007"
+    "npm:zod@^4.4.3": "4.4.3"
   },
   "jsr": {
     "@std/dotenv@0.225.2": {
@@ -155,9 +155,6 @@
     },
     "@vladfrangu/async_event_emitter@2.4.7": {
       "integrity": "sha512-Xfe6rpCTxSxfbswi/W/Pz7zp1WWSNn4A0eW4mLkQUewCrXXtMj31lCg+iQyTkh/CkusZSq9eDflu7tjEDXUY6g=="
-    },
-    "@zod/core@0.8.1": {
-      "integrity": "sha512-djj8hPhxIHcG8ptxITaw/Bout5HJZ9NyRbKr95Eilqwt9R0kvITwUQGDU+n+MVdsBIka5KwztmZSLti22F+P0A=="
     },
     "c12@3.1.0": {
       "integrity": "sha512-uWoS8OU1MEIsOv8p/5a82c3H31LsWVR5qiyXVfBNOzfffjUWtPnhAb4BYI2uG2HfGmZmFjCtui5XNWaps+iFuw==",
@@ -376,11 +373,8 @@
     "ws@8.21.3": {
       "integrity": "sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw=="
     },
-    "zod@4.0.0-beta.20250420T053007": {
-      "integrity": "sha512-5pp8Q0PNDaNcUptGiBE9akyioJh3RJpagIxrLtAVMR9IxwcSZiOsJD/1/98CyhItdTlI2H91MfhhLzRlU+fifA==",
-      "dependencies": [
-        "@zod/core"
-      ]
+    "zod@4.4.3": {
+      "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="
     }
   },
   "workspace": {
@@ -392,7 +386,7 @@
       "npm:moment-timezone@~0.5.43",
       "npm:parse-url@^8.1.0",
       "npm:prisma@6.19.3",
-      "npm:zod@^4.0.0-beta"
+      "npm:zod@^4.4.3"
     ]
   }
 }
