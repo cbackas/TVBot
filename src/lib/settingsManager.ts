@@ -72,7 +72,7 @@ export class Settings {
   public static update = async (
     inputData: Partial<SettingsType>,
   ): Promise<void> => {
-    const data = Prisma.validator<Prisma.SettingsUpdateInput>()(inputData)
+    const data = inputData satisfies Prisma.SettingsUpdateInput
 
     await client.settings.update({
       where: {

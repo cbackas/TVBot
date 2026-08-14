@@ -67,12 +67,12 @@ export async function updateEpisodes(
 
       const airDate = getAirDate(e.aired, airsTime, timezone)
       const airDateUTC = airDate.utc().toDate()
-      return Prisma.validator<Prisma.ShowCreateInput["episodes"]>()({
+      return {
         season: e.seasonNumber,
         number: e.number,
         title: e.name ?? "",
         airDate: airDateUTC,
-      })
+      } satisfies Prisma.ShowCreateInput["episodes"]
     })
 
   // update the show with the new episodes (we can just replace all of them)
