@@ -1,10 +1,17 @@
 import { ActivityType } from "npm:discord.js"
 import client from "lib/prisma.ts"
-import { getClientUser } from "app.ts"
+import { getClient } from "app.ts"
+
+function getClientUser() {
+  const user = getClient().user
+  if (user == null) {
+    throw new Error("Fatal: Client user is null")
+  }
+  return user
+}
 
 /**
  * sets the bots activity to a random show from the bot db
- * @param clientUser the discord user to set the activity for
  */
 export async function setRandomShowActivity(): Promise<void> {
   const showCount = await client.show.count()
@@ -24,7 +31,6 @@ export async function setRandomShowActivity(): Promise<void> {
 
 /**
  * sets watching activity for the bot for a show
- * @param clientUser the discord user to set the activity for
  * @param show show name to put in the activity
  */
 export function setWatchingActivity(
@@ -37,7 +43,6 @@ export function setWatchingActivity(
 
 /**
  * this clears the bots activity
- * @param clientUser the discord user to set the activity for
  */
 export function clearActivity(): void {
   const clientUser = getClientUser()
@@ -47,7 +52,6 @@ export function clearActivity(): void {
 
 /**
  * this sets a dumb 'loading' activity for while the bot is fetching stuff from the TVDB
- * @param clientUser the discord user to set the activity for
  */
 export function setTVDBLoadingActivity(): void {
   const clientUser = getClientUser()
