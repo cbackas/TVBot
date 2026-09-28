@@ -131,6 +131,7 @@ export const command: CommandV2 = {
             post: newPost,
           })
         } catch (error) {
+          console.error(`Error creating post for ${imdbId}:`, error)
           messages.push(`Error creating post for \`${imdbId}\``)
           seriesList.delete(imdbId)
         }

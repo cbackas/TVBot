@@ -60,9 +60,11 @@ export const command: CommandV2 = {
           break
       }
     } catch (error) {
-      if (error instanceof Error) {
-        return await interaction.editReply(error.message)
-      }
+      console.error(`Error fetching upcoming episodes (${subCommand}):`, error)
+      const message = error instanceof Error
+        ? error.message
+        : "An unexpected error occurred while fetching upcoming episodes"
+      return await interaction.editReply(message)
     }
 
     if (s == null || s.length === 0) {
