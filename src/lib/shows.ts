@@ -1,6 +1,6 @@
 import { type Destination, Prisma, type Show } from "prisma-client/client.ts"
-import { type TextBasedChannel } from "npm:discord.js"
-import moment, { type Moment } from "npm:moment-timezone"
+import { type TextBasedChannel } from "discord.js"
+import moment, { type Moment } from "moment-timezone"
 import { isThreadChannel } from "interfaces/discord.ts"
 import client from "lib/prisma.ts"
 import { getTimezone } from "lib/timezones.ts"
