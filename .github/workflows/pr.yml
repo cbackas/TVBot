@@ -44,27 +44,31 @@ jobs:
     with:
       dry_run: true
   build_docker:
-    runs-on: ubuntu-latest
+    name: build_docker (${{ matrix.arch }})
+    # Build each arch on its native runner. QEMU-emulated arm64 SIGILLs on
+    # Deno/V8 during `prisma generate`, so emulation is avoided entirely.
+    # Validation only (no push), so forks and same-repo PRs behave identically.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v7
-      # Fork PRs get a read-only GITHUB_TOKEN and no secrets, so only same-repo
-      # PRs can log in and push. Forks just build (validates the Dockerfile).
-      - uses: docker/login-action@v4
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.github_token }}
-      - uses: docker/setup-qemu-action@v4
       - uses: docker/setup-buildx-action@v4
-      - name: build and push
+      - name: build
         uses: docker/build-push-action@v7
         with:
-          tags: ghcr.io/cbackas/tvbot:pr-${{github.event.pull_request.number}}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha,scope=pr-${{ matrix.arch }}
+          # Fork PRs can't write the Actions cache; only export it for same-repo PRs.
+          cache-to: ${{ github.event.pull_request.head.repo.full_name == github.repository && format('type=gha,mode=max,scope=pr-{0}', matrix.arch) || '' }}
+          push: false
