@@ -80,7 +80,7 @@ export class CommandManager {
     const command = this.commands.get(interaction.commandName)
     if (command === undefined) return
 
-    // checks if the recieved has exactly the same subcommand and/or subcommand group as the command
+    // checks if the received has exactly the same subcommand and/or subcommand group as the command
     const subcommands = command.slashCommand.subCommands
     const subgroups = command.slashCommand.subGroups
     const hasSubCommands = subcommands === undefined ||
@@ -100,7 +100,7 @@ export class CommandManager {
     if (!hasSubCommands && !hasSubGroups && !hasSubgroupSubCommands) return
 
     console.debug(
-      `[Command Recieved] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`,
+      `[Command Received] ${command.slashCommand.main.name} - ${interaction.user.username}#${interaction.user.discriminator}`,
     )
 
     await interaction.deferReply({ ephemeral: true })

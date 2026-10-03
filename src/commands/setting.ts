@@ -43,12 +43,12 @@ export const command: CommandV2 = {
           new SlashCommandSubcommandBuilder()
             .setName("add")
             .setDescription(
-              "Add a channel from the list that receive all episode notifications",
+              "Add a channel to the list that receives all episode notifications",
             )
             .addChannelOption((option) =>
               option.setName("channel")
                 .setDescription(
-                  "Channel to add to the list that recieves all episode notifications",
+                  "Channel to add to the list that receives all episode notifications",
                 )
                 .addChannelTypes(
                   ChannelType.GuildText,
@@ -59,12 +59,12 @@ export const command: CommandV2 = {
           new SlashCommandSubcommandBuilder()
             .setName("remove")
             .setDescription(
-              "Remove a channel from the list that receive all episode notifications",
+              "Remove a channel from the list that receives all episode notifications",
             )
             .addChannelOption((option) =>
               option.setName("channel")
                 .setDescription(
-                  "Channel to remove from the list that recieves all episode notifications",
+                  "Channel to remove from the list that receives all episode notifications",
                 )
                 .addChannelTypes(
                   ChannelType.GuildText,
@@ -84,12 +84,12 @@ export const command: CommandV2 = {
           new SlashCommandSubcommandBuilder()
             .setName("add_channel")
             .setDescription(
-              "Add a channel to the list that recieves the morning summary message",
+              "Add a channel to the list that receives the morning summary message",
             )
             .addChannelOption((option) =>
               option.setName("channel")
                 .setDescription(
-                  "Channel to add to the list that recieves the morning summary message",
+                  "Channel to add to the list that receives the morning summary message",
                 )
                 .addChannelTypes(
                   ChannelType.GuildText,
@@ -100,12 +100,12 @@ export const command: CommandV2 = {
           new SlashCommandSubcommandBuilder()
             .setName("remove_channel")
             .setDescription(
-              "Remove a channel from the list that recieves the morning summary message",
+              "Remove a channel from the list that receives the morning summary message",
             )
             .addChannelOption((option) =>
               option.setName("channel")
                 .setDescription(
-                  "Channel to remove from the list that recieves the morning summary message",
+                  "Channel to remove from the list that receives the morning summary message",
                 )
                 .addChannelTypes(
                   ChannelType.GuildText,
