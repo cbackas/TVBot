@@ -15,6 +15,13 @@ import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressError } from "interfaces/error.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
 import { pruneUnsubscribedShows } from "lib/shows.ts"
+import {
+  codeSpan,
+  type CommandLog,
+  logCommandUse,
+  rememberCommandLog,
+  takeCommandLog,
+} from "lib/discordLog.ts"
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -42,6 +49,7 @@ export const command: CommandV2 = {
   },
   selectMenuIds: ["unlink_shows_menu"],
   async executeCommand(interaction: ChatInputCommandInteraction) {
+    const log = logCommandUse(interaction)
     const subCommand = interaction.options.getSubcommand()
 
     const progress = new ProgressMessageBuilder()
@@ -65,6 +73,7 @@ export const command: CommandV2 = {
 
     // error if the channel didnt get set for some reason
     if (channel === undefined) {
+      void log.fail("invalid channel")
       return await interaction.editReply("Invalid channel")
     }
 
@@ -80,6 +89,7 @@ export const command: CommandV2 = {
       })
 
       if (showsInChannel === null || showsInChannel.length === 0) {
+        void log.append("(no shows linked)")
         return await interaction.editReply(
           "This channel has no shows linked to it.",
         )
@@ -100,52 +110,87 @@ export const command: CommandV2 = {
             })),
         )
 
-      await interaction.editReply({
+      const reply = await interaction.editReply({
         content:
           `Select the shows that you'd like to unlink from <#${channel?.id}>`,
         components: [row],
       })
+      rememberCommandLog(reply.id, log)
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
+        void log.fail(error.message)
         const message = `${progress.toString()}\n\nError: ${error.message}`
         return await interaction.editReply(message)
       }
 
+      void log.fail()
       throw error
     }
   },
   async executeSelectMenu(interaction: AnySelectMenuInteraction) {
+    const log = takeCommandLog(interaction.message.id)
     const channelId = interaction.message.content.match(/<#([0-9]+)>/)?.at(1)
 
     if (channelId === undefined) {
+      void log?.fail("could not find the channel")
       return await interaction.reply("Failed to find channel")
     }
 
-    const values = interaction.values
+    try {
+      return await unlinkShows(interaction, channelId, log)
+    } catch (error) {
+      void log?.fail()
+      throw error
+    }
+  },
+}
 
-    const s = await client.show.updateMany({
-      where: {
-        imdbId: {
-          in: values,
-        },
+/**
+ * Unlinks the shows chosen in the select menu from a channel
+ * @param interaction select menu interaction with the chosen shows
+ * @param channelId channel to unlink the shows from
+ * @param log log handle for the original /unlink command, if it's still remembered
+ */
+async function unlinkShows(
+  interaction: AnySelectMenuInteraction,
+  channelId: string,
+  log: CommandLog | undefined,
+) {
+  const values = interaction.values
+
+  const shows = await client.show.findMany({
+    where: { imdbId: { in: values } },
+    select: { name: true, imdbId: true },
+  })
+
+  const s = await client.show.updateMany({
+    where: {
+      imdbId: {
+        in: values,
       },
-      data: {
-        destinations: {
-          deleteMany: {
-            where: {
-              channelId,
-            },
+    },
+    data: {
+      destinations: {
+        deleteMany: {
+          where: {
+            channelId,
           },
         },
       },
-    })
+    },
+  })
 
-    await pruneUnsubscribedShows()
+  await pruneUnsubscribedShows()
 
-    return await interaction.editReply({
-      content: `Unlinked ${s.count} shows from <#${channelId}>`,
-      components: [],
-    })
-  },
+  void log?.success(
+    `Unlinked ${
+      shows.map((show) => `${codeSpan(show.name)} (${show.imdbId})`).join(", ")
+    } from <#${channelId}>`,
+  )
+
+  return await interaction.editReply({
+    content: `Unlinked ${s.count} shows from <#${channelId}>`,
+    components: [],
+  })
 }

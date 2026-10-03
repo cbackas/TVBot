@@ -12,6 +12,7 @@ import {
 } from "discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { getEnv } from "lib/env.ts"
+import { reportError } from "lib/discordLog.ts"
 
 interface Getter<TInput> {
   command: TInput
@@ -70,7 +71,9 @@ export class CommandManager {
           this.commands.map((cmd) => cmd.slashCommand.main.name).join("\n"),
       )
     } catch (error) {
-      console.error(error)
+      reportError("Slash command registration", error, {
+        type: "command_errors",
+      })
     }
   }
 
@@ -108,7 +111,9 @@ export class CommandManager {
     try {
       await command.executeCommand(interaction)
     } catch (error) {
-      console.error(error)
+      reportError(`/${interaction.commandName}`, error, {
+        type: "command_errors",
+      })
       await interaction.editReply(
         "There was an error while executing this command!",
       )
@@ -128,7 +133,9 @@ export class CommandManager {
     try {
       await command.executeSelectMenu(interaction)
     } catch (error) {
-      console.error(error)
+      reportError(`Select menu ${interaction.customId}`, error, {
+        type: "command_errors",
+      })
       await interaction.editReply(
         "There was an error while executing this command!",
       )
@@ -144,7 +151,9 @@ export class CommandManager {
     try {
       await command.executeAutoComplete(interaction)
     } catch (e) {
-      console.error(e)
+      reportError(`Autocomplete /${interaction.commandName}`, e, {
+        type: "command_errors",
+      })
     }
   }
 

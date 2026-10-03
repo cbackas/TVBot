@@ -5,6 +5,7 @@ import { isThreadChannel } from "interfaces/discord.ts"
 import client from "lib/prisma.ts"
 import { getTimezone } from "lib/timezones.ts"
 import { getSeries } from "lib/tvdb.ts"
+import { reportError } from "lib/discordLog.ts"
 import {
   type EpisodeBaseRecord,
   type SeriesExtendedRecord,
@@ -41,12 +42,13 @@ function getAirDate(
  * @param imdbId imdbid of the show to update
  * @param tvdbId tvdbId of the show to update
  * @param providedSeries optional series data to use instead of fetching it
+ * @returns number of upcoming episodes saved for the show
  */
 export async function updateEpisodes(
   imdbId: string,
   tvdbId: number,
   providedSeries?: SeriesExtendedRecord,
-): Promise<void> {
+): Promise<number> {
   // if the caller already has series data for whatever reason and provided it, just use that
   const series: SeriesExtendedRecord | undefined = providedSeries ??
     (await getSeries(tvdbId))
@@ -96,12 +98,17 @@ export async function updateEpisodes(
   console.info(
     `[Get Episode Data] ${series.name} / Upcoming episodes: ${upcomingEpisodes.length}`,
   )
+
+  return upcomingEpisodes.length
 }
 
 /**
  * Updates all shows in the DB with new episodes
+ * @returns how many shows were checked, how many failed and how many upcoming episodes were found
  */
-export async function checkForAiringEpisodes(): Promise<void> {
+export async function checkForAiringEpisodes(): Promise<
+  { checked: number; failed: number; upcomingEpisodes: number }
+> {
   console.info("== Checking all shows for airing episodes ==")
   const shows = await client.show.findMany({
     select: {
@@ -114,15 +121,27 @@ export async function checkForAiringEpisodes(): Promise<void> {
     },
   })
 
+  let checked = 0
+  let failed = 0
+  let upcomingEpisodes = 0
+
   for (const show of shows) {
     try {
-      await updateEpisodes(show.imdbId, show.tvdbId)
+      upcomingEpisodes += await updateEpisodes(show.imdbId, show.tvdbId)
+      checked++
     } catch (error) {
-      console.error(`Error updating episodes for ${show.name} (${show.imdbId}):`, error)
+      failed++
+      reportError(
+        `Updating episodes for ${show.name} (${show.imdbId})`,
+        error,
+        { type: "task_errors" },
+      )
     }
   }
 
   console.info("== Finished checking all shows for airing episodes ==")
+
+  return { checked, failed, upcomingEpisodes }
 }
 
 /**

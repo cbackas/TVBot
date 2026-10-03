@@ -22,6 +22,7 @@ import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 import { type Destination, type Show } from "prisma-client/client.ts"
 import { parseIMDBIds } from "lib/util.ts"
 import { Settings } from "lib/settingsManager.ts"
+import { logCommandUse, reportError } from "lib/discordLog.ts"
 
 interface SeriesWrapper {
   series: SeriesExtendedRecord
@@ -54,9 +55,11 @@ export const command: CommandV2 = {
   },
 
   async executeCommand(interaction: ChatInputCommandInteraction) {
+    const log = logCommandUse(interaction)
     let imdbIds = parseIMDBIds(interaction.options.getString("imdb_id", true))
 
     if (imdbIds.length > 10) {
+      void log.fail("too many IMDB IDs")
       return await interaction.editReply({
         content: "You can only create 10 posts at a time",
       })
@@ -82,6 +85,7 @@ export const command: CommandV2 = {
       await progress.sendNextStep() // start step 1
 
       const messages: string[] = []
+      const created: string[] = []
 
       for (const imdbId of imdbIds) {
         const existingPosts = await checkForExistingPosts(imdbId, tvForum) ?? []
@@ -92,6 +96,7 @@ export const command: CommandV2 = {
       }
 
       if (imdbIds.length === 0) {
+        void log.append("(already posted)")
         throw new ProgressError(
           `All show(s) already have a post in <#${tvForum}>`,
         )
@@ -131,7 +136,9 @@ export const command: CommandV2 = {
             post: newPost,
           })
         } catch (error) {
-          console.error(`Error creating post for ${imdbId}:`, error)
+          reportError(`/post: creating post for ${imdbId}`, error, {
+            type: "thread_ops",
+          })
           messages.push(`Error creating post for \`${imdbId}\``)
           seriesList.delete(imdbId)
         }
@@ -160,10 +167,17 @@ export const command: CommandV2 = {
         messages.push(
           `Created post for \`${tvDBSeries.name}\` (${imdbId}) - <#${post.id}>`,
         )
+        created.push(`<#${post.id}>`)
         console.info(`Added show ${tvDBSeries.name} (${imdbId})`)
       }
 
       await progress.sendNextStep() // start step 5
+
+      void log.success(
+        `Show ${
+          created.length === 1 ? "thread" : "threads"
+        } created: ${created.join(", ")}`,
+      )
 
       return await progress.sendNextStep(
         `Creating post(s) in <#${tvForum}>:\n\n${messages.join("\n")}`,
@@ -171,10 +185,12 @@ export const command: CommandV2 = {
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
+        void log.fail(error.message)
         const message = `${progress.toString()}\n\nError: ${error.message}`
         return await interaction.editReply(message)
       }
 
+      void log.fail()
       throw error
     }
   },
@@ -280,7 +296,9 @@ async function saveShowToDB(
       channel,
     )
   } catch (error) {
-    console.error(error)
+    reportError(`/post: saving ${seriesName} (${imdbId})`, error, {
+      type: "thread_ops",
+    })
     throw new ProgressError("Something went wrong saving the show to the DB")
   }
 }

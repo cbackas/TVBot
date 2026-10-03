@@ -13,6 +13,7 @@ import client from "lib/prisma.ts"
 import { Settings, type SettingsType } from "lib/settingsManager.ts"
 import { addLeadingZeros, toRanges } from "lib/util.ts"
 import { getClient } from "app.ts"
+import { reportError } from "lib/discordLog.ts"
 
 export function isTextChannel(
   channel: Channel,
@@ -144,7 +145,11 @@ async function sendNotificationPayload(
       // send message to discord
       await sendMessage(channel, message)
     } catch (e) {
-      console.error("Error sending message to destination", e)
+      reportError(
+        `Sending ${payload.showName} notification to ${destination.channelId}`,
+        e,
+        { type: "task_errors" },
+      )
     }
   }
 
@@ -163,7 +168,11 @@ async function sendNotificationPayload(
       // send message to discord
       await sendMessage(channel, globalMessage)
     } catch (e) {
-      console.error("Error sending message to global destination", e)
+      reportError(
+        `Sending ${payload.showName} notification to global destination ${destination.channelId}`,
+        e,
+        { type: "task_errors" },
+      )
     }
   }
 
