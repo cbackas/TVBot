@@ -66,5 +66,5 @@ jobs:
           tags: ghcr.io/cbackas/tvbot:pr-${{github.event.pull_request.number}}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: ${{ github.event.pull_request.head.repo.full_name == github.repository && 'type=gha,mode=max' || '' }}
           push: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
