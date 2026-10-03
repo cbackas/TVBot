@@ -1,5 +1,5 @@
-import "jsr:@std/dotenv/load"
-import { Client, ClientUser, Events, GatewayIntentBits } from "npm:discord.js"
+import "@std/dotenv/load"
+import { Client, ClientUser, Events, GatewayIntentBits } from "discord.js"
 import { CommandManager } from "lib/commandManager.ts"
 import { checkForAiringEpisodes, pruneUnsubscribedShows } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
@@ -24,6 +24,8 @@ await commandManager.registerCommands(clientId, token, guildId)
 
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
 
+export const getClient = (): Client<boolean> => discordClient
+
 discordClient.on(Events.ClientReady, async (client) => {
   if (client.user == null) {
     throw new Error("Fatal: Client user is null")
@@ -46,9 +48,3 @@ discordClient.on(Events.ChannelDelete, handleChannelDelete)
 
 // start the bot
 await discordClient.login(token)
-
-export const getClient = (): Client<boolean> => discordClient
-export const getClientUser = (): ClientUser => {
-  assert(discordClient.user != null, "Client user is null")
-  return discordClient.user
-}

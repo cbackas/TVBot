@@ -1,4 +1,4 @@
-import * as z from "npm:zod"
+import * as z from "zod"
 
 const envKeys = {
   "REGISTER_COMMANDS": z.stringbool().optional().default(true),

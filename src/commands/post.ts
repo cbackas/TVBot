@@ -9,7 +9,7 @@ import {
   SlashCommandBuilder,
   type TextBasedChannel,
   type ThreadChannel,
-} from "npm:discord.js"
+} from "discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
@@ -131,6 +131,7 @@ export const command: CommandV2 = {
             post: newPost,
           })
         } catch (error) {
+          console.error(`Error creating post for ${imdbId}:`, error)
           messages.push(`Error creating post for \`${imdbId}\``)
           seriesList.delete(imdbId)
         }

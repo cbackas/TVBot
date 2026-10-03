@@ -1,6 +1,6 @@
 import { type Destination, Prisma, type Show } from "prisma-client/client.ts"
-import { type TextBasedChannel } from "npm:discord.js"
-import moment, { type Moment } from "npm:moment-timezone"
+import { type TextBasedChannel } from "discord.js"
+import moment, { type Moment } from "moment-timezone"
 import { isThreadChannel } from "interfaces/discord.ts"
 import client from "lib/prisma.ts"
 import { getTimezone } from "lib/timezones.ts"
@@ -28,6 +28,10 @@ function getAirDate(
       timezone,
     )
   } catch (error) {
+    console.error(
+      `Could not parse air date (dateStr=${dateStr}, timeStr=${timeStr}, timezone=${timezone}):`,
+      error,
+    )
     throw new Error("Could not parse air date")
   }
 }
@@ -114,7 +118,7 @@ export async function checkForAiringEpisodes(): Promise<void> {
     try {
       await updateEpisodes(show.imdbId, show.tvdbId)
     } catch (error) {
-      console.error(`Error updating episodes for ${show.name} (${show.imdbId})`)
+      console.error(`Error updating episodes for ${show.name} (${show.imdbId}):`, error)
     }
   }
 

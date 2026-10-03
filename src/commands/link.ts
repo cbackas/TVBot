@@ -8,7 +8,7 @@ import {
   type SlashCommandStringOption,
   SlashCommandSubcommandBuilder,
   type TextBasedChannel,
-} from "npm:discord.js"
+} from "discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"

@@ -3,7 +3,7 @@ import {
   type Channel,
   ChannelType,
   type ForumChannel,
-} from "npm:discord.js"
+} from "discord.js"
 
 export function isForumChannel(channel: Channel): channel is ForumChannel {
   return channel.type === ChannelType.GuildForum
