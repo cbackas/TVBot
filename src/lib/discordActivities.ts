@@ -1,4 +1,4 @@
-import { ActivityType } from "npm:discord.js"
+import { ActivityType } from "discord.js"
 import client from "lib/prisma.ts"
 import { getClient } from "app.ts"
 

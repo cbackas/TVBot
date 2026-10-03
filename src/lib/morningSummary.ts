@@ -1,4 +1,4 @@
-import { type APIEmbed } from "npm:discord.js"
+import { type APIEmbed } from "discord.js"
 import { Settings } from "lib/settingsManager.ts"
 import { getUpcomingEpisodesEmbed } from "lib/upcoming.ts"
 import client from "lib/prisma.ts"

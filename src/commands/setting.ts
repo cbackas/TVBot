@@ -8,7 +8,7 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
-} from "npm:discord.js"
+} from "discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
 import { Settings } from "lib/settingsManager.ts"

@@ -4,7 +4,7 @@ import {
   InteractionContextType,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
-} from "npm:discord.js"
+} from "discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { getSeriesByImdbId } from "lib/tvdb.ts"
