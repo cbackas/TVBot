@@ -3,10 +3,10 @@
   "tasks": {
     "dev": "deno --watch --no-clear-screen -A --unstable-cron --allow-scripts=npm:prisma,npm:@prisma/client,npm:@prisma/engines ./src/app.ts",
     "build": "deno compile --unstable-cron -o ./dist/tvbot ./src/app.ts",
-    "prisma": "deno run -A npm:prisma",
+    "prisma": "deno run -A prisma",
     "prisma:generate": "deno task prisma generate --schema=./prisma/schema.prisma",
-    "db:migrate": "deno run -A npm:prisma migrate dev",
-    "db:studio": "deno run -A npm:prisma studio",
+    "db:migrate": "deno run -A prisma migrate dev",
+    "db:studio": "deno run -A prisma studio",
     "typecheck": "deno check src/**/*.ts"
   },
   "compilerOptions": {

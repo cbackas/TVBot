@@ -1,6 +1,6 @@
 import { type Show } from "prisma-client/client.ts"
-import { type APIEmbed, type APIEmbedField, Collection } from "npm:discord.js"
-import moment from "npm:moment-timezone"
+import { type APIEmbed, type APIEmbedField, Collection } from "discord.js"
+import moment from "moment-timezone"
 import { type NotificationPayload } from "lib/episodeNotifier.ts"
 import { addLeadingZeros, toRanges } from "lib/util.ts"
 import { getEnv } from "lib/env.ts"

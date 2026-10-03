@@ -6,8 +6,8 @@ import {
   type Client,
   Collection,
   type TextChannel,
-} from "npm:discord.js"
-import moment from "npm:moment-timezone"
+} from "discord.js"
+import moment from "moment-timezone"
 import { markMessageSent } from "lib/shows.ts"
 import client from "lib/prisma.ts"
 import { Settings, type SettingsType } from "lib/settingsManager.ts"

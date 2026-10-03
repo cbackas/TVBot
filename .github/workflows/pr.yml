@@ -34,6 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
+      - run: deno run -A --allow-scripts=npm:prisma,npm:@prisma/engines,npm:@prisma/client prisma generate --schema=./prisma/schema.prisma
       - run: deno install --allow-scripts=npm:prisma,npm:@prisma/engines,npm:@prisma/client
       - run: deno task typecheck
   test-semantic-release:

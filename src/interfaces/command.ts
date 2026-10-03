@@ -9,7 +9,7 @@ import {
   type SlashCommandSubcommandBuilder,
   type SlashCommandSubcommandGroupBuilder,
   type SlashCommandSubcommandsOnlyBuilder,
-} from "npm:discord.js"
+} from "discord.js"
 
 type ExecuteFunction = void | Message<boolean> | InteractionResponse<boolean>
 

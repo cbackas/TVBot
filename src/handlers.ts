@@ -1,4 +1,4 @@
-import { ChannelType, ClientEvents } from "npm:discord.js"
+import { ChannelType, ClientEvents } from "discord.js"
 import { Settings } from "lib/settingsManager.ts"
 import { pruneUnsubscribedShows, removeAllSubscriptions } from "lib/shows.ts"
 
