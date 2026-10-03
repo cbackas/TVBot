@@ -25,7 +25,8 @@ export function buildShowEmbed(
     },
     {
       name: "Seasons",
-      value: tvdbSeries.seasons.length.toFixed(0),
+      value: Math.max(0, ...tvdbSeries.seasons.map((s) => s.number ?? 0))
+        .toFixed(0),
       inline: true,
     },
     {
