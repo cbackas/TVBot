@@ -3,7 +3,7 @@ import {
   type ChatInputCommandInteraction,
   InteractionContextType,
   SlashCommandBuilder,
-} from "npm:discord.js"
+} from "discord.js"
 import client from "lib/prisma.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { getSeriesByImdbId, getSeriesByName } from "lib/tvdb.ts"

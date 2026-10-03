@@ -9,7 +9,7 @@ import {
   type RESTPostAPIContextMenuApplicationCommandsJSONBody,
   Routes,
   type SlashCommandBuilder,
-} from "npm:discord.js"
+} from "discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { getEnv } from "lib/env.ts"
 

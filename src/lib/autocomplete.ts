@@ -2,7 +2,7 @@ import { type Prisma } from "prisma-client/client.ts"
 import {
   type ApplicationCommandOptionChoiceData,
   type AutocompleteInteraction,
-} from "npm:discord.js"
+} from "discord.js"
 import client from "lib/prisma.ts"
 
 export async function showSearchAutocomplete(

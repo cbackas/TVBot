@@ -1,5 +1,5 @@
-import "jsr:@std/dotenv/load"
-import { Client, ClientUser, Events, GatewayIntentBits } from "npm:discord.js"
+import "@std/dotenv/load"
+import { Client, ClientUser, Events, GatewayIntentBits } from "discord.js"
 import { CommandManager } from "lib/commandManager.ts"
 import { checkForAiringEpisodes, pruneUnsubscribedShows } from "lib/shows.ts"
 import { sendAiringMessages } from "lib/episodeNotifier.ts"
