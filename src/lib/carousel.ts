@@ -19,6 +19,10 @@ import {
 const PREVIOUS_ID = "carousel_previous"
 const NEXT_ID = "carousel_next"
 const SELECT_ID = "carousel_select"
+const SEND_ID = "carousel_send"
+
+/** why the collector stopped when a result was sent */
+const SENT_REASON = "sent"
 
 /** how long the controls keep working after the reply is sent */
 const TIMEOUT_MS = 10 * 60 * 1000
@@ -68,6 +72,17 @@ function buildButtons(
   count: number,
   disabled: boolean,
 ): ActionRowBuilder<ButtonBuilder> {
+  const send = new ButtonBuilder()
+    .setCustomId(SEND_ID)
+    .setLabel("Send")
+    .setStyle(ButtonStyle.Success)
+    .setDisabled(disabled)
+
+  // there is nothing to browse with a single page
+  if (count === 1) {
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(send)
+  }
+
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(PREVIOUS_ID)
@@ -85,6 +100,7 @@ function buildButtons(
       .setLabel("Next ▶")
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(disabled),
+    send,
   )
 }
 
@@ -103,7 +119,17 @@ function buildContainer(
 
   if (embed.color != null) container.setAccentColor(embed.color)
 
-  container.addActionRowComponents(buildSelect(pages, index, disabled))
+  if (pages.length > 1) {
+    container.addActionRowComponents(buildSelect(pages, index, disabled))
+  } else {
+    // with one page the title isn't in a dropdown, so show it as a heading
+    const { label } = pages[index]
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `## ${embed.url != null ? `[${label}](${embed.url})` : label}`,
+      ),
+    )
+  }
 
   if (embed.description != null && embed.description !== "") {
     const description = embed.description.length > MAX_DESCRIPTION_LENGTH
@@ -158,8 +184,10 @@ function buildContainer(
  * Replies to a deferred command with a private card: one show at a time
  * with a dropdown above it to jump to any page, and previous and next buttons
  * that wrap around at either end
+ * A single page has just its title and the Send button
+ * The Send button posts the current page's embed publicly to the channel
+ * then deletes the carousel reply
  * The controls stop working after TIMEOUT_MS or when the bot restarts
- * With a single page the embed is sent as it is, without controls
  * @param interaction deferred command interaction to reply to
  * @param allPages the pages in order, only the first MAX_PAGES are used
  */
@@ -169,10 +197,6 @@ export async function sendCarousel(
 ): Promise<Message> {
   const pages = allPages.slice(0, MAX_PAGES)
   const count = pages.length
-
-  if (count === 1) {
-    return await interaction.editReply({ embeds: [pages[0].embed] })
-  }
 
   let index = 0
 
@@ -191,6 +215,39 @@ export async function sendCarousel(
 
   collector.on("collect", async (componentInteraction) => {
     try {
+      if (componentInteraction.customId === SEND_ID) {
+        await componentInteraction.deferUpdate()
+
+        // the embed is sent as built, with its title, columns and footer logo
+        // the user is shown as a name but not pinged
+        const publicMessage = {
+          content:
+            `-# <@${interaction.user.id}> used ${interaction.commandName}`,
+          embeds: [pages[index].embed],
+          allowedMentions: { parse: [] },
+        }
+        try {
+          const channel = componentInteraction.channel
+          if (channel?.isSendable()) {
+            await channel.send(publicMessage)
+          } else {
+            await componentInteraction.followUp(publicMessage)
+          }
+        } catch (error) {
+          console.error("Error sending carousel page to the channel:", error)
+          await componentInteraction.followUp({
+            content: "Couldn't send that to the channel.",
+            flags: MessageFlags.Ephemeral,
+          })
+          return
+        }
+
+        // only remove the carousel once the result has been sent
+        collector.stop(SENT_REASON)
+        await interaction.deleteReply()
+        return
+      }
+
       if (componentInteraction.isStringSelectMenu()) {
         const selected = Number(componentInteraction.values[0])
         if (Number.isInteger(selected) && selected >= 0 && selected < count) {
@@ -208,7 +265,10 @@ export async function sendCarousel(
     }
   })
 
-  collector.on("end", async () => {
+  collector.on("end", async (_collected, reason) => {
+    // the reply was deleted, so there are no controls left to disable
+    if (reason === SENT_REASON) return
+
     try {
       await interaction.editReply(buildPage(true))
     } catch (error) {

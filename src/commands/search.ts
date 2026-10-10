@@ -103,11 +103,9 @@ export const command: CommandV2 = {
         )
       }
 
-      return await interaction.editReply({
-        embeds: [
-          buildShowEmbed(imdbId, series, await getDestinations(imdbId)),
-        ],
-      })
+      return await sendCarousel(interaction, [
+        await buildSeriesPage(imdbId, series),
+      ])
     }
 
     const candidates = await getSeriesCandidates(query)
