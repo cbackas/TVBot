@@ -5,10 +5,20 @@ import {
   SlashCommandBuilder,
 } from "discord.js"
 import client from "lib/prisma.ts"
+import { type Destination } from "prisma-client/client.ts"
 import { type CommandV2 } from "interfaces/command.ts"
 import { getSeriesByImdbId, getSeriesByName } from "lib/tvdb.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { showSearchAutocomplete } from "lib/autocomplete.ts"
+
+/** Channels a show is linked to, or none if the show isn't tracked. */
+async function getDestinations(imdbId: string): Promise<Destination[]> {
+  const show = await client.show.findUnique({
+    where: { imdbId },
+    select: { destinations: true },
+  })
+  return show?.destinations ?? []
+}
 
 export const command: CommandV2 = {
   slashCommand: {
@@ -40,17 +50,10 @@ export const command: CommandV2 = {
         )
       }
 
-      const show = await client.show.findUnique({
-        where: {
-          imdbId,
-        },
-        select: {
-          destinations: true,
-        },
-      })
-
       return await interaction.editReply({
-        embeds: [buildShowEmbed(imdbId, series, show?.destinations ?? [])],
+        embeds: [
+          buildShowEmbed(imdbId, series, await getDestinations(imdbId)),
+        ],
       })
     }
 
@@ -63,7 +66,7 @@ export const command: CommandV2 = {
     if (imdbId == null) return await interaction.editReply("Show not found")
 
     return await interaction.editReply({
-      embeds: [buildShowEmbed(imdbId, series, [])],
+      embeds: [buildShowEmbed(imdbId, series, await getDestinations(imdbId))],
     })
   },
   async executeAutoComplete(interaction: AutocompleteInteraction) {
