@@ -4,6 +4,7 @@ import {
   type AutocompleteInteraction,
 } from "discord.js"
 import client from "lib/prisma.ts"
+import { parseIMDBIds } from "lib/util.ts"
 
 export async function showSearchAutocomplete(
   interaction: AutocompleteInteraction,
@@ -12,20 +13,22 @@ export async function showSearchAutocomplete(
 
   if (focusedValue === undefined) return
 
-  const where: Prisma.ShowWhereInput =
-    focusedValue.toLocaleLowerCase().startsWith("tt")
-      ? {
-        imdbId: {
-          startsWith: focusedValue,
-          mode: "insensitive",
-        },
-      }
-      : {
-        name: {
-          startsWith: focusedValue,
-          mode: "insensitive",
-        },
-      }
+  // the input may be a (partial) IMDB ID or IMDB link; otherwise match by name
+  const [parsedId] = parseIMDBIds(focusedValue.trim().toLowerCase())
+
+  const where: Prisma.ShowWhereInput = parsedId != null && parsedId !== ""
+    ? {
+      imdbId: {
+        startsWith: parsedId,
+        mode: "insensitive",
+      },
+    }
+    : {
+      name: {
+        startsWith: focusedValue,
+        mode: "insensitive",
+      },
+    }
 
   const data = await client.show.findMany({
     where,
