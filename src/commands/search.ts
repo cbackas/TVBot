@@ -10,6 +10,7 @@ import { type CommandV2 } from "interfaces/command.ts"
 import { getSeriesByImdbId, getSeriesByName } from "lib/tvdb.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { showSearchAutocomplete } from "lib/autocomplete.ts"
+import { parseIMDBIds } from "lib/util.ts"
 
 /** Channels a show is linked to, or none if the show isn't tracked. */
 async function getDestinations(imdbId: string): Promise<Destination[]> {
@@ -29,7 +30,7 @@ export const command: CommandV2 = {
       .addStringOption((option) =>
         option.setName("query")
           .setDescription(
-            "Query to search for. Can be an IMDB ID or a show name",
+            "Query to search for. Can be an IMDB ID, an IMDB link or a show name",
           )
           .setMinLength(1)
           .setAutocomplete(true)
@@ -37,9 +38,10 @@ export const command: CommandV2 = {
       ),
   },
   async executeCommand(interaction: ChatInputCommandInteraction) {
-    const query = interaction.options.getString("query", true)
+    const query = interaction.options.getString("query", true).trim()
 
-    let imdbId = query.toLowerCase().startsWith("tt") ? query : undefined
+    // the query may be an IMDB ID or an IMDB link; anything else is a show name
+    let imdbId: string | undefined = parseIMDBIds(query.toLowerCase())[0]
 
     if (imdbId !== undefined) {
       const series = await getSeriesByImdbId(imdbId)
