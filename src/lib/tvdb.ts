@@ -58,6 +58,13 @@ export async function getSeriesByImdbId(
     series = await getSeries(data?.season?.seriesId)
   }
 
+  return withEnglishTranslation(series)
+}
+
+/** Swaps in the English name/overview for shows not originally in English. */
+function withEnglishTranslation(
+  series: SeriesExtendedRecord | undefined,
+): SeriesExtendedRecord | undefined {
   if (
     series?.originalLanguage == null || series.originalLanguage === "eng"
   ) return series
@@ -198,5 +205,5 @@ export async function getSeriesByName(
   const searchResult = await searchSeriesByName(query)
   const tvdbId = searchResult?.[0]?.tvdb_id
   if (tvdbId == null) return undefined
-  return await getSeries(parseInt(tvdbId))
+  return withEnglishTranslation(await getSeries(parseInt(tvdbId)))
 }
