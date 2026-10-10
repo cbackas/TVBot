@@ -183,9 +183,8 @@ async function searchSeriesByName(
 
     const data: { data: SearchResult[] } = await response.json()
     const searchResult = data?.data
-    if (searchResult == null || searchResult[0].tvdb_id == null) {
-      return undefined
-    }
+    // an unknown show gives an empty array, so guard before indexing
+    if (searchResult?.[0]?.tvdb_id == null) return undefined
     return searchResult
   } catch (error) {
     console.error(`Unexpected Error Searching Series:`, error)
@@ -197,7 +196,7 @@ export async function getSeriesByName(
   query: string,
 ): Promise<SeriesExtendedRecord | undefined> {
   const searchResult = await searchSeriesByName(query)
-  if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
-  const series = await getSeries(parseInt(searchResult[0].tvdb_id))
-  return series
+  const tvdbId = searchResult?.[0]?.tvdb_id
+  if (tvdbId == null) return undefined
+  return await getSeries(parseInt(tvdbId))
 }
