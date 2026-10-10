@@ -190,8 +190,8 @@ async function searchSeriesByName(
 
     const data: { data: SearchResult[] } = await response.json()
     const searchResult = data?.data
-    // an unknown show gives an empty array, so guard before indexing
-    if (searchResult?.[0]?.tvdb_id == null) return undefined
+    // an unknown show gives an empty array
+    if (searchResult == null || searchResult.length === 0) return undefined
     return searchResult
   } catch (error) {
     console.error(`Unexpected Error Searching Series:`, error)
@@ -199,11 +199,28 @@ async function searchSeriesByName(
   return undefined
 }
 
-export async function getSeriesByName(
+export type SeriesCandidate = SearchResult & { tvdb_id: string }
+
+/**
+ * Searches TVDB for series matching a name
+ * Results without a TVDB id, or known to have no IMDB id, are left out
+ * The search results don't always list IMDB ids, so callers should still
+ * check the full record from getSeriesByTvdbId
+ * @returns matching series, best match first
+ */
+export async function getSeriesCandidates(
   query: string,
+): Promise<SeriesCandidate[]> {
+  const results = await searchSeriesByName(query)
+
+  return (results ?? []).filter((r): r is SeriesCandidate =>
+    r.tvdb_id != null &&
+    (r.remote_ids == null || r.remote_ids.some((id) => id.type === 2))
+  )
+}
+
+export async function getSeriesByTvdbId(
+  tvdbId: number,
 ): Promise<SeriesExtendedRecord | undefined> {
-  const searchResult = await searchSeriesByName(query)
-  const tvdbId = searchResult?.[0]?.tvdb_id
-  if (tvdbId == null) return undefined
-  return withEnglishTranslation(await getSeries(parseInt(tvdbId)))
+  return withEnglishTranslation(await getSeries(tvdbId))
 }
