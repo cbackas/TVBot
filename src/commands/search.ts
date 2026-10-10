@@ -14,7 +14,7 @@ export const command: CommandV2 = {
   slashCommand: {
     main: new SlashCommandBuilder()
       .setName("search")
-      .setDescription("Link a show to a channel for notifications.")
+      .setDescription("Look up a show and see its details and linked channels.")
       .setContexts(InteractionContextType.Guild)
       .addStringOption((option) =>
         option.setName("query")

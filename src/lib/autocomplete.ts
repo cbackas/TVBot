@@ -42,7 +42,11 @@ export async function showSearchAutocomplete(
   const choices = data.map(
     (item): ApplicationCommandOptionChoiceData<string | number> => {
       const { name, imdbId } = item
-      return ({ name: `${name} - (${name})`, value: imdbId })
+      return ({
+        // Discord caps choice names at 100 characters
+        name: `${name} (${imdbId})`.slice(0, 100),
+        value: imdbId,
+      })
     },
   )
 
