@@ -165,6 +165,7 @@ async function searchSeriesByImdbId(
 
 async function searchSeriesByName(
   query: string,
+  year?: number,
 ): Promise<SearchResult[] | undefined> {
   try {
     const params = new URLSearchParams({
@@ -172,6 +173,7 @@ async function searchSeriesByName(
       limit: "10",
       q: query,
     })
+    if (year != null) params.set("year", String(year))
     const response = await fetch(
       `${baseURL}/search?${params}`,
       {
@@ -206,12 +208,14 @@ export type SeriesCandidate = SearchResult & { tvdb_id: string }
  * Results without a TVDB id, or known to have no IMDB id, are left out
  * The search results don't always list IMDB ids, so callers should still
  * check the full record from getSeriesByTvdbId
+ * @param year only return series first aired in this year
  * @returns matching series, best match first
  */
 export async function getSeriesCandidates(
   query: string,
+  year?: number,
 ): Promise<SeriesCandidate[]> {
-  const results = await searchSeriesByName(query)
+  const results = await searchSeriesByName(query, year)
 
   return (results ?? []).filter((r): r is SeriesCandidate =>
     r.tvdb_id != null &&

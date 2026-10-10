@@ -86,6 +86,12 @@ export const command: CommandV2 = {
           .setMinLength(1)
           .setAutocomplete(true)
           .setRequired(true)
+      )
+      .addIntegerOption((option) =>
+        option.setName("year")
+          .setDescription("Only show matches first aired in this year")
+          .setMinValue(1900)
+          .setMaxValue(2100)
       ),
   },
   async executeCommand(interaction: ChatInputCommandInteraction) {
@@ -108,7 +114,9 @@ export const command: CommandV2 = {
       ])
     }
 
-    const candidates = await getSeriesCandidates(query)
+    // an IMDB id or link already points at one show, so the year only narrows name searches
+    const year = interaction.options.getInteger("year") ?? undefined
+    const candidates = await getSeriesCandidates(query, year)
 
     if (candidates.length === 0) {
       return await interaction.editReply("Show not found")
