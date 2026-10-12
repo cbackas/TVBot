@@ -58,6 +58,13 @@ export async function getSeriesByImdbId(
     series = await getSeries(data?.season?.seriesId)
   }
 
+  return withEnglishTranslation(series)
+}
+
+/** Swaps in the English name/overview for shows not originally in English. */
+function withEnglishTranslation(
+  series: SeriesExtendedRecord | undefined,
+): SeriesExtendedRecord | undefined {
   if (
     series?.originalLanguage == null || series.originalLanguage === "eng"
   ) return series
@@ -158,6 +165,7 @@ async function searchSeriesByImdbId(
 
 async function searchSeriesByName(
   query: string,
+  year?: number,
 ): Promise<SearchResult[] | undefined> {
   try {
     const params = new URLSearchParams({
@@ -165,6 +173,7 @@ async function searchSeriesByName(
       limit: "10",
       q: query,
     })
+    if (year != null) params.set("year", String(year))
     const response = await fetch(
       `${baseURL}/search?${params}`,
       {
@@ -183,9 +192,8 @@ async function searchSeriesByName(
 
     const data: { data: SearchResult[] } = await response.json()
     const searchResult = data?.data
-    if (searchResult == null || searchResult[0].tvdb_id == null) {
-      return undefined
-    }
+    // an unknown show gives an empty array
+    if (searchResult == null || searchResult.length === 0) return undefined
     return searchResult
   } catch (error) {
     console.error(`Unexpected Error Searching Series:`, error)
@@ -193,11 +201,30 @@ async function searchSeriesByName(
   return undefined
 }
 
-export async function getSeriesByName(
+export type SeriesCandidate = SearchResult & { tvdb_id: string }
+
+/**
+ * Searches TVDB for series matching a name
+ * Results without a TVDB id, or known to have no IMDB id, are left out
+ * The search results don't always list IMDB ids, so callers should still
+ * check the full record from getSeriesByTvdbId
+ * @param year only return series first aired in this year
+ * @returns matching series, best match first
+ */
+export async function getSeriesCandidates(
   query: string,
+  year?: number,
+): Promise<SeriesCandidate[]> {
+  const results = await searchSeriesByName(query, year)
+
+  return (results ?? []).filter((r): r is SeriesCandidate =>
+    r.tvdb_id != null &&
+    (r.remote_ids == null || r.remote_ids.some((id) => id.type === 2))
+  )
+}
+
+export async function getSeriesByTvdbId(
+  tvdbId: number,
 ): Promise<SeriesExtendedRecord | undefined> {
-  const searchResult = await searchSeriesByName(query)
-  if (searchResult == null || searchResult[0].tvdb_id == null) return undefined
-  const series = await getSeries(parseInt(searchResult[0].tvdb_id))
-  return series
+  return withEnglishTranslation(await getSeries(tvdbId))
 }
