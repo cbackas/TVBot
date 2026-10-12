@@ -253,7 +253,11 @@ async function createForumPost(
     },
   })
 
-  await result.lastMessage?.pin()
+  try {
+    await result.lastMessage?.pin()
+  } catch (error) {
+    console.warn(`Could not pin post for ${seriesName}:`, error)
+  }
 
   return result
 }
