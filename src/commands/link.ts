@@ -18,6 +18,7 @@ import { ProgressError } from "interfaces/error.ts"
 import { buildShowEmbed } from "lib/messages.ts"
 import { type SeriesExtendedRecord } from "interfaces/tvdb.generated.ts"
 import { parseIMDBIds } from "lib/util.ts"
+import { codeSpan, logCommandUse, reportError } from "lib/discordLog.ts"
 
 /**
  * Standardized slash command option for getting IMDB ID
@@ -58,9 +59,11 @@ export const command: CommandV2 = {
     ],
   },
   async executeCommand(interaction: ChatInputCommandInteraction) {
+    const log = logCommandUse(interaction)
     const imdbIds = parseIMDBIds(interaction.options.getString("imdb_id", true))
 
     if (imdbIds.length > 10) {
+      void log.fail("too many IMDB IDs")
       return await interaction.editReply({
         content: "You can only create 10 links at a time",
       })
@@ -70,6 +73,7 @@ export const command: CommandV2 = {
 
     const subCommand = interaction.options.getSubcommand()
     if (subCommand === "") {
+      void log.fail("invalid subcommand")
       return await interaction.editReply("Invalid subcommand")
     }
 
@@ -97,6 +101,7 @@ export const command: CommandV2 = {
 
     // error if the channel didnt get set for some reason
     if (channel == null || !channel.isSendable()) {
+      void log.fail("invalid channel")
       return await interaction.editReply("Invalid channel")
     }
 
@@ -119,6 +124,8 @@ export const command: CommandV2 = {
       await progress.sendNextStep() // start step 2
 
       const messages: string[] = []
+      const linked: string[] = []
+      const alreadyLinked: string[] = []
 
       for (const [imdbId, tvdbSeries] of seriesList) {
         const existingSubscription = await checkForExistingSubscription(
@@ -129,6 +136,7 @@ export const command: CommandV2 = {
           messages.push(
             `Show \`${tvdbSeries.name}\` is already linked to <#${channel.id}>`,
           )
+          alreadyLinked.push(`${codeSpan(tvdbSeries.name)} (${imdbId})`)
           seriesList.delete(imdbId)
         }
       }
@@ -154,15 +162,26 @@ export const command: CommandV2 = {
           })
 
           messages.push(`Linked show \`${tvdbSeries.name}\` (${imdbId})`)
+          linked.push(`${codeSpan(tvdbSeries.name)} (${imdbId})`)
         } catch (error) {
           messages.push(
             `Failed to link show \`${tvdbSeries.name}\` (${imdbId})`,
           )
-          console.error(error)
+          reportError(`/link: linking ${tvdbSeries.name} (${imdbId})`, error, {
+            type: "thread_ops",
+          })
         }
       }
 
       await progress.sendNextStep() // start step 4
+
+      if (linked.length > 0) {
+        void log.success(`Linked ${linked.join(", ")} to <#${channel.id}>`)
+      } else if (alreadyLinked.length > 0) {
+        void log.append("(already linked)")
+      } else {
+        void log.fail("no shows could be linked")
+      }
 
       return await progress.sendNextStep(
         `Linked show(s) to <#${channel.id}>:\n\n${messages.join("\n")}`,
@@ -170,10 +189,12 @@ export const command: CommandV2 = {
     } catch (error) {
       // catch our custom error and display it for the user
       if (error instanceof ProgressError) {
+        void log.fail(error.message)
         const message = `${progress.toString()}\n\nError: ${error.message}`
         return await interaction.editReply(message)
       }
 
+      void log.fail()
       throw error
     }
   },

@@ -4,6 +4,7 @@ import {
   type SeriesExtendedRecord,
 } from "interfaces/tvdb.generated.ts"
 import { getEnv } from "lib/env.ts"
+import { reportApiFailure, reportError } from "lib/discordLog.ts"
 
 const baseURL = "https://api4.thetvdb.com/v4" as const
 
@@ -22,7 +23,7 @@ async function getAuthToken(): Promise<{ Authorization: string }> {
     })
 
     if (!response.ok) {
-      throw new Error("Failed to get TVDB token", {
+      throw new Error(`Failed to get TVDB token (HTTP ${response.status})`, {
         cause: await response.text(),
       })
     }
@@ -112,10 +113,11 @@ export async function getSeries(
     )
 
     if (!response.ok) {
-      console.error(`Error Getting Extended Show Data:`, {
+      reportApiFailure("TVDB: Getting extended show data", {
+        service: "TVDB API",
         url: response.url,
         status: response.status,
-        data: await response.text(),
+        body: await response.text(),
       })
       return undefined
     }
@@ -123,7 +125,11 @@ export async function getSeries(
     const data: { data?: SeriesExtendedRecord } = await response.json()
     return data.data
   } catch (error) {
-    console.error(`Unexpected Error Getting Extended Show Data:`, error)
+    reportError(
+      "TVDB: Getting extended show data",
+      error,
+      { origin: "TVDB API request failed", type: "api_errors" },
+    )
   }
   return undefined
 }
@@ -140,10 +146,11 @@ async function searchSeriesByImdbId(
     )
 
     if (!response.ok) {
-      console.error(`Error Searching Series by IMDB ID:`, {
+      reportApiFailure("TVDB: Searching series by IMDB ID", {
+        service: "TVDB API",
         url: response.url,
         status: response.status,
-        data: await response.text(),
+        body: await response.text(),
       })
       return undefined
     }
@@ -151,7 +158,11 @@ async function searchSeriesByImdbId(
     const data: { data?: SearchByRemoteIdResult[] } = await response.json()
     return data.data?.at(0)
   } catch (error) {
-    console.error(`Unexpected Error Searching Series by IMDB ID:`, error)
+    reportError(
+      "TVDB: Searching series by IMDB ID",
+      error,
+      { origin: "TVDB API request failed", type: "api_errors" },
+    )
   }
   return undefined
 }
@@ -173,10 +184,11 @@ async function searchSeriesByName(
     )
 
     if (!response.ok) {
-      console.error(`Error Searching Series:`, {
+      reportApiFailure("TVDB: Searching series", {
+        service: "TVDB API",
         url: response.url,
         status: response.status,
-        data: await response.text(),
+        body: await response.text(),
       })
       return undefined
     }
@@ -188,7 +200,11 @@ async function searchSeriesByName(
     }
     return searchResult
   } catch (error) {
-    console.error(`Unexpected Error Searching Series:`, error)
+    reportError(
+      "TVDB: Searching series",
+      error,
+      { origin: "TVDB API request failed", type: "api_errors" },
+    )
   }
   return undefined
 }

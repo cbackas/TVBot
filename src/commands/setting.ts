@@ -1,4 +1,6 @@
 import {
+  ActionRowBuilder,
+  type AnySelectMenuInteraction,
   type Channel,
   ChannelType,
   type ChatInputCommandInteraction,
@@ -8,9 +10,11 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
+  StringSelectMenuBuilder,
 } from "discord.js"
 import { type CommandV2 } from "interfaces/command.ts"
 import { ProgressMessageBuilder } from "lib/progressMessages.ts"
+import { LOG_TYPES } from "lib/discordLog.ts"
 import { Settings } from "lib/settingsManager.ts"
 import { type Destination } from "prisma-client/client.ts"
 
@@ -31,6 +35,18 @@ export const command: CommandV2 = {
             .addChannelTypes(ChannelType.GuildForum)
             .setRequired(true)
         ),
+      new SlashCommandSubcommandBuilder()
+        .setName("log_channel")
+        .setDescription("Set the channel that the bot posts log messages to")
+        .addChannelOption((option) =>
+          option.setName("channel")
+            .setDescription("The channel to post logs in")
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true)
+        ),
+      new SlashCommandSubcommandBuilder()
+        .setName("log_types")
+        .setDescription("Choose which types of log message get posted"),
     ],
     subGroups: [
       {
@@ -120,6 +136,16 @@ export const command: CommandV2 = {
   async executeCommand(interaction: ChatInputCommandInteraction) {
     const subCommand = interaction.options.getSubcommand()
     const subcommandGroup = interaction.options.getSubcommandGroup()
+
+    /**
+     * Handle the log types setting, this subcommand has no channel option
+     */
+    if (subcommandGroup === null && subCommand === "log_types") {
+      return await interaction.editReply(
+        buildLogTypesReply(Settings.fetch()?.disabledLogTypes ?? []),
+      )
+    }
+
     const channel = interaction.options.getChannel("channel", true) as Channel
 
     /**
@@ -128,6 +154,13 @@ export const command: CommandV2 = {
     if (subcommandGroup === null && subCommand === "tv_forum") {
       await setTVForum(interaction, channel)
       return
+    }
+
+    /**
+     * Handle the log channel setting
+     */
+    if (subcommandGroup === null && subCommand === "log_channel") {
+      return await setLogChannel(interaction, channel)
     }
 
     /**
@@ -148,6 +181,46 @@ export const command: CommandV2 = {
       return await updateMorningSummaryChannels(interaction)
     }
   },
+  selectMenuIds: ["log_types_menu"],
+  async executeSelectMenu(interaction: AnySelectMenuInteraction) {
+    const disabledLogTypes = LOG_TYPES.map((type) => type.key)
+      .filter((key) => !interaction.values.includes(key))
+
+    await Settings.update({
+      disabledLogTypes,
+    })
+
+    return await interaction.editReply(buildLogTypesReply(disabledLogTypes))
+  },
+}
+
+/**
+ * Builds the reply containing the multi-select menu of log types
+ * @param disabled keys of the log types that are currently turned off
+ */
+function buildLogTypesReply(disabled: string[]) {
+  const menu = new StringSelectMenuBuilder()
+    .setCustomId("log_types_menu")
+    .setPlaceholder("Nothing selected")
+    .setMinValues(0)
+    .setMaxValues(LOG_TYPES.length)
+    .addOptions(LOG_TYPES.map((type) => ({
+      label: type.label,
+      description: type.description,
+      value: type.key,
+      default: !disabled.includes(type.key),
+    })))
+
+  const noChannelNote = Settings.fetch()?.logChannel == null
+    ? "\nNo log channel is set yet, use `/setting log_channel`."
+    : ""
+
+  return {
+    content: `Select the types of message to post in the log channel.${noChannelNote}`,
+    components: [
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu),
+    ],
+  }
 }
 
 /**
@@ -174,6 +247,37 @@ async function setTVForum(
   })
 
   await interaction.editReply(progressMessage.nextStep())
+}
+
+/**
+ * Sets the channel that the bot posts log messages to
+ * @param interaction discord command interaction
+ * @param channel channel to set as the log channel
+ */
+async function setLogChannel(
+  interaction: ChatInputCommandInteraction,
+  channel: Channel,
+): Promise<Message<boolean> | void> {
+  if (channel.type !== ChannelType.GuildText) {
+    return await interaction.editReply("Invalid channel type")
+  }
+
+  try {
+    await channel.send("The bot will post log messages in this channel.")
+  } catch (error) {
+    console.warn(`Could not send to proposed log channel ${channel.id}:`, error)
+    return await interaction.editReply(
+      `I can't send messages in <#${channel.id}>. Check my permissions there and try again.`,
+    )
+  }
+
+  await Settings.update({
+    logChannel: channel.id,
+  })
+
+  return await interaction.editReply(
+    `Log messages will be posted in <#${channel.id}>`,
+  )
 }
 
 /**

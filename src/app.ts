@@ -8,10 +8,15 @@ import {
   setRandomShowActivity,
   setTVDBLoadingActivity,
 } from "lib/discordActivities.ts"
+import { setLogClient } from "lib/discordLog.ts"
 import { getEnv } from "lib/env.ts"
 import { scheduleCronJobs } from "./cron.ts"
 import assert from "node:assert"
-import { handleChannelDelete, handleThreadDelete } from "./handlers.ts"
+import {
+  handleChannelDelete,
+  handleThreadDelete,
+  handleThreadUpdate,
+} from "./handlers.ts"
 
 const token = getEnv("DISCORD_TOKEN")
 const clientId = getEnv("DISCORD_CLIENT_ID")
@@ -23,6 +28,7 @@ const commandManager = new CommandManager()
 await commandManager.registerCommands(clientId, token, guildId)
 
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
+setLogClient(discordClient)
 
 export const getClient = (): Client<boolean> => discordClient
 
@@ -44,6 +50,7 @@ discordClient.on(Events.ClientReady, async (client) => {
 
 discordClient.on(Events.InteractionCreate, commandManager.interactionHandler)
 discordClient.on(Events.ThreadDelete, handleThreadDelete)
+discordClient.on(Events.ThreadUpdate, handleThreadUpdate)
 discordClient.on(Events.ChannelDelete, handleChannelDelete)
 
 // start the bot

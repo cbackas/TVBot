@@ -17,6 +17,8 @@ model Settings {
   id                         Int           @id @default(0) @map("_id")
   allEpisodes                Destination[] // channels that get all episode notifications
   defaultForum               String? // default forum to post episode notifications to
+  logChannel                 String? // channel that the bot posts log messages to
+  disabledLogTypes           String[] // types of log message that are turned off
   morningSummaryDestinations Destination[] // channels that get morning summary notifications
 }
 
